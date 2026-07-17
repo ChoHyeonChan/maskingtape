@@ -8,4 +8,32 @@
 
 1. 루트 [CLAUDE.md](../../CLAUDE.md) 필독
 2. 의존성(fastapi, uvicorn 등) 추가 시 [SBOM.md](../../SBOM.md)에 한 줄씩 추가 — 라이선스 확인 필수
-3. 계획 엔드포인트: `POST /scan`(탐지 리포트), `POST /anonymize`(마스킹 결과) — 응답 스키마는 core의 `Detection` 타입 기준으로 프론트와 합의
+
+## API 계약 (v1 — 프론트·데스크톱은 이 스키마로 목업 개발 시작 가능)
+
+`POST /scan` — 탐지 리포트만
+
+```json
+// 요청
+{ "text": "주민번호 800101-1234560 문의주세요" }
+// 응답 — detections는 core의 Detection 타입 그대로
+{
+  "detections": [
+    { "kind": "rrn", "start": 5, "end": 19, "text": "800101-1234560",
+      "confidence": 1.0, "detector": "RRNDetector" }
+  ]
+}
+```
+
+`POST /anonymize` — 비식별화 결과
+
+```json
+// 요청 — strategy: "mask"(기본) 또는 "label"
+{ "text": "주민번호 800101-1234560 문의주세요", "strategy": "mask" }
+// 응답
+{ "text": "주민번호 ************** 문의주세요", "detections": [ /* 위와 동일 */ ] }
+```
+
+- `kind` 값: `rrn`, `phone`, `email` (추가 예정: `name`, `address`)
+- `start`/`end`는 파이썬 슬라이스 규약 (`text[start:end]` == 탐지된 원문)
+- 계약 변경은 팀장 승인 후 이 문서부터 갱신한다
