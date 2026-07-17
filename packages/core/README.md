@@ -34,7 +34,12 @@ ruff check packages/core    # 린트
 3. `detectors/__init__.py`의 `default_detectors()`에 등록
 4. `tests/`에 합성 데이터 테스트 추가
 
-## 예정 (코어 v1 → v2)
+## 현재 구현
 
-- detectors: `phone.py`, `email.py`, `address.py`, `name_llm.py`(로컬 LLM 문맥 판단)
+- detectors: `rrn.py`(주민등록번호), `phone.py`(휴대폰·유선·070), `email.py`
+- anonymizers: `mask.py`(*로 가림), `label.py`([전화번호] 식 라벨 치환, 번호 매기기 지원)
+
+## 예정 (코어 v2)
+
+- detectors: `address.py`(도로명 주소), `name_llm.py`(로컬 LLM 문맥 판단 — 인명 vs 상호명)
 - anonymizers: `pseudonym.py`(가명처리), `hash.py`
