@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+dist/
+build/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+
+# Flutter / Dart
+.dart_tool/
+apps/desktop/build/
+
+# 환경 변수·비밀 — 절대 커밋 금지
+.env
+.env.*
+*.local.json
+
+# Claude 메모리 미러 (팀장 로컬 전용, 공유 금지)
+.claude-memory/
+.claude/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
