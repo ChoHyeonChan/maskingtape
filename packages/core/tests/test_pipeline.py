@@ -22,3 +22,9 @@ def test_clean_text_untouched():
     result = Pipeline().anonymize(clean)
     assert result.text == clean
     assert result.detections == []
+
+
+def test_multiple_kinds_in_one_text():
+    text = "담당자 010-1234-5678 / hong@example.com / 800101-1234560"
+    kinds = {d.kind for d in Pipeline().scan(text)}
+    assert kinds == {"phone", "email", "rrn"}

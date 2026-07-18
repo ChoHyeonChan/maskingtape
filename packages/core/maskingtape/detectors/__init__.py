@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 from maskingtape.detectors.base import Detector
+from maskingtape.detectors.email import EmailDetector
+from maskingtape.detectors.phone import PhoneDetector
 from maskingtape.detectors.rrn import RRNDetector
 
-__all__ = ["Detector", "RRNDetector", "default_detectors"]
+__all__ = ["Detector", "EmailDetector", "PhoneDetector", "RRNDetector", "default_detectors"]
 
 
 def default_detectors() -> list[Detector]:
     """기본 탐지기 세트 (규칙 전용 — LLM 불필요)."""
-    return [RRNDetector()]
+    return [RRNDetector(), PhoneDetector(), EmailDetector()]

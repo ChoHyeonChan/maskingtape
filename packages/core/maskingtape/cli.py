@@ -4,6 +4,7 @@
     maskingtape "주민번호 800101-1234560 문의주세요"
     type 문서.txt | maskingtape        (Windows) / cat 문서.txt | maskingtape
     maskingtape --scan "..."            # 마스킹 없이 탐지 리포트만(JSON)
+    maskingtape --strategy label "..."  # [전화번호] 식 라벨 치환
 """
 
 from __future__ import annotations
@@ -13,6 +14,7 @@ import json
 import sys
 from dataclasses import asdict
 
+from maskingtape.anonymizers import LabelAnonymizer, MaskAnonymizer
 from maskingtape.pipeline import Pipeline
 
 
@@ -24,10 +26,17 @@ def main() -> int:
     parser.add_argument(
         "--scan", action="store_true", help="마스킹 없이 탐지 결과만 JSON으로 출력"
     )
+    parser.add_argument(
+        "--strategy",
+        choices=["mask", "label"],
+        default="mask",
+        help="비식별화 전략: mask(*로 가림, 기본) 또는 label([전화번호] 식 치환)",
+    )
     args = parser.parse_args()
 
     text = args.text if args.text is not None else sys.stdin.read()
-    pipeline = Pipeline()
+    anonymizer = LabelAnonymizer() if args.strategy == "label" else MaskAnonymizer()
+    pipeline = Pipeline(anonymizer=anonymizer)
 
     if args.scan:
         report = [asdict(d) for d in pipeline.scan(text)]
