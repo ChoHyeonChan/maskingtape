@@ -27,9 +27,12 @@ pip install -e "packages/core[dev]"
 maskingtape "주민번호 800101-1234560 문의주세요"
 # → 주민번호 ************** 문의주세요
 
+maskingtape --strategy label "연락처 010-1234-5678"        # → 연락처 [전화번호]
 maskingtape --scan "주민번호 800101-1234560 문의주세요"   # 탐지 리포트(JSON)만
 pytest packages/core                                       # 테스트
 ```
+
+현재 탐지: **주민등록번호**(체크섬 검증), **전화번호**(휴대폰·유선·070, +82 표기), **이메일** · 예정: 이름(로컬 LLM 문맥 판단), 주소
 
 라이브러리로 쓰기:
 
@@ -42,6 +45,17 @@ print(result.detections)   # [Detection(kind='rrn', start=5, end=19, ...)]
 ```
 
 ※ 예시의 주민등록번호는 체크섬만 맞춘 **합성 번호**다.
+
+## MCP 서버로 쓰기 (AI 에이전트용)
+
+에이전트가 한국어 데이터를 외부로 보내기 전에 자동으로 비식별화하는 프라이버시 계층:
+
+```bash
+pip install -e packages/core -e packages/mcp-server
+claude mcp add maskingtape -- maskingtape-mcp      # Claude Code 등록
+```
+
+제공 도구: `scan_text`(탐지 리포트), `anonymize_text`(mask/label 비식별화). 상세: [packages/mcp-server](packages/mcp-server)
 
 ## 저장소 구조
 

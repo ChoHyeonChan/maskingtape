@@ -13,9 +13,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Install core package
-        run: pip install -e "packages/core[dev]"
+      - name: Install packages (core 먼저 — mcp-server가 로컬 core에 의존)
+        run: |
+          pip install -e "packages/core[dev]"
+          pip install -e packages/mcp-server
       - name: Lint
-        run: ruff check packages/core
-      - name: Test
+        run: ruff check packages/core packages/mcp-server
+      - name: Test core
         run: pytest packages/core -q
+      - name: Test mcp-server
+        run: pytest packages/mcp-server -q
