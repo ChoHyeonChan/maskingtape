@@ -1,6 +1,6 @@
 # apps/desktop — Flutter 데스크톱 앱
 
-**담당: Flutter 담당** · 상태: ⏳ 스켈레톤 머지 후 시작
+**담당: stayalive ([@stayalive000](https://github.com/stayalive000))** · 상태: ✅ 시작 가능 (스켈레톤 머지 완료)
 
 파일 드래그&드롭으로 문서 여러 개를 한 번에 비식별화하는 데스크톱 도구.
 
