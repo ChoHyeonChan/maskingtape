@@ -18,8 +18,10 @@ jobs:
           pip install -e "packages/core[dev]"
           pip install -e packages/mcp-server
       - name: Lint
-        run: ruff check packages/core packages/mcp-server
+        run: ruff check packages/core packages/mcp-server bench
       - name: Test core
         run: pytest packages/core -q
       - name: Test mcp-server
         run: pytest packages/mcp-server -q
+      - name: Test bench
+        run: pytest bench -q
