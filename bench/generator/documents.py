@@ -20,7 +20,7 @@ from bench.generator.entities import ALL_KINDS, generate_entity
 _PLACEHOLDER_RE = re.compile(r"\{(name|phone|email|rrn|address|distractor)\}")
 _NON_LABEL_KINDS = frozenset({"distractor"})
 
-# 개인정보가 실제로 포함된 템플릿.
+# 개인정보가 실제로 포함된 템플릿 — 다양한 업무 맥락(고객센터/병원/학교/관공서/인사/배송/금융)을 커버한다.
 _TEMPLATES = [
     "고객 {name}님 {phone}로 연락 부탁드립니다.",
     "신청자: {name} / 연락처: {phone} / 이메일: {email}",
@@ -32,6 +32,27 @@ _TEMPLATES = [
     "안녕하세요, 저는 {name}이고 전화번호는 {phone}입니다.",
     "{address}에 거주하는 {name}님께 우편을 발송했습니다.",
     "오늘 회의록: 작성자 {name}, 문의는 {email}로.",
+    # 병원/의료
+    "환자명 {name}, 주민번호 {rrn}, 보호자 연락처 {phone}로 등록되었습니다.",
+    "{name} 님의 진료 예약이 확정되었습니다. 문의: {phone}",
+    # 학교/교육
+    "학생 {name}(학부모 연락처 {phone})의 결석계가 접수되었습니다.",
+    "{name} 선생님께 {email}로 성적 자료를 전달했습니다.",
+    # 관공서/행정
+    "민원인 {name}님, 주민등록번호 {rrn}로 접수된 건 처리 완료되었습니다. 회신 주소: {address}",
+    "전입신고 대상자: {name}, 신주소: {address}, 연락처: {phone}",
+    # 인사/채용
+    "지원자 {name} 이력서 접수 — 연락처 {phone}, 이메일 {email}",
+    "신규 입사자 {name}님의 4대보험 등록을 위해 주민번호 {rrn}가 필요합니다.",
+    # 택배/배송
+    "{name}님 앞, {address}로 배송 중입니다. 수령 전 {phone}로 연락드릴 수 있습니다.",
+    "반품 신청자 {name}, 환불 계좌 확인을 위해 연락처 {phone}를 남겨주세요.",
+    # 금융/보험
+    "가입자 {name}, 주민번호 {rrn} 기준으로 보험료가 산정되었습니다.",
+    "{name}님의 이체 알림: 문의는 {phone} 또는 {email}로 부탁드립니다.",
+    # 한 문서에 같은 종류가 두 번 등장하는 경우 (담당자 교체, 자택/직장 번호 등)
+    "담당자가 {name}에서 {name}으로 변경되었습니다. 새 연락처: {phone}",
+    "자택 {phone}, 직장 {phone} 두 번호 모두 등록해 주세요.",
     # 실제 개인정보 + 헷갈리는 값이 섞인 템플릿 — 엔진이 distractor까지 잘못 잡아내지 않는지 확인.
     "주문번호 {distractor}, 고객 {name}님 {phone}로 발송 예정입니다.",
     "사업자등록번호 {distractor} / 담당자 {name} / 이메일 {email}",
