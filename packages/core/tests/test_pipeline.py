@@ -28,3 +28,9 @@ def test_multiple_kinds_in_one_text():
     text = "담당자 010-1234-5678 / hong@example.com / 800101-1234560"
     kinds = {d.kind for d in Pipeline().scan(text)}
     assert kinds == {"phone", "email", "rrn"}
+
+
+def test_detects_address_alongside_other_kinds():
+    text = "배송지 서울특별시 강남구 역삼동 123-4 / 연락처 010-1234-5678"
+    kinds = {d.kind for d in Pipeline().scan(text)}
+    assert kinds == {"address", "phone"}
