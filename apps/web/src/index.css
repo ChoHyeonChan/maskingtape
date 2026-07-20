@@ -1,0 +1,129 @@
+:root {
+  color-scheme: light;
+  --surface: #fcfcfb;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --border: rgba(11, 11, 11, 0.1);
+
+  /* 카테고리 팔레트 — dataviz 스킬 슬롯 1~5, CVD 검증 완료(scripts/validate_palette.js) */
+  --kind-rrn: #2a78d6;
+  --kind-phone: #008300;
+  --kind-email: #e87ba4;
+  --kind-address: #eda100;
+  --kind-name: #1baf7a;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --surface: #1a1a19;
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --border: rgba(255, 255, 255, 0.1);
+
+    --kind-rrn: #3987e5;
+    --kind-phone: #008300;
+    --kind-email: #d55181;
+    --kind-address: #c98500;
+    --kind-name: #199e70;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: var(--surface);
+  color: var(--text-primary);
+}
+
+.app {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+.app__header p {
+  color: var(--text-secondary);
+}
+
+.input-panel textarea {
+  width: 100%;
+  font: inherit;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  resize: vertical;
+}
+
+.input-panel__actions {
+  margin-top: 0.75rem;
+}
+
+.input-panel__actions button {
+  font: inherit;
+  padding: 0.5rem 1.25rem;
+  border-radius: 8px;
+  border: none;
+  background: var(--kind-rrn);
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.input-panel__actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.input-panel__error {
+  color: var(--kind-address);
+  font-weight: 600;
+}
+
+.highlighted-text {
+  line-height: 2.2;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.highlighted-text--empty {
+  color: var(--text-secondary);
+}
+
+.highlight {
+  border-radius: 4px;
+  padding: 0.1rem 0.3rem;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.highlight--rrn {
+  background: var(--kind-rrn);
+}
+.highlight--phone {
+  background: var(--kind-phone);
+}
+.highlight--email {
+  background: var(--kind-email);
+}
+.highlight--address {
+  background: var(--kind-address);
+}
+.highlight--name {
+  background: var(--kind-name);
+}
+
+.highlight__tag {
+  display: inline-block;
+  font-size: 0.7em;
+  font-weight: 700;
+  margin-left: 0.4em;
+  padding: 0.05em 0.4em;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.25);
+}
