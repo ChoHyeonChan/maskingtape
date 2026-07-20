@@ -26,16 +26,21 @@ lib/
   services/
     anonymizer.dart            # 비식별화 백엔드 인터페이스 (CLI ↔ REST 교체 지점)
     cli_anonymizer.dart        # core CLI 서브프로세스 호출 (stdin UTF-8)
-    batch_processor.dart       # 읽기 → 비식별화 → _masked 저장 순차 배치
+    file_reader.dart           # 파일 검증(확장자·크기·바이너리) + UTF-8/CP949 디코딩
+    batch_processor.dart       # 읽기 → 비식별화 → _masked 저장 순차 배치 (취소 지원)
   screens/
     home_screen.dart           # 홈 — 작업 목록 상태 관리 + 배치 시작
   widgets/
     drop_zone.dart             # OS 파일 드래그&드롭 수신 영역 (desktop_drop)
 test/
-  batch_processor_test.dart    # 배치 로직 유닛 테스트 (가짜 백엔드)
+  batch_processor_test.dart    # 배치 로직 유닛 테스트 (가짜 백엔드, 취소 포함)
+  file_reader_test.dart        # 인코딩 폴백·검증 규칙 테스트
   widget_test.dart             # 드롭존·목록·처리 흐름 위젯 테스트
   fakes.dart                   # 테스트용 가짜 Anonymizer
 ```
+
+입력 파일 규칙: txt·csv·tsv·md·json·log, 10MB 이하, UTF-8 또는 CP949(자동 판별).
+결과 `_masked` 파일은 항상 UTF-8로 저장한다. `_masked` 파일 재드롭·바이너리·빈 파일은 건너뛴다.
 
 - Windows에서 플러그인 빌드에는 **개발자 모드**가 필요하다 (설정 → 개발자용 → 개발자 모드 켬).
 - 실행하는 PC에 `maskingtape` CLI가 PATH에 있어야 처리가 동작한다 (`pip install -e packages/core` 후 venv Scripts를 PATH에 — REST API 전환 전까지의 개발용 전제).

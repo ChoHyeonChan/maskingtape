@@ -30,6 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
     for (final path in widget.initialFiles) FileTask(path),
   ];
   bool _running = false;
+  bool _cancelRequested = false;
 
   bool get _hasWaiting =>
       _tasks.any((t) => t.status == FileTaskStatus.waiting);
@@ -46,10 +47,17 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _start() async {
-    setState(() => _running = true);
-    await BatchProcessor(widget.anonymizer).processAll(_tasks, () {
-      if (mounted) setState(() {});
+    setState(() {
+      _running = true;
+      _cancelRequested = false;
     });
+    await BatchProcessor(widget.anonymizer).processAll(
+      _tasks,
+      () {
+        if (mounted) setState(() {});
+      },
+      isCancelled: () => _cancelRequested,
+    );
     if (mounted) {
       setState(() => _running = false);
     }
@@ -94,9 +102,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const Spacer(),
                   FilledButton.icon(
-                    onPressed: _running || !_hasWaiting ? null : _start,
-                    icon: const Icon(Icons.play_arrow),
-                    label: Text(_running ? '처리 중…' : '비식별화 시작'),
+                    onPressed: _running
+                        ? (_cancelRequested
+                            ? null
+                            : () => setState(() => _cancelRequested = true))
+                        : (_hasWaiting ? _start : null),
+                    icon: Icon(_running ? Icons.stop : Icons.play_arrow),
+                    label: Text(
+                      _running
+                          ? (_cancelRequested ? '취소 중…' : '취소')
+                          : '비식별화 시작',
+                    ),
                   ),
                 ],
               ),
