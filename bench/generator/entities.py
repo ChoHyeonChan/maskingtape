@@ -5,6 +5,11 @@ kind 문자열은 core의 Detection.kind와 동일하게 맞춘다: rrn, phone, 
 
 표기 형식(구분자·자릿수 등)도 core 탐지기가 실제로 허용하는 범위 안에서 무작위로 섞는다
 (예: 전화번호 하이픈/공백/구분자 없음) — 실제 문서에서 나타나는 표기 다양성을 반영한다.
+
+difficulty 파라미터로 표기 난이도를 제어한다:
+- "easy": 구분자가 명확한 표준 표기 (하이픈, 지번 주소 등) — 탐지가 쉬운 형태
+- "hard": 구분자 없음/국제표기/도로명+아파트처럼 길고 모호한 형태 — 탐지가 어려운 형태
+- "mixed"(기본값): 위 둘을 무작위로 섞음
 """
 
 from __future__ import annotations
@@ -43,8 +48,12 @@ _RRN_WEIGHTS = (2, 3, 4, 5, 6, 7, 8, 9, 2, 3, 4, 5)
 # 성별코드 1/2=1900년대, 3/4=2000년대 (rrn.py _CENTURY 기준). 5~8(외국인)은 별도 표기라 제외.
 _CENTURY_CODES = {1900: ("1", "2"), 2000: ("3", "4")}
 
-_PHONE_SEPARATORS = ["-", "-", "-", " ", ".", ""]  # 하이픈이 가장 흔한 표기라 가중치를 둔다.
-_RRN_SEPARATORS = ["-", "-", "-", " ", ""]  # RRN 정규식은 '.'을 구분자로 허용하지 않는다(rrn.py 참고).
+_PHONE_SEPARATORS_MIXED = ["-", "-", "-", " ", ".", ""]  # 하이픈이 가장 흔한 표기라 가중치를 둔다.
+_PHONE_SEPARATORS_HARD = ["", ".", " "]  # 하이픈 없는(탐지가 상대적으로 더 까다로운) 표기만.
+_RRN_SEPARATORS_MIXED = ["-", "-", "-", " ", ""]  # RRN 정규식은 '.'을 구분자로 허용하지 않는다(rrn.py 참고).
+_RRN_SEPARATORS_HARD = ["", " "]
+
+DIFFICULTIES = ("easy", "hard", "mixed")
 
 
 @dataclass(frozen=True)
@@ -55,15 +64,30 @@ class Entity:
     text: str
 
 
-def gen_name(rng: random.Random) -> Entity:
+def gen_name(rng: random.Random, difficulty: str = "mixed") -> Entity:
     surname = rng.choice(_SURNAMES)
-    given = "".join(rng.sample(_GIVEN_SYLLABLES, k=rng.choice([1, 2])))
+    if difficulty == "easy":
+        given_len = 2  # 2음절 이름이 더 명확하고 흔한 표준 형태
+    elif difficulty == "hard":
+        given_len = 1  # 1음절 이름은 더 짧고 흔한 단어와 헷갈리기 쉽다
+    else:
+        given_len = rng.choice([1, 2])
+    given = "".join(rng.sample(_GIVEN_SYLLABLES, k=given_len))
     return Entity(kind="name", text=surname + given)
 
 
-def gen_phone(rng: random.Random) -> Entity:
-    sep = rng.choice(_PHONE_SEPARATORS)
-    if rng.random() < 0.15:
+def gen_phone(rng: random.Random, difficulty: str = "mixed") -> Entity:
+    if difficulty == "easy":
+        sep = "-"
+        use_intl = False
+    elif difficulty == "hard":
+        sep = rng.choice(_PHONE_SEPARATORS_HARD)
+        use_intl = rng.random() < 0.4
+    else:
+        sep = rng.choice(_PHONE_SEPARATORS_MIXED)
+        use_intl = rng.random() < 0.15
+
+    if use_intl:
         # 국가번호 표기 (앞자리 0 생략) — PhoneDetector의 +82 분기 커버.
         prefix = f"+82{sep}1{rng.choice('016789')}"
     else:
@@ -73,13 +97,13 @@ def gen_phone(rng: random.Random) -> Entity:
     return Entity(kind="phone", text=f"{prefix}{sep}{mid}{sep}{last}")
 
 
-def gen_email(rng: random.Random) -> Entity:
+def gen_email(rng: random.Random, difficulty: str = "mixed") -> Entity:
     local = "".join(rng.choices("abcdefghijklmnopqrstuvwxyz0123456789.", k=rng.randint(5, 10))).strip(".")
     domain = rng.choice(_EMAIL_DOMAINS)
     return Entity(kind="email", text=f"{local}@{domain}")
 
 
-def gen_rrn(rng: random.Random) -> Entity:
+def gen_rrn(rng: random.Random, difficulty: str = "mixed") -> Entity:
     century = rng.choice([1900, 2000])
     year = rng.randint(0, 99)
     month = rng.randint(1, 12)
@@ -90,23 +114,34 @@ def gen_rrn(rng: random.Random) -> Entity:
     digits = front + century_code + serial  # 12자리 — 검증번호 계산 대상
     total = sum(int(d) * w for d, w in zip(digits, _RRN_WEIGHTS))
     check = (11 - total % 11) % 10
-    sep = rng.choice(_RRN_SEPARATORS)
+
+    if difficulty == "easy":
+        sep = "-"
+    elif difficulty == "hard":
+        sep = rng.choice(_RRN_SEPARATORS_HARD)
+    else:
+        sep = rng.choice(_RRN_SEPARATORS_MIXED)
     return Entity(kind="rrn", text=f"{front}{sep}{century_code}{serial}{check}")
 
 
-def gen_address(rng: random.Random) -> Entity:
+def gen_address(rng: random.Random, difficulty: str = "mixed") -> Entity:
+    if difficulty == "easy":
+        use_road = False  # 지번 주소가 더 짧고 표준적인 형태
+    elif difficulty == "hard":
+        use_road = True  # 도로명 + 아파트 동/호는 더 길고 구조가 복잡함
+    else:
+        use_road = rng.random() < 0.5
+
     city = rng.choice(_CITIES)
-    if rng.random() < 0.5:
-        # 지번 주소
+    if not use_road:
         gu_dong = rng.choice(_GU_DONG)
         bunji = rng.randint(1, 999)
         ho = rng.randint(1, 20)
         base = f"{city} {gu_dong} {bunji}-{ho}"
     else:
-        # 도로명 주소 (+ 아파트 동/호 표기 확률적으로 추가)
         road = rng.choice(_ROAD_ADDRESSES)
         base = f"{city} {road}{rng.randint(1, 300)}길 {rng.randint(1, 90)}"
-        if rng.random() < 0.5:
+        if difficulty == "hard" or rng.random() < 0.5:
             apt = rng.choice(_APARTMENT_NAMES)
             base += f" {apt}아파트 {rng.randint(101, 130)}동 {rng.randint(101, 2005)}호"
     return Entity(kind="address", text=base)
@@ -123,5 +158,5 @@ _GENERATORS = {
 ALL_KINDS = tuple(_GENERATORS.keys())
 
 
-def generate_entity(kind: str, rng: random.Random) -> Entity:
-    return _GENERATORS[kind](rng)
+def generate_entity(kind: str, rng: random.Random, difficulty: str = "mixed") -> Entity:
+    return _GENERATORS[kind](rng, difficulty)

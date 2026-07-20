@@ -17,8 +17,9 @@ generator/
   distractors.py  # 개인정보가 아닌 '헷갈리는' 값 생성 (오탐 측정용)
   documents.py    # 문장 템플릿에 값을 심어 문서 + 라벨(span) 생성
 generate_dataset.py  # CLI — JSONL 데이터셋 생성
-evaluate.py          # CLI — core Pipeline.scan() 결과 vs 정답 → precision/recall/F1 리포트
+evaluate.py          # CLI — core Pipeline.scan() 결과 vs 정답 → precision/recall/F1 리포트 (종류별+난이도별)
 datasets/            # 생성된 평가셋 (정답 라벨 포함)
+reports/             # evaluate.py --report로 저장한 마크다운 리포트 (결과보고서 첨부용)
 tests/               # 생성기·평가 로직 단위 테스트
 ```
 
@@ -28,8 +29,8 @@ tests/               # 생성기·평가 로직 단위 테스트
 # 1. 데이터셋 생성 (재현 가능하도록 seed 고정, 기본 25%는 오탐 측정용 무-개인정보 문서)
 python -m bench.generate_dataset --count 500 --seed 42 --out bench/datasets/synth_v1.jsonl
 
-# 2. core 탐지기 정확도 평가
-python -m bench.evaluate bench/datasets/synth_v1.jsonl
+# 2. core 탐지기 정확도 평가 (--report로 마크다운 리포트 파일도 저장)
+python -m bench.evaluate bench/datasets/synth_v1.jsonl --report bench/reports/report_v1.md
 ```
 
 현재 core에는 `rrn`/`phone`/`email` 탐지기만 있어 `name`/`address`는 recall 0으로 나온다 —
@@ -57,15 +58,30 @@ core가 여기서 뭔가를 탐지하면 `evaluate.py`가 그대로 FP로 집계
 - **문장 맥락**: 고객센터/병원/학교/관공서/인사/배송/금융 등 10여 개 업무 시나리오, 한 문서에
   같은 종류 개인정보가 두 번 등장하는 경우(담당자 교체, 자택/직장 번호 등)도 포함
 
+## 난이도(difficulty) 분류
+
+문서마다 표기 난이도를 태깅해서, 쉬운 표기와 어려운 표기에서 core의 정확도가 갈리는지
+따로 측정할 수 있게 했다.
+
+| 난이도 | 의미 | 예시 |
+|---|---|---|
+| `easy` | 하이픈 등 표준 구분자, 지번 주소 | `010-1234-5678`, `강남구 역삼동 12-3` |
+| `hard` | 구분자 없음/국제표기, 도로명+아파트 동호수 | `01012345678`, `+82 10 1234 5678`, `테헤란로12길 3 래미안아파트 101동 502호` |
+| `negative` | 개인정보 없음(오탐 측정용) | — |
+
+`evaluate.py`는 종류(kind)별 표와 난이도별 표를 둘 다 출력한다 — 예를 들어 rrn의 전체 recall은
+높은데 hard 난이도에서만 떨어진다면 "구분자 없는 표기를 놓친다"는 구체적 원인을 알 수 있다.
+
 ## 데이터셋 포맷 (생성기·평가기가 공유하는 계약)
 
 JSONL — 한 줄에 문서 하나:
 
 ```json
-{"text": "고객 홍길동 010-1234-5678 문의", "labels": [{"kind": "name", "start": 3, "end": 6}, {"kind": "phone", "start": 7, "end": 20}]}
+{"text": "고객 홍길동 010-1234-5678 문의", "labels": [{"kind": "name", "start": 3, "end": 6}, {"kind": "phone", "start": 7, "end": 20}], "difficulty": "easy"}
 ```
 
 - `start`/`end`는 파이썬 슬라이스 규약 (`text[start:end]` == 개인정보 원문)
 - `kind`는 core의 `Detection.kind`와 동일한 문자열: `rrn`, `phone`, `email`, `name`, `address`
+- `difficulty`는 `easy`/`hard`/`negative` 중 하나 (없으면 evaluate.py가 `unknown`으로 취급 — 하위 호환)
 - 평가 기준: span 완전 일치(exact match)로 precision / recall / F1 산출
 - 포맷 변경은 팀장 승인 후 이 문서부터 갱신한다

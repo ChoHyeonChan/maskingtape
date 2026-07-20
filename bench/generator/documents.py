@@ -84,9 +84,10 @@ class Label:
 class Document:
     text: str
     labels: list[Label]
+    difficulty: str  # "easy" | "hard" | "mixed" | "negative"
 
 
-def _render(template: str, rng: random.Random) -> Document:
+def _render(template: str, rng: random.Random, difficulty: str) -> Document:
     """템플릿의 {kind} 자리표시자를 채우고, 개인정보 종류만 라벨로 기록한다.
 
     {distractor}는 개인정보가 아니므로 텍스트에는 삽입하되 라벨은 남기지 않는다 —
@@ -101,7 +102,7 @@ def _render(template: str, rng: random.Random) -> Document:
         cursor += m.start() - last_end
 
         kind = m.group(1)
-        value = generate_distractor(rng) if kind in _NON_LABEL_KINDS else generate_entity(kind, rng).text
+        value = generate_distractor(rng) if kind in _NON_LABEL_KINDS else generate_entity(kind, rng, difficulty).text
         start = cursor
         text_parts.append(value)
         cursor += len(value)
@@ -111,17 +112,22 @@ def _render(template: str, rng: random.Random) -> Document:
         last_end = m.end()
 
     text_parts.append(template[last_end:])
-    return Document(text="".join(text_parts), labels=labels)
+    return Document(text="".join(text_parts), labels=labels, difficulty=difficulty)
 
 
-def generate_document(rng: random.Random, template: str | None = None) -> Document:
-    """실제 개인정보가 포함된 합성 문서 하나를 만든다 (정답 라벨 1개 이상)."""
-    return _render(template if template is not None else rng.choice(_TEMPLATES), rng)
+def generate_document(rng: random.Random, template: str | None = None, difficulty: str | None = None) -> Document:
+    """실제 개인정보가 포함된 합성 문서 하나를 만든다 (정답 라벨 1개 이상).
+
+    difficulty가 None이면 "easy"/"hard" 중 하나를 무작위로 골라 문서 전체에 일관되게 적용한다
+    (entities.generate_entity의 difficulty 파라미터로 표기 형식을 제어 — entities.py 참고).
+    """
+    resolved_difficulty = difficulty if difficulty is not None else rng.choice(["easy", "hard"])
+    return _render(template if template is not None else rng.choice(_TEMPLATES), rng, resolved_difficulty)
 
 
 def generate_negative_document(rng: random.Random, template: str | None = None) -> Document:
     """개인정보가 없는(또는 distractor만 있는) 합성 문서 하나를 만든다 — 오탐(FP) 측정용, 정답 라벨은 0개."""
-    return _render(template if template is not None else rng.choice(_NEGATIVE_TEMPLATES), rng)
+    return _render(template if template is not None else rng.choice(_NEGATIVE_TEMPLATES), rng, "negative")
 
 
 def templates() -> list[str]:
