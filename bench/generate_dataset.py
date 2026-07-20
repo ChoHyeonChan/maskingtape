@@ -11,14 +11,15 @@ import json
 import random
 from pathlib import Path
 
-from bench.generator.documents import generate_document
+from bench.generator.documents import generate_document, generate_negative_document
 
 
-def build_dataset(count: int, seed: int) -> list[dict]:
+def build_dataset(count: int, seed: int, negative_ratio: float = 0.25) -> list[dict]:
+    """negative_ratio 비율만큼은 개인정보 없는(오탐 측정용) 문서로 채운다."""
     rng = random.Random(seed)
     rows = []
     for _ in range(count):
-        doc = generate_document(rng)
+        doc = generate_negative_document(rng) if rng.random() < negative_ratio else generate_document(rng)
         rows.append(
             {
                 "text": doc.text,
@@ -39,10 +40,16 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="합성 개인정보 평가 데이터셋 생성")
     parser.add_argument("--count", type=int, default=200, help="생성할 문서 수")
     parser.add_argument("--seed", type=int, default=42, help="난수 시드 (재현성 보장)")
+    parser.add_argument(
+        "--negative-ratio",
+        type=float,
+        default=0.25,
+        help="개인정보가 전혀 없는 오탐(FP) 측정용 문서 비율 (0~1)",
+    )
     parser.add_argument("--out", type=Path, default=Path("bench/datasets/synth_v1.jsonl"))
     args = parser.parse_args()
 
-    rows = build_dataset(args.count, args.seed)
+    rows = build_dataset(args.count, args.seed, args.negative_ratio)
     write_jsonl(rows, args.out)
     print(f"생성 완료: {args.out} ({len(rows)}건, seed={args.seed})")
 

@@ -13,8 +13,9 @@
 
 ```
 generator/
-  entities.py    # 종류별 합성 값 생성 (name/phone/email/rrn/address)
-  documents.py   # 문장 템플릿에 값을 심어 문서 + 라벨(span) 생성
+  entities.py     # 종류별 합성 값 생성 (name/phone/email/rrn/address)
+  distractors.py  # 개인정보가 아닌 '헷갈리는' 값 생성 (오탐 측정용)
+  documents.py    # 문장 템플릿에 값을 심어 문서 + 라벨(span) 생성
 generate_dataset.py  # CLI — JSONL 데이터셋 생성
 evaluate.py          # CLI — core Pipeline.scan() 결과 vs 정답 → precision/recall/F1 리포트
 datasets/            # 생성된 평가셋 (정답 라벨 포함)
@@ -24,7 +25,7 @@ tests/               # 생성기·평가 로직 단위 테스트
 ## 사용법
 
 ```bash
-# 1. 데이터셋 생성 (재현 가능하도록 seed 고정)
+# 1. 데이터셋 생성 (재현 가능하도록 seed 고정, 기본 25%는 오탐 측정용 무-개인정보 문서)
 python -m bench.generate_dataset --count 500 --seed 42 --out bench/datasets/synth_v1.jsonl
 
 # 2. core 탐지기 정확도 평가
@@ -33,6 +34,16 @@ python -m bench.evaluate bench/datasets/synth_v1.jsonl
 
 현재 core에는 `rrn`/`phone`/`email` 탐지기만 있어 `name`/`address`는 recall 0으로 나온다 —
 이는 생성기 버그가 아니라 아직 구현되지 않은 탐지기를 정확히 반영하는 결과다.
+
+## 오탐(False Positive) 측정
+
+기존에는 데이터셋 전체가 "개인정보가 있는 문서"뿐이라 재현율(recall)만 측정 가능했고,
+core가 개인정보 아닌 걸 잘못 잡아내는지(정밀도, precision)는 검증 불가능했다.
+
+`generator/distractors.py`가 주문번호·사업자등록번호·날짜·가격처럼 숫자가 섞여 있지만
+개인정보는 아닌 값과, 지역번호·생년월일이 실제로는 존재하지 않는 '전화번호/주민번호 모양'
+값을 만든다. `--negative-ratio`(기본 0.25)만큼의 문서는 정답 라벨이 0개인 채로 생성되고,
+core가 여기서 뭔가를 탐지하면 `evaluate.py`가 그대로 FP로 집계한다.
 
 ## 데이터셋 포맷 (생성기·평가기가 공유하는 계약)
 
