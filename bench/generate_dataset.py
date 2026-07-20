@@ -24,6 +24,7 @@ def build_dataset(count: int, seed: int, negative_ratio: float = 0.25) -> list[d
             {
                 "text": doc.text,
                 "labels": [{"kind": lb.kind, "start": lb.start, "end": lb.end} for lb in doc.labels],
+                "difficulty": doc.difficulty,
             }
         )
     return rows

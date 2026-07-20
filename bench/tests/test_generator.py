@@ -59,6 +59,7 @@ def test_negative_documents_have_no_gold_labels():
     for _ in range(50):
         doc = generate_negative_document(rng)
         assert doc.labels == []
+        assert doc.difficulty == "negative"
 
 
 def test_invalid_rrn_like_distractor_is_rejected_by_core_detector():
@@ -125,3 +126,35 @@ def test_address_generator_covers_road_and_jibun_styles():
     has_road = any("로" in s for s in samples)
     assert has_jibun
     assert has_road
+
+
+def test_easy_difficulty_always_uses_standard_separators():
+    """easy 난이도는 하이픈 등 표준 구분자만 사용해야 한다 (탐지가 쉬운 형태)."""
+    rng = random.Random(13)
+    for _ in range(30):
+        phone = generate_entity("phone", rng, difficulty="easy").text
+        rrn = generate_entity("rrn", rng, difficulty="easy").text
+        address = generate_entity("address", rng, difficulty="easy").text
+        assert "-" in phone
+        assert "+82" not in phone
+        assert "-" in rrn
+        assert "길" not in address  # 지번 주소만 사용 ("종로구"처럼 구 이름에 "로"가 들어갈 수 있어 "길"로 판별)
+
+
+def test_hard_difficulty_avoids_hyphen_and_uses_road_address():
+    """hard 난이도는 하이픈 없는 표기와 도로명 주소를 사용해야 한다 (탐지가 어려운 형태)."""
+    rng = random.Random(14)
+    for _ in range(30):
+        phone = generate_entity("phone", rng, difficulty="hard").text
+        rrn = generate_entity("rrn", rng, difficulty="hard").text
+        address = generate_entity("address", rng, difficulty="hard").text
+        assert phone.count("-") == 0
+        assert rrn.count("-") == 0
+        assert "길" in address  # 도로명 주소만 사용
+
+
+def test_generate_document_tags_difficulty_as_easy_or_hard():
+    rng = random.Random(15)
+    for _ in range(30):
+        doc = generate_document(rng)
+        assert doc.difficulty in ("easy", "hard")
