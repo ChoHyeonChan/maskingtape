@@ -31,8 +31,8 @@ python -m bench.generate_dataset --count 500 --seed 42 --out bench/datasets/synt
 python -m bench.evaluate bench/datasets/synth_v1.jsonl
 ```
 
-현재 core에는 `rrn`/`phone`/`email` 탐지기만 있어 `name`/`address`는 recall 0으로 나온다 —
-이는 생성기 버그가 아니라 아직 구현되지 않은 탐지기를 정확히 반영하는 결과다.
+현재 core에는 `rrn`/`phone`/`email`/`address` 탐지기가 있고 `name`은 아직 없어 recall 0으로 나온다 —
+이는 생성기 버그가 아니라 아직 구현되지 않은 탐지기를 정확히 반영하는 결과다 (로컬 LLM 문맥 판단 필요, 계획 중).
 
 ## 데이터셋 포맷 (생성기·평가기가 공유하는 계약)
 
