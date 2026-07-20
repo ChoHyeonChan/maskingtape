@@ -5,6 +5,7 @@ from __future__ import annotations
 from maskingtape.detectors.address import AddressDetector
 from maskingtape.detectors.base import Detector
 from maskingtape.detectors.email import EmailDetector
+from maskingtape.detectors.name import NameDetector
 from maskingtape.detectors.phone import PhoneDetector
 from maskingtape.detectors.rrn import RRNDetector
 
@@ -12,6 +13,7 @@ __all__ = [
     "AddressDetector",
     "Detector",
     "EmailDetector",
+    "NameDetector",
     "PhoneDetector",
     "RRNDetector",
     "default_detectors",
@@ -20,4 +22,4 @@ __all__ = [
 
 def default_detectors() -> list[Detector]:
     """기본 탐지기 세트 (규칙 전용 — LLM 불필요)."""
-    return [RRNDetector(), PhoneDetector(), EmailDetector(), AddressDetector()]
+    return [RRNDetector(), PhoneDetector(), EmailDetector(), AddressDetector(), NameDetector()]
