@@ -9,13 +9,30 @@
 - **진짜 개인정보 절대 금지** — 모든 이름·번호·주소는 생성기로 만든 합성 데이터
 - **AI Hub 등 외부 데이터셋 원본 커밋 금지**(재배포 제한) — 로컬 참고용으로만 사용
 
-## 구성 예정
+## 구성
 
 ```
-generator/     # 합성 문서 생성기 (이름·번호·주소를 만들어 문장에 심는다)
-datasets/      # 생성된 평가셋 (정답 라벨 포함)
-evaluate.py    # 탐지 결과 vs 정답 → precision/recall/F1 리포트
+generator/
+  entities.py    # 종류별 합성 값 생성 (name/phone/email/rrn/address)
+  documents.py   # 문장 템플릿에 값을 심어 문서 + 라벨(span) 생성
+generate_dataset.py  # CLI — JSONL 데이터셋 생성
+evaluate.py          # CLI — core Pipeline.scan() 결과 vs 정답 → precision/recall/F1 리포트
+datasets/            # 생성된 평가셋 (정답 라벨 포함)
+tests/               # 생성기·평가 로직 단위 테스트
 ```
+
+## 사용법
+
+```bash
+# 1. 데이터셋 생성 (재현 가능하도록 seed 고정)
+python -m bench.generate_dataset --count 500 --seed 42 --out bench/datasets/synth_v1.jsonl
+
+# 2. core 탐지기 정확도 평가
+python -m bench.evaluate bench/datasets/synth_v1.jsonl
+```
+
+현재 core에는 `rrn`/`phone`/`email` 탐지기만 있어 `name`/`address`는 recall 0으로 나온다 —
+이는 생성기 버그가 아니라 아직 구현되지 않은 탐지기를 정확히 반영하는 결과다.
 
 ## 데이터셋 포맷 (생성기·평가기가 공유하는 계약)
 
