@@ -31,8 +31,10 @@ python -m bench.generate_dataset --count 500 --seed 42 --out bench/datasets/synt
 python -m bench.evaluate bench/datasets/synth_v1.jsonl
 ```
 
-현재 core에는 `rrn`/`phone`/`email`/`address` 탐지기가 있고 `name`은 아직 없어 recall 0으로 나온다 —
-이는 생성기 버그가 아니라 아직 구현되지 않은 탐지기를 정확히 반영하는 결과다 (로컬 LLM 문맥 판단 필요, 계획 중).
+현재 core의 `rrn`/`phone`/`email`/`address`는 precision/recall/F1 전부 1.0이다. `name`은 성씨 사전 +
+문맥 단서(역할어·존칭) 기반 **임시 규칙판**이라 precision 0.89 / recall 0.85 정도로 낮다 — 문맥 단서가
+전혀 없으면 아예 탐지하지 않도록 설계해 오탐을 줄였지만, 진짜 문맥 이해는 로컬 LLM(Ollama+Qwen) 버전이
+나와야 해결된다(계획 중, `NameDetector` 교체 예정).
 
 ## 데이터셋 포맷 (생성기·평가기가 공유하는 계약)
 
