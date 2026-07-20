@@ -12,5 +12,9 @@ class FileTask {
   String? outputPath;
   String? error;
 
+  /// 결과 미리보기용 — 완료된 작업만 값을 가진다.
+  String? originalText;
+  String? maskedText;
+
   String get name => path.split(RegExp(r'[\\/]')).last;
 }

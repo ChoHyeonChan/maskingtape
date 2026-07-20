@@ -13,12 +13,15 @@ class CliAnonymizer implements Anonymizer {
   final String command;
 
   @override
-  Future<AnonymizeResult> anonymize(String text) async {
+  Future<AnonymizeResult> anonymize(
+    String text, {
+    MaskStrategy strategy = MaskStrategy.mask,
+  }) async {
     final scanOut = await _run(['--scan'], text);
     final detections = (jsonDecode(scanOut) as List<dynamic>)
         .map((e) => Detection.fromJson(e as Map<String, dynamic>))
         .toList();
-    final masked = await _run([], text);
+    final masked = await _run(['--strategy', strategy.wireName], text);
     return AnonymizeResult(
       // print()가 붙인 마지막 줄바꿈 하나만 떼어낸다.
       maskedText: masked.replaceFirst(RegExp(r'\r?\n$'), ''),

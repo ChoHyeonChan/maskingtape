@@ -5,7 +5,9 @@ import '../models/file_task.dart';
 import '../services/anonymizer.dart';
 import '../services/batch_processor.dart';
 import '../services/cli_anonymizer.dart';
+import '../services/shell.dart';
 import '../widgets/drop_zone.dart';
+import '../widgets/result_preview_dialog.dart';
 
 /// 홈 화면 — 드롭된 파일 작업 목록 상태를 들고 배치 처리 흐름을 잇는다.
 class HomeScreen extends StatefulWidget {
@@ -31,9 +33,15 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
   bool _running = false;
   bool _cancelRequested = false;
+  MaskStrategy _strategy = MaskStrategy.mask;
 
   bool get _hasWaiting =>
       _tasks.any((t) => t.status == FileTaskStatus.waiting);
+
+  int get _finished => _tasks
+      .where((t) =>
+          t.status == FileTaskStatus.done || t.status == FileTaskStatus.failed)
+      .length;
 
   void _addFiles(List<String> paths) {
     setState(() {
@@ -56,6 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
       () {
         if (mounted) setState(() {});
       },
+      strategy: _strategy,
       isCancelled: () => _cancelRequested,
     );
     if (mounted) {
@@ -101,6 +110,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const Spacer(),
+                  SegmentedButton<MaskStrategy>(
+                    segments: [
+                      for (final s in MaskStrategy.values)
+                        ButtonSegment(value: s, label: Text(s.displayName)),
+                    ],
+                    selected: {_strategy},
+                    onSelectionChanged: _running
+                        ? null
+                        : (selection) =>
+                            setState(() => _strategy = selection.first),
+                  ),
+                  const SizedBox(width: 12),
                   FilledButton.icon(
                     onPressed: _running
                         ? (_cancelRequested
@@ -116,6 +137,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ],
               ),
+              if (_running) ...[
+                const SizedBox(height: 12),
+                LinearProgressIndicator(
+                  value: _tasks.isEmpty ? null : _finished / _tasks.length,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '$_finished / ${_tasks.length} 처리됨',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
               const SizedBox(height: 8),
               Expanded(child: _FileList(tasks: _tasks)),
             ],
@@ -167,7 +199,7 @@ class _FileTile extends StatelessWidget {
       FileTaskStatus.done => (
           Icon(Icons.check_circle, color: colors.primary),
           '탐지 ${task.detections.length}건 — ${Detection.summarize(task.detections)}\n'
-              '저장: ${task.outputPath}',
+              '저장: ${task.outputPath} · 클릭하면 비교 미리보기',
         ),
       FileTaskStatus.failed => (
           Icon(Icons.error_outline, color: colors.error),
@@ -175,10 +207,24 @@ class _FileTile extends StatelessWidget {
         ),
     };
 
+    final done = task.status == FileTaskStatus.done;
     return ListTile(
       leading: leading,
       title: Text(task.name),
       subtitle: Text(subtitle, maxLines: 2, overflow: TextOverflow.ellipsis),
+      onTap: done
+          ? () => showDialog<void>(
+                context: context,
+                builder: (_) => ResultPreviewDialog(task: task),
+              )
+          : null,
+      trailing: done
+          ? IconButton(
+              icon: const Icon(Icons.folder_open),
+              tooltip: '저장 폴더 열기',
+              onPressed: () => revealInExplorer(task.outputPath!),
+            )
+          : null,
     );
   }
 }

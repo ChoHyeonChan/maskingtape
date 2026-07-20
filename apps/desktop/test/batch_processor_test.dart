@@ -33,7 +33,7 @@ void main() {
     await input.writeAsString('주민번호 800101-1234560 문의주세요');
 
     final task = FileTask(input.path);
-    await const BatchProcessor(FakeAnonymizer()).processAll([task], () {});
+    await BatchProcessor(FakeAnonymizer()).processAll([task], () {});
 
     expect(task.status, FileTaskStatus.done);
     expect(task.outputPath, endsWith('입력_masked.txt'));
@@ -50,7 +50,7 @@ void main() {
 
     final missing = FileTask('${dir.path}${Platform.pathSeparator}없음.txt');
     final good = FileTask(ok.path);
-    await const BatchProcessor(FakeAnonymizer())
+    await BatchProcessor(FakeAnonymizer())
         .processAll([missing, good], () {});
 
     expect(missing.status, FileTaskStatus.failed);
@@ -67,7 +67,7 @@ void main() {
     await b.writeAsString('내용2');
 
     final tasks = [FileTask(a.path), FileTask(b.path)];
-    await const BatchProcessor(FakeAnonymizer()).processAll(
+    await BatchProcessor(FakeAnonymizer()).processAll(
       tasks,
       () {},
       // 첫 파일이 끝난 순간부터 취소 — 둘째는 시작되면 안 된다.
