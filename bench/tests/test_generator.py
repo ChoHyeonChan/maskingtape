@@ -8,8 +8,10 @@ from __future__ import annotations
 
 import random
 
+from maskingtape.detectors.phone import PhoneDetector
 from maskingtape.detectors.rrn import RRNDetector
-from bench.generator.documents import generate_document, templates
+from bench.generator.distractors import gen_invalid_phone_like, gen_invalid_rrn_like, generate_distractor
+from bench.generator.documents import generate_document, generate_negative_document, negative_templates, templates
 from bench.generator.entities import ALL_KINDS, generate_entity
 
 
@@ -48,3 +50,38 @@ def test_labels_do_not_overlap():
         ordered = sorted(doc.labels, key=lambda lb: lb.start)
         for prev, cur in zip(ordered, ordered[1:]):
             assert prev.end <= cur.start
+
+
+def test_negative_documents_have_no_gold_labels():
+    """오탐(FP) 측정용 문서는 개인정보가 없어야 하므로 정답 라벨이 0개여야 한다."""
+    rng = random.Random(5)
+    assert len(negative_templates()) > 0
+    for _ in range(50):
+        doc = generate_negative_document(rng)
+        assert doc.labels == []
+
+
+def test_invalid_rrn_like_distractor_is_rejected_by_core_detector():
+    """생년월일이 존재하지 않는 '주민번호 모양' distractor는 core가 개인정보로 잡으면 안 된다."""
+    rng = random.Random(6)
+    detector = RRNDetector()
+    for _ in range(20):
+        text = gen_invalid_rrn_like(rng)
+        assert detector.detect(text) == []
+
+
+def test_invalid_phone_like_distractor_is_rejected_by_core_detector():
+    """존재하지 않는 지역번호의 '전화번호 모양' distractor는 core가 개인정보로 잡으면 안 된다."""
+    rng = random.Random(7)
+    detector = PhoneDetector()
+    for _ in range(20):
+        text = gen_invalid_phone_like(rng)
+        assert detector.detect(text) == []
+
+
+def test_generate_distractor_returns_nonempty_string():
+    rng = random.Random(8)
+    for _ in range(30):
+        value = generate_distractor(rng)
+        assert isinstance(value, str)
+        assert value != ""
