@@ -85,3 +85,43 @@ def test_generate_distractor_returns_nonempty_string():
         value = generate_distractor(rng)
         assert isinstance(value, str)
         assert value != ""
+
+
+def test_generated_phone_passes_core_detector_across_formats():
+    """하이픈/공백/점/구분자없음/+82 표기 등 어떤 형식이든 core가 정확히 한 건으로 탐지해야 한다."""
+    rng = random.Random(9)
+    detector = PhoneDetector()
+    for _ in range(100):
+        entity = generate_entity("phone", rng)
+        found = detector.detect(entity.text)
+        assert len(found) == 1, f"탐지 실패: {entity.text!r}"
+        assert found[0].text == entity.text
+
+
+def test_phone_generator_covers_multiple_separator_styles():
+    """전화번호 표기 다양성(하이픈/구분자없음 등)이 실제로 섞여 나오는지 확인한다."""
+    rng = random.Random(10)
+    samples = [generate_entity("phone", rng).text for _ in range(200)]
+    has_bare = any(s.replace("+82", "").isdigit() for s in samples)
+    has_hyphen = any("-" in s for s in samples)
+    assert has_bare
+    assert has_hyphen
+
+
+def test_rrn_generator_covers_multiple_separator_styles():
+    rng = random.Random(11)
+    samples = [generate_entity("rrn", rng).text for _ in range(200)]
+    has_bare = any(s.isdigit() for s in samples)
+    has_hyphen = any("-" in s for s in samples)
+    assert has_bare
+    assert has_hyphen
+
+
+def test_address_generator_covers_road_and_jibun_styles():
+    """지번 주소(예: 강남구 역삼동 12-3)와 도로명 주소(예: 테헤란로12길 3)가 둘 다 나오는지 확인한다."""
+    rng = random.Random(12)
+    samples = [generate_entity("address", rng).text for _ in range(200)]
+    has_jibun = any("동" in s and "로" not in s for s in samples)
+    has_road = any("로" in s for s in samples)
+    assert has_jibun
+    assert has_road
