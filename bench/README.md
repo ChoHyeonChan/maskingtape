@@ -18,8 +18,9 @@ generator/
   documents.py    # 문장 템플릿에 값을 심어 문서 + 라벨(span) 생성
 generate_dataset.py  # CLI — JSONL 데이터셋 생성
 evaluate.py          # CLI — core Pipeline.scan() 결과 vs 정답 → precision/recall/F1 리포트 (종류별+난이도별)
-mask_quality.py      # 마스킹 결과물 자체의 개인정보 유출 여부 검증 로직
-evaluate_masking.py  # CLI — 마스킹 결과에 개인정보가 실제로 남아있는지(유출률) 평가
+mask_quality.py       # 마스킹 결과물 자체의 개인정보 유출(완전/부분) 여부 검증 로직
+evaluate_masking.py   # CLI — 마스킹 결과에 개인정보가 실제로 남아있는지(유출률) 평가
+confidence_analysis.py  # CLI — confidence 임계값별 precision/recall/F1 변화 분석
 datasets/            # 생성된 평가셋 (정답 라벨 포함)
 reports/             # evaluate.py --report로 저장한 마크다운 리포트 (결과보고서 첨부용)
 tests/               # 생성기·평가 로직 단위 테스트
@@ -103,6 +104,23 @@ python -m bench.evaluate_masking bench/datasets/synth_v1.jsonl
 유출 0건. 부분 유출은 이 시점에는 0건이지만, 이는 name/address 탐지기가 아예 없어서 탐지 자체가
 안 일어나기 때문이다 — 탐지기가 생기고 나서(예: 경계가 어긋나는 탐지) 이 지표가 진가를 발휘한다.
 길이 보존율은 100%로 마스킹 로직 자체의 구조적 버그는 없음을 확인.
+
+## 신뢰도(confidence) 임계값 분석
+
+core의 각 `Detection`에는 `confidence`(0.0~1.0)가 붙어있지만 지금까지 어디에도 쓰이지 않았다.
+`confidence_analysis.py`는 이 값을 활용해 "임계값을 얼마로 잡아야 하는지" 튜닝 근거를 만든다.
+
+```bash
+python -m bench.confidence_analysis bench/datasets/synth_v1.jsonl
+```
+
+후보 임계값마다 그보다 confidence가 낮은 예측을 버린 뒤 다시 채점해서, 임계값을 올릴수록
+precision이 오르고 recall이 내려가는 트레이드오프를 표로 보여준다.
+
+500건 기준 실측 결과(이 브랜치 시점의 core 기준): precision은 0.0~1.0 전 구간에서 1.000으로
+동일하게 유지되는데, **임계값 0.95부터 recall이 0.519 → 0.465로 떨어진다** — 구분자 없는
+전화번호 표기(confidence 0.9)가 잘려나가기 때문이다. 즉 **정밀도 이득 없이 재현율만 손해**를
+보므로, 지금 core 기준으로는 confidence 임계값을 0.9 이상으로 올릴 이유가 없다는 근거가 된다.
 
 ## 데이터셋 포맷 (생성기·평가기가 공유하는 계약)
 
