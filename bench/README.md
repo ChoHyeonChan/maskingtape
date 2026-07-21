@@ -18,6 +18,8 @@ generator/
   documents.py    # 문장 템플릿에 값을 심어 문서 + 라벨(span) 생성
 generate_dataset.py  # CLI — JSONL 데이터셋 생성
 evaluate.py          # CLI — core Pipeline.scan() 결과 vs 정답 → precision/recall/F1 리포트 (종류별+난이도별)
+mask_quality.py      # 마스킹 결과물 자체의 개인정보 유출 여부 검증 로직
+evaluate_masking.py  # CLI — 마스킹 결과에 개인정보가 실제로 남아있는지(유출률) 평가
 datasets/            # 생성된 평가셋 (정답 라벨 포함)
 reports/             # evaluate.py --report로 저장한 마크다운 리포트 (결과보고서 첨부용)
 tests/               # 생성기·평가 로직 단위 테스트
@@ -71,6 +73,26 @@ core가 여기서 뭔가를 탐지하면 `evaluate.py`가 그대로 FP로 집계
 
 `evaluate.py`는 종류(kind)별 표와 난이도별 표를 둘 다 출력한다 — 예를 들어 rrn의 전체 recall은
 높은데 hard 난이도에서만 떨어진다면 "구분자 없는 표기를 놓친다"는 구체적 원인을 알 수 있다.
+
+## 마스킹 품질(유출) 검증
+
+`evaluate.py`는 "core가 개인정보 위치를 정확히 예측했는가"를 보는 내부 지표(precision/recall)다.
+하지만 이 프로젝트의 실제 산출물은 탐지 결과가 아니라 **마스킹된 텍스트**이므로, "사용자가
+받는 최종 결과물에 개인정보가 실제로 안 남았는가"도 별도로 검증할 필요가 있다.
+
+```bash
+python -m bench.evaluate_masking bench/datasets/synth_v1.jsonl
+```
+
+`Pipeline.anonymize()`로 얻은 마스킹 결과 안에 정답 개인정보 원문이 문자 그대로 남아있으면
+"유출"로 집계한다 — 탐지를 놓쳤든 마스킹 로직 자체에 버그가 있든 사용자 입장에서 결과는
+동일(개인정보 노출)하므로 원인을 구분하지 않고 하나의 지표로 합친다. 마스킹 후 텍스트 길이가
+원본과 같은지(구조 보존)도 함께 확인해, 길이가 달라지면 core `MaskAnonymizer`의 회귀 버그
+신호로 본다.
+
+500건 기준 실측 결과: 유출률 48.1%(875건 중 421건) — 전부 `name`/`address`(현재 core에 탐지기가
+없는 종류)에서만 발생했고, `phone`/`email`/`rrn`은 유출 0건. 길이 보존율은 100%로 마스킹 로직
+자체의 구조적 버그는 없음을 확인.
 
 ## 데이터셋 포맷 (생성기·평가기가 공유하는 계약)
 
