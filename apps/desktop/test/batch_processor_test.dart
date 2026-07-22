@@ -33,7 +33,7 @@ void main() {
     await input.writeAsString('주민번호 800101-1234560 문의주세요');
 
     final task = FileTask(input.path);
-    await const BatchProcessor(FakeAnonymizer()).processAll([task], () {});
+    await BatchProcessor(FakeAnonymizer()).processAll([task], () {});
 
     expect(task.status, FileTaskStatus.done);
     expect(task.outputPath, endsWith('입력_masked.txt'));
@@ -50,12 +50,32 @@ void main() {
 
     final missing = FileTask('${dir.path}${Platform.pathSeparator}없음.txt');
     final good = FileTask(ok.path);
-    await const BatchProcessor(FakeAnonymizer())
+    await BatchProcessor(FakeAnonymizer())
         .processAll([missing, good], () {});
 
     expect(missing.status, FileTaskStatus.failed);
     expect(missing.error, isNotNull);
     expect(good.status, FileTaskStatus.done);
+  });
+
+  test('processAll: 취소하면 남은 파일은 대기 상태로 남는다', () async {
+    final dir = await Directory.systemTemp.createTemp('maskingtape_test');
+    addTearDown(() => dir.delete(recursive: true));
+    final a = File('${dir.path}${Platform.pathSeparator}첫째.txt');
+    final b = File('${dir.path}${Platform.pathSeparator}둘째.txt');
+    await a.writeAsString('내용1');
+    await b.writeAsString('내용2');
+
+    final tasks = [FileTask(a.path), FileTask(b.path)];
+    await BatchProcessor(FakeAnonymizer()).processAll(
+      tasks,
+      () {},
+      // 첫 파일이 끝난 순간부터 취소 — 둘째는 시작되면 안 된다.
+      isCancelled: () => tasks[0].status == FileTaskStatus.done,
+    );
+
+    expect(tasks[0].status, FileTaskStatus.done);
+    expect(tasks[1].status, FileTaskStatus.waiting);
   });
 
   test('processAll: 백엔드 오류는 failed로 기록된다', () async {

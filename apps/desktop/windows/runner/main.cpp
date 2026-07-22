@@ -27,7 +27,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   FlutterWindow window(project);
   Win32Window::Point origin(10, 10);
   Win32Window::Size size(1280, 720);
-  if (!window.Create(L"maskingtape_desktop", origin, size)) {
+  // Window title "maskingtape" in Korean, as Unicode escapes to keep this file ASCII.
+  if (!window.Create(L"\ub9c8\uc2a4\ud0b9\ud14c\uc774\ud504", origin, size)) {
     return EXIT_FAILURE;
   }
   window.SetQuitOnClose(true);
