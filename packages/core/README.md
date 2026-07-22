@@ -36,10 +36,26 @@ ruff check packages/core    # 린트
 
 ## 현재 구현
 
-- detectors: `rrn.py`(주민등록번호), `phone.py`(휴대폰·유선·070), `email.py`
+- detectors: `rrn.py`(주민등록번호), `phone.py`(휴대폰·유선·070), `email.py`, `address.py`(행정구역 주소), `name.py`(이름 — 규칙판), `name_llm.py`(이름 — 로컬 LLM 문맥 판단, **선택**)
 - anonymizers: `mask.py`(*로 가림), `label.py`([전화번호] 식 라벨 치환, 번호 매기기 지원)
+
+## 이름 탐지: 규칙판 vs LLM판
+
+기본(`default_detectors()`)은 **규칙판**이라 아무 설치 없이 동작한다. 다만 성씨 사전에 의존해서
+역할어 뒤에 오는 일반 단어를 오탐할 수 있다("작성자 **정보**"의 정+보, "고객 **지원**"의 지+원).
+
+문맥까지 보려면 **로컬 Ollama**를 띄우고 `--llm`을 준다 (외부 API 호출 없음 — 대회 규정 §2-3):
+
+```bash
+ollama pull qwen2.5:7b       # Apache-2.0 (Qwen2.5는 3B·72B만 비상업 제한이라 7B를 쓴다)
+maskingtape --llm --strategy label "작성자 정보 참고: 최지훈 담당자(010-1234-5678)"
+# → 작성자 정보 참고: [이름] 담당자([전화번호])   ← '정보'는 오탐하지 않고 '최지훈'만 잡는다
+```
+
+- Ollama가 없으면 `--llm`은 무엇을 설치·실행해야 하는지 알려주고 종료한다(조용히 실패하지 않음).
+- `--llm-model`로 다른 로컬 모델을 지정할 수 있다.
+- LLM판은 `default_detectors()`에 **넣지 않는다** — Ollama 없는 환경(CI·다른 팀원 PC)에서 깨지면 안 되므로 `llm_detectors()`/`--llm`으로 명시 선택할 때만 쓴다.
 
 ## 예정 (코어 v2)
 
-- detectors: `address.py`(도로명 주소), `name_llm.py`(로컬 LLM 문맥 판단 — 인명 vs 상호명)
 - anonymizers: `pseudonym.py`(가명처리), `hash.py`
