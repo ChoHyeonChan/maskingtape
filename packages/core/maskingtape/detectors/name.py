@@ -61,6 +61,14 @@ class NameDetector(Detector):
 
     kind = "name"
 
+    def __init__(self, min_confidence: float = 0.0) -> None:
+        """min_confidence 이상인 탐지만 돌려준다.
+
+        LLM판과 함께 안전망으로 쓸 때 0.75를 주면 앞뒤 문맥 단서가 **둘 다** 있는
+        확실한 것만 남아, 이 탐지기의 약점인 오탐(0.5짜리)을 섞지 않고 보강할 수 있다.
+        """
+        self.min_confidence = min_confidence
+
     def detect(self, text: str) -> list[Detection]:
         found: list[Detection] = []
         for m in _NAME_RE.finditer(text):
@@ -73,6 +81,8 @@ class NameDetector(Detector):
                 continue  # 문맥 단서가 하나도 없으면 일반 단어와 구분 못 하므로 버린다
 
             confidence = 0.75 if (has_prefix and has_suffix) else 0.5
+            if confidence < self.min_confidence:
+                continue
             found.append(
                 Detection(
                     kind=self.kind,
