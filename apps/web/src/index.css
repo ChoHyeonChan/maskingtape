@@ -61,6 +61,34 @@ body {
   resize: vertical;
 }
 
+.input-panel__presets {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.input-panel__presets-label {
+  font-size: 0.85em;
+  color: var(--text-secondary);
+}
+
+.input-panel__preset {
+  font: inherit;
+  font-size: 0.85em;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.input-panel__preset:hover {
+  background: var(--border);
+}
+
 .input-panel__actions {
   margin-top: 0.75rem;
 }
@@ -83,6 +111,65 @@ body {
 .input-panel__error {
   color: var(--kind-address);
   font-weight: 600;
+}
+
+.summary {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.summary--clean {
+  color: var(--text-secondary);
+}
+
+.summary__total {
+  font-weight: 700;
+}
+
+.summary__list {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.summary__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.9em;
+  color: var(--text-secondary);
+}
+
+.summary__dot {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.summary__dot--rrn {
+  background: var(--kind-rrn);
+}
+.summary__dot--phone {
+  background: var(--kind-phone);
+}
+.summary__dot--email {
+  background: var(--kind-email);
+}
+.summary__dot--address {
+  background: var(--kind-address);
+}
+.summary__dot--name {
+  background: var(--kind-name);
 }
 
 .highlighted-text {
@@ -116,6 +203,11 @@ body {
 }
 .highlight--name {
   background: var(--kind-name);
+}
+
+.highlight--uncertain {
+  /* 확신도 1.0 미만 — 점선 밑줄로 "애매함"을 표시한다. 배경색(종류)은 유지 */
+  border-bottom: 2px dashed rgba(255, 255, 255, 0.85);
 }
 
 .highlight__tag {

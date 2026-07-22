@@ -12,6 +12,9 @@ export interface ScanResponse {
   detections: Detection[];
 }
 
+/** 요약·범례에서 종류를 나열하는 고정 순서 (KIND_LABELS/KIND_COLORS의 삽입 순서에 의존하지 않도록 명시). */
+export const KIND_ORDER = ["rrn", "phone", "email", "address", "name"] as const;
+
 /** kind별 한국어 표시명 — core anonymizers/label.py의 DEFAULT_LABELS와 동일하게 맞춘다. */
 export const KIND_LABELS: Record<string, string> = {
   rrn: "주민등록번호",

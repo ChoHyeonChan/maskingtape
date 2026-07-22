@@ -43,13 +43,16 @@ src/
   types/detection.ts     # core Detection과 1:1 (API 계약 v1 스키마) + 한국어 라벨/색상
   api/scanClient.ts       # POST /scan 호출
   lib/segments.ts         # 원문+탐지결과 → 하이라이트용 조각으로 분해 (순수 함수, 테스트 용이)
+  lib/summary.ts          # 탐지결과 → 종류별 개수 집계 (순수 함수, 테스트 용이)
   components/
-    InputPanel.tsx         # 입력·하이라이트 뷰 — 텍스트 입력 + 탐지 버튼 (조현찬 담당)
-    HighlightedText.tsx     # 탐지 구간을 종류별 색상 + 라벨로 하이라이트
+    InputPanel.tsx         # 입력 — 텍스트 입력 + 예제 프리셋 버튼 + 탐지 버튼 (조현찬 담당)
+    DetectionSummary.tsx    # 탐지 요약 + 색상 범례 (종류별 건수, 0건이면 안심 메시지)
+    HighlightedText.tsx     # 탐지 구간을 종류별 색상 + 라벨로 하이라이트 (확신도 낮으면 점선)
   App.tsx                  # 화면 조립 — imsoo가 결과·배치 화면 붙일 때 이 파일에 라우팅/탭 추가
 ```
 
-- 하이라이트 색상은 5종 고정 팔레트(CVD 접근성 검증 완료, `src/index.css`의 `--kind-*` 변수) — 색만으로 구분하지 않도록 종류 라벨을 항상 텍스트로 같이 표시한다.
+- 하이라이트 색상은 5종 고정 팔레트(CVD 접근성 검증 완료, `src/index.css`의 `--kind-*` 변수) — 색만으로 구분하지 않도록 종류 라벨을 항상 텍스트로 같이 표시하고, 요약 바가 색상 범례를 겸한다.
+- 확신도(confidence) 1.0 미만 탐지(이름·주소 등 규칙만으론 애매한 것)는 점선 밑줄로 "불확실"을 표시한다.
 - 다크모드는 `prefers-color-scheme`로 자동 대응.
 
 ## 다음 (imsoo 담당 — 결과·배치 화면)
