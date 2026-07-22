@@ -22,7 +22,11 @@ export function HighlightedText({ text, detections }: Props) {
         ) : (
           <mark
             key={i}
-            className={`highlight highlight--${segment.detection.kind}`}
+            className={
+              `highlight highlight--${segment.detection.kind}` +
+              // 확신도 1.0 미만은 점선으로 "불확실" 표시 (이름·주소 등 규칙만으론 애매한 탐지)
+              (segment.detection.confidence < 1 ? " highlight--uncertain" : "")
+            }
             title={`${KIND_LABELS[segment.detection.kind] ?? segment.detection.kind} · 확신도 ${Math.round(
               segment.detection.confidence * 100,
             )}%`}

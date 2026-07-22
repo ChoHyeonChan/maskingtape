@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { DetectionSummary } from "./components/DetectionSummary";
 import { HighlightedText } from "./components/HighlightedText";
 import { InputPanel } from "./components/InputPanel";
 import type { Detection } from "./types/detection";
@@ -18,6 +19,7 @@ export function App() {
 
         <section aria-label="탐지 결과">
           <h2>탐지 결과</h2>
+          {scanned && <DetectionSummary detections={scanned.detections} />}
           <HighlightedText text={scanned?.text ?? ""} detections={scanned?.detections ?? []} />
         </section>
       </main>

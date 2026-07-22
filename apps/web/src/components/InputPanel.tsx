@@ -4,6 +4,18 @@ import type { Detection } from "../types/detection";
 
 const PLACEHOLDER = "예: 고객 홍길동님 010-1234-5678로 연락 부탁드립니다. 서울특별시 강남구 역삼동 123-4";
 
+// 데모용 합성 예제 — 모든 번호·주민번호는 체크섬만 맞춘 가짜다(§실격 규정: 진짜 개인정보 금지).
+const PRESETS: { label: string; text: string }[] = [
+  {
+    label: "상담 메모",
+    text: "고객 홍길동님께 010-1234-5678로 안내드렸고, 이메일 hong@example.com도 보냈습니다.",
+  },
+  {
+    label: "신청서",
+    text: "신청자 김영희, 주민등록번호 800101-1234560, 주소 서울특별시 강남구 역삼동 123-4",
+  },
+];
+
 interface Props {
   onResult: (text: string, detections: Detection[]) => void;
 }
@@ -29,6 +41,19 @@ export function InputPanel({ onResult }: Props) {
 
   return (
     <div className="input-panel">
+      <div className="input-panel__presets">
+        <span className="input-panel__presets-label">예제:</span>
+        {PRESETS.map((preset) => (
+          <button
+            key={preset.label}
+            type="button"
+            className="input-panel__preset"
+            onClick={() => setText(preset.text)}
+          >
+            {preset.label}
+          </button>
+        ))}
+      </div>
       <textarea
         value={text}
         onChange={(e) => setText(e.target.value)}
