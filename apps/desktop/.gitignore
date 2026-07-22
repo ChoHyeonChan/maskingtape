@@ -1,3 +1,6 @@
+# 앱 테스트 중 저장소 안에서 생긴 비식별화 결과물
+*_masked.*
+
 # Miscellaneous
 *.class
 *.log
