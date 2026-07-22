@@ -5,9 +5,11 @@ import '../models/file_task.dart';
 import '../services/anonymizer.dart';
 import '../services/batch_processor.dart';
 import '../services/cli_anonymizer.dart';
+import '../services/file_picker.dart';
 import '../services/shell.dart';
 import '../widgets/drop_zone.dart';
 import '../widgets/result_preview_dialog.dart';
+import '../widgets/status_pill.dart';
 
 /// 홈 화면 — 드롭된 파일 작업 목록 상태를 들고 배치 처리 흐름을 잇는다.
 class HomeScreen extends StatefulWidget {
@@ -15,6 +17,7 @@ class HomeScreen extends StatefulWidget {
     super.key,
     this.initialFiles = const [],
     this.anonymizer = const CliAnonymizer(),
+    this.pickFiles = pickTextFiles,
   });
 
   /// 위젯 테스트에서 목록 상태를 주입하기 위한 초기값.
@@ -22,6 +25,9 @@ class HomeScreen extends StatefulWidget {
 
   /// 비식별화 백엔드 — 기본은 core CLI, 테스트에선 가짜 구현 주입.
   final Anonymizer anonymizer;
+
+  /// 파일 선택 대화상자 — 기본은 OS 대화상자, 테스트에선 가짜 주입.
+  final Future<List<String>> Function() pickFiles;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -42,6 +48,13 @@ class _HomeScreenState extends State<HomeScreen> {
       .where((t) =>
           t.status == FileTaskStatus.done || t.status == FileTaskStatus.failed)
       .length;
+
+  Future<void> _browse() async {
+    final paths = await widget.pickFiles();
+    if (paths.isNotEmpty) {
+      _addFiles(paths);
+    }
+  }
 
   void _addFiles(List<String> paths) {
     setState(() {
@@ -76,7 +89,21 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('마스킹테이프 — 문서 일괄 비식별화'),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            const Text('마스킹테이프'),
+            const SizedBox(width: 12),
+            Text(
+              '문서 일괄 비식별화',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
+          ],
+        ),
         actions: [
           if (_tasks.isNotEmpty)
             Padding(
@@ -98,7 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
               flex: _tasks.isEmpty ? 1 : 0,
               child: SizedBox(
                 height: _tasks.isEmpty ? null : 160,
-                child: DropZone(onFilesDropped: _addFiles),
+                child: DropZone(onFilesDropped: _addFiles, onBrowse: _browse),
               ),
             ),
             if (_tasks.isNotEmpty) ...[
@@ -149,7 +176,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
               const SizedBox(height: 8),
-              Expanded(child: _FileList(tasks: _tasks)),
+              Expanded(
+                child: Material(
+                  color: Theme.of(context).colorScheme.surface,
+                  clipBehavior: Clip.antiAlias,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    side: BorderSide(
+                      color: Theme.of(context).colorScheme.outlineVariant,
+                      width: 1.5,
+                    ),
+                  ),
+                  child: _FileList(tasks: _tasks),
+                ),
+              ),
             ],
           ],
         ),
@@ -218,13 +258,18 @@ class _FileTile extends StatelessWidget {
                 builder: (_) => ResultPreviewDialog(task: task),
               )
           : null,
-      trailing: done
-          ? IconButton(
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          StatusPill(status: task.status),
+          if (done)
+            IconButton(
               icon: const Icon(Icons.folder_open),
               tooltip: '저장 폴더 열기',
               onPressed: () => revealInExplorer(task.outputPath!),
-            )
-          : null,
+            ),
+        ],
+      ),
     );
   }
 }

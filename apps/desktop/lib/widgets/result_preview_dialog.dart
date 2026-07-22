@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/detection.dart';
 import '../models/file_task.dart';
+import '../theme.dart';
 
 /// 완료된 파일의 원문(탐지 하이라이트)과 마스킹 결과를 나란히 보여주는 다이얼로그.
 class ResultPreviewDialog extends StatelessWidget {
@@ -79,7 +80,8 @@ class ResultPreviewDialog extends StatelessWidget {
     );
   }
 
-  /// 원문을 탐지 구간 기준으로 잘라, 탐지된 부분만 강조 스타일을 입힌다.
+  /// 원문을 탐지 구간 기준으로 잘라, 탐지된 부분에 페리윙클 하이라이트를 입힌다.
+  /// 밝은 배경 칩 + 진한 글자는 라이트/다크 어디서나 같은 색으로 읽힌다.
   List<TextSpan> _highlightedSpans(ColorScheme colors) {
     final text = task.originalText ?? '';
     final ordered = [...task.detections]..sort((a, b) => a.start - b.start);
@@ -92,9 +94,10 @@ class ResultPreviewDialog extends StatelessWidget {
       spans.add(
         TextSpan(
           text: text.substring(d.start, d.end),
-          style: TextStyle(
-            backgroundColor: colors.primaryContainer,
-            fontWeight: FontWeight.bold,
+          style: const TextStyle(
+            backgroundColor: AppTheme.runBg,
+            color: AppTheme.runFg,
+            fontWeight: FontWeight.w700,
           ),
         ),
       );

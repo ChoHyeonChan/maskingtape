@@ -41,6 +41,23 @@ void main() {
     expect(find.text(MaskStrategy.label.displayName), findsOneWidget);
   });
 
+  testWidgets('파일 찾아보기로 고른 파일이 목록에 추가된다', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: HomeScreen(
+          anonymizer: FakeAnonymizer(),
+          pickFiles: () async => [r'C:\docs\선택한파일.txt'],
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('또는 파일 찾아보기'));
+    await tester.pump();
+
+    expect(find.text('선택한파일.txt'), findsOneWidget);
+    expect(find.text('파일 1개'), findsOneWidget);
+  });
+
   testWidgets('목록 비우기를 누르면 드롭존만 남는다', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(

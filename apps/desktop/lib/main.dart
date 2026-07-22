@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'screens/home_screen.dart';
+import 'theme.dart';
 
 void main() {
   runApp(const MaskingtapeApp());
@@ -14,10 +15,9 @@ class MaskingtapeApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: '마스킹테이프',
-      theme: ThemeData(
-        colorSchemeSeed: const Color(0xFF5B6B9E),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
+      themeMode: ThemeMode.system,
       home: const HomeScreen(),
     );
   }

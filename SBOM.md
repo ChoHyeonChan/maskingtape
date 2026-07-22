@@ -20,5 +20,6 @@
 | 12 | jsdom | 29.1.1 | MIT | https://github.com/jsdom/jsdom | (개발 도구) 테스트용 가상 브라우저(DOM) 환경 |
 | 13 | @types/node, @types/react, @types/react-dom | 26.1.1 / 19.2.17 / 19.2.3 | MIT | https://github.com/DefinitelyTyped/DefinitelyTyped | (개발 도구) TypeScript 타입 선언 |
 | 14 | cp949_codec | ^1.0.2 | BSD-3-Clause | https://github.com/letyletylety/cp949_codec | 데스크톱 앱 — CP949(EUC-KR) 텍스트 파일 읽기 폴백 (순수 Dart) |
+| 15 | file_selector | ^1.1.0 | BSD-3-Clause | https://github.com/flutter/packages/tree/main/packages/file_selector/file_selector | 데스크톱 앱 — OS 파일 선택 대화상자 (Flutter 공식 플러그인) |
 
 ※ AI 모델(Ollama + Qwen 등 오픈웨이트)을 도입하는 시점에 모델·라이선스 행을 추가하고, 결과보고서 **붙임2(AI 모델 활용 명세서)**에도 반영한다.
