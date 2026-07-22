@@ -28,10 +28,20 @@ def scan_text(text: str) -> list[dict]:
 
 
 @mcp.tool()
-def anonymize_text(text: str, strategy: str = "mask") -> str:
+def anonymize_text(text: str, strategy: str = "mask", numbered: bool = False) -> str:
     """한국어 텍스트의 개인정보를 비식별화한다.
-    strategy="mask"는 *로 가리고, "label"은 [전화번호] 같은 라벨로 치환한다."""
-    return tools.anonymize_text(text, strategy)
+    strategy="mask"는 *로 가리고, "label"은 [전화번호] 같은 라벨로 치환한다.
+    numbered=True면 label에서 같은 값을 같은 번호로 유지한다([이름1] 등) —
+    LLM에 넘길 때 같은 사람·번호를 문맥상 일관되게 추적할 수 있다."""
+    return tools.anonymize_text(text, strategy, numbered)
+
+
+@mcp.tool()
+def anonymize_file(path: str, strategy: str = "mask", numbered: bool = False) -> dict:
+    """로컬 텍스트 파일(UTF-8)을 비식별화해 `<이름>_masked.<확장자>`로 저장한다.
+    파일을 외부로 보내기 전 통째로 가릴 때 쓴다. 입력/출력 경로와
+    탐지 종류별 건수 요약을 반환한다. strategy/numbered는 anonymize_text와 동일."""
+    return tools.anonymize_file(path, strategy, numbered)
 
 
 def main() -> None:
