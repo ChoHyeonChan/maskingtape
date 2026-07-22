@@ -104,7 +104,32 @@ def test_names_key_is_used_when_present(monkeypatch):
     assert [f.text for f in found] == ["김철수"]
 
 
-def test_non_list_names_raises(monkeypatch):
+def test_non_list_names_raises_without_leaking_the_response(monkeypatch):
+    # 응답 본문에는 추출된 이름(개인정보)이 들어있을 수 있다 — 오류 메시지에 새면 안 된다
     d = _detector_with_model_response(monkeypatch, '{"names": "김철수"}')
-    with pytest.raises(RuntimeError, match="이름 목록"):
+    with pytest.raises(RuntimeError, match="이름 목록") as exc_info:
         d.detect("고객 김철수님")
+    assert "김철수" not in str(exc_info.value)
+
+
+# --- 보안: 원문이 외부로 나가지 않도록 host를 로컬로 제한한다 ---
+
+
+@pytest.mark.parametrize("host", ["http://localhost:11434", "http://127.0.0.1:11434"])
+def test_allows_local_hosts(host):
+    assert LLMNameDetector(host=host).host == host
+
+
+@pytest.mark.parametrize(
+    "host",
+    ["http://evil.example.com:11434", "https://api.openai.com", "http://192.168.0.5:11434"],
+)
+def test_rejects_remote_hosts(host):
+    # 이 탐지기는 비식별화 *전* 원문을 보내므로 원격 주소를 허용하면 개인정보가 유출된다
+    with pytest.raises(ValueError, match="로컬 주소만"):
+        LLMNameDetector(host=host)
+
+
+def test_rejects_non_http_scheme():
+    with pytest.raises(ValueError, match="http/https"):
+        LLMNameDetector(host="file:///etc/passwd")

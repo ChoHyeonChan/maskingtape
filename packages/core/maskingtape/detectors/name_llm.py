@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import json
 import urllib.error
+import urllib.parse
 import urllib.request
 from collections.abc import Callable
 
@@ -30,6 +31,10 @@ from maskingtape.types import Detection
 DEFAULT_MODEL = "qwen2.5:7b"  # Apache-2.0 (Qwen2.5의 3B·72B만 비상업 제한이라 7B를 쓴다)
 DEFAULT_HOST = "http://localhost:11434"
 
+# 원문(개인정보)을 그대로 실어 보내는 요청이라 **로컬 주소만 허용한다**.
+# 원격 host를 허용하면 비식별화 전 텍스트가 외부로 나가고, 대회 규정(외부 AI API 호출 금지)도 어긋난다.
+_LOCAL_HOSTNAMES = frozenset({"localhost", "127.0.0.1", "::1"})
+
 # 지명·기관명·일반명사를 이름으로 뱉지 않도록 역할을 좁혀 지시한다.
 _SYSTEM_PROMPT = (
     "너는 한국어 텍스트에서 실제 '사람 이름(인명)'만 추출하는 도구다. "
@@ -38,8 +43,29 @@ _SYSTEM_PROMPT = (
 )
 
 
+def _require_local_host(host: str) -> str:
+    """로컬 주소가 아니면 거부한다 — 개인정보 원문이 외부로 나가는 걸 코드로 막는다.
+
+    docstring의 "외부 API를 부르지 않는다"는 약속을 주석이 아니라 실행되는 검사로 강제한다.
+    """
+    parsed = urllib.parse.urlparse(host)
+    if parsed.scheme not in ("http", "https"):
+        raise ValueError(f"host는 http/https URL이어야 합니다 (받은 값: {host!r})")
+    if parsed.hostname not in _LOCAL_HOSTNAMES:
+        raise ValueError(
+            f"로컬 주소만 허용합니다 (받은 host: {parsed.hostname!r}). "
+            "비식별화 전 원문이 외부로 전송되는 것을 막기 위한 제한입니다 — "
+            f"허용: {', '.join(sorted(_LOCAL_HOSTNAMES))}"
+        )
+    return host.rstrip("/")
+
+
 class LLMNameDetector(Detector):
-    """로컬 Ollama로 문맥을 읽어 사람 이름을 찾는 탐지기 (Ollama 필요)."""
+    """로컬 Ollama로 문맥을 읽어 사람 이름을 찾는 탐지기 (Ollama 필요).
+
+    보안: host는 **로컬 주소만** 허용한다. 이 탐지기는 비식별화 *전* 원문을 그대로
+    모델에 보내므로, 원격 주소를 허용하면 개인정보가 외부로 나간다.
+    """
 
     kind = "name"
 
@@ -52,7 +78,8 @@ class LLMNameDetector(Detector):
     ) -> None:
         """client를 주입하면 Ollama 없이도 동작한다 (테스트용 — 기본은 실제 호출)."""
         self.model = model
-        self.host = host.rstrip("/")
+        # 실제 호출을 하는 경우에만 host를 검증한다 (client 주입 시엔 네트워크를 쓰지 않음)
+        self.host = host.rstrip("/") if client is not None else _require_local_host(host)
         self.timeout = timeout
         self._client = client if client is not None else self._ask_ollama
 
@@ -98,8 +125,10 @@ class LLMNameDetector(Detector):
         # 이름이 하나도 없으면 모델이 {"names": []} 대신 {}만 주기도 한다(실측) — 빈 목록으로 본다
         names = parsed.get("names", []) if isinstance(parsed, dict) else None
         if not isinstance(names, list):
+            # 응답 본문에는 추출된 이름(개인정보)이 들어있을 수 있으므로 타입만 알린다.
             raise RuntimeError(
-                f"모델 {self.model}의 응답에 이름 목록(names)이 없습니다: {parsed!r}"
+                f"모델 {self.model}의 응답에 이름 목록(names)이 없습니다 "
+                f"(받은 형태: {type(parsed).__name__}). 응답 본문은 개인정보가 섞일 수 있어 표시하지 않습니다."
             )
         return names
 
