@@ -5,6 +5,7 @@
     type 문서.txt | maskingtape        (Windows) / cat 문서.txt | maskingtape
     maskingtape --scan "..."            # 마스킹 없이 탐지 리포트만(JSON)
     maskingtape --strategy label "..."  # [전화번호] 식 라벨 치환
+    maskingtape --llm "..."             # 이름을 로컬 LLM으로 판단 (Ollama 필요)
 """
 
 from __future__ import annotations
@@ -15,6 +16,7 @@ import sys
 from dataclasses import asdict
 
 from maskingtape.anonymizers import LabelAnonymizer, MaskAnonymizer
+from maskingtape.detectors import DEFAULT_MODEL, llm_detectors
 from maskingtape.pipeline import Pipeline
 
 
@@ -32,17 +34,33 @@ def main() -> int:
         default="mask",
         help="비식별화 전략: mask(*로 가림, 기본) 또는 label([전화번호] 식 치환)",
     )
+    parser.add_argument(
+        "--llm",
+        action="store_true",
+        help="이름을 규칙 대신 로컬 LLM으로 판단한다 (로컬 Ollama 실행 필요)",
+    )
+    parser.add_argument(
+        "--llm-model",
+        default=DEFAULT_MODEL,
+        help=f"--llm이 쓸 Ollama 모델 (기본: {DEFAULT_MODEL})",
+    )
     args = parser.parse_args()
 
     text = args.text if args.text is not None else sys.stdin.read()
     anonymizer = LabelAnonymizer() if args.strategy == "label" else MaskAnonymizer()
-    pipeline = Pipeline(anonymizer=anonymizer)
+    detectors = llm_detectors(model=args.llm_model) if args.llm else None
+    pipeline = Pipeline(detectors=detectors, anonymizer=anonymizer)
+
+    try:
+        detections = pipeline.scan(text)
+    except RuntimeError as exc:  # --llm인데 Ollama가 없는 등 — 무엇을 고쳐야 하는지 알린다
+        print(f"오류: {exc}", file=sys.stderr)
+        return 1
 
     if args.scan:
-        report = [asdict(d) for d in pipeline.scan(text)]
-        print(json.dumps(report, ensure_ascii=False, indent=2))
+        print(json.dumps([asdict(d) for d in detections], ensure_ascii=False, indent=2))
     else:
-        print(pipeline.anonymize(text).text)
+        print(anonymizer.apply(text, detections))
     return 0
 
 
