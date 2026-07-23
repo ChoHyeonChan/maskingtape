@@ -23,6 +23,8 @@
 | 15 | file_selector | ^1.1.0 | BSD-3-Clause | https://github.com/flutter/packages/tree/main/packages/file_selector/file_selector | 데스크톱 앱 — OS 파일 선택 대화상자 (Flutter 공식 플러그인) |
 | 16 | Ollama | 0.32.1 | MIT | https://github.com/ollama/ollama | 로컬 LLM 실행 런타임 — 코어 `--llm` 이름 탐지에 사용 (**선택 의존성**: 없어도 규칙 탐지는 동작) |
 | 17 | Qwen2.5-7B-Instruct (AI 모델) | qwen2.5:7b | Apache-2.0 | https://github.com/QwenLM/Qwen2.5 | 이름(인명) 문맥 판단용 오픈웨이트 모델 — **로컬 실행 전용, 외부 API 호출 없음** |
+| 18 | FastAPI | >=0.116,<1 | MIT | https://github.com/fastapi/fastapi | API 서버 프레임워크 — 웹·데스크톱 공용 REST 엔드포인트 제공 |
+| 19 | Uvicorn | >=0.35,<1 | BSD-3-Clause | https://github.com/encode/uvicorn | API 서버 실행용 ASGI 서버 |
 
 ※ **AI 모델 주의**: Qwen2.5는 **3B·72B만 비상업 제한(Qwen Research License)**이고 나머지(0.5B/1.5B/**7B**/14B/32B)가 Apache-2.0이다. OSI 인증 라이선스 요건 때문에 **7B를 쓴다 — 3B로 바꾸지 말 것.**
 ※ 위 16·17번은 결과보고서 **붙임2(AI 모델 활용 및 라이선스 기술 명세서)**에도 반영한다(유형1 '외부 모델 그대로' + 기반 모델명·라이선스 기재).

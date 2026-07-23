@@ -9,6 +9,44 @@
 1. 루트 [CLAUDE.md](../../CLAUDE.md) 필독
 2. 의존성(fastapi, uvicorn 등) 추가 시 [SBOM.md](../../SBOM.md)에 한 줄씩 추가 — 라이선스 확인 필수
 
+## 로컬 실행
+
+요구사항:
+
+- Python 3.10 이상
+
+```bash
+cd apps/api
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+python -m pip install -e ..\..\packages\core
+python -m pip install -e ".[dev]"
+```
+
+API 서버:
+
+```bash
+python -m uvicorn maskingtape_api.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+헬스체크:
+
+```bash
+curl http://127.0.0.1:8000/health
+```
+
+예상 응답:
+
+```json
+{ "status": "ok" }
+```
+
+테스트:
+
+```bash
+python -m pytest
+```
+
 ## API 계약 (v1 — 프론트·데스크톱은 이 스키마로 목업 개발 시작 가능)
 
 `POST /scan` — 탐지 리포트만
