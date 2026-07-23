@@ -68,11 +68,13 @@ claude mcp add maskingtape -- maskingtape-mcp      # Claude Code 등록
 | `apps/desktop/` | Flutter 데스크톱 앱 (드래그&드롭 배치 처리) | Flutter |
 | `bench/` | 합성 벤치마크 데이터 + F1 정확도 리포트 | 데이터 |
 
-## 팀원이 개발 시작하기 전에
+## 개발에 참여하기
 
-1. 루트의 **[CLAUDE.md](CLAUDE.md) 필독** — 대회 규정에서 나온 규칙이라 위반하면 팀 전체가 실격될 수 있다
-2. 자기 파트 폴더의 README 확인
-3. **코드 시작은 스켈레톤 머지 후 팀장 신호에 따라** — 의존성 추가 전 [SBOM.md](SBOM.md) 규칙 확인
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** — 협업 규칙 (이슈 → 브랜치 → PR → 머지). AI로 작업한다면 이 파일부터 읽히세요.
+- **[ROADMAP.md](ROADMAP.md)** — 개발 계획과 현재 정확도
+- **[CLAUDE.md](CLAUDE.md)** — 대회 규정에서 나온 필수 규칙 (위반 시 팀 전체 실격)
+- 진행 상황: [Issues](https://github.com/ChoHyeonChan/maskingtape/issues) · [Milestones](https://github.com/ChoHyeonChan/maskingtape/milestones)
+- 의존성을 추가할 땐 같은 PR에서 [SBOM.md](SBOM.md)를 갱신합니다.
 
 ## 라이선스
 
