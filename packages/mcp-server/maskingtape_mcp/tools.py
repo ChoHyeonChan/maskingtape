@@ -7,16 +7,14 @@ from __future__ import annotations
 
 from collections import Counter
 from dataclasses import asdict
-from pathlib import Path
 
 from maskingtape import Pipeline
 from maskingtape.anonymizers import LabelAnonymizer, MaskAnonymizer
 
+from maskingtape_mcp.safe_file import read_text_file, write_masked_copy
+
 # 탐지기는 상태가 없으므로 파이프라인을 재사용한다
 _scan_pipeline = Pipeline()
-
-# 파일 크기 상한 — MCP 도구가 실수로 거대 파일을 통째로 메모리에 올리는 걸 막는다
-_MAX_FILE_BYTES = 10 * 1024 * 1024  # 10MB
 
 
 def _build_pipeline(strategy: str, numbered: bool) -> Pipeline:
@@ -49,28 +47,12 @@ def anonymize_file(path: str, strategy: str = "mask", numbered: bool = False) ->
     AI 에이전트가 로컬 파일을 외부로 보내기 전 통째로 비식별화할 때 쓴다.
     반환: 입력/출력 경로, 탐지 총건수, 종류별 건수 요약.
 
-    strategy/numbered는 anonymize_text와 동일. 파일은 UTF-8로 읽고 쓴다
-    (다른 인코딩이면 명확한 오류를 낸다 — 조용히 깨진 결과를 저장하지 않는다).
+    파일 접근 제한(심볼릭 링크 거부·덮어쓰기 금지·크기 상한·UTF-8만)은
+    safe_file 모듈이 담당한다 — 에이전트가 조작돼도 파일이 파괴되지 않게 한다.
     """
-    src = Path(path)
-    if not src.is_file():
-        raise FileNotFoundError(f"파일을 찾을 수 없습니다: {path}")
-
-    size = src.stat().st_size
-    if size > _MAX_FILE_BYTES:
-        raise ValueError(f"파일이 너무 큽니다({size} bytes, 상한 {_MAX_FILE_BYTES} bytes)")
-
-    try:
-        text = src.read_text(encoding="utf-8")
-    except UnicodeDecodeError as exc:
-        raise ValueError(
-            f"UTF-8로 읽을 수 없는 파일입니다: {path} (텍스트 파일인지, 인코딩이 UTF-8인지 확인하세요)"
-        ) from exc
-
+    src, text = read_text_file(path)
     result = _build_pipeline(strategy, numbered).anonymize(text)
-
-    dst = src.with_name(f"{src.stem}_masked{src.suffix}")
-    dst.write_text(result.text, encoding="utf-8")
+    dst = write_masked_copy(src, result.text)
 
     by_kind = Counter(d.kind for d in result.detections)
     return {
