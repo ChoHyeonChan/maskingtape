@@ -27,7 +27,7 @@ class BatchProcessor {
   Future<void> processAll(
     List<FileTask> tasks,
     void Function() onUpdate, {
-    MaskStrategy strategy = MaskStrategy.mask,
+    AnonymizeOptions options = const AnonymizeOptions(),
     bool Function()? isCancelled,
   }) async {
     for (final task in tasks) {
@@ -41,7 +41,7 @@ class BatchProcessor {
       onUpdate();
       try {
         final text = await fileReader.read(task.path);
-        final result = await anonymizer.anonymize(text, strategy: strategy);
+        final result = await anonymizer.anonymize(text, options: options);
         final outputPath = maskedPathFor(task.path);
         await File(outputPath).writeAsString(result.maskedText);
         task

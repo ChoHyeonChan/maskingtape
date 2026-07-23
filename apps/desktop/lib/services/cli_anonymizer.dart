@@ -12,16 +12,27 @@ class CliAnonymizer implements Anonymizer {
   /// 실행할 CLI 명령 — PATH에서 찾는다.
   final String command;
 
+  /// CLI 인자 조립 — 탐지(`--scan`)와 마스킹 호출이 같은 조건을 쓰도록 한 곳에서 만든다.
+  /// 둘의 조건이 어긋나면 화면의 탐지 요약과 저장된 결과가 서로 다른 기준이 된다.
+  static List<String> argsFor(AnonymizeOptions options, {required bool scan}) =>
+      [
+        if (scan) '--scan' else ...['--strategy', options.strategy.wireName],
+        if (options.useLlm) '--llm',
+      ];
+
   @override
   Future<AnonymizeResult> anonymize(
     String text, {
-    MaskStrategy strategy = MaskStrategy.mask,
+    AnonymizeOptions options = const AnonymizeOptions(),
   }) async {
-    final scanOut = await _run(['--scan'], text);
+    // CLI는 탐지 JSON과 마스킹 텍스트를 따로 내보내므로 두 번 호출한다.
+    // (LLM 모드에서는 모델 호출도 두 번이라 그만큼 느리다 — core에 한 번에
+    //  둘 다 주는 출력 모드가 생기면 한 번으로 줄일 수 있다.)
+    final scanOut = await _run(argsFor(options, scan: true), text);
     final detections = (jsonDecode(scanOut) as List<dynamic>)
         .map((e) => Detection.fromJson(e as Map<String, dynamic>))
         .toList();
-    final masked = await _run(['--strategy', strategy.wireName], text);
+    final masked = await _run(argsFor(options, scan: false), text);
     return AnonymizeResult(
       // print()가 붙인 마지막 줄바꿈 하나만 떼어낸다.
       maskedText: masked.replaceFirst(RegExp(r'\r?\n$'), ''),
@@ -49,9 +60,19 @@ class CliAnonymizer implements Anonymizer {
     await process.stdin.close();
     final exitCode = await process.exitCode;
     if (exitCode != 0) {
-      final stderr = (await stderrFuture).trim();
-      throw AnonymizerException('CLI가 비정상 종료했습니다 (코드 $exitCode): $stderr');
+      throw AnonymizerException(_failureMessage(exitCode, await stderrFuture));
     }
     return stdoutFuture;
+  }
+
+  /// core가 `오류: ...`로 사용자용 안내(예: Ollama 미실행)를 주면 그대로 보여준다.
+  /// 앱이 임의 문구로 덮으면 무엇을 고쳐야 하는지가 사라진다.
+  static String _failureMessage(int exitCode, String stderr) {
+    final trimmed = stderr.trim();
+    const prefix = '오류: ';
+    if (trimmed.startsWith(prefix)) {
+      return trimmed.substring(prefix.length);
+    }
+    return 'CLI가 비정상 종료했습니다 (코드 $exitCode): $trimmed';
   }
 }
