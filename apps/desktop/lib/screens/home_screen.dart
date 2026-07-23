@@ -39,7 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
   bool _running = false;
   bool _cancelRequested = false;
-  MaskStrategy _strategy = MaskStrategy.mask;
+  AnonymizeOptions _options = const AnonymizeOptions();
 
   bool get _hasWaiting =>
       _tasks.any((t) => t.status == FileTaskStatus.waiting);
@@ -77,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
       () {
         if (mounted) setState(() {});
       },
-      strategy: _strategy,
+      options: _options,
       isCancelled: () => _cancelRequested,
     );
     if (mounted) {
@@ -130,37 +130,66 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             if (_tasks.isNotEmpty) ...[
               const SizedBox(height: 24),
-              Row(
+              // 창이 좁으면 파일 수와 조작부가 두 줄로 나뉜다.
+              Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                runSpacing: 12,
                 children: [
                   Text(
                     '파일 ${_tasks.length}개',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
-                  const Spacer(),
-                  SegmentedButton<MaskStrategy>(
-                    segments: [
-                      for (final s in MaskStrategy.values)
-                        ButtonSegment(value: s, label: Text(s.displayName)),
-                    ],
-                    selected: {_strategy},
-                    onSelectionChanged: _running
-                        ? null
-                        : (selection) =>
-                            setState(() => _strategy = selection.first),
-                  ),
-                  const SizedBox(width: 12),
-                  FilledButton.icon(
-                    onPressed: _running
-                        ? (_cancelRequested
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 8,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    alignment: WrapAlignment.end,
+                    children: [
+                      Tooltip(
+                        message: '이름을 규칙 대신 로컬 LLM으로 판단합니다.\n'
+                            '이 PC에서 Ollama가 실행 중이어야 합니다.',
+                        child: FilterChip(
+                          avatar:
+                              const Icon(Icons.psychology_outlined, size: 18),
+                          label: const Text('이름 정밀 탐지'),
+                          selected: _options.useLlm,
+                          onSelected: _running
+                              ? null
+                              : (on) => setState(
+                                    () =>
+                                        _options = _options.copyWith(useLlm: on),
+                                  ),
+                        ),
+                      ),
+                      SegmentedButton<MaskStrategy>(
+                        segments: [
+                          for (final s in MaskStrategy.values)
+                            ButtonSegment(value: s, label: Text(s.displayName)),
+                        ],
+                        selected: {_options.strategy},
+                        onSelectionChanged: _running
                             ? null
-                            : () => setState(() => _cancelRequested = true))
-                        : (_hasWaiting ? _start : null),
-                    icon: Icon(_running ? Icons.stop : Icons.play_arrow),
-                    label: Text(
-                      _running
-                          ? (_cancelRequested ? '취소 중…' : '취소')
-                          : '비식별화 시작',
-                    ),
+                            : (selection) => setState(
+                                  () => _options = _options.copyWith(
+                                    strategy: selection.first,
+                                  ),
+                                ),
+                      ),
+                      FilledButton.icon(
+                        onPressed: _running
+                            ? (_cancelRequested
+                                ? null
+                                : () => setState(() => _cancelRequested = true))
+                            : (_hasWaiting ? _start : null),
+                        icon: Icon(_running ? Icons.stop : Icons.play_arrow),
+                        label: Text(
+                          _running
+                              ? (_cancelRequested ? '취소 중…' : '취소')
+                              : '비식별화 시작',
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

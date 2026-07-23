@@ -15,6 +15,27 @@ enum MaskStrategy {
   final String displayName;
 }
 
+/// 비식별화 호출 옵션.
+/// 옵션이 늘어도 백엔드 구현들의 시그니처가 흔들리지 않도록 객체로 묶는다.
+class AnonymizeOptions {
+  const AnonymizeOptions({
+    this.strategy = MaskStrategy.mask,
+    this.useLlm = false,
+  });
+
+  final MaskStrategy strategy;
+
+  /// 이름을 규칙 대신 로컬 LLM으로 판단할지 (CLI `--llm`).
+  /// 켜려면 실행 PC에 Ollama가 떠 있어야 한다.
+  final bool useLlm;
+
+  AnonymizeOptions copyWith({MaskStrategy? strategy, bool? useLlm}) =>
+      AnonymizeOptions(
+        strategy: strategy ?? this.strategy,
+        useLlm: useLlm ?? this.useLlm,
+      );
+}
+
 /// 비식별화 호출 결과 — 마스킹된 텍스트와 탐지 목록.
 class AnonymizeResult {
   const AnonymizeResult({required this.maskedText, required this.detections});
@@ -28,11 +49,11 @@ class AnonymizeResult {
 abstract interface class Anonymizer {
   Future<AnonymizeResult> anonymize(
     String text, {
-    MaskStrategy strategy = MaskStrategy.mask,
+    AnonymizeOptions options = const AnonymizeOptions(),
   });
 }
 
-/// 백엔드 호출 실패 (CLI 없음, 비정상 종료 등).
+/// 백엔드 호출 실패 (CLI 없음, 비정상 종료, Ollama 미실행 등).
 class AnonymizerException implements Exception {
   const AnonymizerException(this.message);
 
