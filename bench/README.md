@@ -13,22 +13,27 @@
 
 ```
 generator/
-  entities.py    # 종류별 합성 값 생성 (name/phone/email/rrn/address)
-  documents.py   # 문장 템플릿에 값을 심어 문서 + 라벨(span) 생성
+  entities.py     # 종류별 합성 값 생성 (name/phone/email/rrn/address)
+  distractors.py  # 개인정보가 아닌 '헷갈리는' 값 생성 (오탐 측정용)
+  documents.py    # 문장 템플릿에 값을 심어 문서 + 라벨(span) 생성
 generate_dataset.py  # CLI — JSONL 데이터셋 생성
-evaluate.py          # CLI — core Pipeline.scan() 결과 vs 정답 → precision/recall/F1 리포트
+evaluate.py          # CLI — core Pipeline.scan() 결과 vs 정답 → precision/recall/F1 리포트 (종류별+난이도별)
+mask_quality.py       # 마스킹 결과물 자체의 개인정보 유출(완전/부분) 여부 검증 로직
+evaluate_masking.py   # CLI — 마스킹 결과에 개인정보가 실제로 남아있는지(유출률) 평가
+confidence_analysis.py  # CLI — confidence 임계값별 precision/recall/F1 변화 분석
 datasets/            # 생성된 평가셋 (정답 라벨 포함)
+reports/             # evaluate.py --report로 저장한 마크다운 리포트 (결과보고서 첨부용)
 tests/               # 생성기·평가 로직 단위 테스트
 ```
 
 ## 사용법
 
 ```bash
-# 1. 데이터셋 생성 (재현 가능하도록 seed 고정)
+# 1. 데이터셋 생성 (재현 가능하도록 seed 고정, 기본 25%는 오탐 측정용 무-개인정보 문서)
 python -m bench.generate_dataset --count 500 --seed 42 --out bench/datasets/synth_v1.jsonl
 
-# 2. core 탐지기 정확도 평가
-python -m bench.evaluate bench/datasets/synth_v1.jsonl
+# 2. core 탐지기 정확도 평가 (--report로 마크다운 리포트 파일도 저장)
+python -m bench.evaluate bench/datasets/synth_v1.jsonl --report bench/reports/report_v1.md
 ```
 
 현재 core의 `rrn`/`phone`/`email`/`address`는 precision/recall/F1 전부 1.0이다. `name`은 성씨 사전 +
@@ -36,15 +41,99 @@ python -m bench.evaluate bench/datasets/synth_v1.jsonl
 전혀 없으면 아예 탐지하지 않도록 설계해 오탐을 줄였지만, 진짜 문맥 이해는 로컬 LLM(Ollama+Qwen) 버전이
 나와야 해결된다(계획 중, `NameDetector` 교체 예정).
 
+## 오탐(False Positive) 측정
+
+기존에는 데이터셋 전체가 "개인정보가 있는 문서"뿐이라 재현율(recall)만 측정 가능했고,
+core가 개인정보 아닌 걸 잘못 잡아내는지(정밀도, precision)는 검증 불가능했다.
+
+`generator/distractors.py`가 주문번호·사업자등록번호·날짜·가격처럼 숫자가 섞여 있지만
+개인정보는 아닌 값과, 지역번호·생년월일이 실제로는 존재하지 않는 '전화번호/주민번호 모양'
+값을 만든다. `--negative-ratio`(기본 0.25)만큼의 문서는 정답 라벨이 0개인 채로 생성되고,
+core가 여기서 뭔가를 탐지하면 `evaluate.py`가 그대로 FP로 집계한다.
+
+## 문장·표기 다양성
+
+실제 문서는 같은 개인정보라도 표기 형식이 제각각이라, 생성기도 그 다양성을 반영한다:
+
+- **전화번호**: 하이픈(`010-1234-5678`)뿐 아니라 점(`.`)·공백·구분자 없음(`01012345678`)·
+  `+82` 국제표기까지 core가 허용하는 형식을 무작위로 섞는다
+- **주민번호**: 하이픈/공백/구분자 없음, 1900·2000년대 성별코드를 모두 커버
+- **주소**: 지번 주소(`강남구 역삼동 12-3`)와 도로명 주소(`테헤란로12길 3`, 아파트 동/호 포함)를 섞는다
+- **이름**: 성씨 30종 × 이름 음절 30종 조합, 통계청 다빈도 성씨 기준(특정 인물 아님)
+- **문장 맥락**: 고객센터/병원/학교/관공서/인사/배송/금융 등 10여 개 업무 시나리오, 한 문서에
+  같은 종류 개인정보가 두 번 등장하는 경우(담당자 교체, 자택/직장 번호 등)도 포함
+
+## 난이도(difficulty) 분류
+
+문서마다 표기 난이도를 태깅해서, 쉬운 표기와 어려운 표기에서 core의 정확도가 갈리는지
+따로 측정할 수 있게 했다.
+
+| 난이도 | 의미 | 예시 |
+|---|---|---|
+| `easy` | 하이픈 등 표준 구분자, 지번 주소 | `010-1234-5678`, `강남구 역삼동 12-3` |
+| `hard` | 구분자 없음/국제표기, 도로명+아파트 동호수 | `01012345678`, `+82 10 1234 5678`, `테헤란로12길 3 래미안아파트 101동 502호` |
+| `negative` | 개인정보 없음(오탐 측정용) | — |
+
+`evaluate.py`는 종류(kind)별 표와 난이도별 표를 둘 다 출력한다 — 예를 들어 rrn의 전체 recall은
+높은데 hard 난이도에서만 떨어진다면 "구분자 없는 표기를 놓친다"는 구체적 원인을 알 수 있다.
+
+## 마스킹 품질(유출) 검증
+
+`evaluate.py`는 "core가 개인정보 위치를 정확히 예측했는가"를 보는 내부 지표(precision/recall)다.
+하지만 이 프로젝트의 실제 산출물은 탐지 결과가 아니라 **마스킹된 텍스트**이므로, "사용자가
+받는 최종 결과물에 개인정보가 실제로 안 남았는가"도 별도로 검증할 필요가 있다.
+
+```bash
+python -m bench.evaluate_masking bench/datasets/synth_v1.jsonl
+```
+
+`Pipeline.anonymize()`로 얻은 마스킹 결과에서 정답 개인정보 구간의 각 글자 위치를 원문과
+하나씩 비교해 "얼마나 노출됐는지" 비율을 계산한다. `MaskAnonymizer`는 구간 길이를 보존하는
+계약이라(길이가 같으면) 같은 인덱스가 같은 글자를 가리키므로, 위치별 비교만으로 정확한
+노출 비율을 알 수 있다.
+
+- **완전 유출**(노출 비율 100%): 아예 탐지가 안 돼 원문이 통째로 남은 경우
+- **부분 유출**(노출 비율 0~100%): 탐지는 됐지만 마스킹 범위 경계가 정답과 어긋나 일부만
+  가려진 경우 — 탐지 자체는 됐으니 evaluate.py의 recall만 봐서는 놓치기 쉬운 결함이다.
+
+탐지를 놓쳤든 마스킹 경계가 어긋났든 사용자 입장에서 결과는 동일(개인정보 일부 노출)하므로
+원인을 구분하지 않고 하나의 지표로 합친다. 마스킹 후 텍스트 길이가 원본과 같은지(구조 보존)도
+함께 확인해, 길이가 달라지면(위치 비교가 무의미해지는 경우) 원문 전체 포함 여부로 보수적으로
+판정하고 core `MaskAnonymizer`의 회귀 버그 신호로 본다.
+
+500건 기준 실측 결과(이 브랜치 시점의 core 기준): 유출률 48.1%(875건 중 421건, 전부 완전유출) —
+전부 `name`/`address`(현재 core에 탐지기가 없는 종류)에서만 발생했고, `phone`/`email`/`rrn`은
+유출 0건. 부분 유출은 이 시점에는 0건이지만, 이는 name/address 탐지기가 아예 없어서 탐지 자체가
+안 일어나기 때문이다 — 탐지기가 생기고 나서(예: 경계가 어긋나는 탐지) 이 지표가 진가를 발휘한다.
+길이 보존율은 100%로 마스킹 로직 자체의 구조적 버그는 없음을 확인.
+
+## 신뢰도(confidence) 임계값 분석
+
+core의 각 `Detection`에는 `confidence`(0.0~1.0)가 붙어있지만 지금까지 어디에도 쓰이지 않았다.
+`confidence_analysis.py`는 이 값을 활용해 "임계값을 얼마로 잡아야 하는지" 튜닝 근거를 만든다.
+
+```bash
+python -m bench.confidence_analysis bench/datasets/synth_v1.jsonl
+```
+
+후보 임계값마다 그보다 confidence가 낮은 예측을 버린 뒤 다시 채점해서, 임계값을 올릴수록
+precision이 오르고 recall이 내려가는 트레이드오프를 표로 보여준다.
+
+500건 기준 실측 결과(이 브랜치 시점의 core 기준): precision은 0.0~1.0 전 구간에서 1.000으로
+동일하게 유지되는데, **임계값 0.95부터 recall이 0.519 → 0.465로 떨어진다** — 구분자 없는
+전화번호 표기(confidence 0.9)가 잘려나가기 때문이다. 즉 **정밀도 이득 없이 재현율만 손해**를
+보므로, 지금 core 기준으로는 confidence 임계값을 0.9 이상으로 올릴 이유가 없다는 근거가 된다.
+
 ## 데이터셋 포맷 (생성기·평가기가 공유하는 계약)
 
 JSONL — 한 줄에 문서 하나:
 
 ```json
-{"text": "고객 홍길동 010-1234-5678 문의", "labels": [{"kind": "name", "start": 3, "end": 6}, {"kind": "phone", "start": 7, "end": 20}]}
+{"text": "고객 홍길동 010-1234-5678 문의", "labels": [{"kind": "name", "start": 3, "end": 6}, {"kind": "phone", "start": 7, "end": 20}], "difficulty": "easy"}
 ```
 
 - `start`/`end`는 파이썬 슬라이스 규약 (`text[start:end]` == 개인정보 원문)
 - `kind`는 core의 `Detection.kind`와 동일한 문자열: `rrn`, `phone`, `email`, `name`, `address`
+- `difficulty`는 `easy`/`hard`/`negative` 중 하나 (없으면 evaluate.py가 `unknown`으로 취급 — 하위 호환)
 - 평가 기준: span 완전 일치(exact match)로 precision / recall / F1 산출
 - 포맷 변경은 팀장 승인 후 이 문서부터 갱신한다
