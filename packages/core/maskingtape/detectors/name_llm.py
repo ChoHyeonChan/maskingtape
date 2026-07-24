@@ -26,6 +26,7 @@ import urllib.request
 from collections.abc import Callable
 
 from maskingtape.detectors.base import Detector
+from maskingtape.detectors.name import has_name_candidate
 from maskingtape.types import Detection
 
 DEFAULT_MODEL = "qwen2.5:7b"  # Apache-2.0 (Qwen2.5의 3B·72B만 비상업 제한이라 7B를 쓴다)
@@ -77,6 +78,7 @@ class LLMNameDetector(Detector):
         client: Callable[[str], list[str]] | None = None,
     ) -> None:
         """client를 주입하면 Ollama 없이도 동작한다 (테스트용 — 기본은 실제 호출)."""
+        self.calls = 0  # 실제로 LLM을 부른 횟수 (하이브리드 필터 효과 측정용)
         self.model = model
         # 실제 호출을 하는 경우에만 host를 검증한다 (client 주입 시엔 네트워크를 쓰지 않음)
         self.host = host.rstrip("/") if client is not None else _require_local_host(host)
@@ -86,6 +88,11 @@ class LLMNameDetector(Detector):
     def detect(self, text: str) -> list[Detection]:
         if not text.strip():
             return []
+        # 하이브리드: 규칙으로 이름 후보를 먼저 훑어, 후보가 없는 텍스트는 LLM을 건너뛴다.
+        # 순수 숫자·코드처럼 이름이 있을 수 없는 입력에서 느린 LLM 호출을 아낀다.
+        if not has_name_candidate(text):
+            return []
+        self.calls += 1
         return self._to_detections(text, self._client(text))
 
     def _ask_ollama(self, text: str) -> list[str]:
