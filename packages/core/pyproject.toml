@@ -19,8 +19,8 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-# ruff 0.16에서 새 규칙(TRY004 등)이 stable로 승격돼 기존 코드 린트를 깬다.
-# CI와 로컬이 같은 규칙을 쓰도록 상한을 둔다 — 0.16 규칙 정리는 별도 이슈(#60).
+# ruff는 0.16에서 새 규칙(TRY004 등)이 stable로 승격돼 기존 코드까지 린트를 깬다.
+# CI와 로컬이 같은 규칙을 쓰도록 상한을 둔다 — 0.16 규칙 정리는 별도 이슈(#60)에서.
 dev = ["pytest>=8", "ruff>=0.4,<0.16"]
 
 [project.scripts]
