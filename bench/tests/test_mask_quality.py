@@ -35,16 +35,17 @@ def test_no_leak_when_pii_is_correctly_masked():
 def test_leak_detected_when_kind_has_no_detector_yet():
     """core에 탐지기가 없는 종류는 마스킹이 전혀 안 되므로 완전 유출로 잡혀야 한다.
 
-    실제 존재하는 kind(name 등)는 core에 탐지기가 추가되면 이 테스트가 core 발전 상황에
-    따라 깨지므로, core가 절대 만들어낼 리 없는 가짜 kind를 써서 core 구현 범위와 무관하게
-    "탐지기가 없는 종류는 유출로 잡힌다"는 계약 자체만 검증한다.
+    core는 gold label의 kind 문자열이 아니라 텍스트 내용만 보고 탐지하므로, kind 이름만
+    바꿔서는 "탐지기가 없다"는 상황을 흉내낼 수 없다 (core에 이름 탐지기가 생기면 어떤
+    kind로 라벨링하든 "김민준"은 실제로 탐지·마스킹된다). 그래서 detectors=[]인 파이프라인을
+    직접 만들어 core의 현재 탐지기 구성과 완전히 무관하게 "탐지기가 없는 경우" 자체를 재현한다.
     """
-    rows = [{"text": "김민준님 안녕하세요.", "labels": [{"kind": "no_detector_for_this_kind", "start": 0, "end": 3}]}]
-    result = evaluate_mask_quality(rows, Pipeline())
+    rows = [{"text": "김민준님 안녕하세요.", "labels": [{"kind": "name", "start": 0, "end": 3}]}]
+    result = evaluate_mask_quality(rows, Pipeline(detectors=[]))
     assert result.leak_count == 1
     assert result.full_leak_count == 1
     assert result.partial_leak_count == 0
-    assert result.leaks[0].kind == "no_detector_for_this_kind"
+    assert result.leaks[0].kind == "name"
     assert result.leaks[0].value == "김민준"
     assert result.leaks[0].exposed_ratio == 1.0
     assert not result.leaks[0].is_partial
@@ -77,9 +78,9 @@ def test_length_preserved_rate_full_when_all_lengths_match():
 def test_format_mask_quality_report_is_readable():
     rows = [
         {"text": "010-1234-5678로 연락주세요.", "labels": [{"kind": "phone", "start": 0, "end": 13}]},
-        {"text": "김민준님 안녕하세요.", "labels": [{"kind": "no_detector_for_this_kind", "start": 0, "end": 3}]},
+        {"text": "김민준님 안녕하세요.", "labels": [{"kind": "name", "start": 0, "end": 3}]},
     ]
-    result = evaluate_mask_quality(rows, Pipeline())
+    result = evaluate_mask_quality(rows, Pipeline(detectors=[]))
     report = format_mask_quality_report(result)
     assert "유출" in report
-    assert "no_detector_for_this_kind" in report
+    assert "name" in report
