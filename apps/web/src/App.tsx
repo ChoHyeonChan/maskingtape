@@ -1,28 +1,44 @@
 import { useState } from "react";
-import { DetectionSummary } from "./components/DetectionSummary";
-import { HighlightedText } from "./components/HighlightedText";
-import { InputPanel } from "./components/InputPanel";
+import { CoachMark } from "./components/help/CoachMark";
+import { InputPanel } from "./components/input/InputPanel";
+import { AppHeader } from "./components/layout/AppHeader";
+import { ResultsPanel } from "./components/results/ResultsPanel";
 import type { Detection } from "./types/detection";
 
 export function App() {
   const [scanned, setScanned] = useState<{ text: string; detections: Detection[] } | null>(null);
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const [scanRun, setScanRun] = useState(0);
+  const [showCoachMark, setShowCoachMark] = useState(true);
+
+  function handleResult(text: string, detections: Detection[]) {
+    setScanned({ text, detections });
+    setActiveFilter(null);
+    setScanRun((run) => run + 1);
+  }
+
+  function dismissCoachMark() {
+    setShowCoachMark(false);
+  }
 
   return (
-    <div className="app">
-      <header className="app__header">
-        <h1>maskingtape 웹 플레이그라운드</h1>
-        <p>텍스트를 붙여넣으면 한국어 개인정보를 탐지해 종류별로 하이라이트합니다.</p>
-      </header>
+    <div className="app-shell">
+      <AppHeader onHelpClick={() => setShowCoachMark(true)} />
 
-      <main className="app__main">
-        <InputPanel onResult={(text, detections) => setScanned({ text, detections })} />
-
-        <section aria-label="탐지 결과">
-          <h2>탐지 결과</h2>
-          {scanned && <DetectionSummary detections={scanned.detections} />}
-          <HighlightedText text={scanned?.text ?? ""} detections={scanned?.detections ?? []} />
+      <main className="app-grid">
+        <section className="panel panel--main">
+          <InputPanel onResult={handleResult} />
         </section>
+
+        <ResultsPanel
+          scanned={scanned}
+          activeFilter={activeFilter}
+          scanRun={scanRun}
+          onFilterSelect={setActiveFilter}
+        />
       </main>
+
+      {showCoachMark && <CoachMark onDismiss={dismissCoachMark} />}
     </div>
   );
 }

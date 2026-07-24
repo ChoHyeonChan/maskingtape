@@ -14,7 +14,78 @@ npm test         # vitest
 npm run build    # 타입 체크 + 프로덕션 빌드
 ```
 
+### 빠른 실행 순서
+
+```bash
+cd c:/MT/maskingtape
+python -m venv .venv
+.\.venv\Scripts\activate
+pip install -e packages/core
+cd apps/web
+npm install
+npm run dev
+```
+
+> Windows PowerShell 기준으로 작성했습니다. 개발 서버가 열리면 브라우저에서 http://localhost:5173 으로 접속하면 됩니다.
+
 Node.js 24 기준 (Vite 8 / React 19 / TypeScript 7). 새 패키지 추가 전 라이선스 확인 후 [SBOM.md](../../SBOM.md)에 기록.
+
+## 초기 버전 대비 변경 사항
+
+초기 웹 데모에 비해 다음 항목들을 추가·개선했습니다.
+
+### UI/UX 개선
+- 입력 영역이 텍스트 길이에 따라 자동으로 확장되며, 길어질 경우 내부 스크롤바가 생기도록 조정했습니다.
+- 텍스트가 입력되면 개인정보 탐지 버튼이 “반짝이듯” 활성화되는 느낌으로 바뀌었습니다.
+- 예제 버튼을 더 명확한 CTA처럼 보이도록 파란 계열 스타일로 정리했습니다.
+- 탐지 결과의 개인정보 구간을 “형광펜/테이프 붙이기” 느낌의 애니메이션으로 강조했습니다.
+- 결과 요약의 전화번호·이메일·주소·이름 항목을 클릭하면 해당 유형만 집중해서 볼 수 있는 필터링 기능을 추가했습니다.
+- 상단 헤더와 안내 패널을 추가해 데모의 흐름이 더 자연스럽게 보이도록 구성했습니다.
+
+### 구조 개선
+- 기존의 단일 화면 구성에서 입력, 결과, 레이아웃, 도움말 컴포넌트로 역할별로 분리했습니다.
+- 도움말 코치마크를 추가해 첫 사용자에게 기능 흐름을 안내할 수 있게 했습니다.
+- 결과 화면을 별도 패널로 분리해 입력과 결과를 한눈에 비교하기 쉽게 만들었습니다.
+
+### 테스트/검증
+- 결과 요약과 하이라이트 렌더링에 대한 테스트를 보강했습니다.
+- 빌드 검증은 `npm run build`로 확인할 수 있습니다.
+
+## GitHub에 올리는 방법
+
+### 1) 브랜치 생성
+```bash
+cd c:/MT/maskingtape
+git checkout -b feat/web-ui-refresh
+```
+
+### 2) 변경 내용 확인
+```bash
+git status
+git diff -- apps/web README.md
+```
+
+### 3) 스테이지 및 커밋
+```bash
+git add apps/web README.md
+git commit -m "feat(web): refresh demo UI and interaction"
+```
+
+### 4) GitHub 원격 저장소에 푸시
+```bash
+git push -u origin feat/web-ui-refresh
+```
+
+처음 올리는 경우 원격 저장소가 아직 없다면 아래처럼 추가합니다.
+```bash
+git remote add origin https://github.com/<your-username>/maskingtape.git
+```
+
+### 5) GitHub에서 PR 생성
+1. GitHub 저장소 페이지에서 Compare & pull request를 클릭합니다.
+2. 제목과 설명을 작성합니다.
+3. 예: "웹 데모 UI/UX 개선 및 결과 필터링 기능 추가"
+4. Create pull request를 누르면 리뷰 요청이 완료됩니다.
 
 ## ⚠️ 임시 프록시 — apps/api 완성되면 교체
 
