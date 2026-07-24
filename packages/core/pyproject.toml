@@ -19,7 +19,9 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "ruff>=0.4"]
+# ruff 0.16의 새 규칙(TRY004 등)이 기존 코드 린트를 깨 CI가 실패한다. CI·로컬을 같은
+# 규칙으로 맞추는 임시 상한 — main 공통 문제이며 근본 정리는 별도 이슈(#60)에서.
+dev = ["pytest>=8", "ruff>=0.4,<0.16"]
 
 [project.scripts]
 maskingtape = "maskingtape.cli:main"
