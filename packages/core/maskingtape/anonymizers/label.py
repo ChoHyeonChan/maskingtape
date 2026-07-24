@@ -21,6 +21,7 @@ DEFAULT_LABELS = {
     "email": "이메일",
     "name": "이름",
     "address": "주소",
+    "card": "카드번호",
 }
 
 
