@@ -78,13 +78,13 @@ claude mcp add maskingtape -- maskingtape-mcp      # Claude Code 등록
 
 ```mermaid
 flowchart TD
-    core["packages/core — 탐지·마스킹 엔진<br/>주민번호·전화·이메일·주소·이름"]
-    core --> cli["CLI<br/>maskingtape 명령"]
-    core --> mcp["packages/mcp-server<br/>AI 에이전트용 MCP 서버"]
-    core --> api["apps/api<br/>REST API (FastAPI)"]
-    api --> web["apps/web<br/>웹 플레이그라운드"]
-    api --> desktop["apps/desktop<br/>데스크톱 앱"]
-    bench["bench<br/>합성 벤치마크"] -. 정확도 측정 .-> core
+    core["packages/core: 탐지·마스킹 엔진"]
+    core --> cli["CLI: maskingtape 명령"]
+    core --> mcp["packages/mcp-server: MCP 서버"]
+    core --> api["apps/api: REST API"]
+    api --> web["apps/web: 웹 플레이그라운드"]
+    api --> desktop["apps/desktop: 데스크톱 앱"]
+    bench["bench: 합성 벤치마크"] -.->|정확도 측정| core
 ```
 
 > 웹·데스크톱은 통합 전까지 `apps/api` 대신 core CLI를 직접 호출한다(같은 엔진).
