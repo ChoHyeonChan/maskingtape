@@ -36,7 +36,7 @@ ruff check packages/core    # 린트
 
 ## 현재 구현
 
-- detectors: `rrn.py`(주민등록번호), `phone.py`(휴대폰·유선·070), `email.py`, `address.py`(행정구역 주소), `name.py`(이름 — 규칙판), `name_llm.py`(이름 — 로컬 LLM 문맥 판단, **선택**)
+- detectors: `rrn.py`(주민등록번호), `phone.py`(휴대폰·유선·070), `email.py`, `address.py`(행정구역 주소), `creditcard.py`(신용카드번호 — Luhn 체크섬 검증), `name.py`(이름 — 규칙판), `name_llm.py`(이름 — 로컬 LLM 문맥 판단, **선택**)
 - anonymizers: `mask.py`(*로 가림), `label.py`([전화번호] 식 라벨 치환, 번호 매기기 지원)
 
 ## 이름 탐지: 규칙판 vs LLM판

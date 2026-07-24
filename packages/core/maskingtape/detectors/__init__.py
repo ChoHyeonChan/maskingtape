@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from maskingtape.detectors.address import AddressDetector
 from maskingtape.detectors.base import Detector
+from maskingtape.detectors.creditcard import CreditCardDetector
 from maskingtape.detectors.email import EmailDetector
 from maskingtape.detectors.name import NameDetector
 from maskingtape.detectors.name_llm import DEFAULT_MODEL, LLMNameDetector
@@ -12,6 +13,7 @@ from maskingtape.detectors.rrn import RRNDetector
 
 __all__ = [
     "AddressDetector",
+    "CreditCardDetector",
     "Detector",
     "EmailDetector",
     "LLMNameDetector",
@@ -25,7 +27,14 @@ __all__ = [
 
 def default_detectors() -> list[Detector]:
     """기본 탐지기 세트 (규칙 전용 — LLM 불필요)."""
-    return [RRNDetector(), PhoneDetector(), EmailDetector(), AddressDetector(), NameDetector()]
+    return [
+        RRNDetector(),
+        PhoneDetector(),
+        EmailDetector(),
+        AddressDetector(),
+        CreditCardDetector(),
+        NameDetector(),
+    ]
 
 
 def llm_detectors(model: str = DEFAULT_MODEL) -> list[Detector]:
@@ -44,6 +53,7 @@ def llm_detectors(model: str = DEFAULT_MODEL) -> list[Detector]:
         PhoneDetector(),
         EmailDetector(),
         AddressDetector(),
+        CreditCardDetector(),
         LLMNameDetector(model=model),
         NameDetector(min_confidence=0.75),
     ]
