@@ -18,9 +18,11 @@ import re
 from maskingtape.detectors.base import Detector
 from maskingtape.types import Detection
 
-# 숫자로 시작·끝나고, 사이에 숫자/구분자(-·공백)가 이어지는 뭉치. 앞뒤에 숫자가 더 붙으면 제외.
-# 전체 길이 상한(19자리 + 구분자 최대 18개)을 둬 ReDoS를 막는다.
-_CARD_RE = re.compile(r"(?<!\d)\d(?:[ -]?\d){12,18}(?!\d)")
+# 숫자로 시작·끝나고, 사이에 숫자/구분자가 이어지는 뭉치. 앞뒤에 숫자가 더 붙으면 제외.
+# 구분자는 공백·점·하이픈을 자리당 최대 3개까지 허용한다("4111.1111", "4111 - 1111" 등 실제 표기).
+# 개행(\n)은 넣지 않는다 — 서로 다른 줄의 무관한 숫자를 카드로 잘못 잇는 오탐을 막는다.
+# 반복과 구분자 개수 모두 상한을 둬 ReDoS를 막는다(자릿수 검증은 아래에서 다시 한다).
+_CARD_RE = re.compile(r"(?<!\d)\d(?:[ .-]{0,3}\d){12,18}(?!\d)")
 
 
 def _luhn_ok(digits: str) -> bool:
