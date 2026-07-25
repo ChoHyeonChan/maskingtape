@@ -17,6 +17,8 @@ AI 에이전트가 한국어 데이터를 다루기 전에 거치는 **프라이
 
 ## 빠른 시작 (개발 중 — API는 바뀔 수 있음)
 
+**필요한 것: Python 3.10 이상.** 그게 전부다 — 코어 엔진과 CLI는 표준 라이브러리만 쓰고, 외부 서비스도 부르지 않는다. (로컬 LLM 기능은 선택 사항이며 설치 방법은 [packages/core](packages/core)에 있다. 웹 데모는 Node.js 20+, 데스크톱 앱은 Flutter가 추가로 필요하며 각 폴더 README를 참고한다.)
+
 ```bash
 git clone https://github.com/ChoHyeonChan/maskingtape.git
 cd maskingtape
@@ -48,18 +50,33 @@ print(result.detections)   # [Detection(kind='rrn', start=5, end=19, ...)]
 
 ## 정확도 (공개 벤치마크)
 
-저작권·개인정보 걱정 없는 **자체 합성 데이터셋**으로 정확도를 측정한다 — 공개 벤치마크는 이 프로젝트의 핵심 차별화 포인트다. `python -m bench.evaluate bench/datasets/synth_v1.jsonl` 실측:
+저작권·개인정보 걱정 없는 **자체 합성 데이터셋**으로 정확도를 측정한다 — 공개 벤치마크는 이 프로젝트의 핵심 차별화 포인트다. 아무나 다음 한 줄로 재현할 수 있다:
+
+```bash
+python -m bench.evaluate bench/datasets/synth_v1.jsonl
+```
+
+합성 데이터셋(500건)도 시드로 고정돼 있어 바이트 단위로 똑같이 재생성된다 — `python -m bench.generate_dataset --count 500 --seed 42 --out bench/datasets/synth_v1.jsonl`
+
+**측정 기준: `main` 브랜치 `79bb4aa` · 규칙 전용 모드(LLM 미사용)**
 
 | 종류 | precision | recall | F1 |
 |---|---|---|---|
 | 주민등록번호 | 1.000 | 1.000 | 1.000 |
 | 전화번호 | 1.000 | 1.000 | 1.000 |
 | 이메일 | 1.000 | 1.000 | 1.000 |
-| 주소 | 1.000 | 1.000 | 1.000 |
-| 이름 (규칙) | 0.890 | 0.847 | 0.868 |
-| **전체** | **0.961** | **0.943** | **0.952** |
+| 이름 (규칙 전용) | 0.894 | 0.553 | 0.683 |
+| 주소 | 0.371 | 0.371 | 0.371 |
+| **전체** | **0.907** | **0.770** | **0.833** |
 
-번호·주소는 형태 규칙으로 완벽히 잡힌다. 이름은 문맥 판단이 필요해 규칙만으로는 한계가 있어(F1 0.868), **로컬 LLM 하이브리드**로 보완한다 — "이용 안내"의 '이용' 같은 오탐을 문맥으로 걸러낸다. (측정: `bench/` 참고)
+번호(주민등록번호·전화번호·이메일)는 형태와 체크섬으로 완전히 잡힌다. 나머지 둘은 **고치는 중이고, 무엇이 왜 부족한지 숫자로 공개한다**:
+
+- **주소** — 도로명 주소(`월드컵로237길 49 ...`)와 4단계 행정구역(`수원시 영통구 ...`)에서 구간이 잘려 span 불일치가 난다. 수정 진행 중: [#66](https://github.com/ChoHyeonChan/maskingtape/issues/66)
+- **이름 (recall 0.553)** — 한국어 이름은 형태만으로 구분되지 않아 규칙만으로는 문맥 없는 이름을 놓친다. 이것이 **로컬 LLM 하이브리드**(`--llm`)가 필요한 이유이고, 그 효과는 [#46](https://github.com/ChoHyeonChan/maskingtape/issues/46)에서 같은 데이터셋으로 비교 측정한다.
+
+> 신용카드번호 탐지기는 이 표에 없다 — 합성 데이터셋 생성기가 아직 카드번호를 만들지 않아 측정 대상이 아니다([#73](https://github.com/ChoHyeonChan/maskingtape/issues/73)). 탐지기 자체는 Luhn 체크섬 검증과 단위 테스트로 검증돼 있다.
+
+마스킹 결과에 개인정보가 실제로 남는지도 따로 측정한다 — `python -m bench.evaluate_masking bench/datasets/synth_v1.jsonl`. 상세는 [bench/](bench/) 참고.
 
 ## MCP 서버로 쓰기 (AI 에이전트용)
 

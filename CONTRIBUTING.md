@@ -44,6 +44,13 @@ git switch <생성된-브랜치-이름>
 - 커밋 메시지는 **무엇을 왜** 바꿨는지 한국어로 적습니다.
 - 커밋은 **본인 GitHub 계정**으로 (개인 기여도가 심사에 반영됩니다).
 - 새 라이브러리를 추가했다면 **같은 PR에서 [SBOM.md](SBOM.md)에 한 줄 추가**합니다. (라이선스 검증이 2차 심사에 별도로 있습니다)
+- **탐지기나 벤치 데이터셋을 바꿨다면 정확도 수치를 같은 PR에서 다시 측정**합니다. 문서에 적힌 숫자가 실제와 다르면 그 자체로 감점입니다 — 심사에서 직접 돌려봅니다.
+
+  ```bash
+  python -m bench.evaluate bench/datasets/synth_v1.jsonl --report bench/reports/report_v1.md
+  ```
+
+  갱신 대상: `bench/reports/report_v1.md`(위 명령이 덮어씁니다) + 루트 [README.md](README.md)의 「정확도」 표와 **측정 기준 커밋 해시**.
 
 ### 4단계. PR을 올린다 — 본문에 `Closes #이슈번호`
 

@@ -18,8 +18,8 @@
 ```bash
 cd apps/api
 python -m venv .venv
-.venv\Scripts\Activate.ps1
-python -m pip install -e ..\..\packages\core
+# Windows: .venv\Scripts\activate / macOS·Linux: source .venv/bin/activate
+python -m pip install -e ../../packages/core
 python -m pip install -e ".[dev]"
 ```
 
