@@ -3,5 +3,6 @@
 from maskingtape.anonymizers.base import Anonymizer
 from maskingtape.anonymizers.label import LabelAnonymizer
 from maskingtape.anonymizers.mask import MaskAnonymizer
+from maskingtape.anonymizers.pseudonym import PseudonymAnonymizer
 
-__all__ = ["Anonymizer", "LabelAnonymizer", "MaskAnonymizer"]
+__all__ = ["Anonymizer", "LabelAnonymizer", "MaskAnonymizer", "PseudonymAnonymizer"]
