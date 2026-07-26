@@ -118,6 +118,7 @@ flowchart TD
 ## 개발에 참여하기
 
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** — 협업 규칙 (이슈 → 브랜치 → PR → 머지). AI로 작업한다면 이 파일부터 읽히세요.
+- **[STRUCTURE.md](STRUCTURE.md)** — 폴더 구조 규칙 (기능·도메인별로 나눕니다)
 - **[ROADMAP.md](ROADMAP.md)** — 개발 계획과 현재 정확도
 - **[CLAUDE.md](CLAUDE.md)** — 대회 규정에서 나온 필수 규칙 (위반 시 팀 전체 실격)
 - 진행 상황: [Issues](https://github.com/ChoHyeonChan/maskingtape/issues) · [Milestones](https://github.com/ChoHyeonChan/maskingtape/milestones)
