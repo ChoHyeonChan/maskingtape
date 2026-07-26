@@ -7,8 +7,9 @@ from collections.abc import Sequence
 
 from maskingtape.anonymizers import LabelAnonymizer, PseudonymAnonymizer
 from maskingtape.anonymizers.base import Anonymizer
-from maskingtape.detectors.creditcard import CreditCardDetector, _luhn_ok
-from maskingtape.detectors.rrn import RRNDetector, _checksum_ok
+from maskingtape.detectors import CreditCardDetector, RRNDetector
+from maskingtape.detectors.financial.creditcard import _luhn_ok
+from maskingtape.detectors.identity.rrn import _checksum_ok
 from maskingtape.pipeline import Pipeline
 from maskingtape.types import Detection
 
