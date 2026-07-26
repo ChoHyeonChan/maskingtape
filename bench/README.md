@@ -21,6 +21,7 @@ evaluate.py          # CLI — core Pipeline.scan() 결과 vs 정답 → precisi
 mask_quality.py       # 마스킹 결과물 자체의 개인정보 유출(완전/부분) 여부 검증 로직
 evaluate_masking.py   # CLI — 마스킹 결과에 개인정보가 실제로 남아있는지(유출률) 평가
 confidence_analysis.py  # CLI — confidence 임계값별 precision/recall/F1 변화 분석
+compare_name_detectors.py  # CLI — 이름 탐지 규칙판 vs 하이브리드(LLM) 정확도 비교
 datasets/            # 생성된 평가셋 (정답 라벨 포함)
 reports/             # evaluate.py --report로 저장한 마크다운 리포트 (결과보고서 첨부용)
 tests/               # 생성기·평가 로직 단위 테스트
@@ -36,10 +37,28 @@ python -m bench.generate_dataset --count 500 --seed 42 --out bench/datasets/synt
 python -m bench.evaluate bench/datasets/synth_v1.jsonl --report bench/reports/report_v1.md
 ```
 
-현재 core의 `rrn`/`phone`/`email`/`address`는 precision/recall/F1 전부 1.0이다. `name`은 성씨 사전 +
-문맥 단서(역할어·존칭) 기반 **임시 규칙판**이라 precision 0.89 / recall 0.85 정도로 낮다 — 문맥 단서가
-전혀 없으면 아예 탐지하지 않도록 설계해 오탐을 줄였지만, 진짜 문맥 이해는 로컬 LLM(Ollama+Qwen) 버전이
-나와야 해결된다(계획 중, `NameDetector` 교체 예정).
+500건 기준 최신 실측(main 병합 후 재측정, seed=42):
+
+| kind | precision | recall | f1 | 비고 |
+|---|---|---|---|---|
+| rrn / phone / email | 1.000 | 1.000 | 1.000 | — |
+| name | 0.894 | 0.553 | 0.683 | 규칙판. 문맥 단서 없으면 탐지 안 함(오탐↓재현율↓) — 아래 "이름 탐지 방식 비교" 절 참고 |
+| address | 0.371 | 0.371 | 0.371 | ⚠️ core `AddressDetector` 정규식 한계 — 아래 참고 (이슈로 등록 예정) |
+| card | — | — | — | 정답 라벨 없는데 FP 2건 — 원인 확인됨(체크섬 우연 일치), 아래 참고 |
+
+**address 원인(확인됨)**: `AddressDetector`의 정규식이 "시/도 + 구·군·시(1개) + 동·로·길(1개) + 번지"까지만
+지원한다. 그런데 (1) 실제 행정구역엔 "성남시 분당구 정자동"처럼 3단계(시+구+동)인 곳이 있고,
+(2) 도로명 주소는 "테헤란로12길"처럼 로/길 뒤에 숫자가 바로 붙는 게 정상 표기인데 정규식의
+동/로 그룹이 한글(`[가-힣]`)만 허용해 숫자가 나오는 순간 매칭이 끊긴다. 두 경우 다 주소의
+뒷부분이 통째로 탐지되지 않고 그대로 노출되며, 정답 span과 정확히 안 맞아 완전 일치 채점에서
+FP+FN이 동시에 잡힌다(그래서 44/44로 정확히 같다). bench 데이터가 실제 한국 주소 표기를
+정직하게 반영한 결과이며, core 쪽 수정이 필요해 별도 이슈로 등록한다(내 파트 밖이라 직접 수정하지 않음).
+
+**card 원인(확인됨)**: 오탐 2건 모두 `distractors.py`의 `gen_invalid_rrn_like`(존재하지 않는
+날짜로 만든 "주민번호 아닌 것") 값이었다. `RRNDetector`는 이를 정확히 걸러내지만(의도대로),
+그 13자리 숫자가 우연히 신용카드 체크섬(Luhn)도 통과해 `CreditCardDetector`가 대신 반응했다.
+Luhn은 무작위 숫자열 중 약 10%가 우연히 통과하는 수준이라 버그라기보다 체크섬 기반 탐지의
+통계적 한계에 가깝다 — 오탐 테스트 인프라가 탐지기 간의 예상 못한 상호작용을 정확히 잡아낸 사례.
 
 ## 오탐(False Positive) 측정
 
@@ -123,6 +142,24 @@ precision이 오르고 recall이 내려가는 트레이드오프를 표로 보�
 동일하게 유지되는데, **임계값 0.95부터 recall이 0.519 → 0.465로 떨어진다** — 구분자 없는
 전화번호 표기(confidence 0.9)가 잘려나가기 때문이다. 즉 **정밀도 이득 없이 재현율만 손해**를
 보므로, 지금 core 기준으로는 confidence 임계값을 0.9 이상으로 올릴 이유가 없다는 근거가 된다.
+
+## 이름 탐지 방식 비교 — 규칙판 vs 하이브리드(LLM)
+
+core에는 이름을 찾는 방법이 두 가지 있다 — `default_detectors()`(성씨 사전 + 문맥 단서 기반
+규칙판만)와 `llm_detectors()`(로컬 LLM이 문맥으로 판단하고, 확신도 0.75 이상 규칙판을 안전망으로
+겹치는 하이브리드). `compare_name_detectors.py`가 같은 데이터셋으로 두 방식을 나란히 비교한다.
+
+```bash
+python -m bench.compare_name_detectors bench/datasets/synth_v1.jsonl
+```
+
+로컬 Ollama가 안 떠 있으면 하이브리드 쪽은 "LLM 사용 불가"로 표시되고 규칙판 결과만 나온다 —
+CI 등 Ollama 없는 환경에서도 도구 자체는 안 죽는다.
+
+500건 기준 실측 결과(규칙판, main 병합 후 실제 core 기준): precision 0.894 / recall 0.553 /
+F1 0.683. 앞뒤에 역할어·존칭 같은 문맥 단서가 없으면 아예 탐지하지 않도록 설계돼 오탐은
+적지만(precision 高), 그만큼 단서 없는 이름은 다 놓친다(recall 低) — 하이브리드(LLM)판과
+비교하면 이 트레이드오프가 실제로 개선되는지 확인할 수 있다. 로컬 Ollama 환경에서 재측정 필요.
 
 ## 데이터셋 포맷 (생성기·평가기가 공유하는 계약)
 
