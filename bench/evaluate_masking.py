@@ -4,8 +4,11 @@ evaluate.py가 "탐지 위치가 정답과 일치하는가"를 보는 내부 지
 이 스크립트는 "실제로 사용자가 받는 최종 텍스트에 개인정보가 남아있는가"를
 검사하는 산출물 지표다 — 탐지를 놓쳤든 마스킹 로직에 버그가 있든 결과(유출)는 동일하게 잡힌다.
 
+core에는 비식별화 전략이 세 가지 있다 — mask(***, 기본), label([전화번호]), pseudonym(그럴듯한
+가짜 값). --strategy로 골라서 셋 다 같은 방식으로 유출 여부를 검증할 수 있다.
+
 사용법:
-    python -m bench.evaluate_masking bench/datasets/synth_v1.jsonl
+    python -m bench.evaluate_masking bench/datasets/synth_v1.jsonl --strategy pseudonym
 """
 
 from __future__ import annotations
@@ -13,19 +16,28 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
+from maskingtape.anonymizers import LabelAnonymizer, MaskAnonymizer, PseudonymAnonymizer
 from maskingtape.pipeline import Pipeline
 
 from bench.evaluate import load_dataset
 from bench.mask_quality import evaluate_mask_quality, format_mask_quality_report
 
+_STRATEGIES = {
+    "mask": MaskAnonymizer,
+    "label": LabelAnonymizer,
+    "pseudonym": PseudonymAnonymizer,
+}
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="합성 데이터셋으로 마스킹 결과물의 개인정보 유출 여부 평가")
     parser.add_argument("dataset", type=Path, help="평가할 JSONL 데이터셋 경로")
+    parser.add_argument("--strategy", choices=sorted(_STRATEGIES), default="mask", help="검증할 비식별화 전략")
     args = parser.parse_args()
 
     rows = load_dataset(args.dataset)
-    result = evaluate_mask_quality(rows, Pipeline())
+    pipeline = Pipeline(anonymizer=_STRATEGIES[args.strategy]())
+    result = evaluate_mask_quality(rows, pipeline, strategy=args.strategy)
     print(format_mask_quality_report(result))
 
 

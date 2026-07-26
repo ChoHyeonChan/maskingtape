@@ -2,12 +2,17 @@
 
 from __future__ import annotations
 
+import random
 from collections.abc import Sequence
 
+from maskingtape.anonymizers import LabelAnonymizer, PseudonymAnonymizer
 from maskingtape.anonymizers.base import Anonymizer
+from maskingtape.detectors.creditcard import CreditCardDetector, _luhn_ok
+from maskingtape.detectors.rrn import RRNDetector, _checksum_ok
 from maskingtape.pipeline import Pipeline
 from maskingtape.types import Detection
 
+from bench.generator.entities import generate_entity
 from bench.mask_quality import evaluate_mask_quality, format_mask_quality_report
 
 
@@ -84,3 +89,54 @@ def test_format_mask_quality_report_is_readable():
     report = format_mask_quality_report(result)
     assert "유출" in report
     assert "name" in report
+
+
+def test_no_leak_with_label_strategy():
+    """label 전략([전화번호] 치환)도 mask와 똑같이 원문이 안 남아야 한다."""
+    rows = [{"text": "010-1234-5678로 연락주세요.", "labels": [{"kind": "phone", "start": 0, "end": 13}]}]
+    result = evaluate_mask_quality(rows, Pipeline(anonymizer=LabelAnonymizer()), strategy="label")
+    assert result.leak_count == 0
+    assert result.length_mismatch_count == 1  # "[전화번호]"는 원문과 길이가 다름 — 정상
+
+
+def test_no_leak_with_pseudonym_strategy():
+    """pseudonym 전략(그럴듯한 가짜 값 치환)도 원문이 안 남아야 한다."""
+    rows = [{"text": "010-1234-5678로 연락주세요.", "labels": [{"kind": "phone", "start": 0, "end": 13}]}]
+    result = evaluate_mask_quality(rows, Pipeline(anonymizer=PseudonymAnonymizer(seed=1)), strategy="pseudonym")
+    assert result.leak_count == 0
+
+
+def test_format_mask_quality_report_shows_strategy_and_adjusts_length_note():
+    rows = [{"text": "010-1234-5678로 연락주세요.", "labels": [{"kind": "phone", "start": 0, "end": 13}]}]
+    result = evaluate_mask_quality(rows, Pipeline(anonymizer=LabelAnonymizer()), strategy="label")
+    report = format_mask_quality_report(result)
+    assert "label" in report
+    assert "버그 의심" not in report  # label은 길이가 달라지는 게 정상이므로 버그 신호로 오해하면 안 됨
+
+
+def test_pseudonym_generated_rrn_never_passes_real_checksum():
+    """pseudonym.py의 보안 설계 — 가짜 주민번호가 실제 체크섬을 통과하면 안 된다(회귀 방지)."""
+    rng = random.Random(20)
+    detector = RRNDetector()
+    for seed in range(30):
+        entity = generate_entity("rrn", rng, difficulty="easy")
+        detections = detector.detect(entity.text)
+        assert len(detections) == 1
+        fake_text = PseudonymAnonymizer(seed=seed).apply(entity.text, detections)
+        digits = "".join(c for c in fake_text if c.isdigit())
+        assert len(digits) == 13
+        assert not _checksum_ok(digits), f"가짜 주민번호가 진짜 체크섬을 통과함: {fake_text!r}"
+
+
+def test_pseudonym_generated_card_never_passes_real_luhn():
+    """pseudonym.py의 보안 설계 — 가짜 카드번호가 실제 Luhn 체크섬을 통과하면 안 된다(회귀 방지)."""
+    rng = random.Random(21)
+    detector = CreditCardDetector()
+    for seed in range(30):
+        entity = generate_entity("card", rng, difficulty="easy")
+        detections = detector.detect(entity.text)
+        assert len(detections) == 1
+        fake_text = PseudonymAnonymizer(seed=seed).apply(entity.text, detections)
+        digits = "".join(c for c in fake_text if c.isdigit())
+        assert len(digits) == 16
+        assert not _luhn_ok(digits), f"가짜 카드번호가 진짜 Luhn을 통과함: {fake_text!r}"
