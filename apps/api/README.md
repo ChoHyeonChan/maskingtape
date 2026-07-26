@@ -49,6 +49,12 @@ python -m pytest
 
 ## API 계약 (v1 — 프론트·데스크톱은 이 스키마로 목업 개발 시작 가능)
 
+공통 제약:
+
+- 요청 `text`는 1자 이상, 100,000자 이하
+- 서버는 입력 원문을 저장하지 않는다
+- 에러 응답은 `{ "code": "...", "message": "...", "details": { ... } }` 형식을 따른다
+
 `POST /scan` — 탐지 리포트만
 
 ```json
@@ -72,7 +78,7 @@ python -m pytest
 { "text": "주민번호 ************** 문의주세요", "detections": [ /* 위와 동일 */ ] }
 ```
 
-- `kind` 값: `rrn`, `phone`, `email`, `name`, `address` (core에 전부 구현됨)
+- `kind` 값: `rrn`, `phone`, `email`, `name`, `address`, `card` (core에 전부 구현됨)
 - `start`/`end`는 파이썬 슬라이스 규약 (`text[start:end]` == 탐지된 원문)
 - 계약 변경은 팀장 승인 후 이 문서부터 갱신한다
 

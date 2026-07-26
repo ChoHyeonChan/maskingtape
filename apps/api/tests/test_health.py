@@ -3,7 +3,7 @@ from maskingtape_api.routers.health import health
 
 
 def test_health_returns_ok() -> None:
-    assert health() == {"status": "ok"}
+    assert health().model_dump() == {"status": "ok"}
 
 
 def test_health_route_is_registered() -> None:
