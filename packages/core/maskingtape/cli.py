@@ -15,9 +15,21 @@ import json
 import sys
 from dataclasses import asdict
 
-from maskingtape.anonymizers import LabelAnonymizer, MaskAnonymizer
+from maskingtape.anonymizers import (
+    Anonymizer,
+    LabelAnonymizer,
+    MaskAnonymizer,
+    PseudonymAnonymizer,
+)
 from maskingtape.detectors import DEFAULT_MODEL, llm_detectors
 from maskingtape.pipeline import Pipeline
+
+# 비식별화 전략 이름 → 클래스. 새 전략을 만들면 여기에 한 줄 추가한다.
+_STRATEGIES: dict[str, type[Anonymizer]] = {
+    "mask": MaskAnonymizer,
+    "label": LabelAnonymizer,
+    "pseudonym": PseudonymAnonymizer,
+}
 
 
 def _use_utf8_output() -> None:
@@ -56,9 +68,10 @@ def main() -> int:
     )
     parser.add_argument(
         "--strategy",
-        choices=["mask", "label"],
+        choices=list(_STRATEGIES),
         default="mask",
-        help="비식별화 전략: mask(*로 가림, 기본) 또는 label([전화번호] 식 치환)",
+        help="비식별화 전략: mask(*로 가림, 기본) / label([전화번호] 식 치환) / "
+        "pseudonym(그럴듯한 가짜 값으로 치환 — 문맥 유지)",
     )
     parser.add_argument(
         "--llm",
@@ -85,7 +98,7 @@ def main() -> int:
             )
             return 2
 
-    anonymizer = LabelAnonymizer() if args.strategy == "label" else MaskAnonymizer()
+    anonymizer = _STRATEGIES[args.strategy]()
     detectors = llm_detectors(model=args.llm_model) if args.llm else None
     pipeline = Pipeline(detectors=detectors, anonymizer=anonymizer)
 
