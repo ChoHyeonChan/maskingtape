@@ -4,7 +4,7 @@
 Luhn 체크섬만 만족하는 가짜다.
 """
 
-from maskingtape.detectors.creditcard import CreditCardDetector
+from maskingtape.detectors import CreditCardDetector
 
 
 def detect(text: str):

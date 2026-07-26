@@ -11,10 +11,18 @@ maskingtape/
   types.py        # Detection 공용 타입 — 탐지기와 마스킹기가 이걸로 대화한다
   pipeline.py     # 탐지기 + 마스킹 전략 조립 (조립만, 로직 없음)
   cli.py          # 명령줄 도구
-  detectors/      # 탐지기 1종 = 파일 1개 — rrn.py가 참고 구현
+  detectors/      # 탐지기 1종 = 파일 1개 — 개인정보보호법 분류에 따라 도메인 폴더로 묶는다
+    base.py       #   공통 부모 (Detector) — 도메인 아님
+    identity/     #   고유식별정보 — rrn.py (주민등록번호)
+    contact/      #   연락처 — phone.py, email.py
+    financial/    #   금융정보 — creditcard.py
+    personal/     #   인적·신상 — name.py, name_llm.py, address.py
   anonymizers/    # 마스킹 전략 1종 = 파일 1개 — mask.py가 참고 구현
 tests/            # 합성 데이터로만 테스트 (진짜 개인정보 금지)
 ```
+
+폴더 트리만 봐도 어떤 개인정보를 다루는지 읽힌다. `detectors/__init__.py`가 각 도메인의
+탐지기를 re-export하므로, 바깥에서는 위치와 무관하게 `from maskingtape.detectors import RRNDetector`로 쓴다.
 
 ## 개발
 
@@ -29,9 +37,9 @@ ruff check packages/core    # 린트
 
 ## 새 탐지기 추가하는 법
 
-1. `maskingtape/detectors/`에 파일 하나 추가 (예: `phone.py`) — `rrn.py` 패턴을 따른다
+1. 해당 개인정보 도메인 폴더에 파일 하나 추가 (예: 여권번호면 `detectors/identity/passport.py`) — `identity/rrn.py` 패턴을 따른다. 새 도메인이면 폴더를 만들고 `__init__.py`를 둔다
 2. `Detector` 상속, `kind` 지정, `detect()` 구현
-3. `detectors/__init__.py`의 `default_detectors()`에 등록
+3. `detectors/__init__.py`에서 import·re-export하고 `default_detectors()`에 등록
 4. `tests/`에 합성 데이터 테스트 추가
 
 ## 현재 구현

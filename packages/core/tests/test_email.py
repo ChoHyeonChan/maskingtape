@@ -2,7 +2,7 @@
 
 import time
 
-from maskingtape.detectors.email import EmailDetector
+from maskingtape.detectors import EmailDetector
 
 
 def test_detects_email_in_korean_sentence():

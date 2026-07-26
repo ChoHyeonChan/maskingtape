@@ -28,8 +28,8 @@ from collections.abc import Sequence
 
 from maskingtape.anonymizers.base import Anonymizer
 from maskingtape.anonymizers.label import DEFAULT_LABELS
-from maskingtape.detectors.creditcard import _luhn_ok
-from maskingtape.detectors.rrn import _checksum_ok
+from maskingtape.detectors.financial.creditcard import _luhn_ok
+from maskingtape.detectors.identity.rrn import _checksum_ok
 from maskingtape.types import Detection
 
 # 가짜 이름 재료 — 흔한 성/이름 음절 조합으로 그럴듯하게 만든다(전부 합성).

@@ -8,9 +8,9 @@ from __future__ import annotations
 
 import random
 
-from maskingtape.detectors.creditcard import CreditCardDetector
-from maskingtape.detectors.phone import PhoneDetector
-from maskingtape.detectors.rrn import RRNDetector
+from maskingtape.detectors import CreditCardDetector
+from maskingtape.detectors import PhoneDetector
+from maskingtape.detectors import RRNDetector
 from bench.generator.distractors import gen_invalid_phone_like, gen_invalid_rrn_like, generate_distractor
 from bench.generator.documents import generate_document, generate_negative_document, negative_templates, templates
 from bench.generator.entities import ALL_KINDS, generate_entity

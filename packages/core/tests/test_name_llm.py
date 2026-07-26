@@ -8,8 +8,8 @@ import json
 
 import pytest
 
-from maskingtape.detectors import name_llm
-from maskingtape.detectors.name_llm import LLMNameDetector
+from maskingtape.detectors import LLMNameDetector
+from maskingtape.detectors.personal import name_llm
 
 
 def detector(names: list[str]) -> LLMNameDetector:

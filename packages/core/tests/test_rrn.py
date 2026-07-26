@@ -1,6 +1,6 @@
 """RRN 탐지기 테스트. 모든 번호는 합성(가짜)이다 — 진짜 개인정보 커밋 금지."""
 
-from maskingtape.detectors.rrn import RRNDetector
+from maskingtape.detectors import RRNDetector
 
 # 체크섬까지 유효하게 계산해 만든 합성 번호 (실존 인물과 무관)
 VALID_RRN = "800101-1234560"

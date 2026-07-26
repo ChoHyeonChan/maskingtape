@@ -1,6 +1,6 @@
 """주소 탐지기 테스트 — 모든 주소는 합성(가짜)이다."""
 
-from maskingtape.detectors.address import AddressDetector
+from maskingtape.detectors import AddressDetector
 
 
 def detect(text: str):
