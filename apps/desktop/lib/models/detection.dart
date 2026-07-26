@@ -32,9 +32,15 @@ class Detection {
     'email': '이메일',
     'name': '이름',
     'address': '주소',
+    'card': '카드번호',
   };
 
-  String get kindLabel => _kindLabels[kind] ?? kind;
+  /// 코어가 라벨 맵에 없는 새 kind를 내보내면(예: 새 탐지기 추가) 한국어 대신
+  /// `kind(?)`로 표시한다 — 사용자에게 원시 영어가 그대로 새는 대신,
+  /// 개발 중 "라벨을 추가해야 한다"를 눈에 띄게 알린다.
+  bool get hasLabel => _kindLabels.containsKey(kind);
+
+  String get kindLabel => _kindLabels[kind] ?? '$kind(?)';
 
   /// "주민번호 1 · 전화번호 2" 식 종류별 개수 요약. 빈 목록이면 "탐지 없음".
   static String summarize(List<Detection> detections) {
