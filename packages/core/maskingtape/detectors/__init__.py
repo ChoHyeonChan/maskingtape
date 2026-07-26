@@ -1,15 +1,24 @@
-"""탐지기 모음. 새 탐지기를 만들면 default_detectors()에 등록한다."""
+"""탐지기 모음. 새 탐지기를 만들면 default_detectors()에 등록한다.
+
+탐지기 파일은 다루는 개인정보 종류(개인정보보호법 분류)에 따라 도메인 폴더로 묶는다:
+  identity/  고유식별정보 (주민등록번호 등)
+  contact/   연락처 (전화·이메일)
+  financial/ 금융정보 (카드 등)
+  personal/  인적·신상 (이름·주소)
+이 __init__이 각 도메인의 탐지기를 re-export하므로 바깥에서는 위치와 무관하게
+`from maskingtape.detectors import RRNDetector`로 그대로 쓴다.
+"""
 
 from __future__ import annotations
 
-from maskingtape.detectors.address import AddressDetector
 from maskingtape.detectors.base import Detector
-from maskingtape.detectors.creditcard import CreditCardDetector
-from maskingtape.detectors.email import EmailDetector
-from maskingtape.detectors.name import NameDetector
-from maskingtape.detectors.name_llm import DEFAULT_MODEL, LLMNameDetector
-from maskingtape.detectors.phone import PhoneDetector
-from maskingtape.detectors.rrn import RRNDetector
+from maskingtape.detectors.contact.email import EmailDetector
+from maskingtape.detectors.contact.phone import PhoneDetector
+from maskingtape.detectors.financial.creditcard import CreditCardDetector
+from maskingtape.detectors.identity.rrn import RRNDetector
+from maskingtape.detectors.personal.address import AddressDetector
+from maskingtape.detectors.personal.name import NameDetector
+from maskingtape.detectors.personal.name_llm import DEFAULT_MODEL, LLMNameDetector
 
 __all__ = [
     "AddressDetector",

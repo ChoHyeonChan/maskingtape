@@ -4,8 +4,8 @@
 """
 
 from maskingtape.anonymizers.pseudonym import PseudonymAnonymizer
-from maskingtape.detectors.creditcard import _luhn_ok
-from maskingtape.detectors.rrn import _checksum_ok
+from maskingtape.detectors.financial.creditcard import _luhn_ok
+from maskingtape.detectors.identity.rrn import _checksum_ok
 from maskingtape.types import Detection
 
 

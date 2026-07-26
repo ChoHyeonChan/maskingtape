@@ -1,6 +1,6 @@
 """이름 탐지기 테스트 — 모든 이름은 합성(가짜)이다."""
 
-from maskingtape.detectors.name import NameDetector
+from maskingtape.detectors import NameDetector
 
 
 def detect(text: str):

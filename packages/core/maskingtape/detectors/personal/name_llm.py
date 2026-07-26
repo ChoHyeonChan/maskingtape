@@ -26,7 +26,7 @@ import urllib.request
 from collections.abc import Callable
 
 from maskingtape.detectors.base import Detector
-from maskingtape.detectors.name import has_name_candidate
+from maskingtape.detectors.personal.name import has_name_candidate
 from maskingtape.types import Detection
 
 DEFAULT_MODEL = "qwen2.5:7b"  # Apache-2.0 (Qwen2.5의 3B·72B만 비상업 제한이라 7B를 쓴다)
