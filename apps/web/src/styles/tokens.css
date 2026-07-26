@@ -1,0 +1,33 @@
+:root {
+  color-scheme: light;
+  --surface: #f4f7fb;
+  --surface-strong: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --border: rgba(15, 23, 42, 0.12);
+  --shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+
+  --kind-rrn: #2563eb;
+  --kind-phone: #16a34a;
+  --kind-email: #db2777;
+  --kind-address: #7c3aed;
+  --kind-name: #0f766e;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --surface: #07111f;
+    --surface-strong: #111c2e;
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --border: rgba(255, 255, 255, 0.12);
+    --shadow: 0 20px 45px rgba(2, 8, 23, 0.35);
+
+    --kind-rrn: #60a5fa;
+    --kind-phone: #4ade80;
+    --kind-email: #f472b6;
+    --kind-address: #a78bfa;
+    --kind-name: #2dd4bf;
+  }
+}
