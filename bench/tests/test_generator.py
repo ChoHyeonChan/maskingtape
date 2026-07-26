@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import random
 
+from maskingtape.detectors.creditcard import CreditCardDetector
 from maskingtape.detectors.phone import PhoneDetector
 from maskingtape.detectors.rrn import RRNDetector
 from bench.generator.distractors import gen_invalid_phone_like, gen_invalid_rrn_like, generate_distractor
@@ -158,3 +159,41 @@ def test_generate_document_tags_difficulty_as_easy_or_hard():
     for _ in range(30):
         doc = generate_document(rng)
         assert doc.difficulty in ("easy", "hard")
+
+
+def test_generated_card_passes_core_detector_across_formats():
+    """Visa/Mastercard/Amex 계열, 하이픈/점/공백/구분자없음 어떤 조합이든 core가 정확히 한 건으로 잡아야 한다."""
+    rng = random.Random(16)
+    detector = CreditCardDetector()
+    for _ in range(100):
+        entity = generate_entity("card", rng)
+        found = detector.detect(entity.text)
+        assert len(found) == 1, f"탐지 실패: {entity.text!r}"
+        assert found[0].text == entity.text
+
+
+def test_card_generator_covers_16_and_15_digit_networks():
+    """Visa/Mastercard(16자리)와 Amex(15자리) 둘 다 나오는지 확인한다."""
+    rng = random.Random(17)
+    samples = [generate_entity("card", rng).text for _ in range(200)]
+    digit_lengths = {sum(c.isdigit() for c in s) for s in samples}
+    assert 16 in digit_lengths
+    assert 15 in digit_lengths
+
+
+def test_card_easy_difficulty_uses_hyphen_and_hard_uses_bare_digits():
+    rng = random.Random(18)
+    for _ in range(30):
+        easy = generate_entity("card", rng, difficulty="easy").text
+        hard = generate_entity("card", rng, difficulty="hard").text
+        assert "-" in easy
+        assert hard.isdigit()
+
+
+def test_distractors_are_never_detected_as_card():
+    """#69 회귀 방지 — RRN 모양 등 distractor가 카드 체크섬에 우연히 걸려 오탐되지 않아야 한다."""
+    rng = random.Random(19)
+    detector = CreditCardDetector()
+    for _ in range(300):
+        text = generate_distractor(rng)
+        assert detector.detect(text) == [], f"distractor가 card로 오탐됨: {text!r}"

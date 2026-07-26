@@ -13,7 +13,7 @@
 
 ```
 generator/
-  entities.py     # 종류별 합성 값 생성 (name/phone/email/rrn/address)
+  entities.py     # 종류별 합성 값 생성 (name/phone/email/rrn/address/card)
   distractors.py  # 개인정보가 아닌 '헷갈리는' 값 생성 (오탐 측정용)
   documents.py    # 문장 템플릿에 값을 심어 문서 + 라벨(span) 생성
 generate_dataset.py  # CLI — JSONL 데이터셋 생성
@@ -41,24 +41,15 @@ python -m bench.evaluate bench/datasets/synth_v1.jsonl --report bench/reports/re
 
 | kind | precision | recall | f1 | 비고 |
 |---|---|---|---|---|
-| rrn / phone / email | 1.000 | 1.000 | 1.000 | — |
-| name | 0.894 | 0.553 | 0.683 | 규칙판. 문맥 단서 없으면 탐지 안 함(오탐↓재현율↓) — 아래 "이름 탐지 방식 비교" 절 참고 |
-| address | 0.371 | 0.371 | 0.371 | ⚠️ core `AddressDetector` 정규식 한계 — 아래 참고 (이슈로 등록 예정) |
-| card | — | — | — | 정답 라벨 없는데 FP 2건 — 원인 확인됨(체크섬 우연 일치), 아래 참고 |
+| rrn / phone / email / address / card | 1.000 | 1.000 | 1.000 | — |
+| name | 0.879 | 0.529 | 0.661 | 규칙판. 문맥 단서 없으면 탐지 안 함(오탐↓재현율↓) — 아래 "이름 탐지 방식 비교" 절 참고 |
 
-**address 원인(확인됨)**: `AddressDetector`의 정규식이 "시/도 + 구·군·시(1개) + 동·로·길(1개) + 번지"까지만
-지원한다. 그런데 (1) 실제 행정구역엔 "성남시 분당구 정자동"처럼 3단계(시+구+동)인 곳이 있고,
-(2) 도로명 주소는 "테헤란로12길"처럼 로/길 뒤에 숫자가 바로 붙는 게 정상 표기인데 정규식의
-동/로 그룹이 한글(`[가-힣]`)만 허용해 숫자가 나오는 순간 매칭이 끊긴다. 두 경우 다 주소의
-뒷부분이 통째로 탐지되지 않고 그대로 노출되며, 정답 span과 정확히 안 맞아 완전 일치 채점에서
-FP+FN이 동시에 잡힌다(그래서 44/44로 정확히 같다). bench 데이터가 실제 한국 주소 표기를
-정직하게 반영한 결과이며, core 쪽 수정이 필요해 별도 이슈로 등록한다(내 파트 밖이라 직접 수정하지 않음).
-
-**card 원인(확인됨)**: 오탐 2건 모두 `distractors.py`의 `gen_invalid_rrn_like`(존재하지 않는
-날짜로 만든 "주민번호 아닌 것") 값이었다. `RRNDetector`는 이를 정확히 걸러내지만(의도대로),
-그 13자리 숫자가 우연히 신용카드 체크섬(Luhn)도 통과해 `CreditCardDetector`가 대신 반응했다.
-Luhn은 무작위 숫자열 중 약 10%가 우연히 통과하는 수준이라 버그라기보다 체크섬 기반 탐지의
-통계적 한계에 가깝다 — 오탐 테스트 인프라가 탐지기 간의 예상 못한 상호작용을 정확히 잡아낸 사례.
+address·card는 한때 이 표에서 문제(F1 0.371, 오탐 2건)가 있었는데, core 쪽에서 이미 수정됐다
+(각각 [#86](https://github.com/ChoHyeonChan/maskingtape/issues/86), [#87](https://github.com/ChoHyeonChan/maskingtape/issues/87)로
+발견해 확인 후 중복 종료 — 실제 수정은 조현찬님이 #69/#86 관련 커밋에서 먼저 완료해둔 상태였음).
+card는 이번에 `gen_card`(Visa/Mastercard/Amex 계열 IIN + Luhn 체크섬)로 데이터셋에 정답 라벨이
+생기면서 처음으로 실측이 가능해졌다 — `#69`(distractor가 카드로 오탐되던 문제)의 회귀 방지
+테스트(`test_distractors_are_never_detected_as_card`)도 같이 추가했다.
 
 ## 오탐(False Positive) 측정
 
@@ -78,6 +69,8 @@ core가 여기서 뭔가를 탐지하면 `evaluate.py`가 그대로 FP로 집계
   `+82` 국제표기까지 core가 허용하는 형식을 무작위로 섞는다
 - **주민번호**: 하이픈/공백/구분자 없음, 1900·2000년대 성별코드를 모두 커버
 - **주소**: 지번 주소(`강남구 역삼동 12-3`)와 도로명 주소(`테헤란로12길 3`, 아파트 동/호 포함)를 섞는다
+- **카드번호**: Visa(16자리)·Mastercard(16자리)·Amex(15자리) 계열 IIN 대역 + 하이픈/점/공백/구분자
+  없음까지, 실제 발급 번호가 아닌 합성 값에 Luhn 체크섬만 유효하게 맞춘다
 - **이름**: 성씨 30종 × 이름 음절 30종 조합, 통계청 다빈도 성씨 기준(특정 인물 아님)
 - **문장 맥락**: 고객센터/병원/학교/관공서/인사/배송/금융 등 10여 개 업무 시나리오, 한 문서에
   같은 종류 개인정보가 두 번 등장하는 경우(담당자 교체, 자택/직장 번호 등)도 포함
@@ -120,11 +113,12 @@ python -m bench.evaluate_masking bench/datasets/synth_v1.jsonl
 함께 확인해, 길이가 달라지면(위치 비교가 무의미해지는 경우) 원문 전체 포함 여부로 보수적으로
 판정하고 core `MaskAnonymizer`의 회귀 버그 신호로 본다.
 
-500건 기준 실측 결과(이 브랜치 시점의 core 기준): 유출률 48.1%(875건 중 421건, 전부 완전유출) —
-전부 `name`/`address`(현재 core에 탐지기가 없는 종류)에서만 발생했고, `phone`/`email`/`rrn`은
-유출 0건. 부분 유출은 이 시점에는 0건이지만, 이는 name/address 탐지기가 아예 없어서 탐지 자체가
-안 일어나기 때문이다 — 탐지기가 생기고 나서(예: 경계가 어긋나는 탐지) 이 지표가 진가를 발휘한다.
-길이 보존율은 100%로 마스킹 로직 자체의 구조적 버그는 없음을 확인.
+500건 기준 실측 결과(main 병합 후 재측정): 유출률 15.7%(905건 중 142건, 전부 완전유출) — 전부
+`name`(규칙판이 문맥 단서 없어 아예 탐지 못 한 경우)에서만 발생했고, `phone`/`email`/`rrn`/
+`address`/`card`는 유출 0건. 부분 유출은 아직 0건인데, 이는 지금 core 탐지기들이 경계까지
+정확히 맞추고 있다는 뜻이다(탐지 자체를 놓친 경우와는 다름) — 앞으로 탐지 범위가 넓어지며
+경계가 어긋나는 사례가 생기면 이 지표가 그때 진가를 발휘한다. 길이 보존율은 100%로 마스킹
+로직 자체의 구조적 버그는 없음을 확인.
 
 ## 신뢰도(confidence) 임계값 분석
 
@@ -138,10 +132,11 @@ python -m bench.confidence_analysis bench/datasets/synth_v1.jsonl
 후보 임계값마다 그보다 confidence가 낮은 예측을 버린 뒤 다시 채점해서, 임계값을 올릴수록
 precision이 오르고 recall이 내려가는 트레이드오프를 표로 보여준다.
 
-500건 기준 실측 결과(이 브랜치 시점의 core 기준): precision은 0.0~1.0 전 구간에서 1.000으로
-동일하게 유지되는데, **임계값 0.95부터 recall이 0.519 → 0.465로 떨어진다** — 구분자 없는
-전화번호 표기(confidence 0.9)가 잘려나가기 때문이다. 즉 **정밀도 이득 없이 재현율만 손해**를
-보므로, 지금 core 기준으로는 confidence 임계값을 0.9 이상으로 올릴 이유가 없다는 근거가 된다.
+500건 기준 실측 결과(main 병합 후 재측정): 임계값 0.7부터 precision이 1.000으로 완벽해지는데,
+**recall은 0.822(임계값 0.5 이하) → 0.632(0.7) → 0.510(1.0)로 계속 떨어진다** — name의
+규칙판 confidence(0.5~0.75)가 잘려나가는 게 대부분이다. 즉 **임계값을 높여도 얻는 정밀도
+이득보다 recall 손해가 훨씬 크므로**, 지금 core 기준으로는 기본값(필터 없음)을 유지하는 게
+낫다는 근거가 된다.
 
 ## 이름 탐지 방식 비교 — 규칙판 vs 하이브리드(LLM)
 
@@ -177,7 +172,7 @@ JSONL — 한 줄에 문서 하나:
 ```
 
 - `start`/`end`는 파이썬 슬라이스 규약 (`text[start:end]` == 개인정보 원문)
-- `kind`는 core의 `Detection.kind`와 동일한 문자열: `rrn`, `phone`, `email`, `name`, `address`
+- `kind`는 core의 `Detection.kind`와 동일한 문자열: `rrn`, `phone`, `email`, `name`, `address`, `card`
 - `difficulty`는 `easy`/`hard`/`negative` 중 하나 (없으면 evaluate.py가 `unknown`으로 취급 — 하위 호환)
 - 평가 기준: span 완전 일치(exact match)로 precision / recall / F1 산출
 - 포맷 변경은 팀장 승인 후 이 문서부터 갱신한다
