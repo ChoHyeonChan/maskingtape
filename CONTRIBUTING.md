@@ -1,6 +1,6 @@
 # 기여 가이드 (팀 협업 규칙)
 
-> **팀원에게**: AI(Claude Code, Cursor, ChatGPT 등)로 작업한다면 **이 파일과 [CLAUDE.md](CLAUDE.md)를 먼저 읽히고** "이 규칙대로 작업해줘"라고 지시하세요. 이 문서 하나면 우리 협업 방식이 그대로 굴러갑니다.
+> **팀원에게**: AI(Claude Code, Cursor, ChatGPT 등)로 작업한다면 **이 파일과 [CLAUDE.md](CLAUDE.md), [STRUCTURE.md](STRUCTURE.md)를 먼저 읽히고** "이 규칙대로 작업해줘"라고 지시하세요. 이 문서 하나면 우리 협업 방식이 그대로 굴러갑니다. (폴더를 어떻게 나누는지는 [STRUCTURE.md](STRUCTURE.md)에 있습니다.)
 
 ## 왜 이렇게 하나 — 깃 사용 흔적이 곧 점수다
 
