@@ -17,7 +17,7 @@ from bench.generator.distractors import generate_distractor
 from bench.generator.entities import ALL_KINDS, generate_entity
 
 # distractor는 개인정보가 아니므로 라벨을 붙이지 않는다 — _NON_LABEL_KINDS에서 분기 처리.
-_PLACEHOLDER_RE = re.compile(r"\{(name|phone|email|rrn|address|distractor)\}")
+_PLACEHOLDER_RE = re.compile(r"\{(name|phone|email|rrn|address|card|distractor)\}")
 _NON_LABEL_KINDS = frozenset({"distractor"})
 
 # 개인정보가 실제로 포함된 템플릿 — 다양한 업무 맥락(고객센터/병원/학교/관공서/인사/배송/금융)을 커버한다.
@@ -50,6 +50,11 @@ _TEMPLATES = [
     # 금융/보험
     "가입자 {name}, 주민번호 {rrn} 기준으로 보험료가 산정되었습니다.",
     "{name}님의 이체 알림: 문의는 {phone} 또는 {email}로 부탁드립니다.",
+    # 결제/환불 (카드번호)
+    "{name}님 카드번호 {card}로 결제가 완료되었습니다.",
+    "환불 처리를 위해 {name}님의 카드번호 {card}를 확인했습니다. 문의: {phone}",
+    "정기결제 등록: 카드 {card}, 명의자 {name}, 연락처 {phone}",
+    "{card} 카드로 결제 시도가 감지되어 {name}님께 {phone}로 확인 연락드립니다.",
     # 한 문서에 같은 종류가 두 번 등장하는 경우 (담당자 교체, 자택/직장 번호 등)
     "담당자가 {name}에서 {name}으로 변경되었습니다. 새 연락처: {phone}",
     "자택 {phone}, 직장 {phone} 두 번호 모두 등록해 주세요.",

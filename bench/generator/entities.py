@@ -53,6 +53,16 @@ _PHONE_SEPARATORS_HARD = ["", ".", " "]  # 하이픈 없는(탐지가 상대적�
 _RRN_SEPARATORS_MIXED = ["-", "-", "-", " ", ""]  # RRN 정규식은 '.'을 구분자로 허용하지 않는다(rrn.py 참고).
 _RRN_SEPARATORS_HARD = ["", " "]
 
+# (접두사, 전체 자릿수) — 업계 표준 IIN/BIN 대역만 쓰고 나머지는 난수로 채운다(실제 발급 번호 아님).
+# Visa=4로 시작 16자리, Mastercard=51~55로 시작 16자리, Amex=34/37로 시작 15자리.
+_CARD_PREFIXES = [
+    ("4", 16), ("4", 16), ("4", 16),  # Visa가 가장 흔하니 가중치를 둔다.
+    ("51", 16), ("52", 16), ("53", 16), ("54", 16), ("55", 16),
+    ("34", 15), ("37", 15),
+]
+_CARD_SEPARATORS_MIXED = ["-", "-", " ", ".", ""]
+# creditcard.py의 정규식은 그룹 사이 구분자가 전부 동일해야 매칭된다(역참조 \1) — 하나만 골라 반복.
+
 DIFFICULTIES = ("easy", "hard", "mixed")
 
 
@@ -124,6 +134,46 @@ def gen_rrn(rng: random.Random, difficulty: str = "mixed") -> Entity:
     return Entity(kind="rrn", text=f"{front}{sep}{century_code}{serial}{check}")
 
 
+def _luhn_check_digit(payload: str) -> str:
+    """payload(체크 숫자를 뺀 나머지 자릿수)에 이어 붙이면 Luhn 검증을 통과하는 마지막 숫자를 계산한다.
+
+    core의 creditcard.py `_luhn_ok`와 정확히 같은 규칙(오른쪽에서 두 번째 자리마다 2배,
+    9 초과면 9를 뺌)을 거꾸로 풀어 체크 숫자를 구한다 — 검증 로직과 생성 로직이 어긋나면
+    우리가 만든 "유효한 카드번호"가 실제로는 core에 안 잡히는 모순이 생긴다.
+    """
+    total = 0
+    for index, char in enumerate(reversed(payload)):
+        value = int(char)
+        if index % 2 == 0:  # 체크 숫자가 뒤에 붙으면 이 자리가 오른쪽에서 두 번째가 된다
+            value *= 2
+            if value > 9:
+                value -= 9
+        total += value
+    return str((10 - total % 10) % 10)
+
+
+def gen_card(rng: random.Random, difficulty: str = "mixed") -> Entity:
+    prefix, total_len = rng.choice(_CARD_PREFIXES)
+    body_len = total_len - len(prefix) - 1  # 체크 숫자 1자리를 뺀 나머지
+    body = "".join(str(rng.randint(0, 9)) for _ in range(body_len))
+    digits = prefix + body + _luhn_check_digit(prefix + body)
+
+    if difficulty == "easy":
+        sep = "-"
+    elif difficulty == "hard":
+        sep = ""  # 구분자 없이 붙여 쓴 형태 — creditcard.py의 "붙여쓰기 13~19자리" 분기
+    else:
+        sep = rng.choice(_CARD_SEPARATORS_MIXED)
+
+    if not sep:
+        text = digits
+    elif len(digits) == 16:
+        text = sep.join([digits[0:4], digits[4:8], digits[8:12], digits[12:16]])
+    else:  # 15자리 Amex 계열은 4-6-5로 묶는다
+        text = sep.join([digits[0:4], digits[4:10], digits[10:15]])
+    return Entity(kind="card", text=text)
+
+
 def gen_address(rng: random.Random, difficulty: str = "mixed") -> Entity:
     if difficulty == "easy":
         use_road = False  # 지번 주소가 더 짧고 표준적인 형태
@@ -153,6 +203,7 @@ _GENERATORS = {
     "email": gen_email,
     "rrn": gen_rrn,
     "address": gen_address,
+    "card": gen_card,
 }
 
 ALL_KINDS = tuple(_GENERATORS.keys())
