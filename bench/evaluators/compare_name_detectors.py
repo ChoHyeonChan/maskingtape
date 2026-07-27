@@ -11,7 +11,7 @@
    채점 로직을 새로 만들지 않고 검증된 기존 코드를 그대로 쓴다.
 
 사용법:
-    python -m bench.compare_name_detectors bench/datasets/synth_v1.jsonl
+    python -m bench.evaluators.compare_name_detectors bench/datasets/synth_v1.jsonl
 """
 
 from __future__ import annotations
@@ -22,7 +22,7 @@ from pathlib import Path
 from maskingtape.detectors import default_detectors, llm_detectors
 from maskingtape.pipeline import Pipeline
 
-from bench.evaluate import Counts, evaluate, load_dataset
+from bench.evaluators.evaluate import Counts, evaluate, load_dataset
 
 
 def evaluate_name_only(rows: list[dict], pipeline: Pipeline) -> Counts:

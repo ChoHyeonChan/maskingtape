@@ -53,7 +53,7 @@ print(result.detections)   # [Detection(kind='rrn', start=5, end=19, ...)]
 저작권·개인정보 걱정 없는 **자체 합성 데이터셋**으로 정확도를 측정한다 — 공개 벤치마크는 이 프로젝트의 핵심 차별화 포인트다. 아무나 다음 한 줄로 재현할 수 있다:
 
 ```bash
-python -m bench.evaluate bench/datasets/synth_v1.jsonl
+python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl
 ```
 
 합성 데이터셋(500건)도 시드로 고정돼 있어 바이트 단위로 똑같이 재생성된다 — `python -m bench.generate_dataset --count 500 --seed 42 --out bench/datasets/synth_v1.jsonl`
@@ -76,7 +76,7 @@ python -m bench.evaluate bench/datasets/synth_v1.jsonl
 
 > 신용카드번호 탐지기는 이 표에 없다 — 합성 데이터셋 생성기가 아직 카드번호를 만들지 않아 측정 대상이 아니다([#73](https://github.com/ChoHyeonChan/maskingtape/issues/73)). 탐지기 자체는 Luhn 체크섬 검증과 단위 테스트로 검증돼 있다.
 
-마스킹 결과에 개인정보가 실제로 남는지도 따로 측정한다 — `python -m bench.evaluate_masking bench/datasets/synth_v1.jsonl`. 상세는 [bench/](bench/) 참고.
+마스킹 결과에 개인정보가 실제로 남는지도 따로 측정한다 — `python -m bench.evaluators.evaluate_masking bench/datasets/synth_v1.jsonl`. 상세는 [bench/](bench/) 참고.
 
 ## MCP 서버로 쓰기 (AI 에이전트용)
 

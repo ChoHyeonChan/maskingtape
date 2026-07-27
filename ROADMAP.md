@@ -108,7 +108,7 @@
 
 ## 현재 정확도
 
-합성 평가 데이터셋 500건 기준 (`python -m bench.evaluate`, **규칙 전용 모드**):
+합성 평가 데이터셋 500건 기준 (`python -m bench.evaluators.evaluate`, **규칙 전용 모드**):
 
 | 종류 | precision | recall | F1 |
 |---|---|---|---|

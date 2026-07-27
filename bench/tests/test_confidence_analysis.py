@@ -9,7 +9,7 @@ from maskingtape.detectors.base import Detector
 from maskingtape.pipeline import Pipeline
 from maskingtape.types import Detection
 
-from bench.confidence_analysis import evaluate_at_threshold, evaluate_by_threshold, format_threshold_report
+from bench.evaluators.confidence_analysis import evaluate_at_threshold, evaluate_by_threshold, format_threshold_report
 
 
 class _FixedConfidenceDetector(Detector):
