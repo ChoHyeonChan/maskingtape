@@ -70,6 +70,42 @@
 
 > 승현(plana)은 8월 둘째 주 복귀 예정 — 그동안 웹 입력·하이라이트 뷰는 수연이 함께 봅니다.
 
+### 파트별 상세 (위에서 아래로, 위가 먼저)
+
+**기태 — `api`** 🔴 지금 팀 전체의 1순위 (이게 되면 통합·배포가 열림)
+- [ ] 스키마 ↔ `core` 어댑터: 요청을 `Pipeline`에 넘기고 결과를 응답 스키마로 변환
+- [ ] `POST /scan` — 501을 실제 탐지 결과로 (core `scan()` 연결)
+- [ ] `POST /anonymize` — 실제 마스킹 결과로 ([#28](https://github.com/ChoHyeonChan/maskingtape/issues/28))
+- [ ] 입력 검증·공통 에러 처리 ([#29](https://github.com/ChoHyeonChan/maskingtape/issues/29)) — 원문을 로그·에러에 남기지 않기(보안)
+- [ ] CORS·개발 환경 설정 ([#30](https://github.com/ChoHyeonChan/maskingtape/issues/30))
+- [ ] API 테스트 자동화 ([#31](https://github.com/ChoHyeonChan/maskingtape/issues/31))
+- [ ] → Vercel 배포 ([apps/api 보안 요구사항](apps/api/README.md) 준수)
+
+**조현찬(팀장) — `core` · `mcp`**
+- [ ] 기태 API 연동 지원 (core 어댑터 인터페이스 합의) ← 지금 우선
+- [ ] 이름 정확도: 하이브리드 안전망 튜닝
+- [ ] 새 탐지기: 계좌번호 (`financial/`), 여권·운전면허 (`identity/`)
+- [ ] 주소 개선: 광역단체명 없는 주소 ([#68](https://github.com/ChoHyeonChan/maskingtape/issues/68))
+- [ ] PyPI 배포 ([#48](https://github.com/ChoHyeonChan/maskingtape/issues/48))
+- 상시: 팀원 PR 리뷰·아키텍처
+
+**수연 — `web`**
+- [ ] 접근성: `prefers-reduced-motion`, 코치마크 ESC로 닫기 (PR #76 리뷰 반영)
+- [ ] README 정리: 로컬 경로·포크 안내 제거
+- [ ] API 연동되면 임시 프록시(`dev-server`) → 실제 `/api/scan`으로 교체
+- [ ] 결과 화면에 확신도 표시(막대) → "N% 이상만 마스킹" 슬라이더
+
+**준형 — `desktop`**
+- [ ] UX·안정성 완성도 (에러 처리·취소·진행 표시)
+- [ ] 새 엔진 기능(가명처리 전략 등) 데스크톱에 반영
+- [ ] 배치 처리 안정화 (대량 파일)
+
+**서연 — `bench`**
+- [ ] 평가 스크립트를 `evaluators/` 폴더로 묶기 ([STRUCTURE.md](STRUCTURE.md))
+- [ ] 발표용 정확도 자료: 규칙 vs 하이브리드 대비표(0.661 → 0.949) 정리
+- [ ] 데이터 확대: 엣지 케이스(복합 문장·드문 표기)
+- [ ] 새 탐지기 나오면 해당 종류 벤치 데이터 추가
+
 ## 현재 정확도
 
 합성 평가 데이터셋 500건 기준 (`python -m bench.evaluate`, **규칙 전용 모드**):
