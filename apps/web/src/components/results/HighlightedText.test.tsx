@@ -31,6 +31,7 @@ describe("HighlightedText", () => {
 
     const mark = screen.getByText("010-1234-5678");
     expect(mark).toHaveClass("highlight--phone");
+    expect(mark).not.toHaveClass("highlight--covered");
     expect(mark).toHaveAttribute("title", expect.stringContaining("전화번호"));
     expect(screen.getByText("전화번호", { selector: ".highlight__tag" })).toBeInTheDocument();
   });
@@ -105,5 +106,23 @@ describe("HighlightedText", () => {
       vi.advanceTimersByTime(6500);
     });
     expect(mark).toHaveClass("highlight--covered");
+  });
+
+  it("shows an additional masked result below the interactive result", () => {
+    const phone = detection({ kind: "phone", start: 3, end: 16, text: "010-1234-5678", confidence: 1 });
+    const email = detection({ kind: "email", start: 19, end: 35, text: "hong@example.com", confidence: 1 });
+
+    render(
+      <HighlightedText
+        text="문의 010-1234-5678 / hong@example.com"
+        detections={[phone, email]}
+        activeFilter={null}
+      />,
+    );
+
+    expect(screen.getByTestId("highlighted-text")).toHaveTextContent("010-1234-5678");
+    expect(screen.getByTestId("masked-result")).toHaveTextContent("문의 ************* / ****************");
+    expect(screen.getByTestId("masked-result")).not.toHaveTextContent("010-1234-5678");
+    expect(screen.getByTestId("masked-result")).not.toHaveTextContent("hong@example.com");
   });
 });

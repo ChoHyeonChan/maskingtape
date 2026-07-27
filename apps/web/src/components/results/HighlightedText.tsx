@@ -21,6 +21,10 @@ function detectionKey(detection: Detection) {
   return `${detection.kind}:${detection.start}:${detection.end}`;
 }
 
+function maskText(text: string) {
+  return "*".repeat(text.length);
+}
+
 const FILTER_REVEAL_MS = 6500;
 
 export function HighlightedText({ text, detections, activeFilter }: Props) {
@@ -44,6 +48,7 @@ export function HighlightedText({ text, detections, activeFilter }: Props) {
   }
 
   const segments = buildSegments(text, detections);
+  const maskedText = segments.map((segment) => (segment.kind === "plain" ? segment.text : maskText(segment.text))).join("");
 
   function toggleCovered(key: string) {
     setCoveredKeys((current) => {
@@ -124,7 +129,6 @@ export function HighlightedText({ text, detections, activeFilter }: Props) {
         })}
       </p>
       <div className="result-actions">
-        
         <button
           type="button"
           className="result-actions__button"
@@ -135,6 +139,12 @@ export function HighlightedText({ text, detections, activeFilter }: Props) {
           {allCovered ? "가리기 전으로" : "모두 가리기"}
         </button>
       </div>
+      <section className="masked-result" aria-label="개인정보가 가려진 결과">
+        <h3 className="masked-result__title">가려진 결과</h3>
+        <p className="masked-result__text" data-testid="masked-result">
+          {maskedText}
+        </p>
+      </section>
     </>
   );
 }
