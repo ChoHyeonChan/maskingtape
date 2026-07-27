@@ -38,6 +38,8 @@ void main() {
     expect(task.status, FileTaskStatus.done);
     expect(task.outputPath, endsWith('입력_masked.txt'));
     expect(task.detections, hasLength(1));
+    // 대량 파일 안정화: 마스킹 결과는 디스크에만 남고 FileTask는 텍스트를 안 들고 있다
+    // (원문·결과 필드가 제거돼 구조적으로 보장 — 미리보기는 열 때 이 파일을 읽는다).
     final saved = await File(task.outputPath!).readAsString();
     expect(saved, '주민번호 ************** 문의주세요');
   });

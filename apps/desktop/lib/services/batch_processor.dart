@@ -47,8 +47,6 @@ class BatchProcessor {
         task
           ..detections = result.detections
           ..outputPath = outputPath
-          ..originalText = text
-          ..maskedText = result.maskedText
           ..status = FileTaskStatus.done;
       } on FileReadException catch (e) {
         task
