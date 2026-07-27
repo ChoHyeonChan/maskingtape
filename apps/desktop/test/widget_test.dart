@@ -131,9 +131,18 @@ void main() {
     expect(find.textContaining('탐지 1건 — 주민번호 1'), findsOneWidget);
     expect(find.textContaining('_masked.txt'), findsOneWidget);
 
-    // 완료 항목을 클릭하면 원문 vs 마스킹 결과 비교 다이얼로그가 뜬다
-    await tester.tap(find.text('상담기록.txt'));
-    await tester.pumpAndSettle();
+    // 완료 항목을 클릭하면 미리보기가 열리고, 원문·결과를 디스크에서 읽어 보여준다.
+    // (텍스트를 메모리에 안 들고 열 때 읽으므로 실제 IO — runAsync로 로드를 기다린다.)
+    await tester.runAsync(() async {
+      await tester.tap(find.text('상담기록.txt'));
+      for (var i = 0; i < 100; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+        await tester.pump();
+        if (find.textContaining('**************').evaluate().isNotEmpty) {
+          break;
+        }
+      }
+    });
     expect(find.text('원문'), findsOneWidget);
     expect(find.text('마스킹 결과'), findsOneWidget);
     expect(find.textContaining('**************'), findsOneWidget);
