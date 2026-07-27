@@ -6,7 +6,10 @@ enum MaskStrategy {
   mask('mask', '가리기 (***)'),
 
   /// `[전화번호]` 식 라벨 치환 — 정보 종류가 보존된다
-  label('label', '라벨 ([전화번호])');
+  label('label', '라벨 ([전화번호])'),
+
+  /// 그럴듯한 가짜 값으로 치환 — 원문의 형태·문맥을 유지한다 (홍길동 → 정예준)
+  pseudonym('pseudonym', '가명 (홍길동→가명)');
 
   const MaskStrategy(this.wireName, this.displayName);
 

@@ -24,6 +24,23 @@ void main() {
       );
     });
 
+    test('pseudonym 전략이 CLI 값으로 전달된다', () {
+      const options = AnonymizeOptions(strategy: MaskStrategy.pseudonym);
+
+      expect(
+        CliAnonymizer.argsFor(options, scan: false),
+        ['--strategy', 'pseudonym'],
+      );
+    });
+
+    test('모든 전략의 wireName이 CLI가 받는 값과 일치한다', () {
+      // 코어 CLI의 --strategy choices와 어긋나면 런타임에 실패한다.
+      expect(
+        MaskStrategy.values.map((s) => s.wireName).toList(),
+        ['mask', 'label', 'pseudonym'],
+      );
+    });
+
     test('LLM 모드는 탐지·마스킹 두 호출 모두에 --llm이 붙는다', () {
       // 한쪽에만 붙으면 화면의 탐지 요약과 저장된 결과의 기준이 어긋난다.
       const options = AnonymizeOptions(useLlm: true);
