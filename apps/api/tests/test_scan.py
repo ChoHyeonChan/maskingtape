@@ -2,13 +2,13 @@
 
 from maskingtape_api.routers.pii import scan
 from maskingtape_api.schemas import DetectionKind, ScanRequest
-from maskingtape_api.services.scanner import scan_text
+from maskingtape_api.services.core_adapter import CoreEngineAdapter
 
 
-def test_scan_text_returns_core_detections() -> None:
+def test_core_adapter_returns_core_detections() -> None:
     text = "고객 주민번호 800101-1234560 확인 부탁드립니다"
 
-    detections = scan_text(text)
+    detections = CoreEngineAdapter().scan(text).detections
 
     assert len(detections) == 1
     assert detections[0].kind == DetectionKind.RRN
@@ -17,13 +17,13 @@ def test_scan_text_returns_core_detections() -> None:
 
 
 def test_scan_endpoint_returns_response_model() -> None:
-    response = scan(ScanRequest(text="문의는 010-1234-5678로 주세요"))
+    response = scan(ScanRequest(text="문의는 010-1234-5678로 주세요"), core=CoreEngineAdapter())
 
     assert len(response.detections) == 1
     assert response.detections[0].kind == DetectionKind.PHONE
 
 
 def test_scan_endpoint_returns_empty_list_for_clean_text() -> None:
-    response = scan(ScanRequest(text="오늘 회의는 오후 3시입니다"))
+    response = scan(ScanRequest(text="오늘 회의는 오후 3시입니다"), core=CoreEngineAdapter())
 
     assert response.detections == []

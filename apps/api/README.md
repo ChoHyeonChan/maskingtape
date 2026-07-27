@@ -58,6 +58,7 @@ python -m pytest
 `POST /scan` — 탐지 리포트만
 
 현재 `/scan`은 `packages/core`의 규칙 기반 `Pipeline.scan()`을 호출한다. LLM 탐지는 사용하지 않는다.
+FastAPI 라우터는 core를 직접 호출하지 않고 `maskingtape_api.services.core_adapter`를 통해서만 연결한다.
 
 ```json
 // 요청
