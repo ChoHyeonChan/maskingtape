@@ -57,6 +57,8 @@ python -m pytest
 
 `POST /scan` — 탐지 리포트만
 
+현재 `/scan`은 `packages/core`의 규칙 기반 `Pipeline.scan()`을 호출한다. LLM 탐지는 사용하지 않는다.
+
 ```json
 // 요청
 { "text": "주민번호 800101-1234560 문의주세요" }

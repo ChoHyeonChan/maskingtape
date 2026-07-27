@@ -10,6 +10,7 @@ from maskingtape_api.schemas import (
     ScanRequest,
     ScanResponse,
 )
+from maskingtape_api.services.scanner import scan_text
 
 router = APIRouter(tags=["pii"])
 
@@ -23,11 +24,11 @@ ERROR_RESPONSES = {
 @router.post(
     "/scan",
     response_model=ScanResponse,
-    responses={**ERROR_RESPONSES, 501: {"model": ErrorResponse, "description": "미구현"}},
+    responses=ERROR_RESPONSES,
 )
-def scan(_: ScanRequest) -> JSONResponse:
-    """Declare the scan API contract. Core integration is implemented in the next issue."""
-    return _not_implemented("scan_not_implemented", "/scan 구현은 다음 작업에서 core와 연결합니다.")
+def scan(request: ScanRequest) -> ScanResponse:
+    """Detect personal information using the rule-based core pipeline."""
+    return ScanResponse(detections=scan_text(request.text))
 
 
 @router.post(
