@@ -4,9 +4,16 @@ from functools import lru_cache
 from typing import Protocol
 
 from maskingtape import Pipeline
+from maskingtape.anonymizers import LabelAnonymizer, MaskAnonymizer
+from maskingtape.pipeline import AnonymizeResult
 from maskingtape.types import Detection
 
-from maskingtape_api.schemas import DetectionResponse, ScanResponse
+from maskingtape_api.schemas import (
+    AnonymizeResponse,
+    AnonymizeStrategy,
+    DetectionResponse,
+    ScanResponse,
+)
 
 
 class CoreEngineError(RuntimeError):
@@ -18,6 +25,9 @@ class CorePipeline(Protocol):
 
     def scan(self, text: str) -> list[Detection]:
         """Return core detections for text."""
+
+    def anonymize(self, text: str) -> AnonymizeResult:
+        """Return anonymized text and the detections used to produce it."""
 
 
 class CoreEngineAdapter:
@@ -36,11 +46,33 @@ class CoreEngineAdapter:
         except Exception as exc:
             raise CoreEngineError("core scan failed") from exc
 
+    def anonymize(
+        self,
+        text: str,
+        strategy: AnonymizeStrategy = AnonymizeStrategy.MASK,
+    ) -> AnonymizeResponse:
+        """Run core anonymization and return the public API response model."""
+        try:
+            pipeline = self._pipeline if strategy == AnonymizeStrategy.MASK else _pipeline_for_strategy(strategy)
+            result = pipeline.anonymize(text)
+            return AnonymizeResponse(
+                text=result.text,
+                detections=[_to_detection_response(detection) for detection in result.detections],
+            )
+        except Exception as exc:
+            raise CoreEngineError("core anonymize failed") from exc
+
 
 @lru_cache(maxsize=1)
 def get_core_adapter() -> CoreEngineAdapter:
     """Return the shared rule-based core adapter for API requests."""
     return CoreEngineAdapter()
+
+
+def _pipeline_for_strategy(strategy: AnonymizeStrategy) -> Pipeline:
+    if strategy == AnonymizeStrategy.LABEL:
+        return Pipeline(anonymizer=LabelAnonymizer())
+    return Pipeline(anonymizer=MaskAnonymizer())
 
 
 def _to_detection_response(detection: Detection) -> DetectionResponse:

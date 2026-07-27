@@ -25,3 +25,4 @@ def test_openapi_contains_scan_and_anonymize_contracts() -> None:
     assert anonymize_operation["responses"]["200"]["content"]["application/json"]["schema"][
         "$ref"
     ].endswith("/AnonymizeResponse")
+    assert "501" not in anonymize_operation["responses"]
