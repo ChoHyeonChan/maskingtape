@@ -1,6 +1,6 @@
 # apps/api — FastAPI 백엔드
 
-**담당: 기태 ([@kitae13](https://github.com/kitae13), 부리뷰어)** · 상태: ✅ 시작 가능 (스켈레톤 머지 완료)
+**담당: 기태 ([@kitae13](https://github.com/kitae13), 부리뷰어)** · 상태: ✅ `/scan`·`/anonymize` core 연동 완료
 
 웹 플레이그라운드·데스크톱 앱이 함께 쓰는 REST API. `packages/core`를 **래핑만** 한다 — 탐지 로직을 여기 재구현하지 않는다.
 
@@ -73,6 +73,8 @@ FastAPI 라우터는 core를 직접 호출하지 않고 `maskingtape_api.service
 ```
 
 `POST /anonymize` — 비식별화 결과
+
+현재 `/anonymize`는 `packages/core`의 규칙 기반 `Pipeline.anonymize()`를 호출한다. `strategy`는 별표 마스킹(`mask`)과 종류 라벨 치환(`label`)을 지원한다.
 
 ```json
 // 요청 — strategy: "mask"(기본) 또는 "label"

@@ -9,7 +9,7 @@
 ```bash
 cd apps/web
 npm install
-npm run dev      # http://localhost:5173 — 개발 서버(아래 "임시 프록시" 참고)
+npm run dev      # http://localhost:5173 — /api/*는 FastAPI 백엔드로 프록시
 npm test         # vitest
 npm run build    # 타입 체크 + 프로덕션 빌드
 ```
@@ -21,12 +21,27 @@ cd c:/MT/maskingtape
 python -m venv .venv
 .\.venv\Scripts\activate
 pip install -e packages/core
-cd apps/web
+pip install -e "apps/api[dev]"
+python -m uvicorn maskingtape_api.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+다른 터미널에서:
+
+```bash
+cd c:/MT/maskingtape/apps/web
 npm install
 npm run dev
 ```
 
-> Windows PowerShell 기준으로 작성했습니다. 개발 서버가 열리면 브라우저에서 http://localhost:5173 으로 접속하면 됩니다.
+> Windows PowerShell 기준으로 작성했습니다. API 서버는 http://127.0.0.1:8000, 웹 개발 서버는 http://localhost:5173 으로 실행합니다.
+
+웹 개발 서버는 `/api/scan` 요청을 FastAPI 백엔드의 `/scan`으로 프록시합니다. 백엔드 주소를 바꿔야 하면 `VITE_API_TARGET` 환경변수를 사용합니다.
+
+```bash
+$env:VITE_API_TARGET="http://127.0.0.1:8000"
+cd apps/web
+npm run dev
+```
 
 Node.js 24 기준 (Vite 8 / React 19 / TypeScript 7). 새 패키지 추가 전 라이선스 확인 후 [SBOM.md](../../SBOM.md)에 기록.
 
@@ -87,29 +102,13 @@ git remote add origin https://github.com/<your-username>/maskingtape.git
 3. 예: "웹 데모 UI/UX 개선 및 결과 필터링 기능 추가"
 4. Create pull request를 누르면 리뷰 요청이 완료됩니다.
 
-## ⚠️ 임시 프록시 — apps/api 완성되면 교체
+## API 연동
 
-`apps/api`(기태 담당)에 `POST /scan`이 아직 없어서(스켈레톤과 `/health`만 있다), 개발 중에는 `dev-server/scanProxyPlugin.ts`가 `/api/scan` 요청을 받아 **core CLI(`python -m maskingtape.cli --scan`)를 직접 서브프로세스로 호출**해 응답한다. 그래서 로컬에 `packages/core`가 venv에 설치돼 있어야 한다:
-
-```bash
-# 저장소 루트에서, 한 번만
-python -m venv .venv
-./.venv/Scripts/pip install -e packages/core   # Windows
-# ./.venv/bin/pip install -e packages/core     # macOS/Linux
-```
-
-기태가 `apps/api`의 `POST /scan`을 완성하면:
-1. `vite.config.ts`에서 `scanProxyPlugin()` 제거
-2. `dev-server/` 폴더 삭제
-3. `src/api/scanClient.ts`의 `fetch("/api/scan")`을 실제 API 주소로 변경
-
-프론트 코드(컴포넌트·타입)는 계약(`POST /scan` 요청/응답 스키마)이 같으므로 그대로 쓴다.
+프론트는 `src/api/scanClient.ts`에서 `POST /api/scan`을 호출합니다. 개발 중에는 `vite.config.ts`의 proxy가 이 요청을 FastAPI 백엔드 `POST /scan`으로 전달합니다. 실제 탐지와 비식별화는 `apps/api`가 `packages/core`의 `Pipeline`을 호출해 처리합니다.
 
 ## 구조
 
 ```
-dev-server/
-  scanProxyPlugin.ts     # 임시 개발용 프록시 (위 설명 참고 — apps/api 완성되면 삭제)
 src/
   types/detection.ts     # core Detection과 1:1 (API 계약 v1 스키마) + 한국어 라벨/색상
   api/scanClient.ts       # POST /scan 호출
