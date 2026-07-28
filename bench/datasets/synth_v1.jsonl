@@ -1,500 +1,500 @@
-{"text": "환불 처리를 위해 장우은님의 카드번호 4819-6001-3389-0830를 확인했습니다. 문의: 019-8928-6873", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "card", "start": 21, "end": 40}, {"kind": "phone", "start": 54, "end": 67}], "difficulty": "easy"}
-{"text": "사업자등록번호는 ORD-20241214-6574이며, 배송지 우편번호는 2021.04.25입니다.", "labels": [], "difficulty": "negative"}
-{"text": "학생 최율혜(학부모 연락처 016-9891-4333)의 결석계가 접수되었습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}, {"kind": "phone", "start": 15, "end": 28}], "difficulty": "easy"}
-{"text": "신규 입사자 최예님의 4대보험 등록을 위해 주민번호 1009104756747가 필요합니다.", "labels": [{"kind": "name", "start": 7, "end": 9}, {"kind": "rrn", "start": 29, "end": 42}], "difficulty": "hard"}
-{"text": "윤원아님의 이체 알림: 문의는 010-3814-1654 또는 kxnnhj8x@sample.org로 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "phone", "start": 17, "end": 30}, {"kind": "email", "start": 34, "end": 53}], "difficulty": "easy"}
-{"text": "긴급 연락처 017-6216-4422, 자택 주소는 광주광역시 광진구 자양동 225-11입니다.", "labels": [{"kind": "phone", "start": 7, "end": 20}, {"kind": "address", "start": 29, "end": 49}], "difficulty": "easy"}
-{"text": "안녕하세요, 저는 백서석이고 전화번호는 016-6572-4386입니다.", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "phone", "start": 22, "end": 35}], "difficulty": "easy"}
-{"text": "결제일 688,277원, 결제 금액 181639-3146413.", "labels": [], "difficulty": "negative"}
-{"text": "사업자등록번호는 08-6930-4593이며, 배송지 우편번호는 43392입니다.", "labels": [], "difficulty": "negative"}
-{"text": "자택 010-2504-2621, 직장 019-6916-9771 두 번호 모두 등록해 주세요.", "labels": [{"kind": "phone", "start": 3, "end": 16}, {"kind": "phone", "start": 21, "end": 34}], "difficulty": "easy"}
-{"text": "송장번호 701736-1713328로 배송이 시작되었습니다.", "labels": [], "difficulty": "negative"}
-{"text": "정기결제 등록: 카드 5314627048281489, 명의자 홍현, 연락처 +821188378689", "labels": [{"kind": "card", "start": 12, "end": 28}, {"kind": "name", "start": 34, "end": 36}, {"kind": "phone", "start": 42, "end": 55}], "difficulty": "hard"}
-{"text": "전입신고 대상자: 김하, 신주소: 대전광역시 판교역로123길 8 자이아파트 129동 1262호, 연락처: +821711338727", "labels": [{"kind": "name", "start": 10, "end": 12}, {"kind": "address", "start": 19, "end": 52}, {"kind": "phone", "start": 59, "end": 72}], "difficulty": "hard"}
-{"text": "황진도님의 이체 알림: 문의는 016-8645-9938 또는 981z0oyn@mail-sample.kr로 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "phone", "start": 17, "end": 30}, {"kind": "email", "start": 34, "end": 57}], "difficulty": "easy"}
-{"text": "주문번호 446-12-87110가 정상 접수되었습니다.", "labels": [], "difficulty": "negative"}
-{"text": "고객 박훈규님 010-3750-1104로 연락 부탁드립니다.", "labels": [{"kind": "name", "start": 3, "end": 6}, {"kind": "phone", "start": 8, "end": 21}], "difficulty": "easy"}
-{"text": "안우 환자분, 주민등록번호 850807 3948119 확인되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "rrn", "start": 15, "end": 29}], "difficulty": "hard"}
-{"text": "다음 회의 안건은 예산 검토와 일정 조정입니다.", "labels": [], "difficulty": "negative"}
-{"text": "배송지: 서울특별시 성남시 분당구 정자동 363-14 (수령인 신재혜, 019-0887-1612)", "labels": [{"kind": "address", "start": 5, "end": 29}, {"kind": "name", "start": 35, "end": 38}, {"kind": "phone", "start": 40, "end": 53}], "difficulty": "easy"}
-{"text": "결제일 354-34-34931, 결제 금액 231438-3485100.", "labels": [], "difficulty": "negative"}
+{"text": "안녕하세요, 저는 정경이고 전화번호는 +821814249674입니다. 이민 선생님께 isahy@testmail.net로 성적 자료를 전달했습니다.", "labels": [{"kind": "name", "start": 10, "end": 12}, {"kind": "phone", "start": 21, "end": 34}, {"kind": "name", "start": 39, "end": 41}, {"kind": "email", "start": 47, "end": 65}], "difficulty": "hard"}
+{"text": "신윤준님 카드번호 4351-1615-5940-7819로 결제가 완료되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "card", "start": 10, "end": 29}], "difficulty": "easy"}
+{"text": "담당자가 유호에서 남혜으로 변경되었습니다. 새 연락처: 032.677.3733", "labels": [{"kind": "name", "start": 5, "end": 7}, {"kind": "name", "start": 10, "end": 12}, {"kind": "phone", "start": 31, "end": 43}], "difficulty": "hard"}
+{"text": "자택 016-7428-5977, 직장 016-3432-4374 두 번호 모두 등록해 주세요.", "labels": [{"kind": "phone", "start": 3, "end": 16}, {"kind": "phone", "start": 21, "end": 34}], "difficulty": "easy"}
+{"text": "반품 신청자 유도진, 환불 계좌 확인을 위해 연락처 011-7573-6216를 남겨주세요.", "labels": [{"kind": "name", "start": 7, "end": 10}, {"kind": "phone", "start": 29, "end": 42}], "difficulty": "easy"}
+{"text": "한인원님의 이체 알림: 문의는 044-824-5168 또는 jh86lyo7@team.demo-corp.com로 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "phone", "start": 17, "end": 29}, {"kind": "email", "start": 33, "end": 60}], "difficulty": "easy"}
+{"text": "윤은 님의 진료 예약이 확정되었습니다. 문의: 031 156 2621", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "phone", "start": 26, "end": 38}], "difficulty": "hard"}
+{"text": "학생 서호재(학부모 연락처 018-0188-1876)의 결석계가 접수되었습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}, {"kind": "phone", "start": 15, "end": 28}], "difficulty": "easy"}
+{"text": "정기결제 등록: 카드 5314627048281489, 명의자 홍현, 연락처 01188378689", "labels": [{"kind": "card", "start": 12, "end": 28}, {"kind": "name", "start": 34, "end": 36}, {"kind": "phone", "start": 42, "end": 53}], "difficulty": "hard"}
+{"text": "고객 최예님 +82.16.3923.0949로 연락 부탁드립니다.", "labels": [{"kind": "name", "start": 3, "end": 5}, {"kind": "phone", "start": 7, "end": 23}], "difficulty": "hard"}
 {"text": "이번 분기 매출 목표는 지난해 대비 12% 증가입니다.", "labels": [], "difficulty": "negative"}
-{"text": "신청자: 유진인 / 연락처: 010-1528-3872 / 이메일: pr57ga@testcorp.io", "labels": [{"kind": "name", "start": 5, "end": 8}, {"kind": "phone", "start": 16, "end": 29}, {"kind": "email", "start": 37, "end": 55}], "difficulty": "easy"}
-{"text": "오늘 회의록: 작성자 신훈, 문의는 u0fk9vu1c@mail-sample.kr로.", "labels": [{"kind": "name", "start": 12, "end": 14}, {"kind": "email", "start": 20, "end": 44}], "difficulty": "hard"}
-{"text": "신청자: 안지혜 / 연락처: 011-1122-9749 / 이메일: yie6j@example.com", "labels": [{"kind": "name", "start": 5, "end": 8}, {"kind": "phone", "start": 16, "end": 29}, {"kind": "email", "start": 37, "end": 54}], "difficulty": "easy"}
-{"text": "전영님의 이체 알림: 문의는 +82 16 3346 5147 또는 jexq88@example.com로 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "phone", "start": 16, "end": 32}, {"kind": "email", "start": 36, "end": 54}], "difficulty": "hard"}
-{"text": "송현수 환자분, 주민등록번호 160603-3484347 확인되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "rrn", "start": 16, "end": 30}], "difficulty": "easy"}
-{"text": "담당자가 송훈에서 임호으로 변경되었습니다. 새 연락처: 019 9086 4905", "labels": [{"kind": "name", "start": 5, "end": 7}, {"kind": "name", "start": 10, "end": 12}, {"kind": "phone", "start": 31, "end": 44}], "difficulty": "hard"}
-{"text": "결제 금액 27332, 영수증은 61fkh@sample-mail.net로 발송됩니다.", "labels": [{"kind": "email", "start": 18, "end": 39}], "difficulty": "easy"}
-{"text": "사업자등록번호는 111532-4869634이며, 배송지 우편번호는 2020.01.11입니다.", "labels": [], "difficulty": "negative"}
-{"text": "긴급 연락처 019 7007 9189, 자택 주소는 서울특별시 테헤란로39길 89 자이아파트 118동 174호입니다.", "labels": [{"kind": "phone", "start": 7, "end": 20}, {"kind": "address", "start": 29, "end": 61}], "difficulty": "hard"}
-{"text": "정서아 선생님께 7357hjd@testcorp.io로 성적 자료를 전달했습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "email", "start": 9, "end": 28}], "difficulty": "easy"}
-{"text": "사업자등록번호 907,604원 / 담당자 강석도 / 이메일 a1m8353j@mail-test.kr", "labels": [{"kind": "name", "start": 23, "end": 26}, {"kind": "email", "start": 33, "end": 54}], "difficulty": "easy"}
-{"text": "자택 017-3644-3269, 직장 017-5728-5000 두 번호 모두 등록해 주세요.", "labels": [{"kind": "phone", "start": 3, "end": 16}, {"kind": "phone", "start": 21, "end": 34}], "difficulty": "easy"}
-{"text": "안녕하세요, 저는 김성현이고 전화번호는 017-5378-4564입니다.", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "phone", "start": 22, "end": 35}], "difficulty": "easy"}
-{"text": "유수 님의 진료 예약이 확정되었습니다. 문의: 018.5425.0452", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "phone", "start": 26, "end": 39}], "difficulty": "hard"}
-{"text": "사업자등록번호는 48049이며, 배송지 우편번호는 2020.02.20입니다.", "labels": [], "difficulty": "negative"}
-{"text": "홍수 선생님께 ovj0a@testmail.net로 성적 자료를 전달했습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "email", "start": 8, "end": 26}], "difficulty": "hard"}
-{"text": "결제 금액 QR233815413KR, 영수증은 7symzuhyo1@sample.org로 발송됩니다.", "labels": [{"kind": "email", "start": 26, "end": 47}], "difficulty": "easy"}
-{"text": "학생 송인(학부모 연락처 +821170439502)의 결석계가 접수되었습니다.", "labels": [{"kind": "name", "start": 3, "end": 5}, {"kind": "phone", "start": 14, "end": 27}], "difficulty": "hard"}
-{"text": "민원인 권재님, 주민등록번호 6508261863563로 접수된 건 처리 완료되었습니다. 회신 주소: 대전광역시 동성로172길 12 자이아파트 122동 736호", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "rrn", "start": 16, "end": 29}, {"kind": "address", "start": 56, "end": 88}], "difficulty": "hard"}
-{"text": "주문번호 11600가 정상 접수되었습니다.", "labels": [], "difficulty": "negative"}
 {"text": "다음 회의 안건은 예산 검토와 일정 조정입니다.", "labels": [], "difficulty": "negative"}
-{"text": "민원인 신정규님, 주민등록번호 911213-2523834로 접수된 건 처리 완료되었습니다. 회신 주소: 부산광역시 종로구 청운동 672-1", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "rrn", "start": 17, "end": 31}, {"kind": "address", "start": 58, "end": 77}], "difficulty": "easy"}
-{"text": "정기결제 등록: 카드 5432-8708-3172-7881, 명의자 홍윤원, 연락처 017-8270-6991", "labels": [{"kind": "card", "start": 12, "end": 31}, {"kind": "name", "start": 37, "end": 40}, {"kind": "phone", "start": 46, "end": 59}], "difficulty": "easy"}
-{"text": "주문번호 58736, 고객 허연님 +82.11.4543.8540로 발송 예정입니다.", "labels": [{"kind": "name", "start": 15, "end": 17}, {"kind": "phone", "start": 19, "end": 35}], "difficulty": "hard"}
-{"text": "인천광역시 마포구 합정동 731-10에 거주하는 윤준윤님께 우편을 발송했습니다.", "labels": [{"kind": "address", "start": 0, "end": 20}, {"kind": "name", "start": 27, "end": 30}], "difficulty": "easy"}
-{"text": "iz0cpu@testcorp.io로 회신 주시면 이현인 담당자가 답변드립니다.", "labels": [{"kind": "email", "start": 0, "end": 18}, {"kind": "name", "start": 27, "end": 30}], "difficulty": "easy"}
-{"text": "자택 018-6232-7814, 직장 010-5763-4892 두 번호 모두 등록해 주세요.", "labels": [{"kind": "phone", "start": 3, "end": 16}, {"kind": "phone", "start": 21, "end": 34}], "difficulty": "easy"}
-{"text": "신규 입사자 양경님의 4대보험 등록을 위해 주민번호 6204092636547가 필요합니다.", "labels": [{"kind": "name", "start": 7, "end": 9}, {"kind": "rrn", "start": 29, "end": 42}], "difficulty": "hard"}
-{"text": "환불 처리를 위해 강인님의 카드번호 5529806990162720를 확인했습니다. 문의: +821634677449", "labels": [{"kind": "name", "start": 10, "end": 12}, {"kind": "card", "start": 20, "end": 36}, {"kind": "phone", "start": 50, "end": 63}], "difficulty": "hard"}
-{"text": "울산광역시 센텀중앙로130길 11 e편한세상아파트 101동 1635호에 거주하는 송서님께 우편을 발송했습니다.", "labels": [{"kind": "address", "start": 0, "end": 38}, {"kind": "name", "start": 45, "end": 47}], "difficulty": "hard"}
-{"text": "안녕하세요, 저는 유지이고 전화번호는 +82 10 4051 3266입니다.", "labels": [{"kind": "name", "start": 10, "end": 12}, {"kind": "phone", "start": 21, "end": 37}], "difficulty": "hard"}
-{"text": "안녕하세요, 저는 정연성이고 전화번호는 010-9240-3571입니다.", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "phone", "start": 22, "end": 35}], "difficulty": "easy"}
-{"text": "정기결제 등록: 카드 5329912419049662, 명의자 문현, 연락처 01939781669", "labels": [{"kind": "card", "start": 12, "end": 28}, {"kind": "name", "start": 34, "end": 36}, {"kind": "phone", "start": 42, "end": 53}], "difficulty": "hard"}
-{"text": "자택 010 9272 0672, 직장 019.6071.1129 두 번호 모두 등록해 주세요.", "labels": [{"kind": "phone", "start": 3, "end": 16}, {"kind": "phone", "start": 21, "end": 34}], "difficulty": "hard"}
-{"text": "고객 허빈님 +82.16.7532.2506로 연락 부탁드립니다.", "labels": [{"kind": "name", "start": 3, "end": 5}, {"kind": "phone", "start": 7, "end": 23}], "difficulty": "hard"}
-{"text": "반품 신청자 배예, 환불 계좌 확인을 위해 연락처 017 7136 9707를 남겨주세요.", "labels": [{"kind": "name", "start": 7, "end": 9}, {"kind": "phone", "start": 28, "end": 41}], "difficulty": "hard"}
-{"text": "담당자가 심지준에서 남재우으로 변경되었습니다. 새 연락처: 017-9336-9999", "labels": [{"kind": "name", "start": 5, "end": 8}, {"kind": "name", "start": 11, "end": 14}, {"kind": "phone", "start": 33, "end": 46}], "difficulty": "easy"}
-{"text": "고객 황혜님 +82.11.5813.4232로 연락 부탁드립니다.", "labels": [{"kind": "name", "start": 3, "end": 5}, {"kind": "phone", "start": 7, "end": 23}], "difficulty": "hard"}
-{"text": "신규 입사자 김수님의 4대보험 등록을 위해 주민번호 1004242640386가 필요합니다.", "labels": [{"kind": "name", "start": 7, "end": 9}, {"kind": "rrn", "start": 29, "end": 42}], "difficulty": "hard"}
-{"text": "민원인 배민님, 주민등록번호 370413 1401357로 접수된 건 처리 완료되었습니다. 회신 주소: 인천광역시 동성로272길 45 e편한세상아파트 124동 1228호", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "rrn", "start": 16, "end": 30}, {"kind": "address", "start": 57, "end": 93}], "difficulty": "hard"}
-{"text": "대전광역시 판교역로119길 16 더샵아파트 107동 747호에 거주하는 최경님께 우편을 발송했습니다.", "labels": [{"kind": "address", "start": 0, "end": 33}, {"kind": "name", "start": 40, "end": 42}], "difficulty": "hard"}
-{"text": "본인확인용 주민번호 940809-2131766와 이메일 knl0eb@example.com을 제출합니다.", "labels": [{"kind": "rrn", "start": 11, "end": 25}, {"kind": "email", "start": 31, "end": 49}], "difficulty": "easy"}
-{"text": "가입자 허원연, 주민번호 011010-2627461 기준으로 보험료가 산정되었습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "rrn", "start": 14, "end": 28}], "difficulty": "easy"}
-{"text": "결제 금액 ORD-20250804-2070, 영수증은 svzf49dj@testcorp.io로 발송됩니다.", "labels": [{"kind": "email", "start": 30, "end": 50}], "difficulty": "easy"}
-{"text": "정기결제 등록: 카드 3467-749649-90918, 명의자 손현규, 연락처 011-4335-1330", "labels": [{"kind": "card", "start": 12, "end": 29}, {"kind": "name", "start": 35, "end": 38}, {"kind": "phone", "start": 44, "end": 57}], "difficulty": "easy"}
-{"text": "서버 점검은 매주 화요일 새벽에 진행됩니다.", "labels": [], "difficulty": "negative"}
-{"text": "고객 신재훈님 018-7699-4771로 연락 부탁드립니다.", "labels": [{"kind": "name", "start": 3, "end": 6}, {"kind": "phone", "start": 8, "end": 21}], "difficulty": "easy"}
-{"text": "사업자등록번호는 2025.08.03이며, 배송지 우편번호는 969,790원입니다.", "labels": [], "difficulty": "negative"}
-{"text": "최진우 선생님께 fjfc3w48qr@demo-corp.com로 성적 자료를 전달했습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "email", "start": 9, "end": 33}], "difficulty": "easy"}
-{"text": "지원자 송연 이력서 접수 — 연락처 +82.10.7078.5280, 이메일 jd94v9.yj@example.com", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "phone", "start": 20, "end": 36}, {"kind": "email", "start": 42, "end": 63}], "difficulty": "hard"}
-{"text": "전입신고 대상자: 안규재, 신주소: 대전광역시 종로구 청운동 600-14, 연락처: 019-8056-1494", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "address", "start": 20, "end": 40}, {"kind": "phone", "start": 47, "end": 60}], "difficulty": "easy"}
-{"text": "환자명 한성, 주민번호 200614 2377771, 보호자 연락처 +82 10 5153 4135로 등록되었습니다.", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "rrn", "start": 13, "end": 27}, {"kind": "phone", "start": 37, "end": 53}], "difficulty": "hard"}
-{"text": "자택 010 8889 7569, 직장 +82.18.5927.8167 두 번호 모두 등록해 주세요.", "labels": [{"kind": "phone", "start": 3, "end": 16}, {"kind": "phone", "start": 21, "end": 37}], "difficulty": "hard"}
-{"text": "본인확인용 주민번호 700310-4915219와 이메일 e.wifuud@mail-test.kr을 제출합니다.", "labels": [{"kind": "rrn", "start": 11, "end": 25}, {"kind": "email", "start": 31, "end": 52}], "difficulty": "easy"}
-{"text": "가입자 백은연, 주민번호 651209-4632423 기준으로 보험료가 산정되었습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "rrn", "start": 14, "end": 28}], "difficulty": "easy"}
-{"text": "민원인 송은찬님, 주민등록번호 760924-1091500로 접수된 건 처리 완료되었습니다. 회신 주소: 대전광역시 성남시 분당구 정자동 349-17", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "rrn", "start": 17, "end": 31}, {"kind": "address", "start": 58, "end": 82}], "difficulty": "easy"}
-{"text": "오늘 회의록: 작성자 양아인, 문의는 vy6qrm2n8@testmail.net로.", "labels": [{"kind": "name", "start": 12, "end": 15}, {"kind": "email", "start": 21, "end": 43}], "difficulty": "easy"}
-{"text": "서우혜님 앞, 울산광역시 성남시 분당구 정자동 45-11로 배송 중입니다. 수령 전 019-7749-6246로 연락드릴 수 있습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "address", "start": 8, "end": 31}, {"kind": "phone", "start": 47, "end": 60}], "difficulty": "easy"}
-{"text": "전입신고 대상자: 이은수, 신주소: 대구광역시 해운대구 우동 891-4, 연락처: 017-1633-8617", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "address", "start": 20, "end": 39}, {"kind": "phone", "start": 46, "end": 59}], "difficulty": "easy"}
-{"text": "환불 처리를 위해 정빈혜님의 카드번호 4174-5961-5865-7808를 확인했습니다. 문의: 018-1121-3846", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "card", "start": 21, "end": 40}, {"kind": "phone", "start": 54, "end": 67}], "difficulty": "easy"}
-{"text": "안녕하세요, 저는 양지이고 전화번호는 019.1646.7269입니다.", "labels": [{"kind": "name", "start": 10, "end": 12}, {"kind": "phone", "start": 21, "end": 34}], "difficulty": "hard"}
-{"text": "사업자등록번호는 ORD-20240626-1919이며, 배송지 우편번호는 2022.06.14입니다.", "labels": [], "difficulty": "negative"}
-{"text": "송장번호 21140로 배송이 시작되었습니다.", "labels": [], "difficulty": "negative"}
-{"text": "송장번호 522,841원로 배송이 시작되었습니다.", "labels": [], "difficulty": "negative"}
-{"text": "안녕하세요, 저는 권규준이고 전화번호는 017-4183-0153입니다.", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "phone", "start": 22, "end": 35}], "difficulty": "easy"}
-{"text": "주문번호 2025.09.06, 고객 박재님 016.6951.4097로 발송 예정입니다.", "labels": [{"kind": "name", "start": 20, "end": 22}, {"kind": "phone", "start": 24, "end": 37}], "difficulty": "hard"}
-{"text": "본인확인용 주민번호 610208 4749633와 이메일 kza4oa62@mail-sample.kr을 제출합니다.", "labels": [{"kind": "rrn", "start": 11, "end": 25}, {"kind": "email", "start": 31, "end": 54}], "difficulty": "hard"}
-{"text": "정기결제 등록: 카드 5195339421047099, 명의자 오경, 연락처 +821653526807", "labels": [{"kind": "card", "start": 12, "end": 28}, {"kind": "name", "start": 34, "end": 36}, {"kind": "phone", "start": 42, "end": 55}], "difficulty": "hard"}
-{"text": "서버 점검은 매주 화요일 새벽에 진행됩니다.", "labels": [], "difficulty": "negative"}
-{"text": "지원자 안예 이력서 접수 — 연락처 016.7894.4835, 이메일 63rc1izyo5@sample-mail.net", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "phone", "start": 20, "end": 33}, {"kind": "email", "start": 39, "end": 65}], "difficulty": "hard"}
-{"text": "송장번호 ORD-20250904-8451로 배송이 시작되었습니다.", "labels": [], "difficulty": "negative"}
-{"text": "서인님 앞, 광주광역시 판교역로56길 87 자이아파트 116동 152호로 배송 중입니다. 수령 전 018 5374 9995로 연락드릴 수 있습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "address", "start": 7, "end": 39}, {"kind": "phone", "start": 55, "end": 68}], "difficulty": "hard"}
+{"text": "ruj6pht1hl@sample-mail.net로 회신 주시면 안재하 담당자가 답변드립니다.", "labels": [{"kind": "email", "start": 0, "end": 26}, {"kind": "name", "start": 35, "end": 38}], "difficulty": "easy"}
 {"text": "이번 분기 매출 목표는 지난해 대비 12% 증가입니다.", "labels": [], "difficulty": "negative"}
-{"text": "사업자등록번호 2025.07.04 / 담당자 정서 / 이메일 lsd6f@mail-sample.kr", "labels": [{"kind": "name", "start": 25, "end": 27}, {"kind": "email", "start": 34, "end": 54}], "difficulty": "hard"}
-{"text": "양경님 앞, 부산광역시 센텀중앙로51길 63 힐스테이트아파트 114동 673호로 배송 중입니다. 수령 전 01172647285로 연락드릴 수 있습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "address", "start": 7, "end": 43}, {"kind": "phone", "start": 59, "end": 70}], "difficulty": "hard"}
-{"text": "배송지: 광주광역시 판교역로279길 83 푸르지오아파트 102동 916호 (수령인 장현, 01715013475)", "labels": [{"kind": "address", "start": 5, "end": 40}, {"kind": "name", "start": 46, "end": 48}, {"kind": "phone", "start": 50, "end": 61}], "difficulty": "hard"}
-{"text": "신청자: 배윤우 / 연락처: 011-9250-3362 / 이메일: 4uv4i@sample.org", "labels": [{"kind": "name", "start": 5, "end": 8}, {"kind": "phone", "start": 16, "end": 29}, {"kind": "email", "start": 37, "end": 53}], "difficulty": "easy"}
-{"text": "울산광역시 종로구 청운동 134-18에 거주하는 장석도님께 우편을 발송했습니다.", "labels": [{"kind": "address", "start": 0, "end": 20}, {"kind": "name", "start": 27, "end": 30}], "difficulty": "easy"}
+{"text": "윤민지님 앞, 광주광역시 강남구 역삼동 235-3로 배송 중입니다. 수령 전 053-526-3899로 연락드릴 수 있습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "address", "start": 8, "end": 27}, {"kind": "phone", "start": 43, "end": 55}], "difficulty": "easy"}
+{"text": "환불 처리를 위해 심정영님의 카드번호 3773-763116-56671를 확인했습니다. 문의: 031-062-6596", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "card", "start": 21, "end": 38}, {"kind": "phone", "start": 52, "end": 64}], "difficulty": "easy"}
+{"text": "안녕하세요, 저는 조현진이고 전화번호는 017-3006-4563입니다.", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "phone", "start": 22, "end": 35}], "difficulty": "easy"}
+{"text": "민원인 배혜진님, 주민등록번호 061118-1122240로 접수된 건 처리 완료되었습니다. 회신 주소: 울산광역시 수영구 광안동 171-14", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "rrn", "start": 17, "end": 31}, {"kind": "address", "start": 58, "end": 78}], "difficulty": "easy"}
+{"text": "주문번호 ORD-20240701-7396, 고객 장예님 019.9105.7973로 발송 예정입니다.", "labels": [{"kind": "name", "start": 27, "end": 29}, {"kind": "phone", "start": 31, "end": 44}], "difficulty": "hard"}
+{"text": "사업자등록번호는 62,324원이며, 배송지 우편번호는 ORD-20260602-1821입니다.", "labels": [], "difficulty": "negative"}
+{"text": "신청자: 안지혜 / 연락처: 018-1113-3853 / 이메일: e6jvwpvt@testmail.net", "labels": [{"kind": "name", "start": 5, "end": 8}, {"kind": "phone", "start": 16, "end": 29}, {"kind": "email", "start": 37, "end": 58}], "difficulty": "easy"}
+{"text": "유아재님의 이체 알림: 문의는 010-0152-7508 또는 chj866n+zw9xa3@demo-corp.com로 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "phone", "start": 17, "end": 30}, {"kind": "email", "start": 34, "end": 62}], "difficulty": "easy"}
+{"text": "서버 점검은 매주 화요일 새벽에 진행됩니다.", "labels": [], "difficulty": "negative"}
+{"text": "대전광역시 노원구 상계동 216-11에 거주하는 조성규님께 우편을 발송했습니다.", "labels": [{"kind": "address", "start": 0, "end": 20}, {"kind": "name", "start": 27, "end": 30}], "difficulty": "easy"}
+{"text": "주문번호 ORD-20241114-5533, 고객 이민님 +82.19.4291.2647로 발송 예정입니다.", "labels": [{"kind": "name", "start": 27, "end": 29}, {"kind": "phone", "start": 31, "end": 47}], "difficulty": "hard"}
+{"text": "신규 입사자 김하님의 4대보험 등록을 위해 주민번호 8803181483935가 필요합니다.", "labels": [{"kind": "name", "start": 7, "end": 9}, {"kind": "rrn", "start": 29, "end": 42}], "difficulty": "hard"}
+{"text": "주문번호 FF210373808KR, 고객 오원님 +82 17 2532 3878로 발송 예정입니다. 자택 +821167550406, 직장 +821667454065 두 번호 모두 등록해 주세요.", "labels": [{"kind": "name", "start": 23, "end": 25}, {"kind": "phone", "start": 27, "end": 43}, {"kind": "phone", "start": 58, "end": 71}, {"kind": "phone", "start": 76, "end": 89}], "difficulty": "hard"}
+{"text": "학생 허서혜(학부모 연락처 011-7541-5728)의 결석계가 접수되었습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}, {"kind": "phone", "start": 15, "end": 28}], "difficulty": "easy"}
+{"text": "안녕하세요, 저는 김성현이고 전화번호는 016-1137-4573입니다.", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "phone", "start": 22, "end": 35}], "difficulty": "easy"}
+{"text": "결제 금액 ORD-20240506-5349, 영수증은 eq0lw@testcorp.io로 발송됩니다.", "labels": [{"kind": "email", "start": 30, "end": 47}], "difficulty": "hard"}
 {"text": "회의는 내일 오후 2시에 진행됩니다.", "labels": [], "difficulty": "negative"}
-{"text": "결제일 618,457원, 결제 금액 AG236105947KR.", "labels": [], "difficulty": "negative"}
-{"text": "환불 처리를 위해 박연재님의 카드번호 5389-1783-9084-7006를 확인했습니다. 문의: 017-6580-6984", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "card", "start": 21, "end": 40}, {"kind": "phone", "start": 54, "end": 67}], "difficulty": "easy"}
-{"text": "심재님 카드번호 4159212499856989로 결제가 완료되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "card", "start": 9, "end": 25}], "difficulty": "hard"}
-{"text": "배송지: 울산광역시 테헤란로283길 28 e편한세상아파트 115동 1919호 (수령인 윤빈, 017.6815.1557)", "labels": [{"kind": "address", "start": 5, "end": 42}, {"kind": "name", "start": 48, "end": 50}, {"kind": "phone", "start": 52, "end": 65}], "difficulty": "hard"}
-{"text": "장율님의 이체 알림: 문의는 01710991494 또는 dd14u@sample-mail.net로 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "phone", "start": 16, "end": 27}, {"kind": "email", "start": 31, "end": 52}], "difficulty": "hard"}
-{"text": "허성 님의 진료 예약이 확정되었습니다. 문의: 019.0842.4712", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "phone", "start": 26, "end": 39}], "difficulty": "hard"}
-{"text": "배송지: 대구광역시 동성로109길 20 더샵아파트 116동 560호 (수령인 허하, 016.1882.4564)", "labels": [{"kind": "address", "start": 5, "end": 37}, {"kind": "name", "start": 43, "end": 45}, {"kind": "phone", "start": 47, "end": 60}], "difficulty": "hard"}
-{"text": "자택 018 9121 0430, 직장 019 4381 0474 두 번호 모두 등록해 주세요.", "labels": [{"kind": "phone", "start": 3, "end": 16}, {"kind": "phone", "start": 21, "end": 34}], "difficulty": "hard"}
-{"text": "사업자등록번호는 JE253815116KR이며, 배송지 우편번호는 09-3324-1502입니다.", "labels": [], "difficulty": "negative"}
+{"text": "박성예 선생님께 xye7sym@biz.sample.org로 성적 자료를 전달했습니다. 양정도님의 이체 알림: 문의는 016-6653-8977 또는 lh3wl@testmail.net로 부탁드립니다. 4148-9513-4332-0031 카드로 결제 시도가 감지되어 황호혜님께 062-9431-3185로 확인 연락드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "email", "start": 9, "end": 31}, {"kind": "name", "start": 48, "end": 51}, {"kind": "phone", "start": 65, "end": 78}, {"kind": "email", "start": 82, "end": 100}, {"kind": "card", "start": 110, "end": 129}, {"kind": "name", "start": 146, "end": 149}, {"kind": "phone", "start": 152, "end": 165}], "difficulty": "easy"}
+{"text": "안녕하세요, 저는 정규이고 전화번호는 010 6965 3585입니다.", "labels": [{"kind": "name", "start": 10, "end": 12}, {"kind": "phone", "start": 21, "end": 34}], "difficulty": "hard"}
+{"text": "다음 회의 안건은 예산 검토와 일정 조정입니다.", "labels": [], "difficulty": "negative"}
+{"text": "주문번호 567-27-70901가 정상 접수되었습니다.", "labels": [], "difficulty": "negative"}
+{"text": "결제 금액 701738-4940790, 영수증은 1rjjx2@testmail.net로 발송됩니다.", "labels": [{"kind": "email", "start": 27, "end": 46}], "difficulty": "hard"}
+{"text": "사업자등록번호는 285,913원이며, 배송지 우편번호는 HN248578017KR입니다.", "labels": [], "difficulty": "negative"}
+{"text": "송장번호 56295로 배송이 시작되었습니다.", "labels": [], "difficulty": "negative"}
+{"text": "송장번호 00-9890-8633로 배송이 시작되었습니다.", "labels": [], "difficulty": "negative"}
+{"text": "학생 남원(학부모 연락처 +82 10 9432 6232)의 결석계가 접수되었습니다.", "labels": [{"kind": "name", "start": 3, "end": 5}, {"kind": "phone", "start": 14, "end": 30}], "difficulty": "hard"}
+{"text": "정기결제 등록: 카드 5468893734670658, 명의자 고성, 연락처 +82.17.2091.8751", "labels": [{"kind": "card", "start": 12, "end": 28}, {"kind": "name", "start": 34, "end": 36}, {"kind": "phone", "start": 42, "end": 58}], "difficulty": "hard"}
+{"text": "송장번호 ORD-20241114-3223로 배송이 시작되었습니다.", "labels": [], "difficulty": "negative"}
+{"text": "학생 한현(학부모 연락처 017.4558.6906)의 결석계가 접수되었습니다.", "labels": [{"kind": "name", "start": 3, "end": 5}, {"kind": "phone", "start": 14, "end": 27}], "difficulty": "hard"}
+{"text": "결제 금액 FB799816232KR, 영수증은 19haf+uh@demo-corp.com로 발송됩니다. 긴급 연락처 019-1876-2683, 자택 주소는 대전광역시 마포구 합정동 593-1입니다.", "labels": [{"kind": "email", "start": 26, "end": 48}, {"kind": "phone", "start": 64, "end": 77}, {"kind": "address", "start": 86, "end": 105}], "difficulty": "easy"}
+{"text": "학생 문현(학부모 연락처 0447134941)의 결석계가 접수되었습니다.", "labels": [{"kind": "name", "start": 3, "end": 5}, {"kind": "phone", "start": 14, "end": 24}], "difficulty": "hard"}
+{"text": "3705-865185-06712 카드로 결제 시도가 감지되어 신율규님께 062-445-2885로 확인 연락드립니다.", "labels": [{"kind": "card", "start": 0, "end": 17}, {"kind": "name", "start": 34, "end": 37}, {"kind": "phone", "start": 40, "end": 52}], "difficulty": "easy"}
+{"text": "반품 신청자 배예, 환불 계좌 확인을 위해 연락처 +82 17 7136 9707를 남겨주세요.", "labels": [{"kind": "name", "start": 7, "end": 9}, {"kind": "phone", "start": 28, "end": 44}], "difficulty": "hard"}
+{"text": "인천광역시 수영구 광안동 769-15에 거주하는 전호성님께 우편을 발송했습니다.", "labels": [{"kind": "address", "start": 0, "end": 20}, {"kind": "name", "start": 27, "end": 30}], "difficulty": "easy"}
+{"text": "전입신고 대상자: 조율, 신주소: 울산광역시 판교역로175길 36 힐스테이트아파트 123동 1903호, 연락처: 064.087.3954 환불 처리를 위해 신연님의 카드번호 343777014363492를 확인했습니다. 문의: 064.6971.9017", "labels": [{"kind": "name", "start": 10, "end": 12}, {"kind": "address", "start": 19, "end": 56}, {"kind": "phone", "start": 63, "end": 75}, {"kind": "name", "start": 86, "end": 88}, {"kind": "card", "start": 96, "end": 111}, {"kind": "phone", "start": 125, "end": 138}], "difficulty": "hard"}
+{"text": "오늘 회의록: 작성자 장우, 문의는 0l19z+jv1v9@testmail.net로.", "labels": [{"kind": "name", "start": 12, "end": 14}, {"kind": "email", "start": 20, "end": 44}], "difficulty": "hard"}
+{"text": "서울특별시 강남구 역삼동 567-10에 거주하는 문은규님께 우편을 발송했습니다.", "labels": [{"kind": "address", "start": 0, "end": 20}, {"kind": "name", "start": 27, "end": 30}], "difficulty": "easy"}
+{"text": "임연재님 앞, 대전광역시 종로구 청운동 989-2로 배송 중입니다. 수령 전 017-1869-1070로 연락드릴 수 있습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "address", "start": 8, "end": 27}, {"kind": "phone", "start": 43, "end": 56}], "difficulty": "easy"}
+{"text": "9djupww2o@demo-corp.com로 회신 주시면 신아영 담당자가 답변드립니다. 반품 신청자 이호경, 환불 계좌 확인을 위해 연락처 011-3457-4335를 남겨주세요.", "labels": [{"kind": "email", "start": 0, "end": 23}, {"kind": "name", "start": 32, "end": 35}, {"kind": "name", "start": 56, "end": 59}, {"kind": "phone", "start": 78, "end": 91}], "difficulty": "easy"}
+{"text": "신규 입사자 박도민님의 4대보험 등록을 위해 주민번호 571220-4381750가 필요합니다.", "labels": [{"kind": "name", "start": 7, "end": 10}, {"kind": "rrn", "start": 30, "end": 44}], "difficulty": "easy"}
+{"text": "사업자등록번호는 2025.08.03이며, 배송지 우편번호는 969,790원입니다.", "labels": [], "difficulty": "negative"}
+{"text": "최진우 선생님께 fjfc3w48qr@testcorp.io로 성적 자료를 전달했습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "email", "start": 9, "end": 31}], "difficulty": "easy"}
+{"text": "반품 신청자 이정빈, 환불 계좌 확인을 위해 연락처 018-4102-0423를 남겨주세요.", "labels": [{"kind": "name", "start": 7, "end": 10}, {"kind": "phone", "start": 29, "end": 42}], "difficulty": "easy"}
+{"text": "회의는 내일 오후 2시에 진행됩니다.", "labels": [], "difficulty": "negative"}
+{"text": "이원님 앞, 울산광역시 월드컵로241길 67 더샵아파트 115동 1977호로 배송 중입니다. 수령 전 018.7141.8056로 연락드릴 수 있습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "address", "start": 7, "end": 41}, {"kind": "phone", "start": 57, "end": 70}], "difficulty": "hard"}
+{"text": "환자명 한성, 주민번호 200614 2377771, 보호자 연락처 010 5153 4135로 등록되었습니다.", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "rrn", "start": 13, "end": 27}, {"kind": "phone", "start": 37, "end": 50}], "difficulty": "hard"}
+{"text": "자택 +82 10 8889 7569, 직장 018.5927.8167 두 번호 모두 등록해 주세요.", "labels": [{"kind": "phone", "start": 3, "end": 19}, {"kind": "phone", "start": 24, "end": 37}], "difficulty": "hard"}
+{"text": "대구광역시 종로구 청운동 950-10에 거주하는 권정훈님께 우편을 발송했습니다.", "labels": [{"kind": "address", "start": 0, "end": 20}, {"kind": "name", "start": 27, "end": 30}], "difficulty": "easy"}
+{"text": "오늘 회의록: 작성자 송민진, 문의는 d.7re4s0@demo-corp.com로. 전입신고 대상자: 황우재, 신주소: 대구광역시 종로구 청운동 393-7, 연락처: 064-884-1143", "labels": [{"kind": "name", "start": 12, "end": 15}, {"kind": "email", "start": 21, "end": 43}, {"kind": "name", "start": 56, "end": 59}, {"kind": "address", "start": 66, "end": 85}, {"kind": "phone", "start": 92, "end": 104}], "difficulty": "easy"}
+{"text": "환자명 심석, 주민번호 000524 4769314, 보호자 연락처 06354469042로 등록되었습니다.", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "rrn", "start": 13, "end": 27}, {"kind": "phone", "start": 37, "end": 48}], "difficulty": "hard"}
+{"text": "자택 +821193686274, 직장 +821707155213 두 번호 모두 등록해 주세요.", "labels": [{"kind": "phone", "start": 3, "end": 16}, {"kind": "phone", "start": 21, "end": 34}], "difficulty": "hard"}
+{"text": "학생 고석(학부모 연락처 +82 17 0606 2068)의 결석계가 접수되었습니다.", "labels": [{"kind": "name", "start": 3, "end": 5}, {"kind": "phone", "start": 14, "end": 30}], "difficulty": "hard"}
+{"text": "자택 033-0251-2361, 직장 019-2529-1225 두 번호 모두 등록해 주세요.", "labels": [{"kind": "phone", "start": 3, "end": 16}, {"kind": "phone", "start": 21, "end": 34}], "difficulty": "easy"}
+{"text": "반품 신청자 문찬, 환불 계좌 확인을 위해 연락처 016 8742 6226를 남겨주세요.", "labels": [{"kind": "name", "start": 7, "end": 9}, {"kind": "phone", "start": 28, "end": 41}], "difficulty": "hard"}
+{"text": "자택 010 3846 4708, 직장 +821716121646 두 번호 모두 등록해 주세요.", "labels": [{"kind": "phone", "start": 3, "end": 16}, {"kind": "phone", "start": 21, "end": 34}], "difficulty": "hard"}
+{"text": "신청자: 한석서 / 연락처: 016-7056-2385 / 이메일: tu3gc6@testmail.net", "labels": [{"kind": "name", "start": 5, "end": 8}, {"kind": "phone", "start": 16, "end": 29}, {"kind": "email", "start": 37, "end": 56}], "difficulty": "easy"}
+{"text": "민원인 장성님, 주민등록번호 590522 1096817로 접수된 건 처리 완료되었습니다. 회신 주소: 대전광역시 동성로154길 82 e편한세상아파트 123동 613호", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "rrn", "start": 16, "end": 30}, {"kind": "address", "start": 57, "end": 92}], "difficulty": "hard"}
+{"text": "자택 017.9370.5881, 직장 019 4837 0359 두 번호 모두 등록해 주세요.", "labels": [{"kind": "phone", "start": 3, "end": 16}, {"kind": "phone", "start": 21, "end": 34}], "difficulty": "hard"}
+{"text": "고객 전혜님 +82 10 9935 8138로 연락 부탁드립니다.", "labels": [{"kind": "name", "start": 3, "end": 5}, {"kind": "phone", "start": 7, "end": 23}], "difficulty": "hard"}
+{"text": "반품 신청자 배율우, 환불 계좌 확인을 위해 연락처 018-4106-2240를 남겨주세요.", "labels": [{"kind": "name", "start": 7, "end": 10}, {"kind": "phone", "start": 29, "end": 42}], "difficulty": "easy"}
+{"text": "오늘 회의록: 작성자 배재서, 문의는 ne7mph36n@demo-corp.com로.", "labels": [{"kind": "name", "start": 12, "end": 15}, {"kind": "email", "start": 21, "end": 44}], "difficulty": "easy"}
+{"text": "결제 금액 2025.06.26, 영수증은 rc1iz@testcorp.io로 발송됩니다.", "labels": [{"kind": "email", "start": 23, "end": 40}], "difficulty": "hard"}
+{"text": "고객 장진님 05160861775로 연락 부탁드립니다.", "labels": [{"kind": "name", "start": 3, "end": 5}, {"kind": "phone", "start": 7, "end": 18}], "difficulty": "hard"}
+{"text": "사업자등록번호 680,112원 / 담당자 박규 / 이메일 7lpf9lsd@sample.org", "labels": [{"kind": "name", "start": 23, "end": 25}, {"kind": "email", "start": 32, "end": 51}], "difficulty": "hard"}
+{"text": "양경님 앞, 부산광역시 센텀중앙로51길 63 힐스테이트아파트 114동 673호로 배송 중입니다. 수령 전 +821172647285로 연락드릴 수 있습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "address", "start": 7, "end": 43}, {"kind": "phone", "start": 59, "end": 72}], "difficulty": "hard"}
+{"text": "오진정님의 이체 알림: 문의는 054-407-4520 또는 994dhx@example.com로 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "phone", "start": 17, "end": 29}, {"kind": "email", "start": 33, "end": 51}], "difficulty": "easy"}
+{"text": "서버 점검은 매주 화요일 새벽에 진행됩니다.", "labels": [], "difficulty": "negative"}
+{"text": "조인혜님 앞, 부산광역시 해운대구 우동 793-5로 배송 중입니다. 수령 전 02-2370-2129로 연락드릴 수 있습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "address", "start": 8, "end": 27}, {"kind": "phone", "start": 43, "end": 55}], "difficulty": "easy"}
+{"text": "허민은님의 이체 알림: 문의는 011-9647-5304 또는 gb1t1@sample-mail.net로 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "phone", "start": 17, "end": 30}, {"kind": "email", "start": 34, "end": 55}], "difficulty": "easy"}
+{"text": "주문번호 ORD-20261117-5941가 정상 접수되었습니다.", "labels": [], "difficulty": "negative"}
+{"text": "전입신고 대상자: 허찬빈, 신주소: 광주광역시 마포구 합정동 503-15, 연락처: 010-5277-9966", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "address", "start": 20, "end": 40}, {"kind": "phone", "start": 47, "end": 60}], "difficulty": "easy"}
+{"text": "서버 점검은 매주 화요일 새벽에 진행됩니다.", "labels": [], "difficulty": "negative"}
+{"text": "학생 홍수(학부모 연락처 061.812.1874)의 결석계가 접수되었습니다.", "labels": [{"kind": "name", "start": 3, "end": 5}, {"kind": "phone", "start": 14, "end": 26}], "difficulty": "hard"}
+{"text": "권정우 선생님께 mqpdpynf@mail.mail-test.kr로 성적 자료를 전달했습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "email", "start": 9, "end": 35}], "difficulty": "easy"}
+{"text": "이번 분기 매출 목표는 지난해 대비 12% 증가입니다.", "labels": [], "difficulty": "negative"}
+{"text": "신규 입사자 이영진님의 4대보험 등록을 위해 주민번호 850214-4872078가 필요합니다.", "labels": [{"kind": "name", "start": 7, "end": 10}, {"kind": "rrn", "start": 30, "end": 44}], "difficulty": "easy"}
+{"text": "결제 금액 2024.05.12, 영수증은 vhyie@team.sample-mail.net로 발송됩니다.", "labels": [{"kind": "email", "start": 23, "end": 49}], "difficulty": "easy"}
+{"text": "반품 신청자 심성인, 환불 계좌 확인을 위해 연락처 010-2955-4477를 남겨주세요.", "labels": [{"kind": "name", "start": 7, "end": 10}, {"kind": "phone", "start": 29, "end": 42}], "difficulty": "easy"}
+{"text": "김도 님의 진료 예약이 확정되었습니다. 문의: 0551450502", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "phone", "start": 26, "end": 36}], "difficulty": "hard"}
 {"text": "주문번호 08-8432-6585가 정상 접수되었습니다.", "labels": [], "difficulty": "negative"}
 {"text": "사업자등록번호는 UP191221925KR이며, 배송지 우편번호는 ORD-20240325-1815입니다.", "labels": [], "difficulty": "negative"}
-{"text": "민원인 고빈님, 주민등록번호 7708144282555로 접수된 건 처리 완료되었습니다. 회신 주소: 대전광역시 센텀중앙로57길 37 더샵아파트 122동 1315호", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "rrn", "start": 16, "end": 29}, {"kind": "address", "start": 56, "end": 90}], "difficulty": "hard"}
-{"text": "신청자: 윤찬 / 연락처: +82 11 4938 3460 / 이메일: 2kespe@testmail.net", "labels": [{"kind": "name", "start": 5, "end": 7}, {"kind": "phone", "start": 15, "end": 31}, {"kind": "email", "start": 39, "end": 58}], "difficulty": "hard"}
-{"text": "서혜 환자분, 주민등록번호 550115 1410330 확인되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "rrn", "start": 15, "end": 29}], "difficulty": "hard"}
-{"text": "오늘 회의록: 작성자 최찬, 문의는 9g9rz@sample-mail.net로.", "labels": [{"kind": "name", "start": 12, "end": 14}, {"kind": "email", "start": 20, "end": 41}], "difficulty": "hard"}
-{"text": "이번 분기 매출 목표는 지난해 대비 12% 증가입니다.", "labels": [], "difficulty": "negative"}
-{"text": "송장번호 505-49-54500로 배송이 시작되었습니다.", "labels": [], "difficulty": "negative"}
-{"text": "서버 점검은 매주 화요일 새벽에 진행됩니다.", "labels": [], "difficulty": "negative"}
-{"text": "이번 분기 매출 목표는 지난해 대비 12% 증가입니다.", "labels": [], "difficulty": "negative"}
-{"text": "주문번호 JY793039113KR, 고객 백은우님 010-2399-4193로 발송 예정입니다.", "labels": [{"kind": "name", "start": 23, "end": 26}, {"kind": "phone", "start": 28, "end": 41}], "difficulty": "easy"}
-{"text": "서버 점검은 매주 화요일 새벽에 진행됩니다.", "labels": [], "difficulty": "negative"}
-{"text": "긴급 연락처 019-8095-7601, 자택 주소는 울산광역시 노원구 상계동 779-19입니다.", "labels": [{"kind": "phone", "start": 7, "end": 20}, {"kind": "address", "start": 29, "end": 49}], "difficulty": "easy"}
-{"text": "자택 +82 17 1118 7682, 직장 016.9689.0920 두 번호 모두 등록해 주세요.", "labels": [{"kind": "phone", "start": 3, "end": 19}, {"kind": "phone", "start": 24, "end": 37}], "difficulty": "hard"}
-{"text": "오늘 회의록: 작성자 권재서, 문의는 nkx.d@testcorp.io로.", "labels": [{"kind": "name", "start": 12, "end": 15}, {"kind": "email", "start": 21, "end": 38}], "difficulty": "easy"}
-{"text": "민원인 심석영님, 주민등록번호 411016-1081098로 접수된 건 처리 완료되었습니다. 회신 주소: 인천광역시 마포구 합정동 831-11", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "rrn", "start": 17, "end": 31}, {"kind": "address", "start": 58, "end": 78}], "difficulty": "easy"}
-{"text": "지원자 유도서 이력서 접수 — 연락처 011-7172-7199, 이메일 tfnkpmw3x@mail-test.kr", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "phone", "start": 21, "end": 34}, {"kind": "email", "start": 40, "end": 62}], "difficulty": "easy"}
-{"text": "오늘 회의록: 작성자 장경, 문의는 9wfdy7lyye@mail-test.kr로.", "labels": [{"kind": "name", "start": 12, "end": 14}, {"kind": "email", "start": 20, "end": 43}], "difficulty": "hard"}
-{"text": "가입자 배윤, 주민번호 851227 1846750 기준으로 보험료가 산정되었습니다.", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "rrn", "start": 13, "end": 27}], "difficulty": "hard"}
-{"text": "임도현 님의 진료 예약이 확정되었습니다. 문의: 016-7967-3145", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "phone", "start": 27, "end": 40}], "difficulty": "easy"}
-{"text": "서버 점검은 매주 화요일 새벽에 진행됩니다.", "labels": [], "difficulty": "negative"}
-{"text": "사업자등록번호는 619-79-79013이며, 배송지 우편번호는 ORD-20260625-3147입니다.", "labels": [], "difficulty": "negative"}
-{"text": "긴급 연락처 011-2712-7170, 자택 주소는 서울특별시 성남시 분당구 정자동 374-8입니다.", "labels": [{"kind": "phone", "start": 7, "end": 20}, {"kind": "address", "start": 29, "end": 52}], "difficulty": "easy"}
-{"text": "정기결제 등록: 카드 5538347359774689, 명의자 안빈, 연락처 01822674096", "labels": [{"kind": "card", "start": 12, "end": 28}, {"kind": "name", "start": 34, "end": 36}, {"kind": "phone", "start": 42, "end": 53}], "difficulty": "hard"}
+{"text": "전입신고 대상자: 홍재, 신주소: 인천광역시 판교역로111길 66 래미안아파트 112동 981호, 연락처: 01997177972", "labels": [{"kind": "name", "start": 10, "end": 12}, {"kind": "address", "start": 19, "end": 53}, {"kind": "phone", "start": 60, "end": 71}], "difficulty": "hard"}
+{"text": "학생 홍서민(학부모 연락처 011-2248-4186)의 결석계가 접수되었습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}, {"kind": "phone", "start": 15, "end": 28}], "difficulty": "easy"}
+{"text": "긴급 연락처 01937708196, 자택 주소는 대구광역시 판교역로37길 51 더샵아파트 102동 994호입니다. 고객 권예님 +821870339394로 연락 부탁드립니다. 학생 문규(학부모 연락처 017.0341.5321)의 결석계가 접수되었습니다.", "labels": [{"kind": "phone", "start": 7, "end": 18}, {"kind": "address", "start": 27, "end": 59}, {"kind": "name", "start": 67, "end": 69}, {"kind": "phone", "start": 71, "end": 84}, {"kind": "name", "start": 100, "end": 102}, {"kind": "phone", "start": 111, "end": 124}], "difficulty": "hard"}
 {"text": "다음 회의 안건은 예산 검토와 일정 조정입니다.", "labels": [], "difficulty": "negative"}
-{"text": "허수혜님 카드번호 4412-4782-6137-5069로 결제가 완료되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "card", "start": 10, "end": 29}], "difficulty": "easy"}
-{"text": "결제일 405,924원, 결제 금액 483-38-13694.", "labels": [], "difficulty": "negative"}
-{"text": "담당자가 문규윤에서 배은서으로 변경되었습니다. 새 연락처: 016-7740-2273", "labels": [{"kind": "name", "start": 5, "end": 8}, {"kind": "name", "start": 11, "end": 14}, {"kind": "phone", "start": 33, "end": 46}], "difficulty": "easy"}
+{"text": "허하우 선생님께 vtolmmgs+g1m8xf@corp.mail-test.kr로 성적 자료를 전달했습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "email", "start": 9, "end": 42}], "difficulty": "easy"}
+{"text": "서버 점검은 매주 화요일 새벽에 진행됩니다.", "labels": [], "difficulty": "negative"}
+{"text": "결제 금액 871639-3906228, 영수증은 lqrx3vncrb@mail.demo-corp.com로 발송됩니다.", "labels": [{"kind": "email", "start": 27, "end": 56}], "difficulty": "easy"}
+{"text": "송석님 앞, 광주광역시 테헤란로231길 74 더샵아파트 107동 759호로 배송 중입니다. 수령 전 041 461 1695로 연락드릴 수 있습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "address", "start": 7, "end": 40}, {"kind": "phone", "start": 56, "end": 68}], "difficulty": "hard"}
+{"text": "지원자 유도서 이력서 접수 — 연락처 017-7199-8586, 이메일 wn7o2zbxm@testcorp.io", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "phone", "start": 21, "end": 34}, {"kind": "email", "start": 40, "end": 61}], "difficulty": "easy"}
+{"text": "환자명 박영성, 주민번호 440521-2169010, 보호자 연락처 010-5072-9157로 등록되었습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "rrn", "start": 14, "end": 28}, {"kind": "phone", "start": 38, "end": 51}], "difficulty": "easy"}
+{"text": "문인경님의 이체 알림: 문의는 064-661-6937 또는 nngh9rifc@mail-test.kr로 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "phone", "start": 17, "end": 29}, {"kind": "email", "start": 33, "end": 55}], "difficulty": "easy"}
+{"text": "한정원님의 이체 알림: 문의는 018-6172-2527 또는 gzx70b@testmail.net로 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "phone", "start": 17, "end": 30}, {"kind": "email", "start": 34, "end": 53}], "difficulty": "easy"}
+{"text": "안녕하세요, 저는 송우이고 전화번호는 +82.17.3178.6026입니다.", "labels": [{"kind": "name", "start": 10, "end": 12}, {"kind": "phone", "start": 21, "end": 37}], "difficulty": "hard"}
+{"text": "민원인 손아님, 주민등록번호 6409143261741로 접수된 건 처리 완료되었습니다. 회신 주소: 울산광역시 판교역로27길 83 e편한세상아파트 128동 861호", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "rrn", "start": 16, "end": 29}, {"kind": "address", "start": 56, "end": 91}], "difficulty": "hard"}
+{"text": "손도준 환자분, 주민등록번호 650327-4120214 확인되었습니다. 결제 금액 857,375원, 영수증은 68ponodi@mail-test.kr로 발송됩니다. 가입자 한석은, 주민번호 040527-2912352 기준으로 보험료가 산정되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "rrn", "start": 16, "end": 30}, {"kind": "email", "start": 61, "end": 82}, {"kind": "name", "start": 95, "end": 98}, {"kind": "rrn", "start": 105, "end": 119}], "difficulty": "easy"}
 {"text": "민원인 홍민님, 주민등록번호 020507 1719327로 접수된 건 처리 완료되었습니다. 회신 주소: 서울특별시 판교역로122길 39 래미안아파트 102동 589호", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "rrn", "start": 16, "end": 30}, {"kind": "address", "start": 57, "end": 91}], "difficulty": "hard"}
 {"text": "최인 환자분, 주민등록번호 7609013941815 확인되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "rrn", "start": 15, "end": 28}], "difficulty": "hard"}
-{"text": "반품 신청자 오우영, 환불 계좌 확인을 위해 연락처 017-3068-1402를 남겨주세요.", "labels": [{"kind": "name", "start": 7, "end": 10}, {"kind": "phone", "start": 29, "end": 42}], "difficulty": "easy"}
-{"text": "안진 환자분, 주민등록번호 490802 2489295 확인되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "rrn", "start": 15, "end": 29}], "difficulty": "hard"}
-{"text": "4531952058527724 카드로 결제 시도가 감지되어 배은님께 01706054807로 확인 연락드립니다.", "labels": [{"kind": "card", "start": 0, "end": 16}, {"kind": "name", "start": 33, "end": 35}, {"kind": "phone", "start": 38, "end": 49}], "difficulty": "hard"}
-{"text": "주문번호 ORD-20250517-7524가 정상 접수되었습니다.", "labels": [], "difficulty": "negative"}
-{"text": "서울특별시 월드컵로147길 46 래미안아파트 128동 1443호에 거주하는 한준님께 우편을 발송했습니다.", "labels": [{"kind": "address", "start": 0, "end": 35}, {"kind": "name", "start": 42, "end": 44}], "difficulty": "hard"}
-{"text": "결제일 08-8204-7334, 결제 금액 ZM634211672KR.", "labels": [], "difficulty": "negative"}
-{"text": "4616928451154470 카드로 결제 시도가 감지되어 홍훈님께 +82.17.5759.7325로 확인 연락드립니다.", "labels": [{"kind": "card", "start": 0, "end": 16}, {"kind": "name", "start": 33, "end": 35}, {"kind": "phone", "start": 38, "end": 54}], "difficulty": "hard"}
+{"text": "신도님 앞, 광주광역시 테헤란로269길 47 래미안아파트 117동 1215호로 배송 중입니다. 수령 전 +82 18 9079 0333로 연락드릴 수 있습니다. 학생 허연(학부모 연락처 05402665850)의 결석계가 접수되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "address", "start": 7, "end": 42}, {"kind": "phone", "start": 58, "end": 74}, {"kind": "name", "start": 92, "end": 94}, {"kind": "phone", "start": 103, "end": 114}], "difficulty": "hard"}
+{"text": "정기결제 등록: 카드 3752-058527-72211, 명의자 문원재, 연락처 011-0717-3268", "labels": [{"kind": "card", "start": 12, "end": 29}, {"kind": "name", "start": 35, "end": 38}, {"kind": "phone", "start": 44, "end": 57}], "difficulty": "easy"}
+{"text": "지원자 서인 이력서 접수 — 연락처 031 292 5848, 이메일 6men6@testcorp.io", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "phone", "start": 20, "end": 32}, {"kind": "email", "start": 38, "end": 55}], "difficulty": "hard"}
+{"text": "다음 회의 안건은 예산 검토와 일정 조정입니다.", "labels": [], "difficulty": "negative"}
+{"text": "4616928451154470 카드로 결제 시도가 감지되어 홍훈님께 017.5759.7325로 확인 연락드립니다.", "labels": [{"kind": "card", "start": 0, "end": 16}, {"kind": "name", "start": 33, "end": 35}, {"kind": "phone", "start": 38, "end": 51}], "difficulty": "hard"}
 {"text": "결제일 00-1939-2229, 결제 금액 00-9406-3621.", "labels": [], "difficulty": "negative"}
-{"text": "자택 018-7179-0570, 직장 011-1101-3866 두 번호 모두 등록해 주세요.", "labels": [{"kind": "phone", "start": 3, "end": 16}, {"kind": "phone", "start": 21, "end": 34}], "difficulty": "easy"}
-{"text": "서영 님의 진료 예약이 확정되었습니다. 문의: 01973716077", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "phone", "start": 26, "end": 37}], "difficulty": "hard"}
-{"text": "정수율님 앞, 인천광역시 해운대구 우동 666-9로 배송 중입니다. 수령 전 011-1858-0424로 연락드릴 수 있습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "address", "start": 8, "end": 27}, {"kind": "phone", "start": 43, "end": 56}], "difficulty": "easy"}
-{"text": "지원자 서예 이력서 접수 — 연락처 +82 16 7311 3515, 이메일 k7se5q7qd@sample-mail.net", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "phone", "start": 20, "end": 36}, {"kind": "email", "start": 42, "end": 67}], "difficulty": "hard"}
-{"text": "신규 입사자 송아정님의 4대보험 등록을 위해 주민번호 201223-3473815가 필요합니다.", "labels": [{"kind": "name", "start": 7, "end": 10}, {"kind": "rrn", "start": 30, "end": 44}], "difficulty": "easy"}
-{"text": "본인확인용 주민번호 300801-2726160와 이메일 n3uwdl.0t@testcorp.io을 제출합니다.", "labels": [{"kind": "rrn", "start": 11, "end": 25}, {"kind": "email", "start": 31, "end": 52}], "difficulty": "easy"}
-{"text": "xqzm62x@sample.org로 회신 주시면 손은빈 담당자가 답변드립니다.", "labels": [{"kind": "email", "start": 0, "end": 18}, {"kind": "name", "start": 27, "end": 30}], "difficulty": "easy"}
-{"text": "담당자가 최수은에서 임도윤으로 변경되었습니다. 새 연락처: 019-3694-5669", "labels": [{"kind": "name", "start": 5, "end": 8}, {"kind": "name", "start": 11, "end": 14}, {"kind": "phone", "start": 33, "end": 46}], "difficulty": "easy"}
-{"text": "자택 +821990244496, 직장 01887401530 두 번호 모두 등록해 주세요.", "labels": [{"kind": "phone", "start": 3, "end": 16}, {"kind": "phone", "start": 21, "end": 32}], "difficulty": "hard"}
-{"text": "전은도님 앞, 광주광역시 노원구 상계동 738-20로 배송 중입니다. 수령 전 016-9234-0674로 연락드릴 수 있습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "address", "start": 8, "end": 28}, {"kind": "phone", "start": 44, "end": 57}], "difficulty": "easy"}
-{"text": "이규원 환자분, 주민등록번호 830425-4810160 확인되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "rrn", "start": 16, "end": 30}], "difficulty": "easy"}
-{"text": "주문번호 2025.05.16, 고객 윤석님 017 1195 0981로 발송 예정입니다.", "labels": [{"kind": "name", "start": 20, "end": 22}, {"kind": "phone", "start": 24, "end": 37}], "difficulty": "hard"}
-{"text": "송장번호 431635-2327766로 배송이 시작되었습니다.", "labels": [], "difficulty": "negative"}
-{"text": "환불 처리를 위해 허율님의 카드번호 5425881537147323를 확인했습니다. 문의: +821768504067", "labels": [{"kind": "name", "start": 10, "end": 12}, {"kind": "card", "start": 20, "end": 36}, {"kind": "phone", "start": 50, "end": 63}], "difficulty": "hard"}
-{"text": "담당자가 한예영에서 양윤현으로 변경되었습니다. 새 연락처: 011-8163-8433", "labels": [{"kind": "name", "start": 5, "end": 8}, {"kind": "name", "start": 11, "end": 14}, {"kind": "phone", "start": 33, "end": 46}], "difficulty": "easy"}
-{"text": "전입신고 대상자: 김지, 신주소: 인천광역시 동성로235길 31 자이아파트 119동 823호, 연락처: +821797897710", "labels": [{"kind": "name", "start": 10, "end": 12}, {"kind": "address", "start": 19, "end": 51}, {"kind": "phone", "start": 58, "end": 71}], "difficulty": "hard"}
-{"text": "자택 010-7060-2194, 직장 016-5992-6606 두 번호 모두 등록해 주세요.", "labels": [{"kind": "phone", "start": 3, "end": 16}, {"kind": "phone", "start": 21, "end": 34}], "difficulty": "easy"}
-{"text": "신청자: 전진 / 연락처: +821612046329 / 이메일: qu4xwedn@sample-mail.net", "labels": [{"kind": "name", "start": 5, "end": 7}, {"kind": "phone", "start": 15, "end": 28}, {"kind": "email", "start": 36, "end": 60}], "difficulty": "hard"}
-{"text": "반품 신청자 안찬수, 환불 계좌 확인을 위해 연락처 010-0742-0637를 남겨주세요.", "labels": [{"kind": "name", "start": 7, "end": 10}, {"kind": "phone", "start": 29, "end": 42}], "difficulty": "easy"}
-{"text": "결제일 191739-2343897, 결제 금액 DZ893838119KR.", "labels": [], "difficulty": "negative"}
-{"text": "지원자 백수 이력서 접수 — 연락처 018 4911 7780, 이메일 ny.v3@example.com", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "phone", "start": 20, "end": 33}, {"kind": "email", "start": 39, "end": 56}], "difficulty": "hard"}
-{"text": "결제 금액 757,442원, 영수증은 vgxw5@sample.org로 발송됩니다.", "labels": [{"kind": "email", "start": 21, "end": 37}], "difficulty": "hard"}
-{"text": "신청자: 전훈하 / 연락처: 011-0310-7225 / 이메일: pphswr5@example.com", "labels": [{"kind": "name", "start": 5, "end": 8}, {"kind": "phone", "start": 16, "end": 29}, {"kind": "email", "start": 37, "end": 56}], "difficulty": "easy"}
-{"text": "신규 입사자 한성연님의 4대보험 등록을 위해 주민번호 400315-4716013가 필요합니다.", "labels": [{"kind": "name", "start": 7, "end": 10}, {"kind": "rrn", "start": 30, "end": 44}], "difficulty": "easy"}
-{"text": "반품 신청자 황현, 환불 계좌 확인을 위해 연락처 +821636844876를 남겨주세요.", "labels": [{"kind": "name", "start": 7, "end": 9}, {"kind": "phone", "start": 28, "end": 41}], "difficulty": "hard"}
-{"text": "문연윤님 카드번호 5558-4419-8665-2403로 결제가 완료되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "card", "start": 10, "end": 29}], "difficulty": "easy"}
-{"text": "심재규 님의 진료 예약이 확정되었습니다. 문의: 016-7849-3505", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "phone", "start": 27, "end": 40}], "difficulty": "easy"}
-{"text": "사업자등록번호는 2021.02.20이며, 배송지 우편번호는 255,235원입니다.", "labels": [], "difficulty": "negative"}
-{"text": "주문번호 56,040원가 정상 접수되었습니다.", "labels": [], "difficulty": "negative"}
-{"text": "결제일 001334-2426673, 결제 금액 961635-3336768.", "labels": [], "difficulty": "negative"}
-{"text": "사업자등록번호 767-83-40437 / 담당자 송경혜 / 이메일 7g6g8@testcorp.io", "labels": [{"kind": "name", "start": 27, "end": 30}, {"kind": "email", "start": 37, "end": 54}], "difficulty": "easy"}
-{"text": "사업자등록번호 2020.01.10 / 담당자 전호하 / 이메일 k.us85r@testmail.net", "labels": [{"kind": "name", "start": 25, "end": 28}, {"kind": "email", "start": 35, "end": 55}], "difficulty": "easy"}
-{"text": "긴급 연락처 016 3050 0230, 자택 주소는 광주광역시 판교역로152길 73 더샵아파트 125동 496호입니다.", "labels": [{"kind": "phone", "start": 7, "end": 20}, {"kind": "address", "start": 29, "end": 62}], "difficulty": "hard"}
-{"text": "송장번호 00-2421-7567로 배송이 시작되었습니다.", "labels": [], "difficulty": "negative"}
-{"text": "ljji19l0@example.com로 회신 주시면 장규율 담당자가 답변드립니다.", "labels": [{"kind": "email", "start": 0, "end": 20}, {"kind": "name", "start": 29, "end": 32}], "difficulty": "easy"}
-{"text": "최재아님의 이체 알림: 문의는 011-6642-8233 또는 2zx8ni9rq@sample-mail.net로 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "phone", "start": 17, "end": 30}, {"kind": "email", "start": 34, "end": 59}], "difficulty": "easy"}
-{"text": "정기결제 등록: 카드 343391878519106, 명의자 백진, 연락처 +82 18 2455 2695", "labels": [{"kind": "card", "start": 12, "end": 27}, {"kind": "name", "start": 33, "end": 35}, {"kind": "phone", "start": 41, "end": 57}], "difficulty": "hard"}
-{"text": "배송지: 광주광역시 월드컵로299길 63 래미안아파트 129동 1146호 (수령인 권석, 01868067484)", "labels": [{"kind": "address", "start": 5, "end": 40}, {"kind": "name", "start": 46, "end": 48}, {"kind": "phone", "start": 50, "end": 61}], "difficulty": "hard"}
-{"text": "배아님의 이체 알림: 문의는 +82 16 0049 3570 또는 cpzuc7.rk@sample.org로 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "phone", "start": 16, "end": 32}, {"kind": "email", "start": 36, "end": 56}], "difficulty": "hard"}
-{"text": "남찬 님의 진료 예약이 확정되었습니다. 문의: 017.6154.1314", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "phone", "start": 26, "end": 39}], "difficulty": "hard"}
-{"text": "가입자 허율하, 주민번호 680717-1954011 기준으로 보험료가 산정되었습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "rrn", "start": 14, "end": 28}], "difficulty": "easy"}
-{"text": "정기결제 등록: 카드 4478-6863-3752-4319, 명의자 이석성, 연락처 017-0256-3943", "labels": [{"kind": "card", "start": 12, "end": 31}, {"kind": "name", "start": 37, "end": 40}, {"kind": "phone", "start": 46, "end": 59}], "difficulty": "easy"}
+{"text": "ixn9b+8n1ut@testcorp.io로 회신 주시면 장우 담당자가 답변드립니다. 결제 금액 126-33-75410, 영수증은 oujjq.k7s+q6@mail-sample.kr로 발송됩니다.", "labels": [{"kind": "email", "start": 0, "end": 23}, {"kind": "name", "start": 32, "end": 34}, {"kind": "email", "start": 73, "end": 100}], "difficulty": "hard"}
+{"text": "오훈님의 이체 알림: 문의는 05225802852 또는 sehf3au@sample.org로 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "phone", "start": 16, "end": 27}, {"kind": "email", "start": 31, "end": 49}], "difficulty": "hard"}
+{"text": "사업자등록번호는 08-9612-7730이며, 배송지 우편번호는 09-3053-6194입니다.", "labels": [], "difficulty": "negative"}
+{"text": "xg9q7cefg@testmail.net로 회신 주시면 안정 담당자가 답변드립니다.", "labels": [{"kind": "email", "start": 0, "end": 22}, {"kind": "name", "start": 31, "end": 33}], "difficulty": "hard"}
+{"text": "ltsg8fy0w5@team.example.com로 회신 주시면 유현원 담당자가 답변드립니다. 신호규님 앞, 서울특별시 수원시 영통구 매탄동 911-18로 배송 중입니다. 수령 전 016-7912-4012로 연락드릴 수 있습니다. 5447-1027-6773-5925 카드로 결제 시도가 감지되어 한혜훈님께 016-6532-2142로 확인 연락드립니다.", "labels": [{"kind": "email", "start": 0, "end": 27}, {"kind": "name", "start": 36, "end": 39}, {"kind": "name", "start": 53, "end": 56}, {"kind": "address", "start": 61, "end": 85}, {"kind": "phone", "start": 101, "end": 114}, {"kind": "card", "start": 129, "end": 148}, {"kind": "name", "start": 165, "end": 168}, {"kind": "phone", "start": 171, "end": 184}], "difficulty": "easy"}
+{"text": "환자명 윤재하, 주민번호 570405-3066323, 보호자 연락처 017-6850-4067로 등록되었습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "rrn", "start": 14, "end": 28}, {"kind": "phone", "start": 38, "end": 51}], "difficulty": "easy"}
+{"text": "사업자등록번호 ED652681586KR / 담당자 권연 / 이메일 sdoqivb@mail-sample.kr", "labels": [{"kind": "name", "start": 28, "end": 30}, {"kind": "email", "start": 37, "end": 59}], "difficulty": "hard"}
 {"text": "이번 분기 매출 목표는 지난해 대비 12% 증가입니다.", "labels": [], "difficulty": "negative"}
-{"text": "반품 신청자 고훈, 환불 계좌 확인을 위해 연락처 +821065907191를 남겨주세요.", "labels": [{"kind": "name", "start": 7, "end": 9}, {"kind": "phone", "start": 28, "end": 41}], "difficulty": "hard"}
-{"text": "주문번호 ORD-20240910-4836가 정상 접수되었습니다.", "labels": [], "difficulty": "negative"}
-{"text": "홍원님 앞, 광주광역시 판교역로122길 39 자이아파트 122동 1168호로 배송 중입니다. 수령 전 01609989121로 연락드릴 수 있습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "address", "start": 7, "end": 41}, {"kind": "phone", "start": 57, "end": 68}], "difficulty": "hard"}
-{"text": "가입자 고빈진, 주민번호 060621-4687424 기준으로 보험료가 산정되었습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "rrn", "start": 14, "end": 28}], "difficulty": "easy"}
-{"text": "정아 선생님께 gtii5frc@testcorp.io로 성적 자료를 전달했습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "email", "start": 8, "end": 28}], "difficulty": "hard"}
-{"text": "학생 윤준현(학부모 연락처 016-1295-7369)의 결석계가 접수되었습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}, {"kind": "phone", "start": 15, "end": 28}], "difficulty": "easy"}
+{"text": "정기결제 등록: 카드 5450609835841687, 명의자 권원, 연락처 018 1946 2108", "labels": [{"kind": "card", "start": 12, "end": 28}, {"kind": "name", "start": 34, "end": 36}, {"kind": "phone", "start": 42, "end": 55}], "difficulty": "hard"}
+{"text": "신규 입사자 오원님의 4대보험 등록을 위해 주민번호 2510172655461가 필요합니다.", "labels": [{"kind": "name", "start": 7, "end": 9}, {"kind": "rrn", "start": 29, "end": 42}], "difficulty": "hard"}
+{"text": "서버 점검은 매주 화요일 새벽에 진행됩니다.", "labels": [], "difficulty": "negative"}
+{"text": "7f8low5vs@mail-sample.kr로 회신 주시면 임연 담당자가 답변드립니다.", "labels": [{"kind": "email", "start": 0, "end": 24}, {"kind": "name", "start": 33, "end": 35}], "difficulty": "hard"}
+{"text": "전아석 선생님께 6xwjy9vibr@corp.testcorp.io로 성적 자료를 전달했습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "email", "start": 9, "end": 36}], "difficulty": "easy"}
+{"text": "이번 분기 매출 목표는 지난해 대비 12% 증가입니다.", "labels": [], "difficulty": "negative"}
+{"text": "다음 회의 안건은 예산 검토와 일정 조정입니다.", "labels": [], "difficulty": "negative"}
+{"text": "안원호 선생님께 61cfhmyt@sample.org로 성적 자료를 전달했습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "email", "start": 9, "end": 28}], "difficulty": "easy"}
+{"text": "반품 신청자 황현, 환불 계좌 확인을 위해 연락처 01636844876를 남겨주세요.", "labels": [{"kind": "name", "start": 7, "end": 9}, {"kind": "phone", "start": 28, "end": 39}], "difficulty": "hard"}
+{"text": "환자명 황율, 주민번호 360219 4517123, 보호자 연락처 01612945674로 등록되었습니다.", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "rrn", "start": 13, "end": 27}, {"kind": "phone", "start": 37, "end": 48}], "difficulty": "hard"}
+{"text": "본인확인용 주민번호 6805182179927와 이메일 1ib7iidmr@corp.sample.org을 제출합니다.", "labels": [{"kind": "rrn", "start": 11, "end": 24}, {"kind": "email", "start": 30, "end": 55}], "difficulty": "hard"}
+{"text": "전입신고 대상자: 유현, 신주소: 울산광역시 판교역로165길 37 더샵아파트 102동 1960호, 연락처: 0449352868", "labels": [{"kind": "name", "start": 10, "end": 12}, {"kind": "address", "start": 19, "end": 53}, {"kind": "phone", "start": 60, "end": 70}], "difficulty": "hard"}
+{"text": "담당자가 서석연에서 강예경으로 변경되었습니다. 새 연락처: 052-009-4888", "labels": [{"kind": "name", "start": 5, "end": 8}, {"kind": "name", "start": 11, "end": 14}, {"kind": "phone", "start": 33, "end": 45}], "difficulty": "easy"}
+{"text": "민원인 유진님, 주민등록번호 1709154252727로 접수된 건 처리 완료되었습니다. 회신 주소: 대전광역시 월드컵로235길 83 푸르지오아파트 123동 482호 고객 양윤님 043.625.6643로 연락 부탁드립니다. 담당자가 신수에서 한지으로 변경되었습니다. 새 연락처: +82.11.2303.7822", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "rrn", "start": 16, "end": 29}, {"kind": "address", "start": 56, "end": 91}, {"kind": "name", "start": 95, "end": 97}, {"kind": "phone", "start": 99, "end": 111}, {"kind": "name", "start": 129, "end": 131}, {"kind": "name", "start": 134, "end": 136}, {"kind": "phone", "start": 155, "end": 171}], "difficulty": "hard"}
+{"text": "학생 윤재(학부모 연락처 +82.16.9543.9386)의 결석계가 접수되었습니다.", "labels": [{"kind": "name", "start": 3, "end": 5}, {"kind": "phone", "start": 14, "end": 30}], "difficulty": "hard"}
+{"text": "결제일 66,142원, 결제 금액 576-49-30934.", "labels": [], "difficulty": "negative"}
+{"text": "최규님 카드번호 5259332727956876로 결제가 완료되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "card", "start": 9, "end": 25}], "difficulty": "hard"}
+{"text": "정기결제 등록: 카드 5191-8785-1910-8838, 명의자 전진은, 연락처 018-7239-1904", "labels": [{"kind": "card", "start": 12, "end": 31}, {"kind": "name", "start": 37, "end": 40}, {"kind": "phone", "start": 46, "end": 59}], "difficulty": "easy"}
+{"text": "남수 환자분, 주민등록번호 0708054598736 확인되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "rrn", "start": 15, "end": 28}], "difficulty": "hard"}
+{"text": "환불 처리를 위해 김찬님의 카드번호 5203910651801700를 확인했습니다. 문의: 011.6887.6135", "labels": [{"kind": "name", "start": 10, "end": 12}, {"kind": "card", "start": 20, "end": 36}, {"kind": "phone", "start": 50, "end": 63}], "difficulty": "hard"}
+{"text": "학생 박성(학부모 연락처 +82 11 5697 1943)의 결석계가 접수되었습니다.", "labels": [{"kind": "name", "start": 3, "end": 5}, {"kind": "phone", "start": 14, "end": 30}], "difficulty": "hard"}
+{"text": "송장번호 57700로 배송이 시작되었습니다.", "labels": [], "difficulty": "negative"}
+{"text": "오늘 회의록: 작성자 권성경, 문의는 poirfg62b@example.com로.", "labels": [{"kind": "name", "start": 12, "end": 15}, {"kind": "email", "start": 21, "end": 42}], "difficulty": "easy"}
+{"text": "회의는 내일 오후 2시에 진행됩니다.", "labels": [], "difficulty": "negative"}
+{"text": "안녕하세요, 저는 양서찬이고 전화번호는 018-3559-0924입니다.", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "phone", "start": 22, "end": 35}], "difficulty": "easy"}
+{"text": "사업자등록번호는 856,413원이며, 배송지 우편번호는 PU978731508KR입니다.", "labels": [], "difficulty": "negative"}
+{"text": "안우빈님의 이체 알림: 문의는 010-9121-9693 또는 7xps98y3lp+gtii4@sample.org로 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "phone", "start": 17, "end": 30}, {"kind": "email", "start": 34, "end": 61}], "difficulty": "easy"}
+{"text": "신규 입사자 안은님의 4대보험 등록을 위해 주민번호 3105074847650가 필요합니다.", "labels": [{"kind": "name", "start": 7, "end": 9}, {"kind": "rrn", "start": 29, "end": 42}], "difficulty": "hard"}
 {"text": "신규 입사자 양인현님의 4대보험 등록을 위해 주민번호 340722-1095390가 필요합니다.", "labels": [{"kind": "name", "start": 7, "end": 10}, {"kind": "rrn", "start": 30, "end": 44}], "difficulty": "easy"}
 {"text": "주문번호 381437-1222096가 정상 접수되었습니다.", "labels": [], "difficulty": "negative"}
-{"text": "환불 처리를 위해 손연예님의 카드번호 5193-6385-4678-5448를 확인했습니다. 문의: 016-8401-8147", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "card", "start": 21, "end": 40}, {"kind": "phone", "start": 54, "end": 67}], "difficulty": "easy"}
-{"text": "정기결제 등록: 카드 5335560932048992, 명의자 양빈, 연락처 +82.16.3768.6223", "labels": [{"kind": "card", "start": 12, "end": 28}, {"kind": "name", "start": 34, "end": 36}, {"kind": "phone", "start": 42, "end": 58}], "difficulty": "hard"}
-{"text": "전입신고 대상자: 송규성, 신주소: 대전광역시 유성구 봉명동 782-16, 연락처: 019-8037-7550", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "address", "start": 20, "end": 40}, {"kind": "phone", "start": 47, "end": 60}], "difficulty": "easy"}
-{"text": "결제일 19172, 결제 금액 671432-1879827.", "labels": [], "difficulty": "negative"}
-{"text": "정기결제 등록: 카드 4623-1203-8750-9974, 명의자 고연민, 연락처 010-8719-9038", "labels": [{"kind": "card", "start": 12, "end": 31}, {"kind": "name", "start": 37, "end": 40}, {"kind": "phone", "start": 46, "end": 59}], "difficulty": "easy"}
-{"text": "지원자 양준진 이력서 접수 — 연락처 016-0280-8228, 이메일 y37ddfht4j@testcorp.io", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "phone", "start": 21, "end": 34}, {"kind": "email", "start": 40, "end": 62}], "difficulty": "easy"}
-{"text": "송장번호 891735-2314546로 배송이 시작되었습니다.", "labels": [], "difficulty": "negative"}
-{"text": "가입자 허규원, 주민번호 110713-2724435 기준으로 보험료가 산정되었습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "rrn", "start": 14, "end": 28}], "difficulty": "easy"}
-{"text": "강지연님 카드번호 5459-1803-3974-0149로 결제가 완료되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "card", "start": 10, "end": 29}], "difficulty": "easy"}
-{"text": "긴급 연락처 016-0256-3394, 자택 주소는 대구광역시 종로구 청운동 771-13입니다.", "labels": [{"kind": "phone", "start": 7, "end": 20}, {"kind": "address", "start": 29, "end": 49}], "difficulty": "easy"}
-{"text": "긴급 연락처 +82 17 8856 5435, 자택 주소는 인천광역시 월드컵로41길 65 더샵아파트 112동 210호입니다.", "labels": [{"kind": "phone", "start": 7, "end": 23}, {"kind": "address", "start": 32, "end": 64}], "difficulty": "hard"}
-{"text": "주문번호 448-87-90460가 정상 접수되었습니다.", "labels": [], "difficulty": "negative"}
-{"text": "정기결제 등록: 카드 5304773586629614, 명의자 손호, 연락처 019.1204.1344", "labels": [{"kind": "card", "start": 12, "end": 28}, {"kind": "name", "start": 34, "end": 36}, {"kind": "phone", "start": 42, "end": 55}], "difficulty": "hard"}
-{"text": "배규님 카드번호 4655110475412125로 결제가 완료되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "card", "start": 9, "end": 25}], "difficulty": "hard"}
-{"text": "배송지: 서울특별시 테헤란로182길 71 래미안아파트 120동 1325호 (수령인 배윤, +82.17.6353.1387)", "labels": [{"kind": "address", "start": 5, "end": 40}, {"kind": "name", "start": 46, "end": 48}, {"kind": "phone", "start": 50, "end": 66}], "difficulty": "hard"}
-{"text": "안도성님 앞, 인천광역시 종로구 청운동 143-9로 배송 중입니다. 수령 전 016-4397-8079로 연락드릴 수 있습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "address", "start": 8, "end": 27}, {"kind": "phone", "start": 43, "end": 56}], "difficulty": "easy"}
-{"text": "서버 점검은 매주 화요일 새벽에 진행됩니다.", "labels": [], "difficulty": "negative"}
-{"text": "오늘 회의록: 작성자 황석, 문의는 n80sw@mail-sample.kr로.", "labels": [{"kind": "name", "start": 12, "end": 14}, {"kind": "email", "start": 20, "end": 40}], "difficulty": "hard"}
-{"text": "사업자등록번호는 ORD-20250627-7224이며, 배송지 우편번호는 LL984264226KR입니다.", "labels": [], "difficulty": "negative"}
-{"text": "오늘 회의록: 작성자 한호훈, 문의는 rgol1x@testmail.net로.", "labels": [{"kind": "name", "start": 12, "end": 15}, {"kind": "email", "start": 21, "end": 40}], "difficulty": "easy"}
-{"text": "담당자가 배찬에서 오하으로 변경되었습니다. 새 연락처: +82 18 2947 9012", "labels": [{"kind": "name", "start": 5, "end": 7}, {"kind": "name", "start": 10, "end": 12}, {"kind": "phone", "start": 31, "end": 47}], "difficulty": "hard"}
-{"text": "다음 회의 안건은 예산 검토와 일정 조정입니다.", "labels": [], "difficulty": "negative"}
-{"text": "민원인 배아인님, 주민등록번호 521116-1830123로 접수된 건 처리 완료되었습니다. 회신 주소: 대전광역시 수영구 광안동 259-5", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "rrn", "start": 17, "end": 31}, {"kind": "address", "start": 58, "end": 77}], "difficulty": "easy"}
-{"text": "권호 환자분, 주민등록번호 7407184712560 확인되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "rrn", "start": 15, "end": 28}], "difficulty": "hard"}
-{"text": "남석님 카드번호 349113529096563로 결제가 완료되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "card", "start": 9, "end": 24}], "difficulty": "hard"}
+{"text": "환불 처리를 위해 손연예님의 카드번호 5193-6385-4678-5448를 확인했습니다. 문의: 017-7635-1615", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "card", "start": 21, "end": 40}, {"kind": "phone", "start": 54, "end": 67}], "difficulty": "easy"}
+{"text": "사업자등록번호 389,712원 / 담당자 한빈 / 이메일 uifj8@testcorp.io", "labels": [{"kind": "name", "start": 23, "end": 25}, {"kind": "email", "start": 32, "end": 49}], "difficulty": "hard"}
+{"text": "주문번호 07-9180-6530가 정상 접수되었습니다.", "labels": [], "difficulty": "negative"}
+{"text": "민원인 강경님, 주민등록번호 2103244241238로 접수된 건 처리 완료되었습니다. 회신 주소: 대구광역시 테헤란로39길 86 래미안아파트 125동 114호", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "rrn", "start": 16, "end": 29}, {"kind": "address", "start": 56, "end": 89}], "difficulty": "hard"}
+{"text": "문은민 환자분, 주민등록번호 640812-1809808 확인되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "rrn", "start": 16, "end": 30}], "difficulty": "easy"}
+{"text": "황민님의 이체 알림: 문의는 0610178673 또는 k.a4y37ddf+jm2c8q@testmail.net로 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "phone", "start": 16, "end": 26}, {"kind": "email", "start": 30, "end": 60}], "difficulty": "hard"}
 {"text": "이번 분기 매출 목표는 지난해 대비 12% 증가입니다.", "labels": [], "difficulty": "negative"}
-{"text": "민원인 오찬재님, 주민등록번호 440116-1387222로 접수된 건 처리 완료되었습니다. 회신 주소: 인천광역시 마포구 합정동 119-5", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "rrn", "start": 17, "end": 31}, {"kind": "address", "start": 58, "end": 77}], "difficulty": "easy"}
-{"text": "민원인 배현님, 주민등록번호 440804 4946330로 접수된 건 처리 완료되었습니다. 회신 주소: 대전광역시 테헤란로154길 6 더샵아파트 104동 147호", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "rrn", "start": 16, "end": 30}, {"kind": "address", "start": 57, "end": 89}], "difficulty": "hard"}
-{"text": "배도예님의 이체 알림: 문의는 019-3996-8454 또는 umpr3x@sample.org로 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "phone", "start": 17, "end": 30}, {"kind": "email", "start": 34, "end": 51}], "difficulty": "easy"}
-{"text": "학생 김경(학부모 연락처 017 9702 7037)의 결석계가 접수되었습니다.", "labels": [{"kind": "name", "start": 3, "end": 5}, {"kind": "phone", "start": 14, "end": 27}], "difficulty": "hard"}
-{"text": "본인확인용 주민번호 961226-3756748와 이메일 3tnhe@mail-sample.kr을 제출합니다.", "labels": [{"kind": "rrn", "start": 11, "end": 25}, {"kind": "email", "start": 31, "end": 51}], "difficulty": "easy"}
-{"text": "반품 신청자 서호, 환불 계좌 확인을 위해 연락처 016.5766.7501를 남겨주세요.", "labels": [{"kind": "name", "start": 7, "end": 9}, {"kind": "phone", "start": 28, "end": 41}], "difficulty": "hard"}
-{"text": "사업자등록번호 788-27-51049 / 담당자 최우 / 이메일 enfowvp@mail-sample.kr", "labels": [{"kind": "name", "start": 27, "end": 29}, {"kind": "email", "start": 36, "end": 58}], "difficulty": "hard"}
+{"text": "서찬진 환자분, 주민등록번호 071101-3108372 확인되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "rrn", "start": 16, "end": 30}], "difficulty": "easy"}
+{"text": "허하님 앞, 대구광역시 테헤란로118길 28 더샵아파트 129동 1261호로 배송 중입니다. 수령 전 010.4593.8897로 연락드릴 수 있습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "address", "start": 7, "end": 41}, {"kind": "phone", "start": 57, "end": 70}], "difficulty": "hard"}
+{"text": "결제 금액 616,551원, 영수증은 10ocgi@testcorp.io로 발송됩니다. 신규 입사자 한찬님의 4대보험 등록을 위해 주민번호 8812032070388가 필요합니다.", "labels": [{"kind": "email", "start": 21, "end": 39}, {"kind": "name", "start": 55, "end": 57}, {"kind": "rrn", "start": 77, "end": 90}], "difficulty": "hard"}
+{"text": "반품 신청자 손호, 환불 계좌 확인을 위해 연락처 016 0485 4478를 남겨주세요.", "labels": [{"kind": "name", "start": 7, "end": 9}, {"kind": "phone", "start": 28, "end": 41}], "difficulty": "hard"}
+{"text": "송찬빈 님의 진료 예약이 확정되었습니다. 문의: 018-6227-1404", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "phone", "start": 27, "end": 40}], "difficulty": "easy"}
+{"text": "박지준님 카드번호 4626-5511-0475-4120로 결제가 완료되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "card", "start": 10, "end": 29}], "difficulty": "easy"}
+{"text": "송장번호 131738-1093972로 배송이 시작되었습니다.", "labels": [], "difficulty": "negative"}
+{"text": "고객 임빈님 +82.19.9167.3977로 연락 부탁드립니다. 안도님 앞, 광주광역시 센텀중앙로87길 18 푸르지오아파트 110동 650호로 배송 중입니다. 수령 전 011.7121.4521로 연락드릴 수 있습니다. 임연 선생님께 n80sw@sample.org로 성적 자료를 전달했습니다.", "labels": [{"kind": "name", "start": 3, "end": 5}, {"kind": "phone", "start": 7, "end": 23}, {"kind": "name", "start": 36, "end": 38}, {"kind": "address", "start": 43, "end": 78}, {"kind": "phone", "start": 94, "end": 107}, {"kind": "name", "start": 122, "end": 124}, {"kind": "email", "start": 130, "end": 146}], "difficulty": "hard"}
+{"text": "5375692459375267 카드로 결제 시도가 감지되어 한아님께 +82 17 9435 3971로 확인 연락드립니다.", "labels": [{"kind": "card", "start": 0, "end": 16}, {"kind": "name", "start": 33, "end": 35}, {"kind": "phone", "start": 38, "end": 54}], "difficulty": "hard"}
+{"text": "최예 님의 진료 예약이 확정되었습니다. 문의: 018 2947 9012", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "phone", "start": 26, "end": 39}], "difficulty": "hard"}
+{"text": "다음 회의 안건은 예산 검토와 일정 조정입니다.", "labels": [], "difficulty": "negative"}
+{"text": "담당자가 문지에서 백혜으로 변경되었습니다. 새 연락처: +82.11.4961.3965", "labels": [{"kind": "name", "start": 5, "end": 7}, {"kind": "name", "start": 10, "end": 12}, {"kind": "phone", "start": 31, "end": 47}], "difficulty": "hard"}
+{"text": "5417979688680587 카드로 결제 시도가 감지되어 홍규님께 01158162725로 확인 연락드립니다.", "labels": [{"kind": "card", "start": 0, "end": 16}, {"kind": "name", "start": 33, "end": 35}, {"kind": "phone", "start": 38, "end": 49}], "difficulty": "hard"}
+{"text": "결제 금액 09-1172-2615, 영수증은 i1uzinr@sample.org로 발송됩니다. 고객 황하님 010.1901.2321로 연락 부탁드립니다. 임윤 님의 진료 예약이 확정되었습니다. 문의: +82.18.7912.5706", "labels": [{"kind": "email", "start": 25, "end": 43}, {"kind": "name", "start": 55, "end": 57}, {"kind": "phone", "start": 59, "end": 72}, {"kind": "name", "start": 85, "end": 87}, {"kind": "phone", "start": 111, "end": 127}], "difficulty": "hard"}
+{"text": "환자명 박아, 주민번호 9002012849306, 보호자 연락처 +82 19 3996 8454로 등록되었습니다.", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "rrn", "start": 13, "end": 26}, {"kind": "phone", "start": 36, "end": 52}], "difficulty": "hard"}
+{"text": "서버 점검은 매주 화요일 새벽에 진행됩니다.", "labels": [], "difficulty": "negative"}
+{"text": "안녕하세요, 저는 배찬이고 전화번호는 019 7080 6481입니다.", "labels": [{"kind": "name", "start": 10, "end": 12}, {"kind": "phone", "start": 21, "end": 34}], "difficulty": "hard"}
+{"text": "주문번호 491738-1738968가 정상 접수되었습니다.", "labels": [], "difficulty": "negative"}
+{"text": "사업자등록번호는 691-23-80371이며, 배송지 우편번호는 33972입니다.", "labels": [], "difficulty": "negative"}
+{"text": "허연님의 이체 알림: 문의는 +82 16 9780 6367 또는 oenqgy37v@team.sample-mail.net로 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "phone", "start": 16, "end": 32}, {"kind": "email", "start": 36, "end": 66}], "difficulty": "hard"}
+{"text": "결제일 43477, 결제 금액 08-3258-7286.", "labels": [], "difficulty": "negative"}
 {"text": "신규 입사자 강연아님의 4대보험 등록을 위해 주민번호 230627-2811871가 필요합니다.", "labels": [{"kind": "name", "start": 7, "end": 10}, {"kind": "rrn", "start": 30, "end": 44}], "difficulty": "easy"}
 {"text": "결제일 ORD-20250307-7290, 결제 금액 531639-4512438.", "labels": [], "difficulty": "negative"}
 {"text": "회의는 내일 오후 2시에 진행됩니다.", "labels": [], "difficulty": "negative"}
-{"text": "오늘 회의록: 작성자 이준우, 문의는 k2u2ssvju@sample-mail.net로.", "labels": [{"kind": "name", "start": 12, "end": 15}, {"kind": "email", "start": 21, "end": 46}], "difficulty": "easy"}
-{"text": "정기결제 등록: 카드 5583-6134-0745-1719, 명의자 손석우, 연락처 011-9632-5744", "labels": [{"kind": "card", "start": 12, "end": 31}, {"kind": "name", "start": 37, "end": 40}, {"kind": "phone", "start": 46, "end": 59}], "difficulty": "easy"}
-{"text": "긴급 연락처 +82 11 3390 0972, 자택 주소는 대구광역시 판교역로273길 36 힐스테이트아파트 118동 445호입니다.", "labels": [{"kind": "phone", "start": 7, "end": 23}, {"kind": "address", "start": 32, "end": 68}], "difficulty": "hard"}
-{"text": "오늘 회의록: 작성자 전준, 문의는 zd937.6e@sample.org로.", "labels": [{"kind": "name", "start": 12, "end": 14}, {"kind": "email", "start": 20, "end": 39}], "difficulty": "hard"}
-{"text": "결제일 799,462원, 결제 금액 08-3329-5402.", "labels": [], "difficulty": "negative"}
-{"text": "민원인 박규님, 주민등록번호 510924 2910566로 접수된 건 처리 완료되었습니다. 회신 주소: 인천광역시 센텀중앙로168길 75 래미안아파트 128동 1686호", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "rrn", "start": 16, "end": 30}, {"kind": "address", "start": 57, "end": 93}], "difficulty": "hard"}
-{"text": "환불 처리를 위해 권규성님의 카드번호 5318-6363-7454-5892를 확인했습니다. 문의: 011-9275-7951", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "card", "start": 21, "end": 40}, {"kind": "phone", "start": 54, "end": 67}], "difficulty": "easy"}
-{"text": "신청자: 최규석 / 연락처: 017-0266-2035 / 이메일: qa9hze@demo-corp.com", "labels": [{"kind": "name", "start": 5, "end": 8}, {"kind": "phone", "start": 16, "end": 29}, {"kind": "email", "start": 37, "end": 57}], "difficulty": "easy"}
-{"text": "사업자등록번호는 770-56-42819이며, 배송지 우편번호는 480-95-95054입니다.", "labels": [], "difficulty": "negative"}
-{"text": "송장번호 2025.12.25로 배송이 시작되었습니다.", "labels": [], "difficulty": "negative"}
+{"text": "부산광역시 광진구 자양동 296-6에 거주하는 손재영님께 우편을 발송했습니다.", "labels": [{"kind": "address", "start": 0, "end": 19}, {"kind": "name", "start": 26, "end": 29}], "difficulty": "easy"}
+{"text": "최준원님 앞, 대구광역시 해운대구 우동 556-2로 배송 중입니다. 수령 전 062-435-1677로 연락드릴 수 있습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "address", "start": 8, "end": 27}, {"kind": "phone", "start": 43, "end": 55}], "difficulty": "easy"}
+{"text": "오늘 회의록: 작성자 허서재, 문의는 m4q.2i3@sample-mail.net로.", "labels": [{"kind": "name", "start": 12, "end": 15}, {"kind": "email", "start": 21, "end": 44}], "difficulty": "easy"}
+{"text": "5130-9584-9825-4490 카드로 결제 시도가 감지되어 장혜수님께 033-985-6743로 확인 연락드립니다.", "labels": [{"kind": "card", "start": 0, "end": 19}, {"kind": "name", "start": 36, "end": 39}, {"kind": "phone", "start": 42, "end": 54}], "difficulty": "easy"}
+{"text": "허은우님 카드번호 4536-7294-6671-1685로 결제가 완료되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "card", "start": 10, "end": 29}], "difficulty": "easy"}
+{"text": "민원인 황윤님, 주민등록번호 991203 2832096로 접수된 건 처리 완료되었습니다. 회신 주소: 울산광역시 테헤란로274길 51 자이아파트 114동 1790호", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "rrn", "start": 16, "end": 30}, {"kind": "address", "start": 57, "end": 91}], "difficulty": "hard"}
+{"text": "사업자등록번호는 VJ720551525KR이며, 배송지 우편번호는 47102입니다.", "labels": [], "difficulty": "negative"}
+{"text": "신청자: 최규석 / 연락처: 02-951-2588 / 이메일: q.p.76l6@mail-test.kr", "labels": [{"kind": "name", "start": 5, "end": 8}, {"kind": "phone", "start": 16, "end": 27}, {"kind": "email", "start": 35, "end": 56}], "difficulty": "easy"}
+{"text": "신청자: 서규아 / 연락처: 011-7032-1494 / 이메일: dhcvtqame5@biz.mail-sample.kr", "labels": [{"kind": "name", "start": 5, "end": 8}, {"kind": "phone", "start": 16, "end": 29}, {"kind": "email", "start": 37, "end": 66}], "difficulty": "easy"}
 {"text": "이번 분기 매출 목표는 지난해 대비 12% 증가입니다.", "labels": [], "difficulty": "negative"}
-{"text": "본인확인용 주민번호 090319-3680847와 이메일 qame5zrid3@mail-test.kr을 제출합니다.", "labels": [{"kind": "rrn", "start": 11, "end": 25}, {"kind": "email", "start": 31, "end": 54}], "difficulty": "easy"}
-{"text": "21e.ftay@mail-sample.kr로 회신 주시면 오경 담당자가 답변드립니다.", "labels": [{"kind": "email", "start": 0, "end": 23}, {"kind": "name", "start": 32, "end": 34}], "difficulty": "hard"}
-{"text": "서버 점검은 매주 화요일 새벽에 진행됩니다.", "labels": [], "difficulty": "negative"}
-{"text": "자택 +821022932017, 직장 016 7035 5152 두 번호 모두 등록해 주세요.", "labels": [{"kind": "phone", "start": 3, "end": 16}, {"kind": "phone", "start": 21, "end": 34}], "difficulty": "hard"}
-{"text": "광주광역시 마포구 합정동 255-18에 거주하는 홍호경님께 우편을 발송했습니다.", "labels": [{"kind": "address", "start": 0, "end": 20}, {"kind": "name", "start": 27, "end": 30}], "difficulty": "easy"}
-{"text": "자택 019-4942-3366, 직장 018-9943-8348 두 번호 모두 등록해 주세요.", "labels": [{"kind": "phone", "start": 3, "end": 16}, {"kind": "phone", "start": 21, "end": 34}], "difficulty": "easy"}
-{"text": "송장번호 2025.01.26로 배송이 시작되었습니다.", "labels": [], "difficulty": "negative"}
-{"text": "전입신고 대상자: 서하우, 신주소: 인천광역시 노원구 상계동 73-17, 연락처: 010-5916-5185", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "address", "start": 20, "end": 39}, {"kind": "phone", "start": 46, "end": 59}], "difficulty": "easy"}
+{"text": "결제일 2021.07.25, 결제 금액 52046.", "labels": [], "difficulty": "negative"}
+{"text": "민원인 오경현님, 주민등록번호 521022-2284749로 접수된 건 처리 완료되었습니다. 회신 주소: 서울특별시 마포구 합정동 144-4 양찬율님 앞, 인천광역시 해운대구 우동 811-5로 배송 중입니다. 수령 전 019-1380-4065로 연락드릴 수 있습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "rrn", "start": 17, "end": 31}, {"kind": "address", "start": 58, "end": 77}, {"kind": "name", "start": 78, "end": 81}, {"kind": "address", "start": 86, "end": 105}, {"kind": "phone", "start": 121, "end": 134}], "difficulty": "easy"}
+{"text": "정기결제 등록: 카드 4438983640376134, 명의자 황규, 연락처 010 5916 5185", "labels": [{"kind": "card", "start": 12, "end": 28}, {"kind": "name", "start": 34, "end": 36}, {"kind": "phone", "start": 42, "end": 55}], "difficulty": "hard"}
 {"text": "송장번호 PE605748101KR로 배송이 시작되었습니다.", "labels": [], "difficulty": "negative"}
-{"text": "고객 전지민님 016-3534-0652로 연락 부탁드립니다.", "labels": [{"kind": "name", "start": 3, "end": 6}, {"kind": "phone", "start": 8, "end": 21}], "difficulty": "easy"}
-{"text": "지원자 임규 이력서 접수 — 연락처 017 6939 6590, 이메일 xtfdc@testmail.net", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "phone", "start": 20, "end": 33}, {"kind": "email", "start": 39, "end": 57}], "difficulty": "hard"}
-{"text": "신규 입사자 한찬영님의 4대보험 등록을 위해 주민번호 391214-1075893가 필요합니다.", "labels": [{"kind": "name", "start": 7, "end": 10}, {"kind": "rrn", "start": 30, "end": 44}], "difficulty": "easy"}
+{"text": "박민준님 앞, 부산광역시 강남구 역삼동 945-2로 배송 중입니다. 수령 전 055-8209-6806로 연락드릴 수 있습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "address", "start": 8, "end": 27}, {"kind": "phone", "start": 43, "end": 56}], "difficulty": "easy"}
+{"text": "서울특별시 유성구 봉명동 81-17에 거주하는 심현석님께 우편을 발송했습니다.", "labels": [{"kind": "address", "start": 0, "end": 19}, {"kind": "name", "start": 26, "end": 29}], "difficulty": "easy"}
+{"text": "결제일 09-6081-8167, 결제 금액 61,718원.", "labels": [], "difficulty": "negative"}
 {"text": "송장번호 564-88-89800로 배송이 시작되었습니다.", "labels": [], "difficulty": "negative"}
 {"text": "서버 점검은 매주 화요일 새벽에 진행됩니다.", "labels": [], "difficulty": "negative"}
 {"text": "서버 점검은 매주 화요일 새벽에 진행됩니다.", "labels": [], "difficulty": "negative"}
-{"text": "전입신고 대상자: 오수석, 신주소: 울산광역시 유성구 봉명동 171-12, 연락처: 011-4403-1934", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "address", "start": 20, "end": 40}, {"kind": "phone", "start": 47, "end": 60}], "difficulty": "easy"}
-{"text": "환자명 배빈준, 주민번호 331219-1650311, 보호자 연락처 017-8368-5900로 등록되었습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "rrn", "start": 14, "end": 28}, {"kind": "phone", "start": 38, "end": 51}], "difficulty": "easy"}
+{"text": "지원자 안석 이력서 접수 — 연락처 016 2079 4403, 이메일 62b3kc0vcq@mail-sample.kr", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "phone", "start": 20, "end": 33}, {"kind": "email", "start": 39, "end": 64}], "difficulty": "hard"}
 {"text": "서버 점검은 매주 화요일 새벽에 진행됩니다.", "labels": [], "difficulty": "negative"}
-{"text": "정기결제 등록: 카드 4913800030756226, 명의자 심혜, 연락처 01968703678", "labels": [{"kind": "card", "start": 12, "end": 28}, {"kind": "name", "start": 34, "end": 36}, {"kind": "phone", "start": 42, "end": 53}], "difficulty": "hard"}
-{"text": "사업자등록번호 GB500299721KR / 담당자 최수 / 이메일 7g3.9crk5m@mail-sample.kr", "labels": [{"kind": "name", "start": 28, "end": 30}, {"kind": "email", "start": 37, "end": 62}], "difficulty": "hard"}
-{"text": "주문번호 2024.05.24가 정상 접수되었습니다.", "labels": [], "difficulty": "negative"}
-{"text": "전연 님의 진료 예약이 확정되었습니다. 문의: 01840162466", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "phone", "start": 26, "end": 37}], "difficulty": "hard"}
-{"text": "송장번호 ORD-20240912-1157로 배송이 시작되었습니다.", "labels": [], "difficulty": "negative"}
-{"text": "정기결제 등록: 카드 5441-3836-7024-1039, 명의자 남혜수, 연락처 017-6102-7511", "labels": [{"kind": "card", "start": 12, "end": 31}, {"kind": "name", "start": 37, "end": 40}, {"kind": "phone", "start": 46, "end": 59}], "difficulty": "easy"}
-{"text": "최수은님 앞, 광주광역시 성남시 분당구 정자동 77-19로 배송 중입니다. 수령 전 018-1020-7126로 연락드릴 수 있습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "address", "start": 8, "end": 31}, {"kind": "phone", "start": 47, "end": 60}], "difficulty": "easy"}
-{"text": "안녕하세요, 저는 임준혜이고 전화번호는 016-6438-5345입니다.", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "phone", "start": 22, "end": 35}], "difficulty": "easy"}
-{"text": "안녕하세요, 저는 박현이고 전화번호는 01817852546입니다.", "labels": [{"kind": "name", "start": 10, "end": 12}, {"kind": "phone", "start": 21, "end": 32}], "difficulty": "hard"}
+{"text": "환불 처리를 위해 안민서님의 카드번호 4307-5622-0863-5368를 확인했습니다. 문의: 053-1276-9364 최수성 님의 진료 예약이 확정되었습니다. 문의: 042-823-8450", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "card", "start": 21, "end": 40}, {"kind": "phone", "start": 54, "end": 67}, {"kind": "name", "start": 68, "end": 71}, {"kind": "phone", "start": 95, "end": 107}], "difficulty": "easy"}
+{"text": "주문번호 991936-3343199, 고객 박진재님 011-4777-9237로 발송 예정입니다.", "labels": [{"kind": "name", "start": 24, "end": 27}, {"kind": "phone", "start": 29, "end": 42}], "difficulty": "easy"}
+{"text": "민원인 오영연님, 주민등록번호 930925-1197358로 접수된 건 처리 완료되었습니다. 회신 주소: 서울특별시 성남시 분당구 정자동 25-8", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "rrn", "start": 17, "end": 31}, {"kind": "address", "start": 58, "end": 80}], "difficulty": "easy"}
+{"text": "결제 금액 AR892510222KR, 영수증은 lh.p99fkbi@testcorp.io로 발송됩니다.", "labels": [{"kind": "email", "start": 26, "end": 48}], "difficulty": "easy"}
+{"text": "최수은님 앞, 광주광역시 성남시 분당구 정자동 77-19로 배송 중입니다. 수령 전 017-2141-3879로 연락드릴 수 있습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "address", "start": 8, "end": 31}, {"kind": "phone", "start": 47, "end": 60}], "difficulty": "easy"}
+{"text": "백경님 카드번호 5357431329121276로 결제가 완료되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "card", "start": 9, "end": 25}], "difficulty": "hard"}
+{"text": "결제 금액 474,869원, 영수증은 r5d3l0w@corp.sample-mail.net로 발송됩니다.", "labels": [{"kind": "email", "start": 21, "end": 49}], "difficulty": "hard"}
+{"text": "임준인님의 이체 알림: 문의는 02-7408-9108 또는 udd3ec2iho@mail-test.kr로 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "phone", "start": 17, "end": 29}, {"kind": "email", "start": 33, "end": 56}], "difficulty": "easy"}
+{"text": "조정규 환자분, 주민등록번호 160228-4160594 확인되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "rrn", "start": 16, "end": 30}], "difficulty": "easy"}
 {"text": "다음 회의 안건은 예산 검토와 일정 조정입니다.", "labels": [], "difficulty": "negative"}
-{"text": "배송지: 대구광역시 판교역로107길 58 푸르지오아파트 115동 643호 (수령인 허하, +821949849884)", "labels": [{"kind": "address", "start": 5, "end": 40}, {"kind": "name", "start": 46, "end": 48}, {"kind": "phone", "start": 50, "end": 63}], "difficulty": "hard"}
-{"text": "결제일 15977, 결제 금액 374,023원.", "labels": [], "difficulty": "negative"}
-{"text": "임준인님의 이체 알림: 문의는 011-0509-6625 또는 uudd3ec2@testmail.net로 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "phone", "start": 17, "end": 30}, {"kind": "email", "start": 34, "end": 55}], "difficulty": "easy"}
-{"text": "송장번호 SY190236646KR로 배송이 시작되었습니다.", "labels": [], "difficulty": "negative"}
-{"text": "사업자등록번호 122-18-35919 / 담당자 남규 / 이메일 3d53e8b8@testcorp.io", "labels": [{"kind": "name", "start": 27, "end": 29}, {"kind": "email", "start": 36, "end": 56}], "difficulty": "hard"}
-{"text": "전입신고 대상자: 김찬, 신주소: 광주광역시 센텀중앙로89길 46 자이아파트 130동 484호, 연락처: +82.11.0567.4026", "labels": [{"kind": "name", "start": 10, "end": 12}, {"kind": "address", "start": 19, "end": 52}, {"kind": "phone", "start": 59, "end": 75}], "difficulty": "hard"}
-{"text": "남진 선생님께 ckfh6tx3@example.com로 성적 자료를 전달했습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "email", "start": 8, "end": 28}], "difficulty": "hard"}
-{"text": "전입신고 대상자: 송석, 신주소: 인천광역시 판교역로290길 65 푸르지오아파트 113동 654호, 연락처: +821835880480", "labels": [{"kind": "name", "start": 10, "end": 12}, {"kind": "address", "start": 19, "end": 54}, {"kind": "phone", "start": 61, "end": 74}], "difficulty": "hard"}
-{"text": "신청자: 배연 / 연락처: +82 18 3813 2615 / 이메일: jit31@testmail.net", "labels": [{"kind": "name", "start": 5, "end": 7}, {"kind": "phone", "start": 15, "end": 31}, {"kind": "email", "start": 39, "end": 57}], "difficulty": "hard"}
-{"text": "심인 님의 진료 예약이 확정되었습니다. 문의: +821852105878", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "phone", "start": 26, "end": 39}], "difficulty": "hard"}
-{"text": "문율영님 카드번호 3729-378427-01032로 결제가 완료되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "card", "start": 10, "end": 27}], "difficulty": "easy"}
-{"text": "지원자 황민윤 이력서 접수 — 연락처 018-3300-2137, 이메일 075lav7@mail-test.kr", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "phone", "start": 21, "end": 34}, {"kind": "email", "start": 40, "end": 60}], "difficulty": "easy"}
-{"text": "결제 금액 482-94-61851, 영수증은 dlff939yg@sample-mail.net로 발송됩니다.", "labels": [{"kind": "email", "start": 25, "end": 50}], "difficulty": "hard"}
-{"text": "서버 점검은 매주 화요일 새벽에 진행됩니다.", "labels": [], "difficulty": "negative"}
-{"text": "099o.9@example.com로 회신 주시면 강호 담당자가 답변드립니다.", "labels": [{"kind": "email", "start": 0, "end": 18}, {"kind": "name", "start": 27, "end": 29}], "difficulty": "hard"}
-{"text": "가입자 전하예, 주민번호 180624-3311941 기준으로 보험료가 산정되었습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "rrn", "start": 14, "end": 28}], "difficulty": "easy"}
-{"text": "긴급 연락처 010 5500 7317, 자택 주소는 서울특별시 판교역로108길 32 더샵아파트 103동 818호입니다.", "labels": [{"kind": "phone", "start": 7, "end": 20}, {"kind": "address", "start": 29, "end": 62}], "difficulty": "hard"}
-{"text": "환불 처리를 위해 김서찬님의 카드번호 5562-6765-8617-9323를 확인했습니다. 문의: 017-1207-0547", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "card", "start": 21, "end": 40}, {"kind": "phone", "start": 54, "end": 67}], "difficulty": "easy"}
-{"text": "서울특별시 테헤란로176길 22 e편한세상아파트 106동 1600호에 거주하는 박진님께 우편을 발송했습니다.", "labels": [{"kind": "address", "start": 0, "end": 37}, {"kind": "name", "start": 44, "end": 46}], "difficulty": "hard"}
-{"text": "환자명 홍호정, 주민번호 900114-3796028, 보호자 연락처 017-2573-0877로 등록되었습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "rrn", "start": 14, "end": 28}, {"kind": "phone", "start": 38, "end": 51}], "difficulty": "easy"}
-{"text": "주문번호 430,161원가 정상 접수되었습니다.", "labels": [], "difficulty": "negative"}
-{"text": "임아님의 이체 알림: 문의는 +821793679005 또는 fnpkywha@sample.org로 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "phone", "start": 16, "end": 29}, {"kind": "email", "start": 33, "end": 52}], "difficulty": "hard"}
-{"text": "전입신고 대상자: 허하아, 신주소: 울산광역시 성남시 분당구 정자동 483-16, 연락처: 019-4341-1493", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "address", "start": 20, "end": 44}, {"kind": "phone", "start": 51, "end": 64}], "difficulty": "easy"}
-{"text": "긴급 연락처 016.3056.7303, 자택 주소는 서울특별시 판교역로226길 60 푸르지오아파트 108동 1815호입니다.", "labels": [{"kind": "phone", "start": 7, "end": 20}, {"kind": "address", "start": 29, "end": 65}], "difficulty": "hard"}
-{"text": "ydmu9vu54p@mail-sample.kr로 회신 주시면 전정우 담당자가 답변드립니다.", "labels": [{"kind": "email", "start": 0, "end": 25}, {"kind": "name", "start": 34, "end": 37}], "difficulty": "easy"}
-{"text": "학생 남혜훈(학부모 연락처 010-8226-9358)의 결석계가 접수되었습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}, {"kind": "phone", "start": 15, "end": 28}], "difficulty": "easy"}
-{"text": "배송지: 울산광역시 수원시 영통구 매탄동 178-6 (수령인 조석현, 011-0699-6936)", "labels": [{"kind": "address", "start": 5, "end": 28}, {"kind": "name", "start": 34, "end": 37}, {"kind": "phone", "start": 39, "end": 52}], "difficulty": "easy"}
-{"text": "송장번호 863,520원로 배송이 시작되었습니다.", "labels": [], "difficulty": "negative"}
-{"text": "환자명 심경, 주민번호 110718 2723580, 보호자 연락처 010.9626.8561로 등록되었습니다.", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "rrn", "start": 13, "end": 27}, {"kind": "phone", "start": 37, "end": 50}], "difficulty": "hard"}
-{"text": "정은영 선생님께 v9dd23666@demo-corp.com로 성적 자료를 전달했습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "email", "start": 9, "end": 32}], "difficulty": "easy"}
-{"text": "홍연님 앞, 서울특별시 월드컵로142길 52 자이아파트 120동 1347호로 배송 중입니다. 수령 전 010 6484 5431로 연락드릴 수 있습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "address", "start": 7, "end": 41}, {"kind": "phone", "start": 57, "end": 70}], "difficulty": "hard"}
-{"text": "환불 처리를 위해 황예준님의 카드번호 5305-4447-1324-7543를 확인했습니다. 문의: 019-6828-9911", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "card", "start": 21, "end": 40}, {"kind": "phone", "start": 54, "end": 67}], "difficulty": "easy"}
-{"text": "민원인 조예인님, 주민등록번호 940825-4073671로 접수된 건 처리 완료되었습니다. 회신 주소: 대구광역시 종로구 청운동 68-10", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "rrn", "start": 17, "end": 31}, {"kind": "address", "start": 58, "end": 77}], "difficulty": "easy"}
-{"text": "6bh44jq70@demo-corp.com로 회신 주시면 오인 담당자가 답변드립니다.", "labels": [{"kind": "email", "start": 0, "end": 23}, {"kind": "name", "start": 32, "end": 34}], "difficulty": "hard"}
-{"text": "가입자 심하, 주민번호 300616 2232760 기준으로 보험료가 산정되었습니다.", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "rrn", "start": 13, "end": 27}], "difficulty": "hard"}
-{"text": "강인 님의 진료 예약이 확정되었습니다. 문의: 019.1480.4670", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "phone", "start": 26, "end": 39}], "difficulty": "hard"}
-{"text": "회의는 내일 오후 2시에 진행됩니다.", "labels": [], "difficulty": "negative"}
-{"text": "주문번호 679,827원가 정상 접수되었습니다.", "labels": [], "difficulty": "negative"}
-{"text": "주문번호 2025.07.17가 정상 접수되었습니다.", "labels": [], "difficulty": "negative"}
-{"text": "회의는 내일 오후 2시에 진행됩니다.", "labels": [], "difficulty": "negative"}
-{"text": "가입자 강호석, 주민번호 280520-2934200 기준으로 보험료가 산정되었습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "rrn", "start": 14, "end": 28}], "difficulty": "easy"}
+{"text": "송장번호 08-1483-7270로 배송이 시작되었습니다.", "labels": [], "difficulty": "negative"}
+{"text": "사업자등록번호 28021 / 담당자 장재정 / 이메일 bwjkpu+npx2@testmail.net", "labels": [{"kind": "name", "start": 20, "end": 23}, {"kind": "email", "start": 30, "end": 54}], "difficulty": "easy"}
+{"text": "5378759856420595 카드로 결제 시도가 감지되어 윤민님께 017.8674.5856로 확인 연락드립니다.", "labels": [{"kind": "card", "start": 0, "end": 16}, {"kind": "name", "start": 33, "end": 35}, {"kind": "phone", "start": 38, "end": 51}], "difficulty": "hard"}
+{"text": "배송지: 부산광역시 수영구 광안동 273-18 (수령인 백석예, 011-9432-6363)", "labels": [{"kind": "address", "start": 5, "end": 25}, {"kind": "name", "start": 31, "end": 34}, {"kind": "phone", "start": 36, "end": 49}], "difficulty": "easy"}
+{"text": "긴급 연락처 016-5878-9692, 자택 주소는 서울특별시 해운대구 우동 971-19입니다.", "labels": [{"kind": "phone", "start": 7, "end": 20}, {"kind": "address", "start": 29, "end": 49}], "difficulty": "easy"}
+{"text": "담당자가 배정연에서 송아도으로 변경되었습니다. 새 연락처: 010-0920-3811", "labels": [{"kind": "name", "start": 5, "end": 8}, {"kind": "name", "start": 11, "end": 14}, {"kind": "phone", "start": 33, "end": 46}], "difficulty": "easy"}
+{"text": "환자명 심호, 주민번호 1606231424133, 보호자 연락처 01923201817로 등록되었습니다. 자택 +82 10 6120 6481, 직장 016 5285 2235 두 번호 모두 등록해 주세요.", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "rrn", "start": 13, "end": 26}, {"kind": "phone", "start": 36, "end": 47}, {"kind": "phone", "start": 61, "end": 77}, {"kind": "phone", "start": 82, "end": 95}], "difficulty": "hard"}
+{"text": "5552895392644229 카드로 결제 시도가 감지되어 양민님께 +82 17 9297 0530로 확인 연락드립니다.", "labels": [{"kind": "card", "start": 0, "end": 16}, {"kind": "name", "start": 33, "end": 35}, {"kind": "phone", "start": 38, "end": 54}], "difficulty": "hard"}
+{"text": "결제일 671,718원, 결제 금액 608-28-53406.", "labels": [], "difficulty": "negative"}
+{"text": "긴급 연락처 +82 10 5500 7317, 자택 주소는 서울특별시 판교역로108길 32 더샵아파트 103동 818호입니다.", "labels": [{"kind": "phone", "start": 7, "end": 23}, {"kind": "address", "start": 32, "end": 65}], "difficulty": "hard"}
+{"text": "학생 권경빈(학부모 연락처 061-6204-5754)의 결석계가 접수되었습니다. 신규 입사자 서하인님의 4대보험 등록을 위해 주민번호 731125-3213196가 필요합니다.", "labels": [{"kind": "name", "start": 3, "end": 6}, {"kind": "phone", "start": 15, "end": 28}, {"kind": "name", "start": 52, "end": 55}, {"kind": "rrn", "start": 75, "end": 89}], "difficulty": "easy"}
+{"text": "오늘 회의록: 작성자 김윤준, 문의는 cgn1u@mail-test.kr로.", "labels": [{"kind": "name", "start": 12, "end": 15}, {"kind": "email", "start": 21, "end": 39}], "difficulty": "easy"}
+{"text": "유도호 선생님께 fdhhz01j@biz.testmail.net로 성적 자료를 전달했습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "email", "start": 9, "end": 34}], "difficulty": "easy"}
+{"text": "신청자: 오민빈 / 연락처: 019-9833-7869 / 이메일: dhx.re@mail-sample.kr", "labels": [{"kind": "name", "start": 5, "end": 8}, {"kind": "phone", "start": 16, "end": 29}, {"kind": "email", "start": 37, "end": 58}], "difficulty": "easy"}
+{"text": "남찬 님의 진료 예약이 확정되었습니다. 문의: 010.4313.7204 민원인 장우님, 주민등록번호 720105 3112334로 접수된 건 처리 완료되었습니다. 회신 주소: 울산광역시 동성로212길 76 자이아파트 118동 225호", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "phone", "start": 26, "end": 39}, {"kind": "name", "start": 44, "end": 46}, {"kind": "rrn", "start": 56, "end": 70}, {"kind": "address", "start": 97, "end": 129}], "difficulty": "hard"}
+{"text": "결제 금액 601735-3082790, 영수증은 70s73zwe@sample.org로 발송됩니다.", "labels": [{"kind": "email", "start": 27, "end": 46}], "difficulty": "hard"}
+{"text": "주문번호 133,315원가 정상 접수되었습니다.", "labels": [], "difficulty": "negative"}
+{"text": "이번 분기 매출 목표는 지난해 대비 12% 증가입니다.", "labels": [], "difficulty": "negative"}
+{"text": "담당자가 홍준윤에서 심경예으로 변경되었습니다. 새 연락처: 032-9115-6510", "labels": [{"kind": "name", "start": 5, "end": 8}, {"kind": "name", "start": 11, "end": 14}, {"kind": "phone", "start": 33, "end": 46}], "difficulty": "easy"}
+{"text": "사업자등록번호 ORD-20261019-9561 / 담당자 배빈 / 이메일 pfv28@mail-test.kr", "labels": [{"kind": "name", "start": 32, "end": 34}, {"kind": "email", "start": 41, "end": 59}], "difficulty": "hard"}
+{"text": "인천광역시 센텀중앙로293길 78 e편한세상아파트 102동 453호에 거주하는 장찬님께 우편을 발송했습니다.", "labels": [{"kind": "address", "start": 0, "end": 37}, {"kind": "name", "start": 44, "end": 46}], "difficulty": "hard"}
+{"text": "송장번호 ORD-20250623-4892로 배송이 시작되었습니다.", "labels": [], "difficulty": "negative"}
+{"text": "다음 회의 안건은 예산 검토와 일정 조정입니다.", "labels": [], "difficulty": "negative"}
+{"text": "환자명 백석아, 주민번호 350828-3298785, 보호자 연락처 019-7259-5257로 등록되었습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "rrn", "start": 14, "end": 28}, {"kind": "phone", "start": 38, "end": 51}], "difficulty": "easy"}
+{"text": "본인확인용 주민번호 270724-4995486와 이메일 64tflsf56+5hc@example.com을 제출합니다.", "labels": [{"kind": "rrn", "start": 11, "end": 25}, {"kind": "email", "start": 31, "end": 56}], "difficulty": "easy"}
+{"text": "백재 님의 진료 예약이 확정되었습니다. 문의: 010 0500 3963", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "phone", "start": 26, "end": 39}], "difficulty": "hard"}
+{"text": "결제 금액 441737-2878343, 영수증은 1zkogv9@testmail.net로 발송됩니다.", "labels": [{"kind": "email", "start": 27, "end": 47}], "difficulty": "easy"}
+{"text": "자택 02-2167-2837, 직장 010-3666-4135 두 번호 모두 등록해 주세요.", "labels": [{"kind": "phone", "start": 3, "end": 15}, {"kind": "phone", "start": 20, "end": 33}], "difficulty": "easy"}
 {"text": "남찬 선생님께 qiltxva@sample-mail.net로 성적 자료를 전달했습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "email", "start": 8, "end": 31}], "difficulty": "hard"}
-{"text": "오늘 회의록: 작성자 고하, 문의는 c.x5j07l@sample.org로.", "labels": [{"kind": "name", "start": 12, "end": 14}, {"kind": "email", "start": 20, "end": 39}], "difficulty": "hard"}
-{"text": "주문번호 ORD-20260722-6236, 고객 고은경님 010-8148-4843로 발송 예정입니다.", "labels": [{"kind": "name", "start": 27, "end": 30}, {"kind": "phone", "start": 32, "end": 45}], "difficulty": "easy"}
-{"text": "학생 서경(학부모 연락처 01831115622)의 결석계가 접수되었습니다.", "labels": [{"kind": "name", "start": 3, "end": 5}, {"kind": "phone", "start": 14, "end": 25}], "difficulty": "hard"}
-{"text": "송규석님의 이체 알림: 문의는 017-5873-8311 또는 556gdej@sample.org로 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "phone", "start": 17, "end": 30}, {"kind": "email", "start": 34, "end": 52}], "difficulty": "easy"}
+{"text": "전입신고 대상자: 박윤준, 신주소: 광주광역시 해운대구 우동 883-9, 연락처: 019-4895-3086", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "address", "start": 20, "end": 39}, {"kind": "phone", "start": 46, "end": 59}], "difficulty": "easy"}
+{"text": "주문번호 ORD-20260722-6236가 정상 접수되었습니다.", "labels": [], "difficulty": "negative"}
+{"text": "오늘 회의록: 작성자 장예, 문의는 o1v.4m0z@mail-sample.kr로.", "labels": [{"kind": "name", "start": 12, "end": 14}, {"kind": "email", "start": 20, "end": 43}], "difficulty": "hard"}
+{"text": "담당자가 고정진에서 강아하으로 변경되었습니다. 새 연락처: 019-4237-9159", "labels": [{"kind": "name", "start": 5, "end": 8}, {"kind": "name", "start": 11, "end": 14}, {"kind": "phone", "start": 33, "end": 46}], "difficulty": "easy"}
 {"text": "가입자 박우, 주민번호 281228 4551126 기준으로 보험료가 산정되었습니다.", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "rrn", "start": 13, "end": 27}], "difficulty": "hard"}
-{"text": "민원인 허하님, 주민등록번호 0611193618948로 접수된 건 처리 완료되었습니다. 회신 주소: 대구광역시 테헤란로196길 68 푸르지오아파트 114동 211호", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "rrn", "start": 16, "end": 29}, {"kind": "address", "start": 56, "end": 91}], "difficulty": "hard"}
-{"text": "m.7.f5@sample.org로 회신 주시면 손지연 담당자가 답변드립니다.", "labels": [{"kind": "email", "start": 0, "end": 17}, {"kind": "name", "start": 26, "end": 29}], "difficulty": "easy"}
-{"text": "환자명 유서민, 주민번호 350425-3755340, 보호자 연락처 011-8021-1442로 등록되었습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "rrn", "start": 14, "end": 28}, {"kind": "phone", "start": 38, "end": 51}], "difficulty": "easy"}
-{"text": "송장번호 08-8029-8821로 배송이 시작되었습니다.", "labels": [], "difficulty": "negative"}
+{"text": "자택 03231878199, 직장 +821786804888 두 번호 모두 등록해 주세요.", "labels": [{"kind": "phone", "start": 3, "end": 14}, {"kind": "phone", "start": 19, "end": 32}], "difficulty": "hard"}
+{"text": "m.7.f5+rw@sample.org로 회신 주시면 이민재 담당자가 답변드립니다.", "labels": [{"kind": "email", "start": 0, "end": 20}, {"kind": "name", "start": 29, "end": 32}], "difficulty": "easy"}
+{"text": "손도연님 앞, 울산광역시 마포구 합정동 133-20로 배송 중입니다. 수령 전 017-6609-7029로 연락드릴 수 있습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "address", "start": 8, "end": 28}, {"kind": "phone", "start": 44, "end": 57}], "difficulty": "easy"}
 {"text": "신규 입사자 조경율님의 4대보험 등록을 위해 주민번호 410907-1887020가 필요합니다.", "labels": [{"kind": "name", "start": 7, "end": 10}, {"kind": "rrn", "start": 30, "end": 44}], "difficulty": "easy"}
 {"text": "주문번호 728,213원가 정상 접수되었습니다.", "labels": [], "difficulty": "negative"}
-{"text": "ovg4l@demo-corp.com로 회신 주시면 권경 담당자가 답변드립니다.", "labels": [{"kind": "email", "start": 0, "end": 19}, {"kind": "name", "start": 28, "end": 30}], "difficulty": "hard"}
-{"text": "남성 선생님께 m7ng97@testcorp.io로 성적 자료를 전달했습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "email", "start": 8, "end": 26}], "difficulty": "hard"}
-{"text": "주문번호 23840가 정상 접수되었습니다.", "labels": [], "difficulty": "negative"}
-{"text": "배송지: 대전광역시 강남구 역삼동 385-9 (수령인 손진호, 010-9730-0785)", "labels": [{"kind": "address", "start": 5, "end": 24}, {"kind": "name", "start": 30, "end": 33}, {"kind": "phone", "start": 35, "end": 48}], "difficulty": "easy"}
-{"text": "신청자: 문하빈 / 연락처: 017-6230-2024 / 이메일: jzhzapdtx@sample.org", "labels": [{"kind": "name", "start": 5, "end": 8}, {"kind": "phone", "start": 16, "end": 29}, {"kind": "email", "start": 37, "end": 57}], "difficulty": "easy"}
-{"text": "지원자 양호하 이력서 접수 — 연락처 016-1867-1741, 이메일 hhjth0kb@mail-sample.kr", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "phone", "start": 21, "end": 34}, {"kind": "email", "start": 40, "end": 63}], "difficulty": "easy"}
-{"text": "환자명 윤민, 주민번호 8502042195484, 보호자 연락처 +82 19 1659 4192로 등록되었습니다.", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "rrn", "start": 13, "end": 26}, {"kind": "phone", "start": 36, "end": 52}], "difficulty": "hard"}
-{"text": "오늘 회의록: 작성자 장재, 문의는 dgbk3@sample-mail.net로.", "labels": [{"kind": "name", "start": 12, "end": 14}, {"kind": "email", "start": 20, "end": 41}], "difficulty": "hard"}
-{"text": "배송지: 울산광역시 강남구 역삼동 10-5 (수령인 고규도, 016-5857-7171)", "labels": [{"kind": "address", "start": 5, "end": 23}, {"kind": "name", "start": 29, "end": 32}, {"kind": "phone", "start": 34, "end": 47}], "difficulty": "easy"}
-{"text": "주문번호 481-53-33969, 고객 최찬님 016.6319.7835로 발송 예정입니다.", "labels": [{"kind": "name", "start": 22, "end": 24}, {"kind": "phone", "start": 26, "end": 39}], "difficulty": "hard"}
-{"text": "배송지: 부산광역시 강남구 역삼동 966-6 (수령인 최빈예, 018-7908-9321)", "labels": [{"kind": "address", "start": 5, "end": 24}, {"kind": "name", "start": 30, "end": 33}, {"kind": "phone", "start": 35, "end": 48}], "difficulty": "easy"}
-{"text": "반품 신청자 서원율, 환불 계좌 확인을 위해 연락처 018-0472-2140를 남겨주세요.", "labels": [{"kind": "name", "start": 7, "end": 10}, {"kind": "phone", "start": 29, "end": 42}], "difficulty": "easy"}
-{"text": "배송지: 인천광역시 센텀중앙로24길 9 푸르지오아파트 121동 744호 (수령인 김훈, 019 9447 9257)", "labels": [{"kind": "address", "start": 5, "end": 39}, {"kind": "name", "start": 45, "end": 47}, {"kind": "phone", "start": 49, "end": 62}], "difficulty": "hard"}
-{"text": "결제일 543-94-42581, 결제 금액 191538-1012210.", "labels": [], "difficulty": "negative"}
-{"text": "지원자 허연혜 이력서 접수 — 연락처 017-2709-1226, 이메일 lmksuo4c@mail-sample.kr", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "phone", "start": 21, "end": 34}, {"kind": "email", "start": 40, "end": 63}], "difficulty": "easy"}
-{"text": "허연 환자분, 주민등록번호 400216 3134532 확인되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "rrn", "start": 15, "end": 29}], "difficulty": "hard"}
-{"text": "담당자가 박석호에서 홍규아으로 변경되었습니다. 새 연락처: 018-9213-3389", "labels": [{"kind": "name", "start": 5, "end": 8}, {"kind": "name", "start": 11, "end": 14}, {"kind": "phone", "start": 33, "end": 46}], "difficulty": "easy"}
-{"text": "결제 금액 JB339356496KR, 영수증은 m2w0nqdy@example.com로 발송됩니다.", "labels": [{"kind": "email", "start": 26, "end": 46}], "difficulty": "hard"}
-{"text": "신규 입사자 안율님의 4대보험 등록을 위해 주민번호 050316 1939590가 필요합니다.", "labels": [{"kind": "name", "start": 7, "end": 9}, {"kind": "rrn", "start": 29, "end": 43}], "difficulty": "hard"}
-{"text": "주문번호 127,611원가 정상 접수되었습니다.", "labels": [], "difficulty": "negative"}
-{"text": "본인확인용 주민번호 241211 3992415와 이메일 84v2q@sample.org을 제출합니다.", "labels": [{"kind": "rrn", "start": 11, "end": 25}, {"kind": "email", "start": 31, "end": 47}], "difficulty": "hard"}
-{"text": "지원자 양서진 이력서 접수 — 연락처 017-9586-7912, 이메일 27zg4dywl@testcorp.io", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "phone", "start": 21, "end": 34}, {"kind": "email", "start": 40, "end": 61}], "difficulty": "easy"}
-{"text": "인천광역시 해운대구 우동 994-10에 거주하는 권석은님께 우편을 발송했습니다.", "labels": [{"kind": "address", "start": 0, "end": 20}, {"kind": "name", "start": 27, "end": 30}], "difficulty": "easy"}
-{"text": "사업자등록번호는 TY779231134KR이며, 배송지 우편번호는 211,647원입니다.", "labels": [], "difficulty": "negative"}
-{"text": "사업자등록번호는 YD862782374KR이며, 배송지 우편번호는 43023입니다.", "labels": [], "difficulty": "negative"}
-{"text": "최원님 카드번호 5387996846081066로 결제가 완료되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "card", "start": 9, "end": 25}], "difficulty": "hard"}
+{"text": "학생 안영아(학부모 연락처 010-4885-4764)의 결석계가 접수되었습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}, {"kind": "phone", "start": 15, "end": 28}], "difficulty": "easy"}
+{"text": "남성 선생님께 m7ng97@testmail.net로 성적 자료를 전달했습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "email", "start": 8, "end": 27}], "difficulty": "hard"}
+{"text": "안도하님 앞, 대전광역시 강남구 역삼동 385-9로 배송 중입니다. 수령 전 031-677-1771로 연락드릴 수 있습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "address", "start": 8, "end": 27}, {"kind": "phone", "start": 43, "end": 55}], "difficulty": "easy"}
+{"text": "민원인 서하진님, 주민등록번호 601205-3911208로 접수된 건 처리 완료되었습니다. 회신 주소: 광주광역시 강남구 역삼동 309-14 최성수님의 이체 알림: 문의는 018-2247-6862 또는 swk3s@demo-corp.com로 부탁드립니다. 본인확인용 주민번호 900710-3051643와 이메일 sh8may74y+2c@mail-test.kr을 제출합니다.", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "rrn", "start": 17, "end": 31}, {"kind": "address", "start": 58, "end": 78}, {"kind": "name", "start": 79, "end": 82}, {"kind": "phone", "start": 96, "end": 109}, {"kind": "email", "start": 113, "end": 132}, {"kind": "rrn", "start": 153, "end": 167}, {"kind": "email", "start": 173, "end": 198}], "difficulty": "easy"}
+{"text": "인천광역시 테헤란로52길 23 래미안아파트 128동 696호에 거주하는 오석님께 우편을 발송했습니다.", "labels": [{"kind": "address", "start": 0, "end": 33}, {"kind": "name", "start": 40, "end": 42}], "difficulty": "hard"}
+{"text": "배송지: 울산광역시 강남구 역삼동 10-5 (수령인 고규도, 017-4395-1522)", "labels": [{"kind": "address", "start": 5, "end": 23}, {"kind": "name", "start": 29, "end": 32}, {"kind": "phone", "start": 34, "end": 47}], "difficulty": "easy"}
+{"text": "학생 서재준(학부모 연락처 063-2732-1852)의 결석계가 접수되었습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}, {"kind": "phone", "start": 15, "end": 28}], "difficulty": "easy"}
 {"text": "회의는 내일 오후 2시에 진행됩니다.", "labels": [], "difficulty": "negative"}
-{"text": "서버 점검은 매주 화요일 새벽에 진행됩니다.", "labels": [], "difficulty": "negative"}
-{"text": "zk1b4@mail-test.kr로 회신 주시면 홍혜 담당자가 답변드립니다.", "labels": [{"kind": "email", "start": 0, "end": 18}, {"kind": "name", "start": 27, "end": 29}], "difficulty": "hard"}
-{"text": "환불 처리를 위해 유진찬님의 카드번호 5184-0666-5800-4393를 확인했습니다. 문의: 017-3695-6025", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "card", "start": 21, "end": 40}, {"kind": "phone", "start": 54, "end": 67}], "difficulty": "easy"}
-{"text": "정기결제 등록: 카드 5147-2122-8160-6487, 명의자 장은도, 연락처 018-4178-0092", "labels": [{"kind": "card", "start": 12, "end": 31}, {"kind": "name", "start": 37, "end": 40}, {"kind": "phone", "start": 46, "end": 59}], "difficulty": "easy"}
-{"text": "신청자: 정예윤 / 연락처: 018-0833-4934 / 이메일: 3uc0t9t3@sample.org", "labels": [{"kind": "name", "start": 5, "end": 8}, {"kind": "phone", "start": 16, "end": 29}, {"kind": "email", "start": 37, "end": 56}], "difficulty": "easy"}
-{"text": "오우 환자분, 주민등록번호 8406112384795 확인되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "rrn", "start": 15, "end": 28}], "difficulty": "hard"}
-{"text": "신규 입사자 백원님의 4대보험 등록을 위해 주민번호 1411122315028가 필요합니다.", "labels": [{"kind": "name", "start": 7, "end": 9}, {"kind": "rrn", "start": 29, "end": 42}], "difficulty": "hard"}
-{"text": "학생 심석(학부모 연락처 +821846330404)의 결석계가 접수되었습니다.", "labels": [{"kind": "name", "start": 3, "end": 5}, {"kind": "phone", "start": 14, "end": 27}], "difficulty": "hard"}
-{"text": "지원자 배수 이력서 접수 — 연락처 016.3154.5248, 이메일 dd92txhxh@testcorp.io", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "phone", "start": 20, "end": 33}, {"kind": "email", "start": 39, "end": 60}], "difficulty": "hard"}
-{"text": "신규 입사자 백훈정님의 4대보험 등록을 위해 주민번호 820224-3031138가 필요합니다.", "labels": [{"kind": "name", "start": 7, "end": 10}, {"kind": "rrn", "start": 30, "end": 44}], "difficulty": "easy"}
-{"text": "신청자: 박지 / 연락처: +821691431154 / 이메일: 47pqoloea@mail-test.kr", "labels": [{"kind": "name", "start": 5, "end": 7}, {"kind": "phone", "start": 15, "end": 28}, {"kind": "email", "start": 36, "end": 58}], "difficulty": "hard"}
-{"text": "허지율님 카드번호 3414-491476-60721로 결제가 완료되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "card", "start": 10, "end": 27}], "difficulty": "easy"}
-{"text": "환불 처리를 위해 서석혜님의 카드번호 3442-450882-10097를 확인했습니다. 문의: 018-6456-8800", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "card", "start": 21, "end": 38}, {"kind": "phone", "start": 52, "end": 65}], "difficulty": "easy"}
-{"text": "오늘 회의록: 작성자 조경정, 문의는 mpxsfi4hg3@example.com로.", "labels": [{"kind": "name", "start": 12, "end": 15}, {"kind": "email", "start": 21, "end": 43}], "difficulty": "easy"}
-{"text": "가입자 송지, 주민번호 850209 3258759 기준으로 보험료가 산정되었습니다.", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "rrn", "start": 13, "end": 27}], "difficulty": "hard"}
-{"text": "ydw7lqwlvu@sample-mail.net로 회신 주시면 배윤 담당자가 답변드립니다.", "labels": [{"kind": "email", "start": 0, "end": 26}, {"kind": "name", "start": 35, "end": 37}], "difficulty": "hard"}
-{"text": "고객 한우석님 011-7145-4533로 연락 부탁드립니다.", "labels": [{"kind": "name", "start": 3, "end": 6}, {"kind": "phone", "start": 8, "end": 21}], "difficulty": "easy"}
-{"text": "양윤정님의 이체 알림: 문의는 017-7583-7296 또는 2sexdk4@testmail.net로 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "phone", "start": 17, "end": 30}, {"kind": "email", "start": 34, "end": 54}], "difficulty": "easy"}
-{"text": "환불 처리를 위해 박정민님의 카드번호 3409-969308-48872를 확인했습니다. 문의: 019-2435-5993", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "card", "start": 21, "end": 38}, {"kind": "phone", "start": 52, "end": 65}], "difficulty": "easy"}
-{"text": "sdnai9.z@sample.org로 회신 주시면 권도 담당자가 답변드립니다.", "labels": [{"kind": "email", "start": 0, "end": 19}, {"kind": "name", "start": 28, "end": 30}], "difficulty": "hard"}
-{"text": "서버 점검은 매주 화요일 새벽에 진행됩니다.", "labels": [], "difficulty": "negative"}
-{"text": "결제 금액 AU348839570KR, 영수증은 jiyt3@testcorp.io로 발송됩니다.", "labels": [{"kind": "email", "start": 26, "end": 43}], "difficulty": "hard"}
-{"text": "주문번호 ORD-20241111-2691, 고객 문수님 019 4314 9480로 발송 예정입니다.", "labels": [{"kind": "name", "start": 27, "end": 29}, {"kind": "phone", "start": 31, "end": 44}], "difficulty": "hard"}
-{"text": "학생 유찬율(학부모 연락처 018-1275-8465)의 결석계가 접수되었습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}, {"kind": "phone", "start": 15, "end": 28}], "difficulty": "easy"}
-{"text": "지원자 서율인 이력서 접수 — 연락처 016-7976-7898, 이메일 a6qitkffw@mail-test.kr", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "phone", "start": 21, "end": 34}, {"kind": "email", "start": 40, "end": 62}], "difficulty": "easy"}
-{"text": "5317773926030296 카드로 결제 시도가 감지되어 전도님께 01093762406로 확인 연락드립니다.", "labels": [{"kind": "card", "start": 0, "end": 16}, {"kind": "name", "start": 33, "end": 35}, {"kind": "phone", "start": 38, "end": 49}], "difficulty": "hard"}
-{"text": "사업자등록번호는 43858이며, 배송지 우편번호는 09-5644-2404입니다.", "labels": [], "difficulty": "negative"}
+{"text": "심영연 선생님께 zgonbz5.e@mail-test.kr로 성적 자료를 전달했습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "email", "start": 9, "end": 31}], "difficulty": "easy"}
+{"text": "허성님 카드번호 349935889163751로 결제가 완료되었습니다. 고규님의 이체 알림: 문의는 018.0894.0190 또는 8srsg1lmks@testcorp.io로 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "card", "start": 9, "end": 24}, {"kind": "name", "start": 39, "end": 41}, {"kind": "phone", "start": 55, "end": 68}, {"kind": "email", "start": 72, "end": 94}], "difficulty": "hard"}
 {"text": "다음 회의 안건은 예산 검토와 일정 조정입니다.", "labels": [], "difficulty": "negative"}
-{"text": "안녕하세요, 저는 백빈호이고 전화번호는 011-9546-2979입니다.", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "phone", "start": 22, "end": 35}], "difficulty": "easy"}
-{"text": "긴급 연락처 017 9773 9676, 자택 주소는 서울특별시 월드컵로194길 50 자이아파트 104동 134호입니다.", "labels": [{"kind": "phone", "start": 7, "end": 20}, {"kind": "address", "start": 29, "end": 62}], "difficulty": "hard"}
-{"text": "송장번호 49682로 배송이 시작되었습니다.", "labels": [], "difficulty": "negative"}
+{"text": "자택 016-1944-8148, 직장 010-1681-6609 두 번호 모두 등록해 주세요.", "labels": [{"kind": "phone", "start": 3, "end": 16}, {"kind": "phone", "start": 21, "end": 34}], "difficulty": "easy"}
+{"text": "담당자가 박석호에서 홍규아으로 변경되었습니다. 새 연락처: 070-670-7474", "labels": [{"kind": "name", "start": 5, "end": 8}, {"kind": "name", "start": 11, "end": 14}, {"kind": "phone", "start": 33, "end": 45}], "difficulty": "easy"}
+{"text": "담당자가 윤혜재에서 한진원으로 변경되었습니다. 새 연락처: 017-5952-7414", "labels": [{"kind": "name", "start": 5, "end": 8}, {"kind": "name", "start": 11, "end": 14}, {"kind": "phone", "start": 33, "end": 46}], "difficulty": "easy"}
+{"text": "주문번호 ORD-20250627-5783가 정상 접수되었습니다.", "labels": [], "difficulty": "negative"}
+{"text": "신청자: 남도연 / 연락처: 019-6704-1752 / 이메일: wg8oq20+bwye6@mail-sample.kr", "labels": [{"kind": "name", "start": 5, "end": 8}, {"kind": "phone", "start": 16, "end": 29}, {"kind": "email", "start": 37, "end": 65}], "difficulty": "easy"}
+{"text": "지원자 양서 이력서 접수 — 연락처 +82 18 7912 8328, 이메일 zg4dyw@testcorp.io 반품 신청자 심훈, 환불 계좌 확인을 위해 연락처 01648197419를 남겨주세요.", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "phone", "start": 20, "end": 36}, {"kind": "email", "start": 42, "end": 60}, {"kind": "name", "start": 68, "end": 70}, {"kind": "phone", "start": 89, "end": 100}], "difficulty": "hard"}
+{"text": "양예님 카드번호 343339452288515로 결제가 완료되었습니다. 정기결제 등록: 카드 5387996846081066, 명의자 정서, 연락처 016 2636 4695 장은님의 이체 알림: 문의는 +821633428866 또는 nqwyu@testcorp.io로 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "card", "start": 9, "end": 24}, {"kind": "card", "start": 51, "end": 67}, {"kind": "name", "start": 73, "end": 75}, {"kind": "phone", "start": 81, "end": 94}, {"kind": "name", "start": 95, "end": 97}, {"kind": "phone", "start": 111, "end": 124}, {"kind": "email", "start": 128, "end": 145}], "difficulty": "hard"}
+{"text": "고서님 카드번호 5466580043973590로 결제가 완료되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "card", "start": 9, "end": 25}], "difficulty": "hard"}
+{"text": "오늘 회의록: 작성자 권도성, 문의는 ggtnp@team.sample.org로.", "labels": [{"kind": "name", "start": 12, "end": 15}, {"kind": "email", "start": 21, "end": 42}], "difficulty": "easy"}
 {"text": "다음 회의 안건은 예산 검토와 일정 조정입니다.", "labels": [], "difficulty": "negative"}
-{"text": "주문번호 195-71-96427, 고객 정정호님 018-0019-7069로 발송 예정입니다.", "labels": [{"kind": "name", "start": 22, "end": 25}, {"kind": "phone", "start": 27, "end": 40}], "difficulty": "easy"}
-{"text": "자택 01737597899, 직장 +82.19.9439.1600 두 번호 모두 등록해 주세요.", "labels": [{"kind": "phone", "start": 3, "end": 14}, {"kind": "phone", "start": 19, "end": 35}], "difficulty": "hard"}
-{"text": "전입신고 대상자: 손우, 신주소: 울산광역시 테헤란로146길 77 힐스테이트아파트 114동 628호, 연락처: +821901169469", "labels": [{"kind": "name", "start": 10, "end": 12}, {"kind": "address", "start": 19, "end": 55}, {"kind": "phone", "start": 62, "end": 75}], "difficulty": "hard"}
-{"text": "학생 유현훈(학부모 연락처 016-6698-5935)의 결석계가 접수되었습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}, {"kind": "phone", "start": 15, "end": 28}], "difficulty": "easy"}
-{"text": "송장번호 2022.09.14로 배송이 시작되었습니다.", "labels": [], "difficulty": "negative"}
-{"text": "서원님의 이체 알림: 문의는 01879042928 또는 ur.v2of@mail-test.kr로 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "phone", "start": 16, "end": 27}, {"kind": "email", "start": 31, "end": 51}], "difficulty": "hard"}
-{"text": "4138658902601279 카드로 결제 시도가 감지되어 심호님께 +82.16.3633.6075로 확인 연락드립니다.", "labels": [{"kind": "card", "start": 0, "end": 16}, {"kind": "name", "start": 33, "end": 35}, {"kind": "phone", "start": 38, "end": 54}], "difficulty": "hard"}
-{"text": "회의는 내일 오후 2시에 진행됩니다.", "labels": [], "difficulty": "negative"}
-{"text": "반품 신청자 유수, 환불 계좌 확인을 위해 연락처 018.0941.2871를 남겨주세요.", "labels": [{"kind": "name", "start": 7, "end": 9}, {"kind": "phone", "start": 28, "end": 41}], "difficulty": "hard"}
-{"text": "고객 조혜님 018 4685 3190로 연락 부탁드립니다.", "labels": [{"kind": "name", "start": 3, "end": 5}, {"kind": "phone", "start": 7, "end": 20}], "difficulty": "hard"}
-{"text": "주문번호 54172가 정상 접수되었습니다.", "labels": [], "difficulty": "negative"}
-{"text": "주문번호 ORD-20240209-7544가 정상 접수되었습니다.", "labels": [], "difficulty": "negative"}
-{"text": "학생 전현(학부모 연락처 +82 19 1124 1477)의 결석계가 접수되었습니다.", "labels": [{"kind": "name", "start": 3, "end": 5}, {"kind": "phone", "start": 14, "end": 30}], "difficulty": "hard"}
-{"text": "백준 님의 진료 예약이 확정되었습니다. 문의: 01174506618", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "phone", "start": 26, "end": 37}], "difficulty": "hard"}
-{"text": "긴급 연락처 018.1185.8243, 자택 주소는 대전광역시 판교역로60길 66 푸르지오아파트 129동 1202호입니다.", "labels": [{"kind": "phone", "start": 7, "end": 20}, {"kind": "address", "start": 29, "end": 64}], "difficulty": "hard"}
-{"text": "권찬님 카드번호 377357790714165로 결제가 완료되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "card", "start": 9, "end": 24}], "difficulty": "hard"}
-{"text": "문우석님의 이체 알림: 문의는 016-6757-5785 또는 tzjko1mug@sample-mail.net로 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "phone", "start": 17, "end": 30}, {"kind": "email", "start": 34, "end": 59}], "difficulty": "easy"}
-{"text": "긴급 연락처 011 8175 3271, 자택 주소는 부산광역시 월드컵로136길 27 자이아파트 107동 1810호입니다.", "labels": [{"kind": "phone", "start": 7, "end": 20}, {"kind": "address", "start": 29, "end": 63}], "difficulty": "hard"}
-{"text": "결제일 61048, 결제 금액 222-20-98580.", "labels": [], "difficulty": "negative"}
-{"text": "반품 신청자 김원, 환불 계좌 확인을 위해 연락처 017 6081 5167를 남겨주세요.", "labels": [{"kind": "name", "start": 7, "end": 9}, {"kind": "phone", "start": 28, "end": 41}], "difficulty": "hard"}
-{"text": "전입신고 대상자: 강원, 신주소: 대구광역시 판교역로204길 29 힐스테이트아파트 105동 211호, 연락처: 017 8859 0533", "labels": [{"kind": "name", "start": 10, "end": 12}, {"kind": "address", "start": 19, "end": 55}, {"kind": "phone", "start": 62, "end": 75}], "difficulty": "hard"}
-{"text": "자택 017 1972 8490, 직장 +82.10.0193.3452 두 번호 모두 등록해 주세요.", "labels": [{"kind": "phone", "start": 3, "end": 16}, {"kind": "phone", "start": 21, "end": 37}], "difficulty": "hard"}
-{"text": "환자명 오호혜, 주민번호 230909-3353119, 보호자 연락처 017-5621-5995로 등록되었습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "rrn", "start": 14, "end": 28}, {"kind": "phone", "start": 38, "end": 51}], "difficulty": "easy"}
-{"text": "송장번호 440,450원로 배송이 시작되었습니다.", "labels": [], "difficulty": "negative"}
-{"text": "허찬 님의 진료 예약이 확정되었습니다. 문의: 018.2148.9435", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "phone", "start": 26, "end": 39}], "difficulty": "hard"}
-{"text": "환불 처리를 위해 장석우님의 카드번호 3466-322702-67282를 확인했습니다. 문의: 018-5172-7972", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "card", "start": 21, "end": 38}, {"kind": "phone", "start": 52, "end": 65}], "difficulty": "easy"}
-{"text": "학생 최훈도(학부모 연락처 010-3530-4166)의 결석계가 접수되었습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}, {"kind": "phone", "start": 15, "end": 28}], "difficulty": "easy"}
-{"text": "민원인 양윤준님, 주민등록번호 460918-4451074로 접수된 건 처리 완료되었습니다. 회신 주소: 서울특별시 성남시 분당구 정자동 125-12", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "rrn", "start": 17, "end": 31}, {"kind": "address", "start": 58, "end": 82}], "difficulty": "easy"}
-{"text": "전규진님 앞, 부산광역시 유성구 봉명동 364-11로 배송 중입니다. 수령 전 019-8363-7987로 연락드릴 수 있습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "address", "start": 8, "end": 28}, {"kind": "phone", "start": 44, "end": 57}], "difficulty": "easy"}
-{"text": "주문번호 490-88-47555, 고객 권규님 01955276911로 발송 예정입니다.", "labels": [{"kind": "name", "start": 22, "end": 24}, {"kind": "phone", "start": 26, "end": 37}], "difficulty": "hard"}
-{"text": "자택 +821637395136, 직장 019.4382.9918 두 번호 모두 등록해 주세요.", "labels": [{"kind": "phone", "start": 3, "end": 16}, {"kind": "phone", "start": 21, "end": 34}], "difficulty": "hard"}
-{"text": "주문번호 951937-4434098, 고객 강도님 +821141221311로 발송 예정입니다.", "labels": [{"kind": "name", "start": 24, "end": 26}, {"kind": "phone", "start": 28, "end": 41}], "difficulty": "hard"}
-{"text": "송장번호 197-18-72021로 배송이 시작되었습니다.", "labels": [], "difficulty": "negative"}
-{"text": "정기결제 등록: 카드 5481-1492-1643-3476, 명의자 유은수, 연락처 011-0468-0575", "labels": [{"kind": "card", "start": 12, "end": 31}, {"kind": "name", "start": 37, "end": 40}, {"kind": "phone", "start": 46, "end": 59}], "difficulty": "easy"}
-{"text": "자택 018.4463.8987, 직장 +82.19.8835.2900 두 번호 모두 등록해 주세요.", "labels": [{"kind": "phone", "start": 3, "end": 16}, {"kind": "phone", "start": 21, "end": 37}], "difficulty": "hard"}
-{"text": "가입자 양규, 주민번호 671121 4455042 기준으로 보험료가 산정되었습니다.", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "rrn", "start": 13, "end": 27}], "difficulty": "hard"}
-{"text": "민원인 임율빈님, 주민등록번호 190501-3685924로 접수된 건 처리 완료되었습니다. 회신 주소: 울산광역시 종로구 청운동 353-10", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "rrn", "start": 17, "end": 31}, {"kind": "address", "start": 58, "end": 78}], "difficulty": "easy"}
-{"text": "심연원님 카드번호 5540-6493-0853-6861로 결제가 완료되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "card", "start": 10, "end": 29}], "difficulty": "easy"}
-{"text": "양규찬님 카드번호 5434-1638-9448-4634로 결제가 완료되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "card", "start": 10, "end": 29}], "difficulty": "easy"}
-{"text": "eqqzslf@example.com로 회신 주시면 강하아 담당자가 답변드립니다.", "labels": [{"kind": "email", "start": 0, "end": 19}, {"kind": "name", "start": 28, "end": 31}], "difficulty": "easy"}
-{"text": "환불 처리를 위해 김우님의 카드번호 4207356475705124를 확인했습니다. 문의: +821711698899", "labels": [{"kind": "name", "start": 10, "end": 12}, {"kind": "card", "start": 20, "end": 36}, {"kind": "phone", "start": 50, "end": 63}], "difficulty": "hard"}
-{"text": "주문번호 2026.07.27, 고객 김하원님 019-4078-6304로 발송 예정입니다.", "labels": [{"kind": "name", "start": 20, "end": 23}, {"kind": "phone", "start": 25, "end": 38}], "difficulty": "easy"}
-{"text": "안녕하세요, 저는 양서이고 전화번호는 01085383415입니다.", "labels": [{"kind": "name", "start": 10, "end": 12}, {"kind": "phone", "start": 21, "end": 32}], "difficulty": "hard"}
-{"text": "사업자등록번호 DT899641923KR / 담당자 심진 / 이메일 erlnby.iq@example.com", "labels": [{"kind": "name", "start": 28, "end": 30}, {"kind": "email", "start": 37, "end": 58}], "difficulty": "hard"}
-{"text": "사업자등록번호는 505-41-11170이며, 배송지 우편번호는 ORD-20261216-3539입니다.", "labels": [], "difficulty": "negative"}
-{"text": "안녕하세요, 저는 강연지이고 전화번호는 019-5544-0983입니다.", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "phone", "start": 22, "end": 35}], "difficulty": "easy"}
-{"text": "서버 점검은 매주 화요일 새벽에 진행됩니다.", "labels": [], "difficulty": "negative"}
-{"text": "i.313qhz@sample-mail.net로 회신 주시면 양은준 담당자가 답변드립니다.", "labels": [{"kind": "email", "start": 0, "end": 24}, {"kind": "name", "start": 33, "end": 36}], "difficulty": "easy"}
-{"text": "권진님 카드번호 5287392855749820로 결제가 완료되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "card", "start": 9, "end": 25}], "difficulty": "hard"}
-{"text": "서버 점검은 매주 화요일 새벽에 진행됩니다.", "labels": [], "difficulty": "negative"}
-{"text": "신규 입사자 오재님의 4대보험 등록을 위해 주민번호 9911172961613가 필요합니다.", "labels": [{"kind": "name", "start": 7, "end": 9}, {"kind": "rrn", "start": 29, "end": 42}], "difficulty": "hard"}
-{"text": "정기결제 등록: 카드 373518638782946, 명의자 한빈, 연락처 +82 10 8572 1092", "labels": [{"kind": "card", "start": 12, "end": 27}, {"kind": "name", "start": 33, "end": 35}, {"kind": "phone", "start": 41, "end": 57}], "difficulty": "hard"}
-{"text": "서버 점검은 매주 화요일 새벽에 진행됩니다.", "labels": [], "difficulty": "negative"}
-{"text": "회의는 내일 오후 2시에 진행됩니다.", "labels": [], "difficulty": "negative"}
+{"text": "사업자등록번호 QU771482340KR / 담당자 홍인성 / 이메일 svn3lig+ftom5x@sample-mail.net", "labels": [{"kind": "name", "start": 28, "end": 31}, {"kind": "email", "start": 38, "end": 68}], "difficulty": "easy"}
 {"text": "다음 회의 안건은 예산 검토와 일정 조정입니다.", "labels": [], "difficulty": "negative"}
-{"text": "회의는 내일 오후 2시에 진행됩니다.", "labels": [], "difficulty": "negative"}
-{"text": "황수님의 이체 알림: 문의는 016 0804 6002 또는 wc8hs6@mail-test.kr로 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "phone", "start": 16, "end": 29}, {"kind": "email", "start": 33, "end": 52}], "difficulty": "hard"}
-{"text": "송경정 님의 진료 예약이 확정되었습니다. 문의: 017-6046-0955", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "phone", "start": 27, "end": 40}], "difficulty": "easy"}
-{"text": "지원자 이경 이력서 접수 — 연락처 01035378511, 이메일 diohy@sample.org", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "phone", "start": 20, "end": 31}, {"kind": "email", "start": 37, "end": 53}], "difficulty": "hard"}
-{"text": "환불 처리를 위해 최원님의 카드번호 375761228685289를 확인했습니다. 문의: 016 5163 9012", "labels": [{"kind": "name", "start": 10, "end": 12}, {"kind": "card", "start": 20, "end": 35}, {"kind": "phone", "start": 49, "end": 62}], "difficulty": "hard"}
-{"text": "자택 019.7054.5299, 직장 +82 18 3504 6145 두 번호 모두 등록해 주세요.", "labels": [{"kind": "phone", "start": 3, "end": 16}, {"kind": "phone", "start": 21, "end": 37}], "difficulty": "hard"}
-{"text": "권재 님의 진료 예약이 확정되었습니다. 문의: +82.10.4660.9760", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "phone", "start": 26, "end": 42}], "difficulty": "hard"}
-{"text": "서버 점검은 매주 화요일 새벽에 진행됩니다.", "labels": [], "difficulty": "negative"}
-{"text": "고객 임우님 01045219071로 연락 부탁드립니다.", "labels": [{"kind": "name", "start": 3, "end": 5}, {"kind": "phone", "start": 7, "end": 18}], "difficulty": "hard"}
-{"text": "배송지: 서울특별시 수원시 영통구 매탄동 365-5 (수령인 정준율, 018-4093-3817)", "labels": [{"kind": "address", "start": 5, "end": 28}, {"kind": "name", "start": 34, "end": 37}, {"kind": "phone", "start": 39, "end": 52}], "difficulty": "easy"}
-{"text": "전찬 환자분, 주민등록번호 9302242632464 확인되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "rrn", "start": 15, "end": 28}], "difficulty": "hard"}
-{"text": "반품 신청자 유아서, 환불 계좌 확인을 위해 연락처 019-9441-6251를 남겨주세요.", "labels": [{"kind": "name", "start": 7, "end": 10}, {"kind": "phone", "start": 29, "end": 42}], "difficulty": "easy"}
-{"text": "회의는 내일 오후 2시에 진행됩니다.", "labels": [], "difficulty": "negative"}
-{"text": "남인 님의 진료 예약이 확정되었습니다. 문의: 010.3714.9868", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "phone", "start": 26, "end": 39}], "difficulty": "hard"}
-{"text": "신청자: 임수 / 연락처: +821824505354 / 이메일: zfy.91vdp@testcorp.io", "labels": [{"kind": "name", "start": 5, "end": 7}, {"kind": "phone", "start": 15, "end": 28}, {"kind": "email", "start": 36, "end": 57}], "difficulty": "hard"}
-{"text": "결제일 587-83-16463, 결제 금액 00-2393-7529.", "labels": [], "difficulty": "negative"}
-{"text": "정기결제 등록: 카드 4783-7693-8983-3141, 명의자 손빈윤, 연락처 019-9437-1467", "labels": [{"kind": "card", "start": 12, "end": 31}, {"kind": "name", "start": 37, "end": 40}, {"kind": "phone", "start": 46, "end": 59}], "difficulty": "easy"}
-{"text": "송장번호 00-6706-4120로 배송이 시작되었습니다.", "labels": [], "difficulty": "negative"}
-{"text": "정기결제 등록: 카드 5225-9792-7033-5212, 명의자 최경서, 연락처 011-2419-4713", "labels": [{"kind": "card", "start": 12, "end": 31}, {"kind": "name", "start": 37, "end": 40}, {"kind": "phone", "start": 46, "end": 59}], "difficulty": "easy"}
+{"text": "배송지: 광주광역시 해운대구 우동 457-8 (수령인 남규호, 044-698-5258)", "labels": [{"kind": "address", "start": 5, "end": 24}, {"kind": "name", "start": 30, "end": 33}, {"kind": "phone", "start": 35, "end": 47}], "difficulty": "easy"}
+{"text": "학생 장진경(학부모 연락처 018-6143-8426)의 결석계가 접수되었습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}, {"kind": "phone", "start": 15, "end": 28}], "difficulty": "easy"}
+{"text": "오늘 회의록: 작성자 남규현, 문의는 t9g9tac@testmail.net로.", "labels": [{"kind": "name", "start": 12, "end": 15}, {"kind": "email", "start": 21, "end": 41}], "difficulty": "easy"}
+{"text": "환불 처리를 위해 고은님의 카드번호 4750110248193469를 확인했습니다. 문의: 055.5183.0276 학생 고하(학부모 연락처 019 1036 9594)의 결석계가 접수되었습니다.", "labels": [{"kind": "name", "start": 10, "end": 12}, {"kind": "card", "start": 20, "end": 36}, {"kind": "phone", "start": 50, "end": 63}, {"kind": "name", "start": 67, "end": 69}, {"kind": "phone", "start": 78, "end": 91}], "difficulty": "hard"}
 {"text": "이번 분기 매출 목표는 지난해 대비 12% 증가입니다.", "labels": [], "difficulty": "negative"}
-{"text": "고객 한현님 011 8952 8573로 연락 부탁드립니다.", "labels": [{"kind": "name", "start": 3, "end": 5}, {"kind": "phone", "start": 7, "end": 20}], "difficulty": "hard"}
-{"text": "반품 신청자 양은, 환불 계좌 확인을 위해 연락처 010 6170 9551를 남겨주세요.", "labels": [{"kind": "name", "start": 7, "end": 9}, {"kind": "phone", "start": 28, "end": 41}], "difficulty": "hard"}
-{"text": "부산광역시 강남구 역삼동 291-7에 거주하는 배훈호님께 우편을 발송했습니다.", "labels": [{"kind": "address", "start": 0, "end": 19}, {"kind": "name", "start": 26, "end": 29}], "difficulty": "easy"}
-{"text": "가입자 김지, 주민번호 8405224141412 기준으로 보험료가 산정되었습니다.", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "rrn", "start": 13, "end": 26}], "difficulty": "hard"}
-{"text": "안녕하세요, 저는 서수이고 전화번호는 +82 16 7940 9782입니다.", "labels": [{"kind": "name", "start": 10, "end": 12}, {"kind": "phone", "start": 21, "end": 37}], "difficulty": "hard"}
-{"text": "본인확인용 주민번호 711201-3324261와 이메일 ls1aznl@demo-corp.com을 제출합니다.", "labels": [{"kind": "rrn", "start": 11, "end": 25}, {"kind": "email", "start": 31, "end": 52}], "difficulty": "easy"}
-{"text": "주문번호 09-5590-4695, 고객 정윤님 010.6262.8531로 발송 예정입니다.", "labels": [{"kind": "name", "start": 22, "end": 24}, {"kind": "phone", "start": 26, "end": 39}], "difficulty": "hard"}
-{"text": "윤영은 선생님께 97muhfu3@sample.org로 성적 자료를 전달했습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "email", "start": 9, "end": 28}], "difficulty": "easy"}
-{"text": "심원은 선생님께 87lu9el602@testcorp.io로 성적 자료를 전달했습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "email", "start": 9, "end": 31}], "difficulty": "easy"}
-{"text": "민원인 양예님, 주민등록번호 1904043242153로 접수된 건 처리 완료되었습니다. 회신 주소: 울산광역시 동성로137길 78 힐스테이트아파트 120동 573호", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "rrn", "start": 16, "end": 29}, {"kind": "address", "start": 56, "end": 91}], "difficulty": "hard"}
-{"text": "김율지님의 이체 알림: 문의는 019-7808-2196 또는 5rygorgip@example.com로 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "phone", "start": 17, "end": 30}, {"kind": "email", "start": 34, "end": 55}], "difficulty": "easy"}
-{"text": "안녕하세요, 저는 양성이고 전화번호는 01029017197입니다.", "labels": [{"kind": "name", "start": 10, "end": 12}, {"kind": "phone", "start": 21, "end": 32}], "difficulty": "hard"}
-{"text": "한혜님 카드번호 5536609656999885로 결제가 완료되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "card", "start": 9, "end": 25}], "difficulty": "hard"}
-{"text": "지원자 최재인 이력서 접수 — 연락처 010-4025-8498, 이메일 o1utxbkol@demo-corp.com", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "phone", "start": 21, "end": 34}, {"kind": "email", "start": 40, "end": 63}], "difficulty": "easy"}
-{"text": "오늘 회의록: 작성자 홍예, 문의는 z7rxd@mail-test.kr로.", "labels": [{"kind": "name", "start": 12, "end": 14}, {"kind": "email", "start": 20, "end": 38}], "difficulty": "hard"}
+{"text": "5291476607283263 카드로 결제 시도가 감지되어 배석님께 019 2360 4883로 확인 연락드립니다.", "labels": [{"kind": "card", "start": 0, "end": 16}, {"kind": "name", "start": 33, "end": 35}, {"kind": "phone", "start": 38, "end": 51}], "difficulty": "hard"}
+{"text": "결제 금액 ORD-20260905-3019, 영수증은 awt9l@sample-mail.net로 발송됩니다.", "labels": [{"kind": "email", "start": 30, "end": 51}], "difficulty": "hard"}
+{"text": "긴급 연락처 018-4140-3183, 자택 주소는 서울특별시 종로구 청운동 688-19입니다.", "labels": [{"kind": "phone", "start": 7, "end": 20}, {"kind": "address", "start": 29, "end": 49}], "difficulty": "easy"}
+{"text": "가입자 송지, 주민번호 850209 3258759 기준으로 보험료가 산정되었습니다.", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "rrn", "start": 13, "end": 27}], "difficulty": "hard"}
+{"text": "배송지: 대전광역시 노원구 상계동 72-7 (수령인 한연재, 019-5008-9571)", "labels": [{"kind": "address", "start": 5, "end": 23}, {"kind": "name", "start": 29, "end": 32}, {"kind": "phone", "start": 34, "end": 47}], "difficulty": "easy"}
+{"text": "결제일 ZE436311814KR, 결제 금액 824,824원.", "labels": [], "difficulty": "negative"}
+{"text": "송장번호 2026.06.05로 배송이 시작되었습니다.", "labels": [], "difficulty": "negative"}
+{"text": "민원인 권율님, 주민등록번호 6209043846130로 접수된 건 처리 완료되었습니다. 회신 주소: 울산광역시 판교역로72길 69 자이아파트 109동 1603호", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "rrn", "start": 16, "end": 29}, {"kind": "address", "start": 56, "end": 89}], "difficulty": "hard"}
+{"text": "자택 010-9533-9484, 직장 018-3485-0600 두 번호 모두 등록해 주세요. 신규 입사자 장진정님의 4대보험 등록을 위해 주민번호 830312-4292696가 필요합니다.", "labels": [{"kind": "phone", "start": 3, "end": 16}, {"kind": "phone", "start": 21, "end": 34}, {"kind": "name", "start": 59, "end": 62}, {"kind": "rrn", "start": 82, "end": 96}], "difficulty": "easy"}
+{"text": "sdnai9.z@sample.org로 회신 주시면 강영 담당자가 답변드립니다.", "labels": [{"kind": "email", "start": 0, "end": 19}, {"kind": "name", "start": 28, "end": 30}], "difficulty": "hard"}
+{"text": "환불 처리를 위해 양연율님의 카드번호 4373-1453-0385-6771를 확인했습니다. 문의: 031-1691-8542", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "card", "start": 21, "end": 40}, {"kind": "phone", "start": 54, "end": 67}], "difficulty": "easy"}
+{"text": "송영님 앞, 부산광역시 센텀중앙로194길 47 힐스테이트아파트 121동 1940호로 배송 중입니다. 수령 전 0555286649로 연락드릴 수 있습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "address", "start": 7, "end": 45}, {"kind": "phone", "start": 61, "end": 71}], "difficulty": "hard"}
+{"text": "5590827231843229 카드로 결제 시도가 감지되어 강율님께 +82 10 3773 6793로 확인 연락드립니다.", "labels": [{"kind": "card", "start": 0, "end": 16}, {"kind": "name", "start": 33, "end": 35}, {"kind": "phone", "start": 38, "end": 54}], "difficulty": "hard"}
+{"text": "황연님의 이체 알림: 문의는 0612490706 또는 vfxbvc@sample.org로 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "phone", "start": 16, "end": 26}, {"kind": "email", "start": 30, "end": 47}], "difficulty": "hard"}
+{"text": "주문번호 2020.04.15, 고객 홍연혜님 011-6730-9844로 발송 예정입니다.", "labels": [{"kind": "name", "start": 20, "end": 23}, {"kind": "phone", "start": 25, "end": 38}], "difficulty": "easy"}
 {"text": "서버 점검은 매주 화요일 새벽에 진행됩니다.", "labels": [], "difficulty": "negative"}
-{"text": "민원인 김도님, 주민등록번호 751207 4118209로 접수된 건 처리 완료되었습니다. 회신 주소: 대전광역시 월드컵로64길 12 래미안아파트 123동 1021호", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "rrn", "start": 16, "end": 30}, {"kind": "address", "start": 57, "end": 91}], "difficulty": "hard"}
-{"text": "지원자 문찬경 이력서 접수 — 연락처 018-2619-6204, 이메일 o27uyf6g0@testcorp.io", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "phone", "start": 21, "end": 34}, {"kind": "email", "start": 40, "end": 61}], "difficulty": "easy"}
-{"text": "오늘 회의록: 작성자 유도, 문의는 79a2a@mail-sample.kr로.", "labels": [{"kind": "name", "start": 12, "end": 14}, {"kind": "email", "start": 20, "end": 40}], "difficulty": "hard"}
-{"text": "반품 신청자 남연우, 환불 계좌 확인을 위해 연락처 011-9647-7794를 남겨주세요.", "labels": [{"kind": "name", "start": 7, "end": 10}, {"kind": "phone", "start": 29, "end": 42}], "difficulty": "easy"}
-{"text": "홍호 환자분, 주민등록번호 3109091064117 확인되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "rrn", "start": 15, "end": 28}], "difficulty": "hard"}
-{"text": "결제일 ORD-20240122-5889, 결제 금액 YB547704086KR.", "labels": [], "difficulty": "negative"}
-{"text": "임호성님의 이체 알림: 문의는 019-9747-9376 또는 gqv8dlnoc@testcorp.io로 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "phone", "start": 17, "end": 30}, {"kind": "email", "start": 34, "end": 55}], "difficulty": "easy"}
-{"text": "오늘 회의록: 작성자 황은하, 문의는 5mphhcv.td@demo-corp.com로.", "labels": [{"kind": "name", "start": 12, "end": 15}, {"kind": "email", "start": 21, "end": 45}], "difficulty": "easy"}
-{"text": "대구광역시 동성로182길 17 힐스테이트아파트 119동 1117호에 거주하는 안경님께 우편을 발송했습니다.", "labels": [{"kind": "address", "start": 0, "end": 36}, {"kind": "name", "start": 43, "end": 45}], "difficulty": "hard"}
-{"text": "4934301071396605 카드로 결제 시도가 감지되어 한율님께 011 0185 3296로 확인 연락드립니다.", "labels": [{"kind": "card", "start": 0, "end": 16}, {"kind": "name", "start": 33, "end": 35}, {"kind": "phone", "start": 38, "end": 51}], "difficulty": "hard"}
-{"text": "4448850155699028 카드로 결제 시도가 감지되어 조윤님께 017.7774.0582로 확인 연락드립니다.", "labels": [{"kind": "card", "start": 0, "end": 16}, {"kind": "name", "start": 33, "end": 35}, {"kind": "phone", "start": 38, "end": 51}], "difficulty": "hard"}
-{"text": "r67r48ctuz@example.com로 회신 주시면 조영 담당자가 답변드립니다.", "labels": [{"kind": "email", "start": 0, "end": 22}, {"kind": "name", "start": 31, "end": 33}], "difficulty": "hard"}
+{"text": "환불 처리를 위해 고윤예님의 카드번호 5599-1366-2103-8866를 확인했습니다. 문의: 033-487-9827", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "card", "start": 21, "end": 40}, {"kind": "phone", "start": 54, "end": 66}], "difficulty": "easy"}
+{"text": "이번 분기 매출 목표는 지난해 대비 12% 증가입니다.", "labels": [], "difficulty": "negative"}
+{"text": "서버 점검은 매주 화요일 새벽에 진행됩니다.", "labels": [], "difficulty": "negative"}
+{"text": "주문번호 08-7068-1711, 고객 문수빈님 017-6246-5742로 발송 예정입니다.", "labels": [{"kind": "name", "start": 22, "end": 25}, {"kind": "phone", "start": 27, "end": 40}], "difficulty": "easy"}
+{"text": "정준연 선생님께 7dwuja@example.com로 성적 자료를 전달했습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "email", "start": 9, "end": 27}], "difficulty": "easy"}
+{"text": "회의는 내일 오후 2시에 진행됩니다.", "labels": [], "difficulty": "negative"}
+{"text": "오하 선생님께 pvjtuw@testcorp.io로 성적 자료를 전달했습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "email", "start": 8, "end": 26}], "difficulty": "hard"}
+{"text": "긴급 연락처 063.5024.9464, 자택 주소는 대전광역시 센텀중앙로71길 85 래미안아파트 124동 571호입니다.", "labels": [{"kind": "phone", "start": 7, "end": 20}, {"kind": "address", "start": 29, "end": 63}], "difficulty": "hard"}
+{"text": "배송지: 부산광역시 광진구 자양동 411-11 (수령인 배진호, 019-0852-2633)", "labels": [{"kind": "address", "start": 5, "end": 25}, {"kind": "name", "start": 31, "end": 34}, {"kind": "phone", "start": 36, "end": 49}], "difficulty": "easy"}
+{"text": "담당자가 정연예에서 홍빈지으로 변경되었습니다. 새 연락처: 011-6075-1311", "labels": [{"kind": "name", "start": 5, "end": 8}, {"kind": "name", "start": 11, "end": 14}, {"kind": "phone", "start": 33, "end": 46}], "difficulty": "easy"}
+{"text": "반품 신청자 유수, 환불 계좌 확인을 위해 연락처 +82.18.0941.2871를 남겨주세요.", "labels": [{"kind": "name", "start": 7, "end": 9}, {"kind": "phone", "start": 28, "end": 44}], "difficulty": "hard"}
+{"text": "자택 018-4685-3190, 직장 018-8364-8451 두 번호 모두 등록해 주세요.", "labels": [{"kind": "phone", "start": 3, "end": 16}, {"kind": "phone", "start": 21, "end": 34}], "difficulty": "easy"}
+{"text": "윤규민 님의 진료 예약이 확정되었습니다. 문의: 032-6544-5785", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "phone", "start": 27, "end": 40}], "difficulty": "easy"}
+{"text": "지원자 김경훈 이력서 접수 — 연락처 010-9004-4661, 이메일 47m9kwh8vj@mail-test.kr", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "phone", "start": 21, "end": 34}, {"kind": "email", "start": 40, "end": 63}], "difficulty": "easy"}
+{"text": "3448-947697-35771 카드로 결제 시도가 감지되어 남영혜님께 010-4224-1106로 확인 연락드립니다.", "labels": [{"kind": "card", "start": 0, "end": 17}, {"kind": "name", "start": 34, "end": 37}, {"kind": "phone", "start": 40, "end": 53}], "difficulty": "easy"}
+{"text": "문우석님의 이체 알림: 문의는 016-8462-8776 또는 zjko1@sample.org로 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "phone", "start": 17, "end": 30}, {"kind": "email", "start": 34, "end": 50}], "difficulty": "easy"}
+{"text": "긴급 연락처 +82 11 8175 3271, 자택 주소는 부산광역시 월드컵로136길 27 자이아파트 107동 1810호입니다.", "labels": [{"kind": "phone", "start": 7, "end": 23}, {"kind": "address", "start": 32, "end": 66}], "difficulty": "hard"}
+{"text": "결제일 61048, 결제 금액 222-20-98580.", "labels": [], "difficulty": "negative"}
+{"text": "정기결제 등록: 카드 3407-595794-72846, 명의자 서우원, 연락처 010-8613-6933", "labels": [{"kind": "card", "start": 12, "end": 29}, {"kind": "name", "start": 35, "end": 38}, {"kind": "phone", "start": 44, "end": 57}], "difficulty": "easy"}
+{"text": "학생 허성(학부모 연락처 03351710137)의 결석계가 접수되었습니다.", "labels": [{"kind": "name", "start": 3, "end": 5}, {"kind": "phone", "start": 14, "end": 25}], "difficulty": "hard"}
+{"text": "주문번호 09-6331-6924가 정상 접수되었습니다.", "labels": [], "difficulty": "negative"}
+{"text": "안녕하세요, 저는 장연이고 전화번호는 011 8171 6945입니다.", "labels": [{"kind": "name", "start": 10, "end": 12}, {"kind": "phone", "start": 21, "end": 34}], "difficulty": "hard"}
+{"text": "결제일 WG293154584KR, 결제 금액 47741.", "labels": [], "difficulty": "negative"}
+{"text": "5186632270267284 카드로 결제 시도가 감지되어 송경님께 +82.16.4111.9210로 확인 연락드립니다.", "labels": [{"kind": "card", "start": 0, "end": 16}, {"kind": "name", "start": 33, "end": 35}, {"kind": "phone", "start": 38, "end": 54}], "difficulty": "hard"}
+{"text": "신청자: 조인준 / 연락처: 019-1577-7370 / 이메일: mnu8jae69h@sample.org 오늘 회의록: 작성자 오윤성, 문의는 s16okxfg3@testcorp.io로.", "labels": [{"kind": "name", "start": 5, "end": 8}, {"kind": "phone", "start": 16, "end": 29}, {"kind": "email", "start": 37, "end": 58}, {"kind": "name", "start": 71, "end": 74}, {"kind": "email", "start": 80, "end": 101}], "difficulty": "easy"}
+{"text": "서버 점검은 매주 화요일 새벽에 진행됩니다.", "labels": [], "difficulty": "negative"}
+{"text": "장호님 카드번호 5447598762202342로 결제가 완료되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "card", "start": 9, "end": 25}], "difficulty": "hard"}
+{"text": "본인확인용 주민번호 500204-1620215와 이메일 b2t.dwd8o@demo-corp.com을 제출합니다.", "labels": [{"kind": "rrn", "start": 11, "end": 25}, {"kind": "email", "start": 31, "end": 54}], "difficulty": "easy"}
+{"text": "서버 점검은 매주 화요일 새벽에 진행됩니다.", "labels": [], "difficulty": "negative"}
+{"text": "결제일 WM680447823KR, 결제 금액 2024.08.05.", "labels": [], "difficulty": "negative"}
+{"text": "홍재규님 앞, 광주광역시 노원구 상계동 446-17로 배송 중입니다. 수령 전 018-5073-5688로 연락드릴 수 있습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "address", "start": 8, "end": 28}, {"kind": "phone", "start": 44, "end": 57}], "difficulty": "easy"}
+{"text": "민원인 임율빈님, 주민등록번호 190501-3685924로 접수된 건 처리 완료되었습니다. 회신 주소: 울산광역시 종로구 청운동 353-10", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "rrn", "start": 17, "end": 31}, {"kind": "address", "start": 58, "end": 78}], "difficulty": "easy"}
+{"text": "오늘 회의록: 작성자 김원, 문의는 3w3ug6qj@testcorp.io로. 안녕하세요, 저는 장지이고 전화번호는 064.4664.8715입니다. 5263122417974972 카드로 결제 시도가 감지되어 조윤님께 01803623046로 확인 연락드립니다.", "labels": [{"kind": "name", "start": 12, "end": 14}, {"kind": "email", "start": 20, "end": 40}, {"kind": "name", "start": 53, "end": 55}, {"kind": "phone", "start": 64, "end": 77}, {"kind": "card", "start": 82, "end": 98}, {"kind": "name", "start": 115, "end": 117}, {"kind": "phone", "start": 120, "end": 131}], "difficulty": "hard"}
+{"text": "권경민님 카드번호 5112-0735-6475-7053로 결제가 완료되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "card", "start": 10, "end": 29}], "difficulty": "easy"}
+{"text": "서버 점검은 매주 화요일 새벽에 진행됩니다.", "labels": [], "difficulty": "negative"}
+{"text": "송장번호 656-70-33803로 배송이 시작되었습니다.", "labels": [], "difficulty": "negative"}
+{"text": "사업자등록번호는 09-2998-5078이며, 배송지 우편번호는 08-5049-1549입니다.", "labels": [], "difficulty": "negative"}
+{"text": "이번 분기 매출 목표는 지난해 대비 12% 증가입니다.", "labels": [], "difficulty": "negative"}
+{"text": "학생 고아(학부모 연락처 019.0691.9004)의 결석계가 접수되었습니다.", "labels": [{"kind": "name", "start": 3, "end": 5}, {"kind": "phone", "start": 14, "end": 27}], "difficulty": "hard"}
+{"text": "본인확인용 주민번호 061107 3309287와 이메일 a3voi9v@sample.org을 제출합니다.", "labels": [{"kind": "rrn", "start": 11, "end": 25}, {"kind": "email", "start": 31, "end": 49}], "difficulty": "hard"}
+{"text": "서버 점검은 매주 화요일 새벽에 진행됩니다.", "labels": [], "difficulty": "negative"}
+{"text": "사업자등록번호 ORD-20240621-3521 / 담당자 문진 / 이메일 ei.31@mail-sample.kr", "labels": [{"kind": "name", "start": 32, "end": 34}, {"kind": "email", "start": 41, "end": 61}], "difficulty": "hard"}
+{"text": "송장번호 TG142400500KR로 배송이 시작되었습니다.", "labels": [], "difficulty": "negative"}
+{"text": "신규 입사자 문연님의 4대보험 등록을 위해 주민번호 720318 2424251가 필요합니다.", "labels": [{"kind": "name", "start": 7, "end": 9}, {"kind": "rrn", "start": 29, "end": 43}], "difficulty": "hard"}
+{"text": "안은재 환자분, 주민등록번호 330912-4000948 확인되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "rrn", "start": 16, "end": 30}], "difficulty": "easy"}
+{"text": "주문번호 ORD-20260625-4912, 고객 한경지님 018-6348-3110로 발송 예정입니다.", "labels": [{"kind": "name", "start": 27, "end": 30}, {"kind": "phone", "start": 32, "end": 45}], "difficulty": "easy"}
+{"text": "반품 신청자 임윤빈, 환불 계좌 확인을 위해 연락처 010-1577-8572를 남겨주세요.", "labels": [{"kind": "name", "start": 7, "end": 10}, {"kind": "phone", "start": 29, "end": 42}], "difficulty": "easy"}
+{"text": "자택 010-7952-3139, 직장 018-6366-8026 두 번호 모두 등록해 주세요. 지원자 홍훈영 이력서 접수 — 연락처 016-3616-9927, 이메일 c8hs6c3cu8@sample-mail.net", "labels": [{"kind": "phone", "start": 3, "end": 16}, {"kind": "phone", "start": 21, "end": 34}, {"kind": "name", "start": 56, "end": 59}, {"kind": "phone", "start": 73, "end": 86}, {"kind": "email", "start": 92, "end": 118}], "difficulty": "easy"}
+{"text": "사업자등록번호는 ORD-20260227-5979이며, 배송지 우편번호는 321-76-22729입니다.", "labels": [], "difficulty": "negative"}
+{"text": "주문번호 07-4164-9621가 정상 접수되었습니다.", "labels": [], "difficulty": "negative"}
+{"text": "신규 입사자 양진빈님의 4대보험 등록을 위해 주민번호 981119-2884074가 필요합니다.", "labels": [{"kind": "name", "start": 7, "end": 10}, {"kind": "rrn", "start": 30, "end": 44}], "difficulty": "easy"}
+{"text": "긴급 연락처 070-8268-5529, 자택 주소는 광주광역시 종로구 청운동 547-20입니다.", "labels": [{"kind": "phone", "start": 7, "end": 20}, {"kind": "address", "start": 29, "end": 49}], "difficulty": "easy"}
+{"text": "신규 입사자 한혜님의 4대보험 등록을 위해 주민번호 5211144797458가 필요합니다.", "labels": [{"kind": "name", "start": 7, "end": 9}, {"kind": "rrn", "start": 29, "end": 42}], "difficulty": "hard"}
+{"text": "권재 님의 진료 예약이 확정되었습니다. 문의: 010.4660.9760", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "phone", "start": 26, "end": 39}], "difficulty": "hard"}
+{"text": "서버 점검은 매주 화요일 새벽에 진행됩니다.", "labels": [], "difficulty": "negative"}
+{"text": "안녕하세요, 저는 조혜이고 전화번호는 019.4521.9071입니다.", "labels": [{"kind": "name", "start": 10, "end": 12}, {"kind": "phone", "start": 21, "end": 34}], "difficulty": "hard"}
+{"text": "배송지: 서울특별시 수원시 영통구 매탄동 365-5 (수령인 정준율, 044-262-4920)", "labels": [{"kind": "address", "start": 5, "end": 28}, {"kind": "name", "start": 34, "end": 37}, {"kind": "phone", "start": 39, "end": 51}], "difficulty": "easy"}
+{"text": "송장번호 770,933원로 배송이 시작되었습니다.", "labels": [], "difficulty": "negative"}
+{"text": "결제일 881439-1624145, 결제 금액 2020.12.26.", "labels": [], "difficulty": "negative"}
+{"text": "남인빈 님의 진료 예약이 확정되었습니다. 문의: 010-3714-9868 사업자등록번호 ORD-20261113-1886 / 담당자 임수서 / 이메일 tfsib1o@mail-test.kr 오늘 회의록: 작성자 배찬은, 문의는 mr1ujo@sample.org로.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "phone", "start": 27, "end": 40}, {"kind": "name", "start": 73, "end": 76}, {"kind": "email", "start": 83, "end": 103}, {"kind": "name", "start": 116, "end": 119}, {"kind": "email", "start": 125, "end": 142}], "difficulty": "easy"}
+{"text": "가입자 전현, 주민번호 3102092423904 기준으로 보험료가 산정되었습니다.", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "rrn", "start": 13, "end": 26}], "difficulty": "hard"}
+{"text": "송장번호 00-6706-4120로 배송이 시작되었습니다.", "labels": [], "difficulty": "negative"}
+{"text": "정기결제 등록: 카드 5225-9792-7033-5212, 명의자 최경서, 연락처 018-2419-4713", "labels": [{"kind": "card", "start": 12, "end": 31}, {"kind": "name", "start": 37, "end": 40}, {"kind": "phone", "start": 46, "end": 59}], "difficulty": "easy"}
+{"text": "이번 분기 매출 목표는 지난해 대비 12% 증가입니다.", "labels": [], "difficulty": "negative"}
+{"text": "본인확인용 주민번호 260917 2719321와 이메일 1fzavybgk@mail.demo-corp.com을 제출합니다.", "labels": [{"kind": "rrn", "start": 11, "end": 25}, {"kind": "email", "start": 31, "end": 59}], "difficulty": "hard"}
+{"text": "사업자등록번호는 WA797299908KR이며, 배송지 우편번호는 07-7237-9331입니다.", "labels": [], "difficulty": "negative"}
+{"text": "자택 042 512 7503, 직장 +82 10 0651 4053 두 번호 모두 등록해 주세요. 사업자등록번호 2022.08.13 / 담당자 양도 / 이메일 mnxi@example.com 주문번호 09-5590-4695, 고객 정윤님 032.8531.3726로 발송 예정입니다.", "labels": [{"kind": "phone", "start": 3, "end": 15}, {"kind": "phone", "start": 20, "end": 36}, {"kind": "name", "start": 79, "end": 81}, {"kind": "email", "start": 88, "end": 104}, {"kind": "name", "start": 127, "end": 129}, {"kind": "phone", "start": 131, "end": 144}], "difficulty": "hard"}
+{"text": "오늘 회의록: 작성자 심호, 문의는 qeyvzhf@sample.org로.", "labels": [{"kind": "name", "start": 12, "end": 14}, {"kind": "email", "start": 20, "end": 38}], "difficulty": "hard"}
+{"text": "환자명 박진경, 주민번호 230627-1952997, 보호자 연락처 016-6783-6737로 등록되었습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "rrn", "start": 14, "end": 28}, {"kind": "phone", "start": 38, "end": 51}], "difficulty": "easy"}
+{"text": "dg2wju@testmail.net로 회신 주시면 김율 담당자가 답변드립니다.", "labels": [{"kind": "email", "start": 0, "end": 19}, {"kind": "name", "start": 28, "end": 30}], "difficulty": "hard"}
+{"text": "다음 회의 안건은 예산 검토와 일정 조정입니다.", "labels": [], "difficulty": "negative"}
+{"text": "다음 회의 안건은 예산 검토와 일정 조정입니다.", "labels": [], "difficulty": "negative"}
+{"text": "전입신고 대상자: 황은, 신주소: 부산광역시 월드컵로116길 5 e편한세상아파트 125동 131호, 연락처: +82.11.3323.3351", "labels": [{"kind": "name", "start": 10, "end": 12}, {"kind": "address", "start": 19, "end": 54}, {"kind": "phone", "start": 61, "end": 77}], "difficulty": "hard"}
+{"text": "다음 회의 안건은 예산 검토와 일정 조정입니다.", "labels": [], "difficulty": "negative"}
+{"text": "자택 +82.17.6633.0685, 직장 +82 17 5126 6457 두 번호 모두 등록해 주세요.", "labels": [{"kind": "phone", "start": 3, "end": 19}, {"kind": "phone", "start": 24, "end": 40}], "difficulty": "hard"}
+{"text": "지원자 최재인 이력서 접수 — 연락처 044-0643-9137, 이메일 txbkol4r@example.com", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "phone", "start": 21, "end": 34}, {"kind": "email", "start": 40, "end": 60}], "difficulty": "easy"}
+{"text": "양수 환자분, 주민등록번호 231023 1515204 확인되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "rrn", "start": 15, "end": 29}], "difficulty": "hard"}
+{"text": "주문번호 411336-2753270, 고객 양하님 01759461397로 발송 예정입니다. 지원자 문찬 이력서 접수 — 연락처 +82 18 2619 6204, 이메일 o27uyf6g0@demo-corp.com", "labels": [{"kind": "name", "start": 24, "end": 26}, {"kind": "phone", "start": 28, "end": 39}, {"kind": "name", "start": 55, "end": 57}, {"kind": "phone", "start": 71, "end": 87}, {"kind": "email", "start": 93, "end": 116}], "difficulty": "hard"}
+{"text": "배송지: 부산광역시 수영구 광안동 4-20 (수령인 손준민, 017-8904-0094)", "labels": [{"kind": "address", "start": 5, "end": 23}, {"kind": "name", "start": 29, "end": 32}, {"kind": "phone", "start": 34, "end": 47}], "difficulty": "easy"}
+{"text": "고연재님 앞, 인천광역시 수원시 영통구 매탄동 82-20로 배송 중입니다. 수령 전 011-8967-4556로 연락드릴 수 있습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "address", "start": 8, "end": 31}, {"kind": "phone", "start": 47, "end": 60}], "difficulty": "easy"}
+{"text": "신청자: 강은서 / 연락처: 010-2381-0531 / 이메일: vwmde.fkyz@sample.org", "labels": [{"kind": "name", "start": 5, "end": 8}, {"kind": "phone", "start": 16, "end": 29}, {"kind": "email", "start": 37, "end": 58}], "difficulty": "easy"}
+{"text": "손아윤 환자분, 주민등록번호 480225-4721514 확인되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "rrn", "start": 16, "end": 30}], "difficulty": "easy"}
+{"text": "다음 회의 안건은 예산 검토와 일정 조정입니다.", "labels": [], "difficulty": "negative"}
+{"text": "사업자등록번호는 NN847141233KR이며, 배송지 우편번호는 642,784원입니다.", "labels": [], "difficulty": "negative"}
+{"text": "이번 분기 매출 목표는 지난해 대비 12% 증가입니다.", "labels": [], "difficulty": "negative"}
+{"text": "홍혜 선생님께 jvx8ws0@sample.org로 성적 자료를 전달했습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "email", "start": 8, "end": 26}], "difficulty": "hard"}
+{"text": "사업자등록번호는 2,657원이며, 배송지 우편번호는 124-69-91980입니다.", "labels": [], "difficulty": "negative"}
+{"text": "3766-055830-34410 카드로 결제 시도가 감지되어 임아수님께 010-1865-5460로 확인 연락드립니다.", "labels": [{"kind": "card", "start": 0, "end": 17}, {"kind": "name", "start": 34, "end": 37}, {"kind": "phone", "start": 40, "end": 53}], "difficulty": "easy"}
+{"text": "담당자가 강현윤에서 백윤예으로 변경되었습니다. 새 연락처: 017-0582-2224", "labels": [{"kind": "name", "start": 5, "end": 8}, {"kind": "name", "start": 11, "end": 14}, {"kind": "phone", "start": 33, "end": 46}], "difficulty": "easy"}
+{"text": "민원인 배인님, 주민등록번호 950127 4740486로 접수된 건 처리 완료되었습니다. 회신 주소: 대구광역시 동성로10길 27 힐스테이트아파트 122동 780호", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "rrn", "start": 16, "end": 30}, {"kind": "address", "start": 57, "end": 91}], "difficulty": "hard"}
 {"text": "정준 환자분, 주민등록번호 430721 1748391 확인되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "rrn", "start": 15, "end": 29}], "difficulty": "hard"}
 {"text": "이번 분기 매출 목표는 지난해 대비 12% 증가입니다.", "labels": [], "difficulty": "negative"}
-{"text": "허윤님 카드번호 4461735743842150로 결제가 완료되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "card", "start": 9, "end": 25}], "difficulty": "hard"}
-{"text": "사업자등록번호 554-74-13268 / 담당자 배연정 / 이메일 fmr6lm2d@sample.org", "labels": [{"kind": "name", "start": 27, "end": 30}, {"kind": "email", "start": 37, "end": 56}], "difficulty": "easy"}
+{"text": "이준님 카드번호 5417357438421505로 결제가 완료되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "card", "start": 9, "end": 25}], "difficulty": "hard"}
+{"text": "지원자 김석 이력서 접수 — 연락처 +82.11.3116.5572, 이메일 1t2f648z+qz@mail.mail-test.kr", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "phone", "start": 20, "end": 36}, {"kind": "email", "start": 42, "end": 71}], "difficulty": "hard"}
+{"text": "환자명 권정서, 주민번호 661124-2029464, 보호자 연락처 016-3438-5257로 등록되었습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "rrn", "start": 14, "end": 28}, {"kind": "phone", "start": 38, "end": 51}], "difficulty": "easy"}
+{"text": "사업자등록번호는 2024.06.25이며, 배송지 우편번호는 341833-2165146입니다.", "labels": [], "difficulty": "negative"}
+{"text": "신규 입사자 오진윤님의 4대보험 등록을 위해 주민번호 181226-4752462가 필요합니다. 안녕하세요, 저는 강지아이고 전화번호는 016-8856-7268입니다.", "labels": [{"kind": "name", "start": 7, "end": 10}, {"kind": "rrn", "start": 30, "end": 44}, {"kind": "name", "start": 63, "end": 66}, {"kind": "phone", "start": 75, "end": 88}], "difficulty": "easy"}
 {"text": "회의는 내일 오후 2시에 진행됩니다.", "labels": [], "difficulty": "negative"}
-{"text": "고객 임예서님 019-9736-1426로 연락 부탁드립니다.", "labels": [{"kind": "name", "start": 3, "end": 6}, {"kind": "phone", "start": 8, "end": 21}], "difficulty": "easy"}
-{"text": "배송지: 대구광역시 유성구 봉명동 24-19 (수령인 손아규, 011-5257-3285)", "labels": [{"kind": "address", "start": 5, "end": 24}, {"kind": "name", "start": 30, "end": 33}, {"kind": "phone", "start": 35, "end": 48}], "difficulty": "easy"}
-{"text": "사업자등록번호는 US392760228KR이며, 배송지 우편번호는 20321입니다.", "labels": [], "difficulty": "negative"}
-{"text": "결제 금액 311-79-55916, 영수증은 lf0kjcwmq@sample.org로 발송됩니다.", "labels": [{"kind": "email", "start": 25, "end": 45}], "difficulty": "easy"}
+{"text": "학생 이지빈(학부모 연락처 019-9766-9711)의 결석계가 접수되었습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}, {"kind": "phone", "start": 15, "end": 28}], "difficulty": "easy"}
+{"text": "반품 신청자 오아, 환불 계좌 확인을 위해 연락처 +82.19.8740.1286를 남겨주세요.", "labels": [{"kind": "name", "start": 7, "end": 9}, {"kind": "phone", "start": 28, "end": 44}], "difficulty": "hard"}
+{"text": "정지님 앞, 울산광역시 센텀중앙로50길 59 푸르지오아파트 122동 1420호로 배송 중입니다. 수령 전 +82 17 3796 3666로 연락드릴 수 있습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "address", "start": 7, "end": 43}, {"kind": "phone", "start": 59, "end": 75}], "difficulty": "hard"}
+{"text": "사업자등록번호는 KS814232253KR이며, 배송지 우편번호는 UX586708987KR입니다.", "labels": [], "difficulty": "negative"}
+{"text": "전입신고 대상자: 권혜도, 신주소: 대전광역시 해운대구 우동 619-19, 연락처: 010-6646-1752 환자명 송규지, 주민번호 680813-4312701, 보호자 연락처 018-2605-7903로 등록되었습니다. 학생 박윤현(학부모 연락처 061-9293-5606)의 결석계가 접수되었습니다.", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "address", "start": 20, "end": 40}, {"kind": "phone", "start": 47, "end": 60}, {"kind": "name", "start": 65, "end": 68}, {"kind": "rrn", "start": 75, "end": 89}, {"kind": "phone", "start": 99, "end": 112}, {"kind": "name", "start": 126, "end": 129}, {"kind": "phone", "start": 138, "end": 151}], "difficulty": "easy"}
+{"text": "환불 처리를 위해 심훈영님의 카드번호 5519-9758-1724-6198를 확인했습니다. 문의: 018-6208-5364", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "card", "start": 21, "end": 40}, {"kind": "phone", "start": 54, "end": 67}], "difficulty": "easy"}
+{"text": "본인확인용 주민번호 741126-1992311와 이메일 yqkwqh@demo-corp.com을 제출합니다.", "labels": [{"kind": "rrn", "start": 11, "end": 25}, {"kind": "email", "start": 31, "end": 51}], "difficulty": "easy"}
+{"text": "심율님 카드번호 4909862405800852로 결제가 완료되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "card", "start": 9, "end": 25}], "difficulty": "hard"}
+{"text": "사업자등록번호는 ORD-20240723-7459이며, 배송지 우편번호는 TK567281753KR입니다.", "labels": [], "difficulty": "negative"}
+{"text": "u5npk6+ca@mail-sample.kr로 회신 주시면 정지 담당자가 답변드립니다.", "labels": [{"kind": "email", "start": 0, "end": 24}, {"kind": "name", "start": 33, "end": 35}], "difficulty": "hard"}
+{"text": "송장번호 791938-2476467로 배송이 시작되었습니다.", "labels": [], "difficulty": "negative"}
+{"text": "학생 오우(학부모 연락처 01094688161)의 결석계가 접수되었습니다.", "labels": [{"kind": "name", "start": 3, "end": 5}, {"kind": "phone", "start": 14, "end": 25}], "difficulty": "hard"}
+{"text": "심진 선생님께 n.v0erzf1@demo-corp.com로 성적 자료를 전달했습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "email", "start": 8, "end": 31}], "difficulty": "hard"}
+{"text": "이번 분기 매출 목표는 지난해 대비 12% 증가입니다.", "labels": [], "difficulty": "negative"}
+{"text": "이번 분기 매출 목표는 지난해 대비 12% 증가입니다.", "labels": [], "difficulty": "negative"}
+{"text": "반품 신청자 이정, 환불 계좌 확인을 위해 연락처 02.7438.8399를 남겨주세요.", "labels": [{"kind": "name", "start": 7, "end": 9}, {"kind": "phone", "start": 28, "end": 40}], "difficulty": "hard"}
+{"text": "오석 선생님께 kb810uc@sample.org로 성적 자료를 전달했습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "email", "start": 8, "end": 26}], "difficulty": "hard"}
+{"text": "오늘 회의록: 작성자 황지은, 문의는 c2jwkj1w7@mail-sample.kr로.", "labels": [{"kind": "name", "start": 12, "end": 15}, {"kind": "email", "start": 21, "end": 45}], "difficulty": "easy"}
+{"text": "주문번호 431432-1152117가 정상 접수되었습니다.", "labels": [], "difficulty": "negative"}
+{"text": "정기결제 등록: 카드 5463723950410270, 명의자 서연, 연락처 070.388.6390", "labels": [{"kind": "card", "start": 12, "end": 28}, {"kind": "name", "start": 34, "end": 36}, {"kind": "phone", "start": 42, "end": 54}], "difficulty": "hard"}
+{"text": "오늘 회의록: 작성자 심석, 문의는 olt9dtn5@demo-corp.com로. 울산광역시 테헤란로131길 84 힐스테이트아파트 113동 1045호에 거주하는 손성님께 우편을 발송했습니다.", "labels": [{"kind": "name", "start": 12, "end": 14}, {"kind": "email", "start": 20, "end": 42}, {"kind": "address", "start": 45, "end": 82}, {"kind": "name", "start": 89, "end": 91}], "difficulty": "hard"}
+{"text": "지원자 한성훈 이력서 접수 — 연락처 053-688-0138, 이메일 addqi@mail.testmail.net", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "phone", "start": 21, "end": 33}, {"kind": "email", "start": 39, "end": 62}], "difficulty": "easy"}
+{"text": "주문번호 825-25-21322가 정상 접수되었습니다.", "labels": [], "difficulty": "negative"}
+{"text": "강준아님 카드번호 5517-4654-2140-6653로 결제가 완료되었습니다. 신청자: 장인준 / 연락처: 010-8056-3287 / 이메일: oxeupwdqj+uj@biz.mail-sample.kr", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "card", "start": 10, "end": 29}, {"kind": "name", "start": 49, "end": 52}, {"kind": "phone", "start": 60, "end": 73}, {"kind": "email", "start": 81, "end": 112}], "difficulty": "easy"}
 {"text": "회의는 내일 오후 2시에 진행됩니다.", "labels": [], "difficulty": "negative"}
+{"text": "moa02ro04c@testcorp.io로 회신 주시면 백원 담당자가 답변드립니다.", "labels": [{"kind": "email", "start": 0, "end": 22}, {"kind": "name", "start": 31, "end": 33}], "difficulty": "hard"}
+{"text": "환자명 고아, 주민번호 071121 3478876, 보호자 연락처 +821633272893로 등록되었습니다.", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "rrn", "start": 13, "end": 27}, {"kind": "phone", "start": 37, "end": 50}], "difficulty": "hard"}
+{"text": "오늘 회의록: 작성자 문찬정, 문의는 xndx1+a9i@team.testcorp.io로.", "labels": [{"kind": "name", "start": 12, "end": 15}, {"kind": "email", "start": 21, "end": 47}], "difficulty": "easy"}
+{"text": "결제 금액 ORD-20240602-6533, 영수증은 be3yqz6fv8+ra6@example.com로 발송됩니다.", "labels": [{"kind": "email", "start": 30, "end": 56}], "difficulty": "hard"}
+{"text": "담당자가 배하재에서 홍도인으로 변경되었습니다. 새 연락처: 010-1870-8145 반품 신청자 배호우, 환불 계좌 확인을 위해 연락처 011-6983-5527를 남겨주세요. 5451-9825-3092-5116 카드로 결제 시도가 감지되어 장은원님께 019-6060-9067로 확인 연락드립니다.", "labels": [{"kind": "name", "start": 5, "end": 8}, {"kind": "name", "start": 11, "end": 14}, {"kind": "phone", "start": 33, "end": 46}, {"kind": "name", "start": 54, "end": 57}, {"kind": "phone", "start": 76, "end": 89}, {"kind": "card", "start": 98, "end": 117}, {"kind": "name", "start": 134, "end": 137}, {"kind": "phone", "start": 140, "end": 153}], "difficulty": "easy"}
+{"text": "주문번호 ORD-20240226-7162가 정상 접수되었습니다.", "labels": [], "difficulty": "negative"}
+{"text": "고객 김도님 +821846486819로 연락 부탁드립니다. 배석님 카드번호 5523248763290923로 결제가 완료되었습니다.", "labels": [{"kind": "name", "start": 3, "end": 5}, {"kind": "phone", "start": 7, "end": 20}, {"kind": "name", "start": 33, "end": 35}, {"kind": "card", "start": 42, "end": 58}], "difficulty": "hard"}
+{"text": "가입자 백석아, 주민번호 530118-3251531 기준으로 보험료가 산정되었습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "rrn", "start": 14, "end": 28}], "difficulty": "easy"}
+{"text": "이번 분기 매출 목표는 지난해 대비 12% 증가입니다.", "labels": [], "difficulty": "negative"}
+{"text": "민원인 손규성님, 주민등록번호 350107-1195582로 접수된 건 처리 완료되었습니다. 회신 주소: 광주광역시 수원시 영통구 매탄동 510-6", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "rrn", "start": 17, "end": 31}, {"kind": "address", "start": 58, "end": 81}], "difficulty": "easy"}
 {"text": "회의는 내일 오후 2시에 진행됩니다.", "labels": [], "difficulty": "negative"}
-{"text": "송장번호 56181로 배송이 시작되었습니다.", "labels": [], "difficulty": "negative"}
+{"text": "결제일 2021.07.09, 결제 금액 QX586563564KR.", "labels": [], "difficulty": "negative"}
+{"text": "회의는 내일 오후 2시에 진행됩니다.", "labels": [], "difficulty": "negative"}
+{"text": "전입신고 대상자: 안하지, 신주소: 부산광역시 수원시 영통구 매탄동 607-19, 연락처: 011-5336-3769", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "address", "start": 20, "end": 44}, {"kind": "phone", "start": 51, "end": 64}], "difficulty": "easy"}
+{"text": "안녕하세요, 저는 양빈혜이고 전화번호는 011-1204-7716입니다.", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "phone", "start": 22, "end": 35}], "difficulty": "easy"}
+{"text": "본인확인용 주민번호 2207123599968와 이메일 njmbvkerp2@demo-corp.com을 제출합니다. 372983168739776 카드로 결제 시도가 감지되어 장민님께 011 4060 5362로 확인 연락드립니다.", "labels": [{"kind": "rrn", "start": 11, "end": 24}, {"kind": "email", "start": 30, "end": 54}, {"kind": "card", "start": 63, "end": 78}, {"kind": "name", "start": 95, "end": 97}, {"kind": "phone", "start": 100, "end": 113}], "difficulty": "hard"}
+{"text": "사업자등록번호 ORD-20250102-8711 / 담당자 양원수 / 이메일 po3zd@mail-test.kr", "labels": [{"kind": "name", "start": 32, "end": 35}, {"kind": "email", "start": 42, "end": 60}], "difficulty": "easy"}
+{"text": "송장번호 140,158원로 배송이 시작되었습니다.", "labels": [], "difficulty": "negative"}
+{"text": "고객 황성아님 017-9345-9562로 연락 부탁드립니다.", "labels": [{"kind": "name", "start": 3, "end": 6}, {"kind": "phone", "start": 8, "end": 21}], "difficulty": "easy"}
+{"text": "다음 회의 안건은 예산 검토와 일정 조정입니다.", "labels": [], "difficulty": "negative"}
+{"text": "5370165804649897 카드로 결제 시도가 감지되어 배현님께 016 0898 8433로 확인 연락드립니다. 결제 금액 XC492550199KR, 영수증은 wnguc0h@mail-test.kr로 발송됩니다.", "labels": [{"kind": "card", "start": 0, "end": 16}, {"kind": "name", "start": 33, "end": 35}, {"kind": "phone", "start": 38, "end": 51}, {"kind": "email", "start": 90, "end": 110}], "difficulty": "hard"}
+{"text": "정기결제 등록: 카드 5155-4864-0155-7783, 명의자 안인하, 연락처 018-8730-4788", "labels": [{"kind": "card", "start": 12, "end": 31}, {"kind": "name", "start": 37, "end": 40}, {"kind": "phone", "start": 46, "end": 59}], "difficulty": "easy"}
+{"text": "본인확인용 주민번호 110213-3377970와 이메일 ekzs6@example.com을 제출합니다.", "labels": [{"kind": "rrn", "start": 11, "end": 25}, {"kind": "email", "start": 31, "end": 48}], "difficulty": "easy"}
+{"text": "전입신고 대상자: 오빈재, 신주소: 광주광역시 강남구 역삼동 299-7, 연락처: 011-8513-5503", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "address", "start": 20, "end": 39}, {"kind": "phone", "start": 46, "end": 59}], "difficulty": "easy"}
+{"text": "전입신고 대상자: 전성, 신주소: 광주광역시 동성로281길 57 e편한세상아파트 110동 1262호, 연락처: +821628134259", "labels": [{"kind": "name", "start": 10, "end": 12}, {"kind": "address", "start": 19, "end": 55}, {"kind": "phone", "start": 62, "end": 75}], "difficulty": "hard"}
+{"text": "결제일 2026.01.05, 결제 금액 GY764249151KR.", "labels": [], "difficulty": "negative"}
+{"text": "긴급 연락처 +821925142641, 자택 주소는 부산광역시 테헤란로22길 41 힐스테이트아파트 105동 1003호입니다.", "labels": [{"kind": "phone", "start": 7, "end": 20}, {"kind": "address", "start": 29, "end": 65}], "difficulty": "hard"}
+{"text": "한율은님의 이체 알림: 문의는 018-2663-8743 또는 ea8298f@sample-mail.net로 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "phone", "start": 17, "end": 30}, {"kind": "email", "start": 34, "end": 57}], "difficulty": "easy"}
+{"text": "3775-170281-40695 카드로 결제 시도가 감지되어 백우재님께 016-0901-9963로 확인 연락드립니다.", "labels": [{"kind": "card", "start": 0, "end": 17}, {"kind": "name", "start": 34, "end": 37}, {"kind": "phone", "start": 40, "end": 53}], "difficulty": "easy"}
+{"text": "5230-1871-8637-5990 카드로 결제 시도가 감지되어 안서예님께 017-2423-7006로 확인 연락드립니다.", "labels": [{"kind": "card", "start": 0, "end": 19}, {"kind": "name", "start": 36, "end": 39}, {"kind": "phone", "start": 42, "end": 55}], "difficulty": "easy"}
+{"text": "오아 님의 진료 예약이 확정되었습니다. 문의: +82.10.3533.7278", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "phone", "start": 26, "end": 42}], "difficulty": "hard"}
+{"text": "오늘 회의록: 작성자 강석, 문의는 9p7fvdhr6+1do6ou@biz.sample.org로.", "labels": [{"kind": "name", "start": 12, "end": 14}, {"kind": "email", "start": 20, "end": 51}], "difficulty": "hard"}
+{"text": "담당자가 전아에서 황진으로 변경되었습니다. 새 연락처: 02 157 4303", "labels": [{"kind": "name", "start": 5, "end": 7}, {"kind": "name", "start": 10, "end": 12}, {"kind": "phone", "start": 31, "end": 42}], "difficulty": "hard"}
+{"text": "배송지: 광주광역시 판교역로214길 23 e편한세상아파트 130동 1509호 (수령인 유우, 01680781093)", "labels": [{"kind": "address", "start": 5, "end": 42}, {"kind": "name", "start": 48, "end": 50}, {"kind": "phone", "start": 52, "end": 63}], "difficulty": "hard"}
+{"text": "신혜님 앞, 대전광역시 센텀중앙로62길 48 힐스테이트아파트 124동 1279호로 배송 중입니다. 수령 전 +821195290958로 연락드릴 수 있습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "address", "start": 7, "end": 44}, {"kind": "phone", "start": 60, "end": 73}], "difficulty": "hard"}
+{"text": "다음 회의 안건은 예산 검토와 일정 조정입니다.", "labels": [], "difficulty": "negative"}
+{"text": "대전광역시 성남시 분당구 정자동 652-12에 거주하는 이아수님께 우편을 발송했습니다. 가입자 심지수, 주민번호 981106-1784807 기준으로 보험료가 산정되었습니다.", "labels": [{"kind": "address", "start": 0, "end": 24}, {"kind": "name", "start": 31, "end": 34}, {"kind": "name", "start": 53, "end": 56}, {"kind": "rrn", "start": 63, "end": 77}], "difficulty": "easy"}
+{"text": "담당자가 허성에서 배아으로 변경되었습니다. 새 연락처: +82.19.5939.1570", "labels": [{"kind": "name", "start": 5, "end": 7}, {"kind": "name", "start": 10, "end": 12}, {"kind": "phone", "start": 31, "end": 47}], "difficulty": "hard"}
+{"text": "고객 정수아님 017-6750-5575로 연락 부탁드립니다.", "labels": [{"kind": "name", "start": 3, "end": 6}, {"kind": "phone", "start": 8, "end": 21}], "difficulty": "easy"}
+{"text": "ig7w4ttu1+6eeam@biz.sample-mail.net로 회신 주시면 남호수 담당자가 답변드립니다.", "labels": [{"kind": "email", "start": 0, "end": 35}, {"kind": "name", "start": 44, "end": 47}], "difficulty": "easy"}
+{"text": "고객 양인님 01923323712로 연락 부탁드립니다.", "labels": [{"kind": "name", "start": 3, "end": 5}, {"kind": "phone", "start": 7, "end": 18}], "difficulty": "hard"}
+{"text": "문원석 선생님께 c22bd@example.com로 성적 자료를 전달했습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "email", "start": 9, "end": 26}], "difficulty": "easy"}
+{"text": "정기결제 등록: 카드 4193932501249554, 명의자 강혜, 연락처 +82 18 3962 8272 박하님 앞, 울산광역시 동성로8길 68 자이아파트 123동 493호로 배송 중입니다. 수령 전 018.0070.1616로 연락드릴 수 있습니다.", "labels": [{"kind": "card", "start": 12, "end": 28}, {"kind": "name", "start": 34, "end": 36}, {"kind": "phone", "start": 42, "end": 58}, {"kind": "name", "start": 59, "end": 61}, {"kind": "address", "start": 66, "end": 96}, {"kind": "phone", "start": 112, "end": 125}], "difficulty": "hard"}
+{"text": "문영 님의 진료 예약이 확정되었습니다. 문의: 01029635813", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "phone", "start": 26, "end": 37}], "difficulty": "hard"}
+{"text": "최원윤 선생님께 rtsnk@mail-test.kr로 성적 자료를 전달했습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "email", "start": 9, "end": 27}], "difficulty": "easy"}
+{"text": "사업자등록번호는 871736-4236845이며, 배송지 우편번호는 00-8011-4093입니다.", "labels": [], "difficulty": "negative"}
+{"text": "결제 금액 EZ627903421KR, 영수증은 dqydfovd8+mv9@mail-test.kr로 발송됩니다.", "labels": [{"kind": "email", "start": 26, "end": 52}], "difficulty": "hard"}
+{"text": "정기결제 등록: 카드 5457967842711472, 명의자 황우, 연락처 +82 10 1631 0865", "labels": [{"kind": "card", "start": 12, "end": 28}, {"kind": "name", "start": 34, "end": 36}, {"kind": "phone", "start": 42, "end": 58}], "difficulty": "hard"}
+{"text": "긴급 연락처 019-5356-2502, 자택 주소는 대전광역시 노원구 상계동 639-4입니다.", "labels": [{"kind": "phone", "start": 7, "end": 20}, {"kind": "address", "start": 29, "end": 48}], "difficulty": "easy"}
+{"text": "5534778485880061 카드로 결제 시도가 감지되어 남예님께 01661657250로 확인 연락드립니다.", "labels": [{"kind": "card", "start": 0, "end": 16}, {"kind": "name", "start": 33, "end": 35}, {"kind": "phone", "start": 38, "end": 49}], "difficulty": "hard"}
+{"text": "전입신고 대상자: 신은, 신주소: 대전광역시 센텀중앙로250길 15 힐스테이트아파트 122동 1105호, 연락처: 070 7797 9211 자택 05581059683, 직장 054.5250.1006 두 번호 모두 등록해 주세요.", "labels": [{"kind": "name", "start": 10, "end": 12}, {"kind": "address", "start": 19, "end": 57}, {"kind": "phone", "start": 64, "end": 77}, {"kind": "phone", "start": 81, "end": 92}, {"kind": "phone", "start": 97, "end": 110}], "difficulty": "hard"}
+{"text": "회의는 내일 오후 2시에 진행됩니다.", "labels": [], "difficulty": "negative"}
+{"text": "결제일 VQ921620818KR, 결제 금액 KL483718906KR.", "labels": [], "difficulty": "negative"}
+{"text": "안녕하세요, 저는 유아영이고 전화번호는 019-1073-4995입니다. 배송지: 대전광역시 종로구 청운동 21-18 (수령인 한서재, 017-9306-8433)", "labels": [{"kind": "name", "start": 10, "end": 13}, {"kind": "phone", "start": 22, "end": 35}, {"kind": "address", "start": 45, "end": 64}, {"kind": "name", "start": 70, "end": 73}, {"kind": "phone", "start": 75, "end": 88}], "difficulty": "easy"}
+{"text": "김윤님 앞, 인천광역시 동성로200길 42 힐스테이트아파트 104동 1756호로 배송 중입니다. 수령 전 019.3373.5504로 연락드릴 수 있습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}, {"kind": "address", "start": 7, "end": 43}, {"kind": "phone", "start": 59, "end": 72}], "difficulty": "hard"}
+{"text": "긴급 연락처 017 3305 8142, 자택 주소는 광주광역시 테헤란로275길 28 푸르지오아파트 109동 198호입니다.", "labels": [{"kind": "phone", "start": 7, "end": 20}, {"kind": "address", "start": 29, "end": 64}], "difficulty": "hard"}
+{"text": "반품 신청자 양지훈, 환불 계좌 확인을 위해 연락처 033-4478-1102를 남겨주세요.", "labels": [{"kind": "name", "start": 7, "end": 10}, {"kind": "phone", "start": 29, "end": 42}], "difficulty": "easy"}
+{"text": "본인확인용 주민번호 091127 4661448와 이메일 ylpjtyu6@sample.org을 제출합니다.", "labels": [{"kind": "rrn", "start": 11, "end": 25}, {"kind": "email", "start": 31, "end": 50}], "difficulty": "hard"}
+{"text": "다음 회의 안건은 예산 검토와 일정 조정입니다.", "labels": [], "difficulty": "negative"}
+{"text": "사업자등록번호 ORD-20260412-8577 / 담당자 정우 / 이메일 125p57@testcorp.io", "labels": [{"kind": "name", "start": 32, "end": 34}, {"kind": "email", "start": 41, "end": 59}], "difficulty": "hard"}
+{"text": "학생 윤하은(학부모 연락처 011-5087-7604)의 결석계가 접수되었습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}, {"kind": "phone", "start": 15, "end": 28}], "difficulty": "easy"}
+{"text": "가입자 남서, 주민번호 200505 1338685 기준으로 보험료가 산정되었습니다.", "labels": [{"kind": "name", "start": 4, "end": 6}, {"kind": "rrn", "start": 13, "end": 27}], "difficulty": "hard"}
+{"text": "결제 금액 071932-1329153, 영수증은 lc97y6o55@mail-test.kr로 발송됩니다.", "labels": [{"kind": "email", "start": 27, "end": 49}], "difficulty": "easy"}
+{"text": "전입신고 대상자: 남지, 신주소: 부산광역시 동성로63길 41 푸르지오아파트 127동 1297호, 연락처: 019 3865 6928", "labels": [{"kind": "name", "start": 10, "end": 12}, {"kind": "address", "start": 19, "end": 53}, {"kind": "phone", "start": 60, "end": 73}], "difficulty": "hard"}
+{"text": "이번 분기 매출 목표는 지난해 대비 12% 증가입니다.", "labels": [], "difficulty": "negative"}
+{"text": "사업자등록번호는 751636-1514178이며, 배송지 우편번호는 SC685989264KR입니다.", "labels": [], "difficulty": "negative"}
+{"text": "주문번호 33789, 고객 황훈님 +82.10.9925.0570로 발송 예정입니다.", "labels": [{"kind": "name", "start": 15, "end": 17}, {"kind": "phone", "start": 19, "end": 35}], "difficulty": "hard"}
+{"text": "심석성님 카드번호 5148-6451-8376-0648로 결제가 완료되었습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "card", "start": 10, "end": 29}], "difficulty": "easy"}
+{"text": "오늘 회의록: 작성자 조혜정, 문의는 7x62pb@mail-sample.kr로.", "labels": [{"kind": "name", "start": 12, "end": 15}, {"kind": "email", "start": 21, "end": 42}], "difficulty": "easy"}
+{"text": "주문번호 944-30-44205, 고객 안지님 019.8973.5353로 발송 예정입니다.", "labels": [{"kind": "name", "start": 22, "end": 24}, {"kind": "phone", "start": 26, "end": 39}], "difficulty": "hard"}
+{"text": "가입자 권석규, 주민번호 000707-2411205 기준으로 보험료가 산정되었습니다. 박하도님 앞, 부산광역시 광진구 자양동 731-5로 배송 중입니다. 수령 전 061-7397-7837로 연락드릴 수 있습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "rrn", "start": 14, "end": 28}, {"kind": "name", "start": 48, "end": 51}, {"kind": "address", "start": 56, "end": 75}, {"kind": "phone", "start": 91, "end": 104}], "difficulty": "easy"}
+{"text": "5231-6526-6930-0897 카드로 결제 시도가 감지되어 유우예님께 017-3248-4289로 확인 연락드립니다. 허도서님 카드번호 5496-9421-5291-0868로 결제가 완료되었습니다. 정기결제 등록: 카드 5571-3334-4762-6394, 명의자 조인아, 연락처 011-6853-2955", "labels": [{"kind": "card", "start": 0, "end": 19}, {"kind": "name", "start": 36, "end": 39}, {"kind": "phone", "start": 42, "end": 55}, {"kind": "name", "start": 68, "end": 71}, {"kind": "card", "start": 78, "end": 97}, {"kind": "card", "start": 124, "end": 143}, {"kind": "name", "start": 149, "end": 152}, {"kind": "phone", "start": 158, "end": 171}], "difficulty": "easy"}
+{"text": "안녕하세요, 저는 홍재이고 전화번호는 01975061404입니다. 고객 황은님 +82.17.3476.6283로 연락 부탁드립니다. 신경님 카드번호 374118005375991로 결제가 완료되었습니다.", "labels": [{"kind": "name", "start": 10, "end": 12}, {"kind": "phone", "start": 21, "end": 32}, {"kind": "name", "start": 40, "end": 42}, {"kind": "phone", "start": 44, "end": 60}, {"kind": "name", "start": 73, "end": 75}, {"kind": "card", "start": 82, "end": 97}], "difficulty": "hard"}
+{"text": "대구광역시 노원구 상계동 391-10에 거주하는 서성율님께 우편을 발송했습니다.", "labels": [{"kind": "address", "start": 0, "end": 20}, {"kind": "name", "start": 27, "end": 30}], "difficulty": "easy"}
+{"text": "회의는 내일 오후 2시에 진행됩니다.", "labels": [], "difficulty": "negative"}

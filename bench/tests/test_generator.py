@@ -9,10 +9,17 @@ from __future__ import annotations
 import random
 
 from maskingtape.detectors import CreditCardDetector
+from maskingtape.detectors import EmailDetector
 from maskingtape.detectors import PhoneDetector
 from maskingtape.detectors import RRNDetector
 from bench.generator.distractors import gen_invalid_phone_like, gen_invalid_rrn_like, generate_distractor
-from bench.generator.documents import generate_document, generate_negative_document, negative_templates, templates
+from bench.generator.documents import (
+    generate_document,
+    generate_multi_sentence_document,
+    generate_negative_document,
+    negative_templates,
+    templates,
+)
 from bench.generator.entities import ALL_KINDS, generate_entity
 
 
@@ -197,3 +204,67 @@ def test_distractors_are_never_detected_as_card():
     for _ in range(300):
         text = generate_distractor(rng)
         assert detector.detect(text) == [], f"distractor가 card로 오탐됨: {text!r}"
+
+
+def test_generated_phone_covers_landline_and_passes_core_detector():
+    """유선전화(02/031~033 등)도 생성되고, core가 형식과 무관하게 정확히 한 건으로 잡아야 한다."""
+    rng = random.Random(22)
+    detector = PhoneDetector()
+    landline_prefixes = (
+        "02", "031", "032", "033", "041", "042", "043", "044",
+        "051", "052", "053", "054", "055", "061", "062", "063", "064", "070",
+    )
+    found_landline = False
+    for _ in range(300):
+        # easy 난이도는 하이픈만 쓰고 국제표기를 안 섞으므로, "-" 기준으로 지역번호를 안정적으로 추출할 수 있다.
+        entity = generate_entity("phone", rng, difficulty="easy")
+        found = detector.detect(entity.text)
+        assert len(found) == 1, f"탐지 실패: {entity.text!r}"
+        assert found[0].text == entity.text
+        if entity.text.split("-")[0] in landline_prefixes:
+            found_landline = True
+    assert found_landline
+
+
+def test_generated_email_covers_plus_tag_and_subdomain():
+    """plus 표기·서브도메인도 core EmailDetector가 정확히 한 건으로 잡아야 한다."""
+    rng = random.Random(23)
+    detector = EmailDetector()
+    samples = []
+    for _ in range(200):
+        entity = generate_entity("email", rng)
+        found = detector.detect(entity.text)
+        assert len(found) == 1, f"탐지 실패: {entity.text!r}"
+        assert found[0].text == entity.text
+        samples.append(entity.text)
+    assert any("+" in s.split("@")[0] for s in samples)
+    assert any(s.split("@")[1].count(".") >= 2 for s in samples)
+
+
+def test_multi_sentence_document_labels_have_correct_offsets():
+    """여러 문장을 이어붙여도 뒤 문장의 라벨이 실제 위치를 정확히 가리켜야 한다."""
+    rng = random.Random(24)
+    for _ in range(50):
+        doc = generate_multi_sentence_document(rng)
+        assert len(doc.labels) >= 2  # 문장이 2개 이상이라 라벨도 최소 2개 이상
+        for label in doc.labels:
+            assert doc.text[label.start : label.end] != ""
+            assert label.kind in ALL_KINDS
+
+
+def test_multi_sentence_document_labels_do_not_overlap():
+    rng = random.Random(25)
+    for _ in range(50):
+        doc = generate_multi_sentence_document(rng)
+        ordered = sorted(doc.labels, key=lambda lb: lb.start)
+        for prev, cur in zip(ordered, ordered[1:]):
+            assert prev.end <= cur.start
+
+
+def test_multi_sentence_document_has_multiple_sentences_worth_of_text():
+    """단일 문장 문서보다 눈에 띄게 길어야 한다 — 실제로 여러 문장이 이어붙었다는 방증."""
+    rng = random.Random(26)
+    single = generate_document(rng)
+    multi = generate_multi_sentence_document(rng, sentence_count=3)
+    assert len(multi.text) > len(single.text)
+    assert multi.text.count(" ") >= 2

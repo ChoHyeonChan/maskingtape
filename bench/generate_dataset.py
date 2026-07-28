@@ -11,15 +11,23 @@ import json
 import random
 from pathlib import Path
 
-from bench.generator.documents import generate_document, generate_negative_document
+from bench.generator.documents import generate_document, generate_multi_sentence_document, generate_negative_document
 
 
-def build_dataset(count: int, seed: int, negative_ratio: float = 0.25) -> list[dict]:
-    """negative_ratio 비율만큼은 개인정보 없는(오탐 측정용) 문서로 채운다."""
+def build_dataset(
+    count: int, seed: int, negative_ratio: float = 0.25, multi_sentence_ratio: float = 0.15
+) -> list[dict]:
+    """negative_ratio 비율만큼은 개인정보 없는(오탐 측정용) 문서로, 그 나머지 중
+    multi_sentence_ratio 비율만큼은 여러 문장을 이어붙인 복합 문서로 채운다."""
     rng = random.Random(seed)
     rows = []
     for _ in range(count):
-        doc = generate_negative_document(rng) if rng.random() < negative_ratio else generate_document(rng)
+        if rng.random() < negative_ratio:
+            doc = generate_negative_document(rng)
+        elif rng.random() < multi_sentence_ratio:
+            doc = generate_multi_sentence_document(rng)
+        else:
+            doc = generate_document(rng)
         rows.append(
             {
                 "text": doc.text,
@@ -47,10 +55,16 @@ def main() -> None:
         default=0.25,
         help="개인정보가 전혀 없는 오탐(FP) 측정용 문서 비율 (0~1)",
     )
+    parser.add_argument(
+        "--multi-sentence-ratio",
+        type=float,
+        default=0.15,
+        help="여러 문장을 이어붙인 복합 문서 비율 — negative가 아닌 문서 중에서 (0~1)",
+    )
     parser.add_argument("--out", type=Path, default=Path("bench/datasets/synth_v1.jsonl"))
     args = parser.parse_args()
 
-    rows = build_dataset(args.count, args.seed, args.negative_ratio)
+    rows = build_dataset(args.count, args.seed, args.negative_ratio, args.multi_sentence_ratio)
     write_jsonl(rows, args.out)
     print(f"생성 완료: {args.out} ({len(rows)}건, seed={args.seed})")
 
