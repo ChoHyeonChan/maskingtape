@@ -15,6 +15,13 @@ import random
 # core RRNDetector가 허용하는 지역번호(rrn.py 참고)에 없는 국번 — 형식은 유선전화 같지만 매칭되면 안 됨.
 _INVALID_AREA_CODES = ["09", "07", "00", "08"]
 
+# 시/도 없이 시/군으로 시작하는 주소를 탐지하는 규칙(#118 관련 core #68/#117)이 지역 언급까지
+# 오탐하면 안 되는 경계 케이스 — 조사 '로'가 공백 없이 붙거나(성남시로), 구만 단독으로 오는 경우.
+_REGION_MENTION_PHRASES = [
+    "성남시로", "김포시로", "수원시로", "용인시로",
+    "강남구에서", "분당구에서", "영통구에서",
+]
+
 
 def gen_order_number(rng: random.Random) -> str:
     return f"ORD-{rng.randint(2024, 2026)}{rng.randint(1, 12):02d}{rng.randint(1, 28):02d}-{rng.randint(1000, 9999)}"
@@ -57,6 +64,11 @@ def gen_invalid_rrn_like(rng: random.Random) -> str:
     return f"{front}-{back}"
 
 
+def gen_region_mention_like(rng: random.Random) -> str:
+    """시/군 이름에 조사 '로'가 붙거나 구만 단독으로 오는 지역 언급 — AddressDetector가 걸러내야 정상."""
+    return rng.choice(_REGION_MENTION_PHRASES)
+
+
 _DISTRACTOR_GENERATORS = [
     gen_order_number,
     gen_business_reg_number,
@@ -66,6 +78,7 @@ _DISTRACTOR_GENERATORS = [
     gen_tracking_number,
     gen_invalid_phone_like,
     gen_invalid_rrn_like,
+    gen_region_mention_like,
 ]
 
 

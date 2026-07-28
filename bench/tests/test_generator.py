@@ -8,11 +8,17 @@ from __future__ import annotations
 
 import random
 
+from maskingtape.detectors import AddressDetector
 from maskingtape.detectors import CreditCardDetector
 from maskingtape.detectors import EmailDetector
 from maskingtape.detectors import PhoneDetector
 from maskingtape.detectors import RRNDetector
-from bench.generator.distractors import gen_invalid_phone_like, gen_invalid_rrn_like, generate_distractor
+from bench.generator.distractors import (
+    gen_invalid_phone_like,
+    gen_invalid_rrn_like,
+    gen_region_mention_like,
+    generate_distractor,
+)
 from bench.generator.documents import (
     generate_document,
     generate_multi_sentence_document,
@@ -21,6 +27,7 @@ from bench.generator.documents import (
     templates,
 )
 from bench.generator.entities import ALL_KINDS, generate_entity
+from bench.generator.entities import _CITIES
 
 
 def test_labels_match_text_spans_exactly():
@@ -150,15 +157,45 @@ def test_easy_difficulty_always_uses_standard_separators():
 
 
 def test_hard_difficulty_avoids_hyphen_and_uses_road_address():
-    """hard 난이도는 하이픈 없는 표기와 도로명 주소를 사용해야 한다 (탐지가 어려운 형태)."""
+    """hard 난이도는 하이픈 없는 표기를 쓰고, 주소는 도로명 또는 시/도 없는 시/군 표기를 사용한다."""
     rng = random.Random(14)
+    addresses = []
     for _ in range(30):
         phone = generate_entity("phone", rng, difficulty="hard").text
         rrn = generate_entity("rrn", rng, difficulty="hard").text
-        address = generate_entity("address", rng, difficulty="hard").text
+        addresses.append(generate_entity("address", rng, difficulty="hard").text)
         assert phone.count("-") == 0
         assert rrn.count("-") == 0
-        assert "길" in address  # 도로명 주소만 사용
+    # hard 주소는 지번(구/동으로만 끝나는 표준형)이 아니라 도로명 또는 시/도 없는 형태여야 한다.
+    assert all("길" in a or not any(a.startswith(city) for city in _CITIES) for a in addresses)
+    assert any("길" in a for a in addresses)  # 도로명 주소도 나온다
+
+
+def test_hard_difficulty_can_produce_no_province_address():
+    """#118: 시/도 없이 시/군으로 시작하는 주소도 hard 난이도에서 실제로 나와야 측정 사각지대가 없다."""
+    rng = random.Random(17)
+    addresses = [generate_entity("address", rng, difficulty="hard").text for _ in range(100)]
+    assert any(not any(a.startswith(city) for city in _CITIES) for a in addresses)
+
+
+def test_no_province_address_has_gu_or_dong_right_after_si_or_gun():
+    """core AddressDetector(#117)의 오탐 방지 게이트 — 시/군 바로 뒤에 구/동/읍/면이 와야 한다."""
+    rng = random.Random(18)
+    for _ in range(50):
+        entity = generate_entity("address", rng, difficulty="hard")
+        if any(entity.text.startswith(city) for city in _CITIES):
+            continue  # road 스타일은 이 케이스가 아니므로 건너뛴다
+        second_word = entity.text.split(" ")[1]
+        assert second_word.endswith(("구", "동", "읍", "면", "리"))
+
+
+def test_region_mention_distractor_is_rejected_by_core_detector():
+    """조사 '로'가 붙거나 구 단독인 지역 언급 distractor는 core가 주소로 잡으면 안 된다."""
+    rng = random.Random(19)
+    detector = AddressDetector()
+    for _ in range(20):
+        text = gen_region_mention_like(rng)
+        assert detector.detect(text) == []
 
 
 def test_generate_document_tags_difficulty_as_easy_or_hard():
