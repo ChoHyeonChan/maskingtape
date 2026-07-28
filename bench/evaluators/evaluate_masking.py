@@ -8,7 +8,7 @@ core에는 비식별화 전략이 세 가지 있다 — mask(***, 기본), label
 가짜 값). --strategy로 골라서 셋 다 같은 방식으로 유출 여부를 검증할 수 있다.
 
 사용법:
-    python -m bench.evaluate_masking bench/datasets/synth_v1.jsonl --strategy pseudonym
+    python -m bench.evaluators.evaluate_masking bench/datasets/synth_v1.jsonl --strategy pseudonym
 """
 
 from __future__ import annotations
@@ -19,8 +19,8 @@ from pathlib import Path
 from maskingtape.anonymizers import LabelAnonymizer, MaskAnonymizer, PseudonymAnonymizer
 from maskingtape.pipeline import Pipeline
 
-from bench.evaluate import load_dataset
-from bench.mask_quality import evaluate_mask_quality, format_mask_quality_report
+from bench.evaluators.evaluate import load_dataset
+from bench.evaluators.mask_quality import evaluate_mask_quality, format_mask_quality_report
 
 _STRATEGIES = {
     "mask": MaskAnonymizer,

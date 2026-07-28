@@ -17,11 +17,12 @@ generator/
   distractors.py  # 개인정보가 아닌 '헷갈리는' 값 생성 (오탐 측정용)
   documents.py    # 문장 템플릿에 값을 심어 문서 + 라벨(span) 생성
 generate_dataset.py  # CLI — JSONL 데이터셋 생성
-evaluate.py          # CLI — core Pipeline.scan() 결과 vs 정답 → precision/recall/F1 리포트 (종류별+난이도별)
-mask_quality.py       # 마스킹 결과물 자체의 개인정보 유출(완전/부분) 여부 검증 로직
-evaluate_masking.py   # CLI — 마스킹 결과에 개인정보가 실제로 남아있는지(유출률) 평가 (--strategy로 mask/label/pseudonym 선택)
-confidence_analysis.py  # CLI — confidence 임계값별 precision/recall/F1 변화 분석
-compare_name_detectors.py  # CLI — 이름 탐지 규칙판 vs 하이브리드(LLM) 정확도 비교
+evaluators/           # 평가 도구 모음 — "무엇을 평가하는가"별로 파일 하나
+  evaluate.py            # CLI — core Pipeline.scan() 결과 vs 정답 → precision/recall/F1 리포트 (종류별+난이도별)
+  mask_quality.py        # 마스킹 결과물 자체의 개인정보 유출(완전/부분) 여부 검증 로직
+  evaluate_masking.py    # CLI — 마스킹 결과에 개인정보가 실제로 남아있는지(유출률) 평가 (--strategy로 mask/label/pseudonym 선택)
+  confidence_analysis.py # CLI — confidence 임계값별 precision/recall/F1 변화 분석
+  compare_name_detectors.py  # CLI — 이름 탐지 규칙판 vs 하이브리드(LLM) 정확도 비교
 datasets/            # 생성된 평가셋 (정답 라벨 포함)
 reports/             # evaluate.py --report로 저장한 마크다운 리포트 (결과보고서 첨부용)
 tests/               # 생성기·평가 로직 단위 테스트
@@ -34,7 +35,7 @@ tests/               # 생성기·평가 로직 단위 테스트
 python -m bench.generate_dataset --count 500 --seed 42 --out bench/datasets/synth_v1.jsonl
 
 # 2. core 탐지기 정확도 평가 (--report로 마크다운 리포트 파일도 저장)
-python -m bench.evaluate bench/datasets/synth_v1.jsonl --report bench/reports/report_v1.md
+python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl --report bench/reports/report_v1.md
 ```
 
 500건 기준 최신 실측(main 병합 후 재측정, seed=42):
@@ -99,7 +100,7 @@ core에는 비식별화 전략이 세 가지 있다 — `mask`(`***`, 기본), `
 `pseudonym`(그럴듯한 가짜 값). `--strategy`로 골라서 검증한다.
 
 ```bash
-python -m bench.evaluate_masking bench/datasets/synth_v1.jsonl --strategy pseudonym
+python -m bench.evaluators.evaluate_masking bench/datasets/synth_v1.jsonl --strategy pseudonym
 ```
 
 `mask`는 정답 개인정보 구간의 각 글자 위치를 원문과 하나씩 비교해 "얼마나 노출됐는지" 비율을
@@ -139,7 +140,7 @@ core의 각 `Detection`에는 `confidence`(0.0~1.0)가 붙어있지만 지금까
 `confidence_analysis.py`는 이 값을 활용해 "임계값을 얼마로 잡아야 하는지" 튜닝 근거를 만든다.
 
 ```bash
-python -m bench.confidence_analysis bench/datasets/synth_v1.jsonl
+python -m bench.evaluators.confidence_analysis bench/datasets/synth_v1.jsonl
 ```
 
 후보 임계값마다 그보다 confidence가 낮은 예측을 버린 뒤 다시 채점해서, 임계값을 올릴수록
@@ -158,7 +159,7 @@ core에는 이름을 찾는 방법이 두 가지 있다 — `default_detectors()
 겹치는 하이브리드). `compare_name_detectors.py`가 같은 데이터셋으로 두 방식을 나란히 비교한다.
 
 ```bash
-python -m bench.compare_name_detectors bench/datasets/synth_v1.jsonl
+python -m bench.evaluators.compare_name_detectors bench/datasets/synth_v1.jsonl
 ```
 
 로컬 Ollama가 안 떠 있으면 하이브리드 쪽은 "LLM 사용 불가"로 표시되고 규칙판 결과만 나온다 —

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from bench.evaluate import Counts, Span, evaluate, evaluate_by_difficulty, write_markdown_report
+from bench.evaluators.evaluate import Counts, Span, evaluate, evaluate_by_difficulty, write_markdown_report
 from maskingtape.pipeline import Pipeline
 
 
