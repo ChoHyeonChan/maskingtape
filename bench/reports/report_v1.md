@@ -1,7 +1,7 @@
 # maskingtape 합성 벤치마크 정확도 리포트
 
 - 데이터셋: `bench\datasets\synth_v1.jsonl` (500건)
-- 생성 시각: 2026-07-27 08:10 UTC
+- 생성 시각: 2026-07-28 14:53 UTC
 - 평가 방식: span 완전 일치(exact match) 기준 precision/recall/F1
 
 ## 종류(kind)별 결과
@@ -28,8 +28,3 @@
 - `easy`: 하이픈 등 표준 구분자를 사용한 명확한 표기
 - `hard`: 구분자 없음/국제표기/도로명+아파트 등 상대적으로 탐지가 어려운 표기
 - `negative`: 개인정보가 전혀 없는(또는 distractor만 있는) 문서 — 오탐(FP) 측정용
-
-## 참고
-
-- `name`/`address`는 core에 아직 탐지기가 구현되지 않아 recall 0으로 나온다 —
-  생성기 버그가 아니라 현재 core 구현 범위를 정확히 반영하는 결과다.
