@@ -15,24 +15,29 @@ AI 에이전트가 한국어 데이터를 다루기 전에 거치는 **프라이
 - **규칙 전용 모드**: LLM 없이도 동작 — 저사양 환경에서도 쓸 수 있다
 - **MCP 서버**: AI 에이전트 워크플로에 비식별화 계층을 끼워 넣을 수 있다
 
-## 빠른 시작 (개발 중 — API는 바뀔 수 있음)
+## 빠른 시작
 
-**필요한 것: Python 3.10 이상.** 그게 전부다 — 코어 엔진과 CLI는 표준 라이브러리만 쓰고, 외부 서비스도 부르지 않는다. (로컬 LLM 기능은 선택 사항이며 설치 방법은 [packages/core](packages/core)에 있다. 웹 데모는 Node.js 20+, 데스크톱 앱은 Flutter가 추가로 필요하며 각 폴더 README를 참고한다.)
+**필요한 것: Python 3.10 이상.** 그게 전부다 — 코어 엔진과 CLI는 표준 라이브러리만 쓰고, 외부 서비스도 부르지 않는다.
 
 ```bash
-git clone https://github.com/ChoHyeonChan/maskingtape.git
-cd maskingtape
-python -m venv .venv
-# Windows: .venv\Scripts\activate / macOS·Linux: source .venv/bin/activate
-pip install -e "packages/core[dev]"
+pip install maskingtape
 
 maskingtape "주민번호 800101-1234560 문의주세요"
 # → 주민번호 ************** 문의주세요
 
 maskingtape --strategy label "연락처 010-1234-5678"        # → 연락처 [전화번호]
 maskingtape --scan "주민번호 800101-1234560 문의주세요"   # 탐지 리포트(JSON)만
-pytest packages/core                                       # 테스트
 ```
+
+소스로 받아 개발하려면(테스트·린트 포함):
+
+```bash
+git clone https://github.com/ChoHyeonChan/maskingtape.git
+cd maskingtape && pip install -e "packages/core[dev]"
+pytest packages/core
+```
+
+로컬 LLM 기능은 선택 사항이며 설치 방법은 [packages/core](packages/core)에 있다. 웹 데모는 Node.js 20+, 데스크톱 앱은 Flutter가 추가로 필요하며 각 폴더 README를 참고한다.
 
 현재 탐지: **주민등록번호**(체크섬 검증), **전화번호**(휴대폰·유선·070, +82 표기), **이메일**, **주소**(행정구역), **이름**(규칙 + 로컬 LLM 문맥 판단)
 
