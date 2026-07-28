@@ -33,6 +33,8 @@ class Detection {
     'name': '이름',
     'address': '주소',
     'card': '카드번호',
+    'biz_reg': '사업자등록번호',
+    'passport': '여권번호',
   };
 
   /// 코어가 라벨 맵에 없는 새 kind를 내보내면(예: 새 탐지기 추가) 한국어 대신
