@@ -197,6 +197,33 @@ def gen_card(rng: random.Random, difficulty: str = "mixed") -> Entity:
     return Entity(kind="card", text=text)
 
 
+# 국세청 사업자등록번호 검증 가중치 — core의 business_registration.py `_checksum_ok`와 동일.
+_BIZ_REG_WEIGHTS = (1, 3, 7, 1, 3, 7, 1, 3, 5)
+
+
+def _biz_reg_check_digit(front9: str) -> str:
+    """앞 9자리(front9)에 이어 붙이면 국세청 검증을 통과하는 마지막(10번째) 자리를 계산한다.
+
+    core의 business_registration.py `_checksum_ok`와 정확히 같은 규칙(가중합 + 9번째 자리×5의
+    십의 자리 보정, 10에서 일의 자리를 뺌)을 거꾸로 풀어 체크 숫자를 구한다 — 계산이 어긋나면
+    우리가 만든 "유효한 사업자등록번호"가 실제로는 core에 안 잡히는 모순이 생긴다.
+    """
+    total = sum(int(d) * w for d, w in zip(front9, _BIZ_REG_WEIGHTS))
+    total += (int(front9[8]) * 5) // 10
+    return str((10 - total % 10) % 10)
+
+
+def gen_biz_reg(rng: random.Random, difficulty: str = "mixed") -> Entity:
+    """사업자등록번호(XXX-XX-XXXXX). core는 하이픈 표기 + 유효 체크섬만 잡으므로(#123) 그
+    형태만 만든다 — 표기 다양성(구분자 등)을 둘 여지가 core 쪽에 아예 없다.
+    """
+    g1 = f"{rng.randint(100, 999)}"
+    g2 = f"{rng.randint(10, 99)}"
+    g3_front = f"{rng.randint(0, 9999):04d}"
+    check = _biz_reg_check_digit(g1 + g2 + g3_front)
+    return Entity(kind="biz_reg", text=f"{g1}-{g2}-{g3_front}{check}")
+
+
 def gen_address(rng: random.Random, difficulty: str = "mixed") -> Entity:
     if difficulty == "easy":
         use_road = False  # 지번 주소가 더 짧고 표준적인 형태
@@ -227,6 +254,7 @@ _GENERATORS = {
     "rrn": gen_rrn,
     "address": gen_address,
     "card": gen_card,
+    "biz_reg": gen_biz_reg,
 }
 
 ALL_KINDS = tuple(_GENERATORS.keys())
