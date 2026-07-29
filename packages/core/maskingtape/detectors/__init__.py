@@ -5,6 +5,7 @@
   contact/   연락처 (전화·이메일)
   financial/ 금융정보 (카드 등)
   personal/  인적·신상 (이름·주소)
+  business/  사업자·기관 식별정보 (사업자등록번호)
 이 __init__이 각 도메인의 탐지기를 re-export하므로 바깥에서는 위치와 무관하게
 `from maskingtape.detectors import RRNDetector`로 그대로 쓴다.
 """
@@ -12,6 +13,7 @@
 from __future__ import annotations
 
 from maskingtape.detectors.base import Detector
+from maskingtape.detectors.business.business_registration import BusinessRegistrationDetector
 from maskingtape.detectors.contact.email import EmailDetector
 from maskingtape.detectors.contact.phone import PhoneDetector
 from maskingtape.detectors.financial.creditcard import CreditCardDetector
@@ -22,6 +24,7 @@ from maskingtape.detectors.personal.name_llm import DEFAULT_MODEL, LLMNameDetect
 
 __all__ = [
     "AddressDetector",
+    "BusinessRegistrationDetector",
     "CreditCardDetector",
     "Detector",
     "EmailDetector",
@@ -42,6 +45,7 @@ def default_detectors() -> list[Detector]:
         EmailDetector(),
         AddressDetector(),
         CreditCardDetector(),
+        BusinessRegistrationDetector(),
         NameDetector(),
     ]
 
@@ -63,6 +67,7 @@ def llm_detectors(model: str = DEFAULT_MODEL) -> list[Detector]:
         EmailDetector(),
         AddressDetector(),
         CreditCardDetector(),
+        BusinessRegistrationDetector(),
         LLMNameDetector(model=model),
         NameDetector(min_confidence=0.75),
     ]

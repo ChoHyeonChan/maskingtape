@@ -15,24 +15,29 @@ AI 에이전트가 한국어 데이터를 다루기 전에 거치는 **프라이
 - **규칙 전용 모드**: LLM 없이도 동작 — 저사양 환경에서도 쓸 수 있다
 - **MCP 서버**: AI 에이전트 워크플로에 비식별화 계층을 끼워 넣을 수 있다
 
-## 빠른 시작 (개발 중 — API는 바뀔 수 있음)
+## 빠른 시작
 
-**필요한 것: Python 3.10 이상.** 그게 전부다 — 코어 엔진과 CLI는 표준 라이브러리만 쓰고, 외부 서비스도 부르지 않는다. (로컬 LLM 기능은 선택 사항이며 설치 방법은 [packages/core](packages/core)에 있다. 웹 데모는 Node.js 20+, 데스크톱 앱은 Flutter가 추가로 필요하며 각 폴더 README를 참고한다.)
+**필요한 것: Python 3.10 이상.** 그게 전부다 — 코어 엔진과 CLI는 표준 라이브러리만 쓰고, 외부 서비스도 부르지 않는다.
 
 ```bash
-git clone https://github.com/ChoHyeonChan/maskingtape.git
-cd maskingtape
-python -m venv .venv
-# Windows: .venv\Scripts\activate / macOS·Linux: source .venv/bin/activate
-pip install -e "packages/core[dev]"
+pip install maskingtape
 
 maskingtape "주민번호 800101-1234560 문의주세요"
 # → 주민번호 ************** 문의주세요
 
 maskingtape --strategy label "연락처 010-1234-5678"        # → 연락처 [전화번호]
 maskingtape --scan "주민번호 800101-1234560 문의주세요"   # 탐지 리포트(JSON)만
-pytest packages/core                                       # 테스트
 ```
+
+소스로 받아 개발하려면(테스트·린트 포함):
+
+```bash
+git clone https://github.com/ChoHyeonChan/maskingtape.git
+cd maskingtape && pip install -e "packages/core[dev]"
+pytest packages/core
+```
+
+로컬 LLM 기능은 선택 사항이며 설치 방법은 [packages/core](packages/core)에 있다. 웹 데모는 Node.js 20+, 데스크톱 앱은 Flutter가 추가로 필요하며 각 폴더 README를 참고한다.
 
 현재 탐지: **주민등록번호**(체크섬 검증), **전화번호**(휴대폰·유선·070, +82 표기), **이메일**, **주소**(행정구역), **이름**(규칙 + 로컬 LLM 문맥 판단)
 
@@ -58,7 +63,7 @@ python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl
 
 합성 데이터셋(500건)도 시드로 고정돼 있어 바이트 단위로 똑같이 재생성된다 — `python -m bench.generate_dataset --count 500 --seed 42 --out bench/datasets/synth_v1.jsonl`
 
-**측정 기준: `38f7d63` · 규칙 전용 모드(LLM 미사용)**
+**측정 기준: `06527b2` · 규칙 전용 모드(LLM 미사용)**
 
 | 종류 | precision | recall | F1 |
 |---|---|---|---|
@@ -67,13 +72,14 @@ python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl
 | 이메일 | 1.000 | 1.000 | 1.000 |
 | 주소 | 1.000 | 1.000 | 1.000 |
 | 신용카드번호 | 1.000 | 1.000 | 1.000 |
-| 이름 (규칙 전용) | 0.881 | 0.509 | 0.645 |
-| **전체** | **0.968** | **0.811** | **0.883** |
+| 사업자등록번호 | 1.000 | 1.000 | 1.000 |
+| 이름 (규칙 전용) | 0.924 | 0.531 | 0.675 |
+| **전체** | **0.981** | **0.825** | **0.896** |
 
-번호·주소·카드는 형태와 체크섬으로 완전히 잡힌다(유선전화·plus 이메일·서브도메인·여러 문장으로
-구성된 복합 문서까지 섞어도 흔들리지 않음을 확인했다). 이름만 남은 과제다:
+번호·주소·카드·사업자등록번호는 형태와 체크섬으로 완전히 잡힌다(유선전화·plus 이메일·서브도메인·
+여러 문장으로 구성된 복합 문서까지 섞어도 흔들리지 않음을 확인했다) — 주소는 [#118](https://github.com/ChoHyeonChan/maskingtape/issues/118)에서 시/도 없는 시/군 시작 주소 데이터를, 사업자등록번호는 [#123](https://github.com/ChoHyeonChan/maskingtape/issues/123)에서 새 kind를 추가해 측정 사각지대를 없앴다. 이름만 남은 과제다:
 
-- **이름 (recall 0.509)** — 한국어 이름은 형태만으로 구분되지 않아 규칙만으로는 문맥 없는 이름을 놓친다. 이것이 **로컬 LLM 하이브리드**(`--llm`)가 필요한 이유이고, 그 효과는 [#46](https://github.com/ChoHyeonChan/maskingtape/issues/46)에서 같은 데이터셋으로 비교 측정한다 — 하이브리드로 켜면 F1이 **0.645 → 0.933**으로 오른다(상세 수치는 [bench/](bench/) 참고).
+- **이름** — 한국어 이름은 형태만으로 구분되지 않아 규칙만으로는 문맥 없는 이름을 놓친다. 이것이 **로컬 LLM 하이브리드**(`--llm`)가 필요한 이유이고, 그 효과는 [#46](https://github.com/ChoHyeonChan/maskingtape/issues/46)에서 같은 데이터셋으로 비교 측정한다 — 하이브리드로 켜면 F1이 대략 0.93 안팎으로 오른다(정확한 하이브리드 수치는 데이터셋이 바뀔 때마다 로컬 Ollama로 재측정 필요 — 상세는 [bench/](bench/) 참고).
 
 마스킹 결과에 개인정보가 실제로 남는지도 따로 측정한다 — `python -m bench.evaluators.evaluate_masking bench/datasets/synth_v1.jsonl`. 상세는 [bench/](bench/) 참고.
 

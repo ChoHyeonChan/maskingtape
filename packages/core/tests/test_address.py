@@ -101,3 +101,44 @@ def test_road_address_does_not_swallow_a_following_number():
 
     found = detect("부산광역시 센텀중앙로252길 12 더샵아파트 123동 1241호 010-9876-5432")
     assert found[0].text == "부산광역시 센텀중앙로252길 12 더샵아파트 123동 1241호"
+
+
+# --- #68: 시/도 없이 시/군으로 시작하는 주소 (미탐지는 곧 유출) ---
+
+
+def test_detects_address_starting_at_si_without_province():
+    """'성남시 분당구 정자동 45-6' — 광역단체명이 없어도 통째로 잡아야 한다."""
+    found = detect("배송지는 성남시 분당구 정자동 45-6 입니다")
+    assert len(found) == 1
+    assert found[0].text == "성남시 분당구 정자동 45-6"
+    # 시/도가 없어 확신도는 province 앵커(1.0)보다 낮다
+    assert found[0].confidence < 1.0
+
+
+def test_detects_si_without_gu_directly_to_dong():
+    # 구가 없는 작은 시는 시 뒤에 바로 동이 온다 — "김포시 사우동"
+    found = detect("주소: 김포시 사우동 12-3")
+    assert len(found) == 1
+    assert found[0].text == "김포시 사우동 12-3"
+
+
+def test_detects_gun_with_myeon():
+    found = detect("양평군 양서면 으로 오세요")
+    assert len(found) == 1
+    assert found[0].text.startswith("양평군 양서면")
+
+
+def test_si_anchor_does_not_double_detect_when_province_present():
+    """시/도가 있으면 province 앵커가 통째로 잡고, 안쪽 시/군 매칭은 중복으로 버린다."""
+    found = detect("경기도 성남시 분당구 정자동 45-6")
+    assert len(found) == 1
+    assert found[0].text == "경기도 성남시 분당구 정자동 45-6"
+    assert found[0].confidence == 1.0
+
+
+def test_si_anchor_rejects_region_mentions_and_common_words():
+    # 조사 '로'(성남시로), 구 단독(강남구에서), 구/동으로 끝나는 일반어는 주소가 아니다
+    assert detect("성남시로 이사갔어요") == []
+    assert detect("강남구에서 만나요") == []
+    assert detect("요구사항을 먼저 정리했다") == []
+    assert detect("부산시 마케팅부 소속입니다") == []

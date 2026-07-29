@@ -36,6 +36,22 @@ _GU_DONG = [
 ]
 _CITIES = ["서울특별시", "부산광역시", "대전광역시", "인천광역시", "대구광역시", "광주광역시", "울산광역시"]
 _APARTMENT_NAMES = ["래미안", "자이", "푸르지오", "e편한세상", "힐스테이트", "더샵"]
+# 시/도(광역단체명) 없이 시/군으로 시작하는 주소(#118) — core AddressDetector가 시작점으로
+# 인정하려면 시/군 바로 뒤에 구 또는 동/읍/면/리가 와야 한다(조사 '로'·구 단독과 구분하기 위함).
+# 각 항목은 그 조건을 만족하도록 "<시|군> <구|동|읍|면>..." 형태만 담는다.
+_NO_PROVINCE_AREAS = [
+    "성남시 분당구 정자동",
+    "수원시 영통구 매탄동",
+    "용인시 기흥구 구갈동",
+    "안양시 동안구 평촌동",
+    "고양시 일산동구 장항동",
+    "김포시 사우동",
+    "파주시 금촌동",
+    "이천시 창전동",
+    "양평군 양서면",
+    "홍천군 홍천읍",
+    "가평군 가평읍",
+]
 
 # 실제 회사 도메인과 겹치지 않도록 합성/예시 전용 도메인만 사용한다.
 _EMAIL_DOMAINS = [
@@ -197,21 +213,56 @@ def gen_card(rng: random.Random, difficulty: str = "mixed") -> Entity:
     return Entity(kind="card", text=text)
 
 
+# 국세청 사업자등록번호 검증 가중치 — core의 business_registration.py `_checksum_ok`와 동일.
+_BIZ_REG_WEIGHTS = (1, 3, 7, 1, 3, 7, 1, 3, 5)
+
+
+def _biz_reg_check_digit(front9: str) -> str:
+    """앞 9자리(front9)에 이어 붙이면 국세청 검증을 통과하는 마지막(10번째) 자리를 계산한다.
+
+    core의 business_registration.py `_checksum_ok`와 정확히 같은 규칙(가중합 + 9번째 자리×5의
+    십의 자리 보정, 10에서 일의 자리를 뺌)을 거꾸로 풀어 체크 숫자를 구한다 — 계산이 어긋나면
+    우리가 만든 "유효한 사업자등록번호"가 실제로는 core에 안 잡히는 모순이 생긴다.
+    """
+    total = sum(int(d) * w for d, w in zip(front9, _BIZ_REG_WEIGHTS))
+    total += (int(front9[8]) * 5) // 10
+    return str((10 - total % 10) % 10)
+
+
+def gen_biz_reg(rng: random.Random, difficulty: str = "mixed") -> Entity:
+    """사업자등록번호(XXX-XX-XXXXX). core는 하이픈 표기 + 유효 체크섬만 잡으므로(#123) 그
+    형태만 만든다 — 표기 다양성(구분자 등)을 둘 여지가 core 쪽에 아예 없다.
+    """
+    g1 = f"{rng.randint(100, 999)}"
+    g2 = f"{rng.randint(10, 99)}"
+    g3_front = f"{rng.randint(0, 9999):04d}"
+    check = _biz_reg_check_digit(g1 + g2 + g3_front)
+    return Entity(kind="biz_reg", text=f"{g1}-{g2}-{g3_front}{check}")
+
+
 def gen_address(rng: random.Random, difficulty: str = "mixed") -> Entity:
     if difficulty == "easy":
-        use_road = False  # 지번 주소가 더 짧고 표준적인 형태
+        style = "jibun"  # 지번 주소가 더 짧고 표준적인 형태
     elif difficulty == "hard":
-        use_road = True  # 도로명 + 아파트 동/호는 더 길고 구조가 복잡함
+        # 도로명(+아파트)과 시/도 없이 시/군으로 시작하는 표기(#118)를 둘 다 "어려운 형태"로 섞는다 —
+        # 후자는 province 앵커가 없어 core 쪽 확신도도 낮게 잡히는 실제로 더 까다로운 케이스다.
+        style = rng.choices(["road", "no_province"], weights=[7, 3])[0]
     else:
-        use_road = rng.random() < 0.5
+        style = rng.choices(["jibun", "road", "no_province"], weights=[4, 4, 2])[0]
+
+    if style == "no_province":
+        area = rng.choice(_NO_PROVINCE_AREAS)
+        bunji = rng.randint(1, 999)
+        ho = rng.randint(1, 20)
+        return Entity(kind="address", text=f"{area} {bunji}-{ho}")
 
     city = rng.choice(_CITIES)
-    if not use_road:
+    if style == "jibun":
         gu_dong = rng.choice(_GU_DONG)
         bunji = rng.randint(1, 999)
         ho = rng.randint(1, 20)
         base = f"{city} {gu_dong} {bunji}-{ho}"
-    else:
+    else:  # road
         road = rng.choice(_ROAD_ADDRESSES)
         base = f"{city} {road}{rng.randint(1, 300)}길 {rng.randint(1, 90)}"
         if difficulty == "hard" or rng.random() < 0.5:
@@ -227,6 +278,7 @@ _GENERATORS = {
     "rrn": gen_rrn,
     "address": gen_address,
     "card": gen_card,
+    "biz_reg": gen_biz_reg,
 }
 
 ALL_KINDS = tuple(_GENERATORS.keys())

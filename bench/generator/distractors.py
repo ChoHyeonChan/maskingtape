@@ -12,8 +12,17 @@ from __future__ import annotations
 
 import random
 
+from bench.generator.entities import _biz_reg_check_digit
+
 # core RRNDetector가 허용하는 지역번호(rrn.py 참고)에 없는 국번 — 형식은 유선전화 같지만 매칭되면 안 됨.
 _INVALID_AREA_CODES = ["09", "07", "00", "08"]
+
+# 시/도 없이 시/군으로 시작하는 주소를 탐지하는 규칙(#118 관련 core #68/#117)이 지역 언급까지
+# 오탐하면 안 되는 경계 케이스 — 조사 '로'가 공백 없이 붙거나(성남시로), 구만 단독으로 오는 경우.
+_REGION_MENTION_PHRASES = [
+    "성남시로", "김포시로", "수원시로", "용인시로",
+    "강남구에서", "분당구에서", "영통구에서",
+]
 
 
 def gen_order_number(rng: random.Random) -> str:
@@ -21,8 +30,18 @@ def gen_order_number(rng: random.Random) -> str:
 
 
 def gen_business_reg_number(rng: random.Random) -> str:
-    """사업자등록번호 (ddd-dd-ddddd) — RRN(6+7)·전화(지역번호+7~8) 어느 자릿수 패턴과도 다르다."""
-    return f"{rng.randint(100, 999)}-{rng.randint(10, 99)}-{rng.randint(10000, 99999)}"
+    """사업자등록번호 모양(ddd-dd-ddddd)이지만 체크섬은 항상 무효인 문자열 —
+    BusinessRegistrationDetector가 걸러내야 정상.
+
+    core는 국세청 검증 체크섬이 맞는 번호만 사업자등록번호로 잡는다(business_registration.py).
+    체크 자리까지 완전 난수로 뽑으면 10자리 중 하나(약 10% 확률)로 우연히 체크섬이 맞아
+    오탐이 생길 수 있어(#123), 유효 체크 숫자를 계산한 뒤 일부러 다른 숫자로 바꿔 항상
+    무효가 되게 만든다.
+    """
+    front9 = f"{rng.randint(100, 999)}{rng.randint(10, 99)}{rng.randint(0, 9999):04d}"
+    valid_check = int(_biz_reg_check_digit(front9))
+    invalid_check = (valid_check + rng.randint(1, 9)) % 10
+    return f"{front9[:3]}-{front9[3:5]}-{front9[5:]}{invalid_check}"
 
 
 def gen_zip_code(rng: random.Random) -> str:
@@ -57,6 +76,11 @@ def gen_invalid_rrn_like(rng: random.Random) -> str:
     return f"{front}-{back}"
 
 
+def gen_region_mention_like(rng: random.Random) -> str:
+    """시/군 이름에 조사 '로'가 붙거나 구만 단독으로 오는 지역 언급 — AddressDetector가 걸러내야 정상."""
+    return rng.choice(_REGION_MENTION_PHRASES)
+
+
 _DISTRACTOR_GENERATORS = [
     gen_order_number,
     gen_business_reg_number,
@@ -66,6 +90,7 @@ _DISTRACTOR_GENERATORS = [
     gen_tracking_number,
     gen_invalid_phone_like,
     gen_invalid_rrn_like,
+    gen_region_mention_like,
 ]
 
 

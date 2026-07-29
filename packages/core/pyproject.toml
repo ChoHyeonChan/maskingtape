@@ -12,11 +12,22 @@ requires-python = ">=3.10"
 authors = [{ name = "Team maskingtape" }]
 keywords = ["korean", "pii", "privacy", "anonymization", "deidentification", "masking"]
 classifiers = [
-  "Development Status :: 2 - Pre-Alpha",
+  "Development Status :: 3 - Alpha",
   "License :: OSI Approved :: Apache Software License",
   "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Topic :: Security",
+  "Natural Language :: Korean",
+  "Intended Audience :: Developers",
 ]
+
+[project.urls]
+Homepage = "https://github.com/ChoHyeonChan/maskingtape"
+Repository = "https://github.com/ChoHyeonChan/maskingtape"
+Issues = "https://github.com/ChoHyeonChan/maskingtape/issues"
 
 [project.optional-dependencies]
 # ruff는 0.16에서 새 규칙(TRY004 등)이 stable로 승격돼 기존 코드까지 린트를 깬다.
