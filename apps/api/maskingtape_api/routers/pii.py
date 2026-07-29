@@ -40,25 +40,15 @@ def scan(
     response_model=AnonymizeResponse,
     responses=ERROR_RESPONSES,
 )
-def anonymize(_: AnonymizeRequest) -> JSONResponse:
-    """Declare the anonymize API contract. Core integration is implemented later."""
-    return _not_implemented(
-        "anonymize_not_implemented",
-        "/anonymize 구현은 scan 및 core 연동 이후 연결합니다.",
-    )
-
-
-def _not_implemented(code: str, message: str) -> JSONResponse:
-    return _error_response(status.HTTP_501_NOT_IMPLEMENTED, code, message)
-
-
-def _server_error(code: str, message: str) -> JSONResponse:
-    return _error_response(status.HTTP_500_INTERNAL_SERVER_ERROR, code, message)
-
-
-def _error_response(status_code: int, code: str, message: str) -> JSONResponse:
-    error = ErrorResponse(code=code, message=message)
-    return JSONResponse(
-        status_code=status_code,
-        content=error.model_dump(mode="json"),
-    )
+def anonymize(
+    request: AnonymizeRequest,
+    core: CoreEngineAdapter = Depends(get_core_adapter),
+) -> AnonymizeResponse | JSONResponse:
+    """Anonymize personal information using the rule-based core pipeline."""
+    try:
+        return core.anonymize(request.text, request.strategy)
+    except CoreEngineError:
+        return server_error(
+            "core_anonymize_failed",
+            "core 비식별화 엔진 호출에 실패했습니다.",
+        )
