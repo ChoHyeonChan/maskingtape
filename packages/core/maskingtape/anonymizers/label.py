@@ -23,6 +23,7 @@ DEFAULT_LABELS = {
     "address": "주소",
     "card": "카드번호",
     "biz_reg": "사업자등록번호",
+    "passport": "여권번호",
 }
 
 
