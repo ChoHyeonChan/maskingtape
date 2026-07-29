@@ -29,6 +29,16 @@ API 서버:
 python -m uvicorn maskingtape_api.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
+Development environment variables:
+
+```powershell
+$env:MASKINGTAPE_API_ENV="development"
+$env:MASKINGTAPE_API_CORS_ORIGINS="http://localhost:5173,http://127.0.0.1:5173"
+```
+
+`MASKINGTAPE_API_CORS_ORIGINS` is a comma-separated allowlist. Do not use `*`;
+set the deployed web origin explicitly when the frontend domain is decided.
+
 헬스체크:
 
 ```bash
