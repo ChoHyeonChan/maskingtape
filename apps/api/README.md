@@ -57,6 +57,14 @@ curl http://127.0.0.1:8000/health
 python -m pytest
 ```
 
+CI에서 루트 기준 실행:
+
+```bash
+python -m pip install -e packages/core
+python -m pip install -e "apps/api[dev]"
+python -m pytest apps/api -q
+```
+
 ## API 계약 (v1 — 프론트·데스크톱은 이 스키마로 목업 개발 시작 가능)
 
 공통 제약:
