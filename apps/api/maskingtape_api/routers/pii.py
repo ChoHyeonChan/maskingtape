@@ -44,8 +44,11 @@ def anonymize(
     request: AnonymizeRequest,
     core: CoreEngineAdapter = Depends(get_core_adapter),
 ) -> AnonymizeResponse | JSONResponse:
-    """Detect and anonymize personal information using the core pipeline."""
+    """Anonymize personal information using the rule-based core pipeline."""
     try:
         return core.anonymize(request.text, request.strategy)
     except CoreEngineError:
-        return server_error("core_anonymize_failed", "core 비식별화 엔진 호출에 실패했습니다.")
+        return server_error(
+            "core_anonymize_failed",
+            "core 비식별화 엔진 호출에 실패했습니다.",
+        )

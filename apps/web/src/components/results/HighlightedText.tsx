@@ -44,7 +44,7 @@ export function HighlightedText({ text, detections, activeFilter }: Props) {
   }, [activeFilter]);
 
   if (!text) {
-    return <p className="highlighted-text highlighted-text--empty">텍스트를 입력하고 탐지를 실행하세요.</p>;
+    return <p className="highlighted-text highlighted-text--empty">텍스트를 입력하고 탐지를 실행해 주세요.</p>;
   }
 
   const segments = buildSegments(text, detections);
@@ -68,7 +68,7 @@ export function HighlightedText({ text, detections, activeFilter }: Props) {
 
   return (
     <>
-      <p className="highlighted-text__hint">👇 개인정보를 클릭하면 마스킹테이프로 가려져요.</p>
+      <p className="highlighted-text__hint">강조된 개인정보를 클릭하면 해당 값만 가리거나 다시 볼 수 있습니다.</p>
       <p className="highlighted-text" data-testid="highlighted-text">
         {segments.map((segment, i) => {
           const isDetectionMatch = segment.kind !== "plain" && segment.detection.kind === activeFilter;
@@ -109,7 +109,7 @@ export function HighlightedText({ text, detections, activeFilter }: Props) {
                 isCovered && isTemporarilyRevealed && "highlight--revealed",
               )}
               style={{ animationDelay: `${i * 40}ms` }}
-              title={`${label} · 확신도 ${Math.round(segment.detection.confidence * 100)}%`}
+              title={`${label} · 신뢰도 ${Math.round(segment.detection.confidence * 100)}%`}
               role="button"
               tabIndex={0}
               aria-pressed={isCovered}
@@ -140,7 +140,7 @@ export function HighlightedText({ text, detections, activeFilter }: Props) {
         </button>
       </div>
       <section className="masked-result" aria-label="개인정보가 가려진 결과">
-        <h3 className="masked-result__title">가려진 결과</h3>
+        <h3 className="masked-result__title">마스킹 미리보기</h3>
         <p className="masked-result__text" data-testid="masked-result">
           {maskedText}
         </p>

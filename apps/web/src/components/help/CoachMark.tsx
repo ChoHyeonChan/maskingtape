@@ -21,8 +21,8 @@ interface CoachTarget {
 type RawCoachTarget = Omit<CoachTarget, "note">;
 
 const TARGET_COPY: Record<CoachTarget["key"], string> = {
-  presets: "탐지할 문장이 없으면 예제로 먼저 테스트해 볼 수 있습니다.",
-  scan: "내용을 입력한 뒤 누르면 탐지 결과가 나옵니다.",
+  presets: "입력할 문장이 없다면 예제로 먼저 확인해 보세요.",
+  scan: "텍스트를 입력한 뒤 탐지를 실행하면 결과가 오른쪽에 표시됩니다.",
 };
 
 function expandRect(rect: DOMRect, padding: number): Rect {
@@ -157,7 +157,7 @@ export function CoachMark({ onDismiss }: Props) {
 
       <div className="coachmark__mini">
         <strong>처음이라면</strong>
-        <span>예제 입력 → 탐지 결과 보기 → 결과에서 개인정보 클릭 순서로 써보세요.</span>
+        <span>예제 선택, 개인정보 탐지, 결과에서 값 가리기 순서로 살펴보세요.</span>
       </div>
     </div>
   );

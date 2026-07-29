@@ -65,14 +65,18 @@
 .summary__dot--rrn { background: var(--kind-rrn); }
 .summary__dot--phone { background: var(--kind-phone); }
 .summary__dot--email { background: var(--kind-email); }
+.summary__dot--card { background: var(--kind-card); }
 .summary__dot--address { background: var(--kind-address); }
 .summary__dot--name { background: var(--kind-name); }
+.summary__dot--business_registration { background: var(--kind-business); }
 
 .summary__filter--rrn { --summary-color: var(--kind-rrn); }
 .summary__filter--phone { --summary-color: var(--kind-phone); }
 .summary__filter--email { --summary-color: var(--kind-email); }
+.summary__filter--card { --summary-color: var(--kind-card); }
 .summary__filter--address { --summary-color: var(--kind-address); }
 .summary__filter--name { --summary-color: var(--kind-name); }
+.summary__filter--business_registration { --summary-color: var(--kind-business); }
 
 .highlighted-text {
   line-height: 2.15;
@@ -193,8 +197,10 @@
 .highlight--rrn { --highlight-color: var(--kind-rrn); }
 .highlight--phone { --highlight-color: var(--kind-phone); }
 .highlight--email { --highlight-color: var(--kind-email); }
+.highlight--card { --highlight-color: var(--kind-card); }
 .highlight--address { --highlight-color: var(--kind-address); }
 .highlight--name { --highlight-color: var(--kind-name); }
+.highlight--business_registration { --highlight-color: var(--kind-business); }
 
 .highlight--uncertain {
   --highlight-strength: 14%;

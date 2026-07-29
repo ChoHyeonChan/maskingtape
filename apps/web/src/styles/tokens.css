@@ -10,8 +10,10 @@
   --kind-rrn: #2563eb;
   --kind-phone: #16a34a;
   --kind-email: #db2777;
+  --kind-card: #ea580c;
   --kind-address: #7c3aed;
   --kind-name: #0f766e;
+  --kind-business: #0891b2;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -27,7 +29,9 @@
     --kind-rrn: #60a5fa;
     --kind-phone: #4ade80;
     --kind-email: #f472b6;
+    --kind-card: #fb923c;
     --kind-address: #a78bfa;
     --kind-name: #2dd4bf;
+    --kind-business: #22d3ee;
   }
 }

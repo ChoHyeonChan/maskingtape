@@ -35,7 +35,7 @@ export function ResultsPanel({ scanned, activeFilter, scanRun, onFilterSelect }:
         </>
       ) : (
         <div className="empty-state">
-          <p>텍스트를 입력하고 탐지 결과 보기를 누르면 이곳에 표시됩니다.</p>
+          <p>왼쪽에 텍스트를 입력하고 개인정보 탐지를 실행하면 결과가 여기에 표시됩니다.</p>
         </div>
       )}
     </section>
