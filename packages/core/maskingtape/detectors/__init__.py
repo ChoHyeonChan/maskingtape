@@ -17,6 +17,7 @@ from maskingtape.detectors.business.business_registration import BusinessRegistr
 from maskingtape.detectors.contact.email import EmailDetector
 from maskingtape.detectors.contact.phone import PhoneDetector
 from maskingtape.detectors.financial.creditcard import CreditCardDetector
+from maskingtape.detectors.identity.passport import PassportDetector
 from maskingtape.detectors.identity.rrn import RRNDetector
 from maskingtape.detectors.personal.address import AddressDetector
 from maskingtape.detectors.personal.name import NameDetector
@@ -30,6 +31,7 @@ __all__ = [
     "EmailDetector",
     "LLMNameDetector",
     "NameDetector",
+    "PassportDetector",
     "PhoneDetector",
     "RRNDetector",
     "default_detectors",
@@ -41,6 +43,7 @@ def default_detectors() -> list[Detector]:
     """기본 탐지기 세트 (규칙 전용 — LLM 불필요)."""
     return [
         RRNDetector(),
+        PassportDetector(),
         PhoneDetector(),
         EmailDetector(),
         AddressDetector(),
@@ -63,6 +66,7 @@ def llm_detectors(model: str = DEFAULT_MODEL) -> list[Detector]:
     """
     return [
         RRNDetector(),
+        PassportDetector(),
         PhoneDetector(),
         EmailDetector(),
         AddressDetector(),
