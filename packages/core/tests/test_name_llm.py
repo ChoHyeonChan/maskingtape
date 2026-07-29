@@ -40,6 +40,20 @@ def test_ignores_hallucinated_names_not_present_in_text():
     assert found == []
 
 
+def test_strips_trailing_honorific_from_model_output():
+    # LLM이 "허성님"처럼 존칭을 붙여 반환해도 스팬은 이름("허성")만 잡아 gold와 정합한다
+    found = detector(["허성님"]).detect("허성님 카드번호로 결제 완료")
+    assert len(found) == 1
+    assert found[0].text == "허성"
+    assert found[0].end - found[0].start == 2
+
+
+def test_does_not_over_strip_when_result_would_be_one_char():
+    # 존칭을 떼면 2글자 미만이 되는 경우는 과잉 절단이므로 원본을 유지한다
+    found = detector(["김씨"]).detect("김씨 확인 바랍니다")
+    assert found[0].text == "김씨"
+
+
 def test_returns_nothing_when_model_finds_no_names():
     assert detector([]).detect("이용 안내: 회원 가입 후 사용하세요.") == []
 

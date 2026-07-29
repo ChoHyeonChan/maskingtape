@@ -61,6 +61,22 @@ def _require_local_host(host: str) -> str:
     return host.rstrip("/")
 
 
+# LLM이 이름 뒤에 존칭을 붙여 반환하기도 한다("허성님") — 떼어 gold 스팬과 맞춘다.
+# 사람 이름은 님/씨로 끝나지 않으므로 안전하다.
+_HONORIFICS = ("님", "씨")
+
+
+def _strip_honorific(name: str) -> str:
+    """LLM 반환 이름 뒤의 존칭(님/씨)을 뗀다. 떼면 2글자 미만이 되는 경우는 과잉 절단으로
+    오탐을 낼 수 있어 원본을 그대로 둔다(사람 이름은 최소 2글자)."""
+    for suffix in _HONORIFICS:
+        if name.endswith(suffix):
+            stripped = name[: -len(suffix)]
+            if len(stripped) >= 2:
+                return stripped
+    return name
+
+
 class LLMNameDetector(Detector):
     """로컬 Ollama로 문맥을 읽어 사람 이름을 찾는 탐지기 (Ollama 필요).
 
@@ -145,6 +161,7 @@ class LLMNameDetector(Detector):
         for name in names:
             if not isinstance(name, str) or not name:
                 continue
+            name = _strip_honorific(name)
             start = text.find(name)
             while start != -1:
                 found.append(
