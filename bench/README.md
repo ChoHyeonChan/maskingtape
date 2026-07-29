@@ -13,7 +13,7 @@
 
 ```
 generator/
-  entities.py     # 종류별 합성 값 생성 (name/phone/email/rrn/address/card)
+  entities.py     # 종류별 합성 값 생성 (name/phone/email/rrn/address/card/biz_reg)
   distractors.py  # 개인정보가 아닌 '헷갈리는' 값 생성 (오탐 측정용)
   documents.py    # 문장 템플릿에 값을 심어 문서 + 라벨(span) 생성
 generate_dataset.py  # CLI — JSONL 데이터셋 생성
@@ -38,13 +38,14 @@ python -m bench.generate_dataset --count 500 --seed 42 --out bench/datasets/synt
 python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl --report bench/reports/report_v1.md
 ```
 
-500건 기준 최신 실측(시/도 없는 주소 positive 데이터 추가 후 재측정, seed=42):
+500건 기준 최신 실측(시/도 없는 주소 + 사업자등록번호 데이터 모두 반영 후 재측정, seed=42):
 
 | kind | precision | recall | f1 | 비고 |
 |---|---|---|---|---|
 | rrn / phone / email / card | 1.000 | 1.000 | 1.000 | 유선전화·plus 이메일·서브도메인·복합 문장 추가돼도 그대로 유지 |
-| address | 1.000 | 0.826 | 0.905 | [#118](https://github.com/ChoHyeonChan/maskingtape/issues/118)에서 시/도 없는 시/군 시작 주소 positive를 추가해 드러난 갭 — core 수정([#117](https://github.com/ChoHyeonChan/maskingtape/pull/117), 아직 미머지)이 반영되면 recall 상승 예상. 오탐(precision)은 그대로 1.000 유지 |
-| name | 0.917 | 0.529 | 0.671 | 규칙판. 문맥 단서 없으면 탐지 안 함(오탐↓재현율↓) — 아래 "이름 탐지 방식 비교" 절 참고 |
+| address | 1.000 | 1.000 | 1.000 | [#118](https://github.com/ChoHyeonChan/maskingtape/issues/118)에서 시/도 없는 시/군 시작 주소 positive를 추가 — core 수정([#117](https://github.com/ChoHyeonChan/maskingtape/pull/117))이 이미 머지돼 recall도 1.000으로 정상 측정됨 |
+| biz_reg | 1.000 | 1.000 | 1.000 | [#123](https://github.com/ChoHyeonChan/maskingtape/issues/123)에서 새 kind로 추가 |
+| name | 0.924 | 0.531 | 0.675 | 규칙판. 문맥 단서 없으면 탐지 안 함(오탐↓재현율↓) — 아래 "이름 탐지 방식 비교" 절 참고 |
 
 address·card는 한때 이 표에서 문제(F1 0.371, 오탐 2건)가 있었는데, core 쪽에서 이미 수정됐다
 (각각 [#86](https://github.com/ChoHyeonChan/maskingtape/issues/86), [#87](https://github.com/ChoHyeonChan/maskingtape/issues/87)로
@@ -52,6 +53,14 @@ address·card는 한때 이 표에서 문제(F1 0.371, 오탐 2건)가 있었는
 card는 `gen_card`(Visa/Mastercard/Amex 계열 IIN + Luhn 체크섬)로 데이터셋에 정답 라벨이 생기면서
 처음으로 실측이 가능해졌다 — `#69`(distractor가 카드로 오탐되던 문제)의 회귀 방지 테스트
 (`test_distractors_are_never_detected_as_card`)도 같이 추가했다.
+
+`biz_reg`(사업자등록번호)는 core에 `BusinessRegistrationDetector`가 새로 추가되면서([#120](https://github.com/ChoHyeonChan/maskingtape/issues/120)/[#121](https://github.com/ChoHyeonChan/maskingtape/pull/121))
+생긴 kind다. `#123`에서 두 가지를 발견해 고쳤다: ① bench에 `biz_reg` 정답 라벨이 아예 없어
+이 탐지기의 정확도가 전혀 측정되지 않던 사각지대 — `gen_biz_reg`(국세청 체크섬 검증 알고리즘을
+거꾸로 풀어 항상 유효한 값을 생성, `gen_card`의 Luhn 방식과 동일한 패턴)와 계약서·세금계산서
+템플릿을 추가해 해결. ② 기존 `gen_business_reg_number` distractor가 체크섬 없이 완전 난수라
+~10% 확률로 우연히 유효한 체크섬이 나와 오탐될 수 있던 문제(500건 재현에서 실제로 1건 발생을
+확인) — 유효 체크 숫자를 계산한 뒤 일부러 다른 숫자로 바꿔 항상 무효가 되도록 고쳤다.
 
 ## 오탐(False Positive) 측정
 
@@ -83,6 +92,8 @@ core가 여기서 뭔가를 탐지하면 `evaluate.py`가 그대로 FP로 집계
   distractor(`gen_region_mention_like`)로 별도 추가해 오탐 여부를 검증한다.
 - **카드번호**: Visa(16자리)·Mastercard(16자리)·Amex(15자리) 계열 IIN 대역 + 하이픈/점/공백/구분자
   없음까지, 실제 발급 번호가 아닌 합성 값에 Luhn 체크섬만 유효하게 맞춘다
+- **사업자등록번호**: `XXX-XX-XXXXX` 하이픈 표기(core가 지원하는 유일한 형식)에 국세청 검증
+  체크섬만 유효하게 맞춘다 — 실제 발급 번호는 아니다
 - **이름**: 성씨 30종 × 이름 음절 30종 조합, 통계청 다빈도 성씨 기준(특정 인물 아님)
 - **문장 맥락**: 고객센터/병원/학교/관공서/인사/배송/금융 등 10여 개 업무 시나리오, 한 문서에
   같은 종류 개인정보가 두 번 등장하는 경우(담당자 교체, 자택/직장 번호 등)도 포함
@@ -198,7 +209,7 @@ JSONL — 한 줄에 문서 하나:
 ```
 
 - `start`/`end`는 파이썬 슬라이스 규약 (`text[start:end]` == 개인정보 원문)
-- `kind`는 core의 `Detection.kind`와 동일한 문자열: `rrn`, `phone`, `email`, `name`, `address`, `card`
+- `kind`는 core의 `Detection.kind`와 동일한 문자열: `rrn`, `phone`, `email`, `name`, `address`, `card`, `biz_reg`
 - `difficulty`는 `easy`/`hard`/`negative` 중 하나 (없으면 evaluate.py가 `unknown`으로 취급 — 하위 호환)
 - 평가 기준: span 완전 일치(exact match)로 precision / recall / F1 산출
 - 포맷 변경은 팀장 승인 후 이 문서부터 갱신한다

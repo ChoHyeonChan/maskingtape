@@ -63,23 +63,23 @@ python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl
 
 합성 데이터셋(500건)도 시드로 고정돼 있어 바이트 단위로 똑같이 재생성된다 — `python -m bench.generate_dataset --count 500 --seed 42 --out bench/datasets/synth_v1.jsonl`
 
-**측정 기준: `b3e3e36` · 규칙 전용 모드(LLM 미사용)**
+**측정 기준: `06527b2` · 규칙 전용 모드(LLM 미사용)**
 
 | 종류 | precision | recall | F1 |
 |---|---|---|---|
 | 주민등록번호 | 1.000 | 1.000 | 1.000 |
 | 전화번호(휴대폰+유선) | 1.000 | 1.000 | 1.000 |
 | 이메일 | 1.000 | 1.000 | 1.000 |
-| 주소 | 1.000 | 0.826 | 0.905 |
+| 주소 | 1.000 | 1.000 | 1.000 |
 | 신용카드번호 | 1.000 | 1.000 | 1.000 |
-| 이름 (규칙 전용) | 0.917 | 0.529 | 0.671 |
-| **전체** | **0.979** | **0.810** | **0.886** |
+| 사업자등록번호 | 1.000 | 1.000 | 1.000 |
+| 이름 (규칙 전용) | 0.924 | 0.531 | 0.675 |
+| **전체** | **0.981** | **0.825** | **0.896** |
 
-번호·카드는 형태와 체크섬으로 완전히 잡힌다(유선전화·plus 이메일·서브도메인·여러 문장으로
-구성된 복합 문서까지 섞어도 흔들리지 않음을 확인했다). 주소와 이름이 남은 과제다:
+번호·주소·카드·사업자등록번호는 형태와 체크섬으로 완전히 잡힌다(유선전화·plus 이메일·서브도메인·
+여러 문장으로 구성된 복합 문서까지 섞어도 흔들리지 않음을 확인했다) — 주소는 [#118](https://github.com/ChoHyeonChan/maskingtape/issues/118)에서 시/도 없는 시/군 시작 주소 데이터를, 사업자등록번호는 [#123](https://github.com/ChoHyeonChan/maskingtape/issues/123)에서 새 kind를 추가해 측정 사각지대를 없앴다. 이름만 남은 과제다:
 
-- **주소 (recall 0.826)** — [#118](https://github.com/ChoHyeonChan/maskingtape/issues/118)에서 시/도(광역단체명) 없이 시/군으로 시작하는 주소(`성남시 분당구 정자동 45-6`) positive 샘플을 벤치에 추가해 이전까지 안 보이던 측정 사각지대를 드러냈다. 이 표기를 잡는 core 수정은 [#117](https://github.com/ChoHyeonChan/maskingtape/pull/117)(이슈 [#68](https://github.com/ChoHyeonChan/maskingtape/issues/68))이 준비돼 있으나 아직 main에 머지되지 않아, 지금 수치는 그 갭을 정직하게 반영한다 — 머지 후 재측정하면 recall이 오를 것으로 예상된다.
-- **이름 (recall 0.529)** — 한국어 이름은 형태만으로 구분되지 않아 규칙만으로는 문맥 없는 이름을 놓친다. 이것이 **로컬 LLM 하이브리드**(`--llm`)가 필요한 이유이고, 그 효과는 [#46](https://github.com/ChoHyeonChan/maskingtape/issues/46)에서 같은 데이터셋으로 비교 측정한다 — 하이브리드로 켜면 F1이 **0.671 → 0.933**으로 오른다(상세 수치는 [bench/](bench/) 참고).
+- **이름** — 한국어 이름은 형태만으로 구분되지 않아 규칙만으로는 문맥 없는 이름을 놓친다. 이것이 **로컬 LLM 하이브리드**(`--llm`)가 필요한 이유이고, 그 효과는 [#46](https://github.com/ChoHyeonChan/maskingtape/issues/46)에서 같은 데이터셋으로 비교 측정한다 — 하이브리드로 켜면 F1이 대략 0.93 안팎으로 오른다(정확한 하이브리드 수치는 데이터셋이 바뀔 때마다 로컬 Ollama로 재측정 필요 — 상세는 [bench/](bench/) 참고).
 
 마스킹 결과에 개인정보가 실제로 남는지도 따로 측정한다 — `python -m bench.evaluators.evaluate_masking bench/datasets/synth_v1.jsonl`. 상세는 [bench/](bench/) 참고.
 

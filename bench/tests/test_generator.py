@@ -9,11 +9,13 @@ from __future__ import annotations
 import random
 
 from maskingtape.detectors import AddressDetector
+from maskingtape.detectors import BusinessRegistrationDetector
 from maskingtape.detectors import CreditCardDetector
 from maskingtape.detectors import EmailDetector
 from maskingtape.detectors import PhoneDetector
 from maskingtape.detectors import RRNDetector
 from bench.generator.distractors import (
+    gen_business_reg_number,
     gen_invalid_phone_like,
     gen_invalid_rrn_like,
     gen_region_mention_like,
@@ -241,6 +243,35 @@ def test_distractors_are_never_detected_as_card():
     for _ in range(300):
         text = generate_distractor(rng)
         assert detector.detect(text) == [], f"distractor가 card로 오탐됨: {text!r}"
+
+
+def test_generated_biz_reg_passes_core_detector():
+    """생성된 사업자등록번호는 국세청 체크섬이 항상 유효해 core가 정확히 한 건으로 잡아야 한다."""
+    rng = random.Random(20)
+    detector = BusinessRegistrationDetector()
+    for _ in range(50):
+        entity = generate_entity("biz_reg", rng)
+        found = detector.detect(entity.text)
+        assert len(found) == 1, f"탐지 실패: {entity.text!r}"
+        assert found[0].text == entity.text
+
+
+def test_business_reg_distractor_is_rejected_by_core_detector():
+    """#123: 체크섬 없는 '사업자등록번호 모양' distractor는 core가 걸러내야 한다(우연한 통과 없이)."""
+    rng = random.Random(21)
+    detector = BusinessRegistrationDetector()
+    for _ in range(300):
+        text = gen_business_reg_number(rng)
+        assert detector.detect(text) == [], f"distractor가 biz_reg로 오탐됨: {text!r}"
+
+
+def test_distractors_are_never_detected_as_biz_reg():
+    """#123 회귀 방지 — generate_distractor 전체 풀에서도 biz_reg 오탐이 없어야 한다."""
+    rng = random.Random(27)
+    detector = BusinessRegistrationDetector()
+    for _ in range(300):
+        text = generate_distractor(rng)
+        assert detector.detect(text) == [], f"distractor가 biz_reg로 오탐됨: {text!r}"
 
 
 def test_generated_phone_covers_landline_and_passes_core_detector():
