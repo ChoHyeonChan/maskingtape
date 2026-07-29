@@ -13,8 +13,8 @@ from maskingtape.detectors.identity.rrn import _checksum_ok
 from maskingtape.pipeline import Pipeline
 from maskingtape.types import Detection
 
+from bench.evaluators.mask_quality import evaluate_mask_quality, format_mask_quality_report
 from bench.generator.entities import generate_entity
-from bench.mask_quality import evaluate_mask_quality, format_mask_quality_report
 
 
 class _HalfMaskAnonymizer(Anonymizer):

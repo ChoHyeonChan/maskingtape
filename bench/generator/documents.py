@@ -130,6 +130,32 @@ def generate_document(rng: random.Random, template: str | None = None, difficult
     return _render(template if template is not None else rng.choice(_TEMPLATES), rng, resolved_difficulty)
 
 
+def generate_multi_sentence_document(
+    rng: random.Random, sentence_count: int | None = None, difficulty: str | None = None
+) -> Document:
+    """여러 문장을 이어붙인 복합 문서 하나를 만든다 (정답 라벨 2개 이상 문장에 걸쳐 분포).
+
+    실제 문서는 한 문장으로 끝나지 않는다 — 문장 여러 개를 이어붙여도 뒤 문장의 라벨
+    start/end가 앞 문장들의 길이만큼 밀린 위치를 정확히 가리키는지(오프셋 정합성)를 검증한다.
+    """
+    resolved_difficulty = difficulty if difficulty is not None else rng.choice(["easy", "hard"])
+    n = sentence_count if sentence_count is not None else rng.choice([2, 3])
+
+    text_parts: list[str] = []
+    labels: list[Label] = []
+    cursor = 0
+    for i in range(n):
+        if i > 0:
+            text_parts.append(" ")
+            cursor += 1
+        sentence = _render(rng.choice(_TEMPLATES), rng, resolved_difficulty)
+        text_parts.append(sentence.text)
+        labels.extend(Label(kind=lb.kind, start=lb.start + cursor, end=lb.end + cursor) for lb in sentence.labels)
+        cursor += len(sentence.text)
+
+    return Document(text="".join(text_parts), labels=labels, difficulty=resolved_difficulty)
+
+
 def generate_negative_document(rng: random.Random, template: str | None = None) -> Document:
     """개인정보가 없는(또는 distractor만 있는) 합성 문서 하나를 만든다 — 오탐(FP) 측정용, 정답 라벨은 0개."""
     return _render(template if template is not None else rng.choice(_NEGATIVE_TEMPLATES), rng, "negative")
@@ -148,6 +174,7 @@ __all__ = [
     "Document",
     "Label",
     "generate_document",
+    "generate_multi_sentence_document",
     "generate_negative_document",
     "negative_templates",
     "templates",

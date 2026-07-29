@@ -47,7 +47,7 @@ git switch <생성된-브랜치-이름>
 - **탐지기나 벤치 데이터셋을 바꿨다면 정확도 수치를 같은 PR에서 다시 측정**합니다. 문서에 적힌 숫자가 실제와 다르면 그 자체로 감점입니다 — 심사에서 직접 돌려봅니다.
 
   ```bash
-  python -m bench.evaluate bench/datasets/synth_v1.jsonl --report bench/reports/report_v1.md
+  python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl --report bench/reports/report_v1.md
   ```
 
   갱신 대상: `bench/reports/report_v1.md`(위 명령이 덮어씁니다) + 루트 [README.md](README.md)의 「정확도」 표와 **측정 기준 커밋 해시**.

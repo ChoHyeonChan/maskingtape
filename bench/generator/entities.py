@@ -50,6 +50,15 @@ _CENTURY_CODES = {1900: ("1", "2"), 2000: ("3", "4")}
 
 _PHONE_SEPARATORS_MIXED = ["-", "-", "-", " ", ".", ""]  # 하이픈이 가장 흔한 표기라 가중치를 둔다.
 _PHONE_SEPARATORS_HARD = ["", ".", " "]  # 하이픈 없는(탐지가 상대적으로 더 까다로운) 표기만.
+# phone.py의 _LANDLINE_RE가 허용하는 지역번호만 나열한다(그 외는 core가 아예 안 잡음).
+_LANDLINE_AREA_CODES = [
+    "02",
+    "031", "032", "033",
+    "041", "042", "043", "044",
+    "051", "052", "053", "054", "055",
+    "061", "062", "063", "064",
+    "070",
+]
 _RRN_SEPARATORS_MIXED = ["-", "-", "-", " ", ""]  # RRN 정규식은 '.'을 구분자로 허용하지 않는다(rrn.py 참고).
 _RRN_SEPARATORS_HARD = ["", " "]
 
@@ -89,27 +98,41 @@ def gen_name(rng: random.Random, difficulty: str = "mixed") -> Entity:
 def gen_phone(rng: random.Random, difficulty: str = "mixed") -> Entity:
     if difficulty == "easy":
         sep = "-"
-        use_intl = False
+        variant = rng.choices(["mobile", "landline"], weights=[3, 1])[0]
     elif difficulty == "hard":
         sep = rng.choice(_PHONE_SEPARATORS_HARD)
-        use_intl = rng.random() < 0.4
+        variant = rng.choices(["mobile", "landline", "intl"], weights=[4, 2, 3])[0]
     else:
         sep = rng.choice(_PHONE_SEPARATORS_MIXED)
-        use_intl = rng.random() < 0.15
+        variant = rng.choices(["mobile", "landline", "intl"], weights=[6, 2, 1])[0]
 
-    if use_intl:
+    mid_len = 4
+    if variant == "intl":
         # 국가번호 표기 (앞자리 0 생략) — PhoneDetector의 +82 분기 커버.
         prefix = f"+82{sep}1{rng.choice('016789')}"
+    elif variant == "landline":
+        # 유선전화 — 자택·사무실 번호. 서울(02)은 국번이 3자리인 경우도 흔해 길이를 섞는다.
+        prefix = rng.choice(_LANDLINE_AREA_CODES)
+        mid_len = rng.choice([3, 4])
     else:
         prefix = rng.choice(["010", "011", "016", "017", "018", "019"])
-    mid = f"{rng.randint(0, 9999):04d}"
+    mid = f"{rng.randint(0, 10**mid_len - 1):0{mid_len}d}"
     last = f"{rng.randint(0, 9999):04d}"
     return Entity(kind="phone", text=f"{prefix}{sep}{mid}{sep}{last}")
 
 
 def gen_email(rng: random.Random, difficulty: str = "mixed") -> Entity:
     local = "".join(rng.choices("abcdefghijklmnopqrstuvwxyz0123456789.", k=rng.randint(5, 10))).strip(".")
+    if rng.random() < 0.2:
+        # plus 표기(user+tag@) — email.py의 로컬 파트 문자 집합에 "+"가 포함돼 있어 실제로 잡힌다.
+        tag = "".join(rng.choices("abcdefghijklmnopqrstuvwxyz0123456789", k=rng.randint(2, 6)))
+        local = f"{local}+{tag}"
+
     domain = rng.choice(_EMAIL_DOMAINS)
+    if rng.random() < 0.2:
+        # 서브도메인(mail.example.com) — email.py의 도메인 라벨이 여러 개(최대 8개) 이어져도 잡힌다.
+        subdomain = rng.choice(["mail", "corp", "team", "biz"])
+        domain = f"{subdomain}.{domain}"
     return Entity(kind="email", text=f"{local}@{domain}")
 
 

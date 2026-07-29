@@ -8,7 +8,7 @@
    "오탐을 줄이려면 confidence를 얼마로 잡아야 하는지" 같은 실전 튜닝 근거를 제공한다.
 
 사용법:
-    python -m bench.confidence_analysis bench/datasets/synth_v1.jsonl
+    python -m bench.evaluators.confidence_analysis bench/datasets/synth_v1.jsonl
 """
 
 from __future__ import annotations
@@ -18,7 +18,7 @@ from pathlib import Path
 
 from maskingtape.pipeline import Pipeline
 
-from bench.evaluate import Counts, Span, gold_spans, load_dataset
+from bench.evaluators.evaluate import Counts, Span, gold_spans, load_dataset
 
 DEFAULT_THRESHOLDS = (0.0, 0.5, 0.7, 0.8, 0.85, 0.9, 0.95, 1.0)
 
