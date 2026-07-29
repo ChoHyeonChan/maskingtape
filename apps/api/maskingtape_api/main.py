@@ -5,24 +5,40 @@ from typing import Any
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.openapi.utils import get_openapi
+from fastapi.middleware.cors import CORSMiddleware
 
 from maskingtape_api.errors import validation_exception_handler
 from maskingtape_api.routers.health import router as health_router
 from maskingtape_api.routers.pii import router as pii_router
+from maskingtape_api.settings import ApiSettings, get_api_settings
 
 
-def create_app() -> FastAPI:
+def create_app(settings: ApiSettings | None = None) -> FastAPI:
     """Build the FastAPI application with all API routers attached."""
+    settings = settings if settings is not None else get_api_settings()
     app = FastAPI(
         title="maskingtape API",
         version="0.1.0",
         description="REST API wrapper for the maskingtape core engine.",
     )
+    _configure_cors(app, settings)
     app.add_exception_handler(RequestValidationError, validation_exception_handler)
     app.include_router(health_router)
     app.include_router(pii_router)
     app.openapi = lambda: _openapi_without_default_422(app)
     return app
+
+
+def _configure_cors(app: FastAPI, settings: ApiSettings) -> None:
+    if not settings.cors_allowed_origins:
+        return
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=list(settings.cors_allowed_origins),
+        allow_methods=["GET", "POST", "OPTIONS"],
+        allow_headers=["content-type"],
+    )
 
 
 def _openapi_without_default_422(app: FastAPI) -> dict[str, Any]:
