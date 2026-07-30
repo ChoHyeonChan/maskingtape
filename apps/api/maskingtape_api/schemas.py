@@ -18,6 +18,7 @@ class DetectionKind(str, Enum):
     NAME = "name"
     ADDRESS = "address"
     CARD = "card"
+    BIZ_REG = "biz_reg"
 
 
 class AnonymizeStrategy(str, Enum):

@@ -47,3 +47,17 @@ def test_detection_response_matches_core_detection_shape() -> None:
         "confidence": 1.0,
         "detector": "RRNDetector",
     }
+
+
+def test_detection_response_accepts_business_registration_kind() -> None:
+    detection = DetectionResponse(
+        kind=DetectionKind.BIZ_REG,
+        start=0,
+        end=12,
+        text="123-45-67890",
+        confidence=1.0,
+        detector="BusinessRegistrationDetector",
+    )
+
+    assert detection.kind == DetectionKind.BIZ_REG
+    assert detection.model_dump(mode="json")["kind"] == "biz_reg"
