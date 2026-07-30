@@ -25,6 +25,11 @@ describe("summarize", () => {
     expect(result.map((r) => r.kind)).toEqual(["rrn", "phone", "name"]);
   });
 
+  it("keeps core business registration detections in the known-kind order", () => {
+    const result = summarize([d("biz_reg"), d("phone")]);
+    expect(result.map((r) => r.kind)).toEqual(["phone", "biz_reg"]);
+  });
+
   it("appends unknown kinds after the known ones", () => {
     const result = summarize([d("mystery"), d("phone")]);
     expect(result.map((r) => r.kind)).toEqual(["phone", "mystery"]);

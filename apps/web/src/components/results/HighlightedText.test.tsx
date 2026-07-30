@@ -36,6 +36,15 @@ describe("HighlightedText", () => {
     expect(screen.getByText("전화번호", { selector: ".highlight__tag" })).toBeInTheDocument();
   });
 
+  it("renders core business registration detections with the business color class", () => {
+    const d = detection({ kind: "biz_reg", start: 3, end: 15, text: "123-45-67890", confidence: 1 });
+    render(<HighlightedText text="번호 123-45-67890 확인" detections={[d]} activeFilter={null} />);
+
+    const mark = screen.getByText("123-45-67890");
+    expect(mark).toHaveClass("highlight--biz_reg");
+    expect(screen.getByText("사업자등록번호", { selector: ".highlight__tag" })).toBeInTheDocument();
+  });
+
   it("preserves the full original text across plain and highlighted segments", () => {
     const text = "이메일 test@example.com 로 문의";
     const d = detection({ kind: "email", start: 4, end: 20, text: "test@example.com" });
