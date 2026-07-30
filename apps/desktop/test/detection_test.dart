@@ -15,13 +15,19 @@ void main() {
       expect(_d('address').kindLabel, '주소');
       // 코어에 추가된 신용카드 탐지기 (#61/#62) 대응
       expect(_d('card').kindLabel, '카드번호');
+      // 코어에 추가된 사업자등록번호 탐지기 (#120) 대응
+      expect(_d('biz_reg').kindLabel, '사업자등록번호');
+      // 코어에 추가된 여권번호 탐지기 (#129) 대응
+      expect(_d('passport').kindLabel, '여권번호');
     });
 
     test('라벨 맵에 없는 kind는 kind(?)로 표시해 누락을 드러낸다', () {
       // 코어가 새 탐지기를 추가했는데 앱 라벨을 안 넣은 상황을 흉내 낸다.
-      final unknown = _d('passport');
+      // 실재할 수 있는 이름(passport 등)을 쓰면 코어가 그 탐지기를 실제로 추가하는
+      // 순간 "미지의 kind"라는 전제가 거짓이 되므로, 절대 kind가 될 수 없는 값을 쓴다.
+      final unknown = _d('not_a_real_kind');
       expect(unknown.hasLabel, isFalse);
-      expect(unknown.kindLabel, 'passport(?)');
+      expect(unknown.kindLabel, 'not_a_real_kind(?)');
     });
   });
 
