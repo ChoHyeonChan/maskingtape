@@ -79,7 +79,7 @@ python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl
 번호·주소·카드·사업자등록번호는 형태와 체크섬으로 완전히 잡힌다(유선전화·plus 이메일·서브도메인·
 여러 문장으로 구성된 복합 문서까지 섞어도 흔들리지 않음을 확인했다) — 주소는 [#118](https://github.com/ChoHyeonChan/maskingtape/issues/118)에서 시/도 없는 시/군 시작 주소 데이터를, 사업자등록번호는 [#123](https://github.com/ChoHyeonChan/maskingtape/issues/123)에서 새 kind를 추가해 측정 사각지대를 없앴다. 이름만 남은 과제다:
 
-- **이름** — 한국어 이름은 형태만으로 구분되지 않아 규칙만으로는 문맥 없는 이름을 놓친다. 이것이 **로컬 LLM 하이브리드**(`--llm`)가 필요한 이유이고, 그 효과는 [#46](https://github.com/ChoHyeonChan/maskingtape/issues/46)에서 같은 데이터셋으로 비교 측정한다 — 하이브리드로 켜면 F1이 대략 0.93 안팎으로 오른다(정확한 하이브리드 수치는 데이터셋이 바뀔 때마다 로컬 Ollama로 재측정 필요 — 상세는 [bench/](bench/) 참고).
+- **이름** — 한국어 이름은 형태만으로 구분되지 않아 규칙만으로는 문맥 없는 이름을 놓친다. 이것이 **로컬 LLM 하이브리드**(`--llm`)가 필요한 이유이고, 그 효과는 [#46](https://github.com/ChoHyeonChan/maskingtape/issues/46)에서 같은 데이터셋으로 비교 측정한다 — 하이브리드로 켜면 F1이 **0.675 → 0.951**(precision 0.924→0.987, recall 0.531→0.918)로 오른다. [#128](https://github.com/ChoHyeonChan/maskingtape/pull/128)(LLM 반환값의 존칭 '님'/'씨' 스팬 정합 수정) 이후 재측정한 수치다 — 상세는 [bench/](bench/) 참고.
 
 마스킹 결과에 개인정보가 실제로 남는지도 따로 측정한다 — `python -m bench.evaluators.evaluate_masking bench/datasets/synth_v1.jsonl`. 상세는 [bench/](bench/) 참고.
 
