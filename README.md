@@ -85,7 +85,7 @@ python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl
 측정 사각지대를 없앴다. 여권번호는 core에 체크섬 검증이 없어(형식+문맥어만으로 판단) distractor가
 우연히 형식과 겹치지 않는지 별도 회귀 테스트로 고정해뒀다. 이름만 남은 과제다:
 
-- **이름** — 한국어 이름은 형태만으로 구분되지 않아 규칙만으로는 문맥 없는 이름을 놓친다. 이것이 **로컬 LLM 하이브리드**(`--llm`)가 필요한 이유이고, 그 효과는 [#46](https://github.com/ChoHyeonChan/maskingtape/issues/46)에서 같은 데이터셋으로 비교 측정한다 — 하이브리드로 켜면 F1이 대략 0.93 안팎으로 오른다(정확한 하이브리드 수치는 데이터셋이 바뀔 때마다 로컬 Ollama로 재측정 필요 — 상세는 [bench/](bench/) 참고).
+- **이름** — 한국어 이름은 형태만으로 구분되지 않아 규칙만으로는 문맥 없는 이름을 놓친다. 이것이 **로컬 LLM 하이브리드**(`--llm`)가 필요한 이유이고, 그 효과는 [#46](https://github.com/ChoHyeonChan/maskingtape/issues/46)에서 같은 데이터셋으로 비교 측정한다 — 하이브리드로 켜면 F1이 **0.676 → 0.950**(precision 0.928→0.971, recall 0.532→0.931)로 오른다. [#128](https://github.com/ChoHyeonChan/maskingtape/pull/128)(LLM 반환값의 존칭 '님'/'씨' 스팬 정합 수정) 이후, 여권번호 데이터([#139](https://github.com/ChoHyeonChan/maskingtape/issues/139))까지 반영된 최신 데이터셋 기준으로 재측정한 수치다 — 상세는 [bench/](bench/) 참고.
 
 마스킹 결과에 개인정보가 실제로 남는지도 따로 측정한다 — `python -m bench.evaluators.evaluate_masking bench/datasets/synth_v1.jsonl`. 상세는 [bench/](bench/) 참고.
 
