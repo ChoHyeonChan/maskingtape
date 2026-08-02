@@ -13,7 +13,7 @@
 
 ```
 generator/
-  entities.py     # 종류별 합성 값 생성 (name/phone/email/rrn/address/card/biz_reg)
+  entities.py     # 종류별 합성 값 생성 (name/phone/email/rrn/address/card/biz_reg/passport)
   distractors.py  # 개인정보가 아닌 '헷갈리는' 값 생성 (오탐 측정용)
   documents.py    # 문장 템플릿에 값을 심어 문서 + 라벨(span) 생성
 generate_dataset.py  # CLI — JSONL 데이터셋 생성
@@ -38,14 +38,15 @@ python -m bench.generate_dataset --count 500 --seed 42 --out bench/datasets/synt
 python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl --report bench/reports/report_v1.md
 ```
 
-500건 기준 최신 실측(시/도 없는 주소 + 사업자등록번호 데이터 모두 반영 후 재측정, seed=42):
+500건 기준 최신 실측(여권번호 데이터 추가 후 재측정, seed=42):
 
 | kind | precision | recall | f1 | 비고 |
 |---|---|---|---|---|
 | rrn / phone / email / card | 1.000 | 1.000 | 1.000 | 유선전화·plus 이메일·서브도메인·복합 문장 추가돼도 그대로 유지 |
 | address | 1.000 | 1.000 | 1.000 | [#118](https://github.com/ChoHyeonChan/maskingtape/issues/118)에서 시/도 없는 시/군 시작 주소 positive를 추가 — core 수정([#117](https://github.com/ChoHyeonChan/maskingtape/pull/117))이 이미 머지돼 recall도 1.000으로 정상 측정됨 |
 | biz_reg | 1.000 | 1.000 | 1.000 | [#123](https://github.com/ChoHyeonChan/maskingtape/issues/123)에서 새 kind로 추가 |
-| name | 0.924 | 0.531 | 0.675 | 규칙판. 문맥 단서 없으면 탐지 안 함(오탐↓재현율↓) — 아래 "이름 탐지 방식 비교" 절 참고 |
+| passport | 1.000 | 1.000 | 1.000 | [#139](https://github.com/ChoHyeonChan/maskingtape/issues/139)에서 새 kind로 추가. core에 체크섬이 없어(형식+문맥어만) distractor 오탐 위험이 특히 큰 kind — 회귀 테스트로 고정 |
+| name | 0.928 | 0.532 | 0.676 | 규칙판. 문맥 단서 없으면 탐지 안 함(오탐↓재현율↓) — 아래 "이름 탐지 방식 비교" 절 참고 |
 
 address·card는 한때 이 표에서 문제(F1 0.371, 오탐 2건)가 있었는데, core 쪽에서 이미 수정됐다
 (각각 [#86](https://github.com/ChoHyeonChan/maskingtape/issues/86), [#87](https://github.com/ChoHyeonChan/maskingtape/issues/87)로
@@ -61,6 +62,14 @@ card는 `gen_card`(Visa/Mastercard/Amex 계열 IIN + Luhn 체크섬)로 데이�
 템플릿을 추가해 해결. ② 기존 `gen_business_reg_number` distractor가 체크섬 없이 완전 난수라
 ~10% 확률로 우연히 유효한 체크섬이 나와 오탐될 수 있던 문제(500건 재현에서 실제로 1건 발생을
 확인) — 유효 체크 숫자를 계산한 뒤 일부러 다른 숫자로 바꿔 항상 무효가 되도록 고쳤다.
+
+`passport`(여권번호)도 같은 패턴 — core에 `PassportDetector`가 추가돼 `default_detectors()`에
+이미 들어가 있었는데 bench가 못 따라가서 정확도가 전혀 측정되지 않고 있었다(#139). 이 탐지기는
+**체크섬이 없다**(구여권 `M12345678`, 신여권 `M123A4567` 형식 + "여권" 문맥어 유무로만 확신도를
+0.6/0.9로 가른다) — 그래서 `gen_biz_reg`처럼 "체크섬을 무효화"하는 방법 자체가 없고, 오탐 여부는
+오직 형식이 우연히 겹치는지에 달려 있다. 500건 재현에서는 오탐이 없었지만, 기존 distractor
+전체 풀에 대해 300회 반복 회귀 테스트(`test_distractors_are_never_detected_as_passport`)를 추가해
+앞으로도 우연히 겹치지 않는지 계속 확인한다.
 
 ## 오탐(False Positive) 측정
 
@@ -94,6 +103,10 @@ core가 여기서 뭔가를 탐지하면 `evaluate.py`가 그대로 FP로 집계
   없음까지, 실제 발급 번호가 아닌 합성 값에 Luhn 체크섬만 유효하게 맞춘다
 - **사업자등록번호**: `XXX-XX-XXXXX` 하이픈 표기(core가 지원하는 유일한 형식)에 국세청 검증
   체크섬만 유효하게 맞춘다 — 실제 발급 번호는 아니다
+- **여권번호**: 구여권(`M12345678`, 문자+숫자 8자리)과 신여권(`M123A4567`, 문자+3자리+문자+4자리)
+  둘 다 섞는다. core가 확신도를 문맥어("여권")로 가르므로, "여권번호 {passport}"처럼 문맥어가
+  가까이 있는 템플릿과 문맥어 없이 번호만 나오는 템플릿을 모두 둬서 confidence 0.9/0.6 두
+  경로를 다 검증한다
 - **이름**: 성씨 30종 × 이름 음절 30종 조합, 통계청 다빈도 성씨 기준(특정 인물 아님)
 - **문장 맥락**: 고객센터/병원/학교/관공서/인사/배송/금융 등 10여 개 업무 시나리오, 한 문서에
   같은 종류 개인정보가 두 번 등장하는 경우(담당자 교체, 자택/직장 번호 등)도 포함
@@ -209,7 +222,7 @@ JSONL — 한 줄에 문서 하나:
 ```
 
 - `start`/`end`는 파이썬 슬라이스 규약 (`text[start:end]` == 개인정보 원문)
-- `kind`는 core의 `Detection.kind`와 동일한 문자열: `rrn`, `phone`, `email`, `name`, `address`, `card`, `biz_reg`
+- `kind`는 core의 `Detection.kind`와 동일한 문자열: `rrn`, `phone`, `email`, `name`, `address`, `card`, `biz_reg`, `passport`
 - `difficulty`는 `easy`/`hard`/`negative` 중 하나 (없으면 evaluate.py가 `unknown`으로 취급 — 하위 호환)
 - 평가 기준: span 완전 일치(exact match)로 precision / recall / F1 산출
 - 포맷 변경은 팀장 승인 후 이 문서부터 갱신한다
