@@ -17,7 +17,7 @@ from bench.generator.distractors import generate_distractor
 from bench.generator.entities import ALL_KINDS, generate_entity
 
 # distractor는 개인정보가 아니므로 라벨을 붙이지 않는다 — _NON_LABEL_KINDS에서 분기 처리.
-_PLACEHOLDER_RE = re.compile(r"\{(name|phone|email|rrn|address|card|biz_reg|distractor)\}")
+_PLACEHOLDER_RE = re.compile(r"\{(name|phone|email|rrn|address|card|biz_reg|passport|distractor)\}")
 _NON_LABEL_KINDS = frozenset({"distractor"})
 
 # 개인정보가 실제로 포함된 템플릿 — 다양한 업무 맥락(고객센터/병원/학교/관공서/인사/배송/금융)을 커버한다.
@@ -66,6 +66,12 @@ _TEMPLATES = [
     "거래처 사업자등록번호 {biz_reg}, 담당자 {name}, 연락처 {phone}",
     "세금계산서 발행을 위해 사업자등록번호 {biz_reg}를 확인했습니다. 문의: {phone}",
     "계약서상 사업자등록번호는 {biz_reg}이며, 서명자는 {name}입니다.",
+    # 출입국/비자 (여권번호) — "여권"이 앞 15자 안에 있어 core가 확신도 0.9로 잡는 케이스.
+    "여권번호 {passport}로 출입국 기록을 조회했습니다.",
+    "출입국 심사대에서 {name}님의 여권번호 {passport}를 확인했습니다.",
+    "비자 신청자 {name}, 여권번호는 {passport}이며 연락처는 {phone}입니다.",
+    # 문맥어 없이 번호만 나오는 케이스 — core가 확신도 0.6(형식만)으로 잡아야 정상.
+    "해외 출장 등록 코드는 {passport}입니다.",
 ]
 
 # 개인정보가 전혀 없는(또는 distractor만 있는) 템플릿 — 정답 라벨이 0개인 문서를 만든다.

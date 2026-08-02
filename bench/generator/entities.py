@@ -240,6 +240,36 @@ def gen_biz_reg(rng: random.Random, difficulty: str = "mixed") -> Entity:
     return Entity(kind="biz_reg", text=f"{g1}-{g2}-{g3_front}{check}")
 
 
+# 여권 종류 코드 — core의 _PASSPORT_RE가 허용하는 문자만 사용(passport.py 참고).
+_PASSPORT_TYPE_CODES = ["M", "S", "R", "O", "D"]
+_UPPERCASE_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+
+def gen_passport(rng: random.Random, difficulty: str = "mixed") -> Entity:
+    """대한민국 여권번호. core는 체크섬 없이 형식만 보므로(#139, passport.py) 형식만 맞춘다.
+
+    구여권(M12345678, 문자+숫자 8자리)과 신여권(M123A4567, 문자+3자리+문자+4자리) 두 형식이
+    있다 — 신여권은 문자가 중간에 섞여 더 낯선 형태라 hard로 분류한다.
+    """
+    code = rng.choice(_PASSPORT_TYPE_CODES)
+    if difficulty == "easy":
+        style = "old"
+    elif difficulty == "hard":
+        style = "new"
+    else:
+        style = rng.choice(["old", "new"])
+
+    if style == "old":
+        digits = f"{rng.randint(0, 99999999):08d}"
+        text = f"{code}{digits}"
+    else:
+        front3 = f"{rng.randint(0, 999):03d}"
+        letter = rng.choice(_UPPERCASE_LETTERS)
+        back4 = f"{rng.randint(0, 9999):04d}"
+        text = f"{code}{front3}{letter}{back4}"
+    return Entity(kind="passport", text=text)
+
+
 def gen_address(rng: random.Random, difficulty: str = "mixed") -> Entity:
     if difficulty == "easy":
         style = "jibun"  # 지번 주소가 더 짧고 표준적인 형태
@@ -279,6 +309,7 @@ _GENERATORS = {
     "address": gen_address,
     "card": gen_card,
     "biz_reg": gen_biz_reg,
+    "passport": gen_passport,
 }
 
 ALL_KINDS = tuple(_GENERATORS.keys())

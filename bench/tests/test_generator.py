@@ -12,6 +12,7 @@ from maskingtape.detectors import AddressDetector
 from maskingtape.detectors import BusinessRegistrationDetector
 from maskingtape.detectors import CreditCardDetector
 from maskingtape.detectors import EmailDetector
+from maskingtape.detectors import PassportDetector
 from maskingtape.detectors import PhoneDetector
 from maskingtape.detectors import RRNDetector
 from bench.generator.distractors import (
@@ -272,6 +273,37 @@ def test_distractors_are_never_detected_as_biz_reg():
     for _ in range(300):
         text = generate_distractor(rng)
         assert detector.detect(text) == [], f"distractor가 biz_reg로 오탐됨: {text!r}"
+
+
+def test_generated_passport_passes_core_detector():
+    """생성된 여권번호(구/신여권)는 형식이 core 정규식과 정확히 맞아 한 건으로 잡혀야 한다."""
+    rng = random.Random(28)
+    detector = PassportDetector()
+    for _ in range(50):
+        entity = generate_entity("passport", rng)
+        found = detector.detect(entity.text)
+        assert len(found) == 1, f"탐지 실패: {entity.text!r}"
+        assert found[0].text == entity.text
+
+
+def test_passport_generator_covers_old_and_new_styles():
+    """구여권(문자+숫자8자리)과 신여권(문자+3자리+문자+4자리) 둘 다 나오는지 확인한다."""
+    rng = random.Random(29)
+    samples = [generate_entity("passport", rng).text for _ in range(200)]
+    has_old = any(len(s) == 9 and s[1:].isdigit() for s in samples)
+    has_new = any(len(s) == 9 and not s[1:].isdigit() for s in samples)
+    assert has_old
+    assert has_new
+
+
+def test_distractors_are_never_detected_as_passport():
+    """#139 회귀 방지 — 여권 탐지기는 체크섬이 없어 형식만 겹쳐도 오탐된다. distractor 전체
+    풀에서 우연히도 형식이 겹치지 않는지 확인한다."""
+    rng = random.Random(30)
+    detector = PassportDetector()
+    for _ in range(300):
+        text = generate_distractor(rng)
+        assert detector.detect(text) == [], f"distractor가 passport로 오탐됨: {text!r}"
 
 
 def test_generated_phone_covers_landline_and_passes_core_detector():
