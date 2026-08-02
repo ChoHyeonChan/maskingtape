@@ -109,7 +109,7 @@
 
 ## 현재 정확도
 
-합성 평가 데이터셋 500건 기준 (`python -m bench.evaluators.evaluate`, **규칙 전용 모드**, 측정 기준 `<COMMIT_HASH>`):
+합성 평가 데이터셋 500건 기준 (`python -m bench.evaluators.evaluate`, **규칙 전용 모드**, 측정 기준 `13e460c`):
 
 | 종류 | precision | recall | F1 |
 |---|---|---|---|
