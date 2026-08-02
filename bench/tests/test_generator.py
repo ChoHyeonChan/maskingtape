@@ -136,6 +136,22 @@ def test_rrn_generator_covers_multiple_separator_styles():
     assert has_hyphen
 
 
+def test_rrn_generator_covers_foreign_registration_gender_codes():
+    """#148: 성별코드 5~8(외국인등록번호)도 나오고, core RRNDetector가 그대로 잡아야 한다."""
+    rng = random.Random(31)
+    detector = RRNDetector()
+    gender_codes = set()
+    for _ in range(300):
+        entity = generate_entity("rrn", rng, difficulty="easy")
+        digits = entity.text.replace("-", "")
+        gender_codes.add(digits[6])
+        found = detector.detect(entity.text)
+        assert len(found) == 1, f"탐지 실패: {entity.text!r}"
+        assert found[0].text == entity.text
+    assert gender_codes & {"5", "6", "7", "8"}  # 외국인등록번호 성별코드가 실제로 나온다
+    assert gender_codes & {"1", "2", "3", "4"}  # 내국인 성별코드도 여전히 나온다
+
+
 def test_address_generator_covers_road_and_jibun_styles():
     """지번 주소(예: 강남구 역삼동 12-3)와 도로명 주소(예: 테헤란로12길 3)가 둘 다 나오는지 확인한다."""
     rng = random.Random(12)
