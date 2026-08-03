@@ -63,7 +63,7 @@ python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl
 
 합성 데이터셋(500건)도 시드로 고정돼 있어 바이트 단위로 똑같이 재생성된다 — `python -m bench.generate_dataset --count 500 --seed 42 --out bench/datasets/synth_v1.jsonl`
 
-**측정 기준: `c1b37b9` · 규칙 전용 모드(LLM 미사용)**
+**측정 기준: `<COMMIT_HASH>` · 규칙 전용 모드(LLM 미사용)**
 
 | 종류 | precision | recall | F1 |
 |---|---|---|---|
@@ -74,8 +74,8 @@ python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl
 | 신용카드번호 | 1.000 | 1.000 | 1.000 |
 | 사업자등록번호 | 1.000 | 1.000 | 1.000 |
 | 여권번호 | 1.000 | 1.000 | 1.000 |
-| 이름 (규칙 전용) | 0.982 | 0.699 | 0.817 |
-| **전체** | **0.995** | **0.890** | **0.940** |
+| 이름 (규칙 전용) | 0.958 | 0.681 | 0.796 |
+| **전체** | **0.988** | **0.885** | **0.934** |
 
 번호·주소·카드·사업자등록번호·여권번호는 형태(와 있는 경우 체크섬)로 완전히 잡힌다(유선전화·plus
 이메일·서브도메인·여러 문장으로 구성된 복합 문서까지 섞어도 흔들리지 않음을 확인했다) — 주소는
@@ -83,9 +83,9 @@ python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl
 [#123](https://github.com/ChoHyeonChan/maskingtape/issues/123), 여권번호는
 [#139](https://github.com/ChoHyeonChan/maskingtape/issues/139)에서 각각 새 kind를 추가해
 측정 사각지대를 없앴다. 여권번호는 core에 체크섬 검증이 없어(형식+문맥어만으로 판단) distractor가
-우연히 형식과 겹치지 않는지 별도 회귀 테스트로 고정해뒀다. 이름 규칙판도 [#150](https://github.com/ChoHyeonChan/maskingtape/pull/150)(존칭 '님'/'씨' 삼킴 버그 수정)으로 F1이 **0.676 → 0.817**로 크게 올라 이제 남은 과제는 문맥 없는 이름뿐이다:
+우연히 형식과 겹치지 않는지 별도 회귀 테스트로 고정해뒀다. 이름 규칙판도 [#150](https://github.com/ChoHyeonChan/maskingtape/pull/150)(존칭 '님'/'씨' 삼킴 버그 수정)으로 F1이 **0.676 → 0.796**으로 크게 올라 이제 남은 과제는 문맥 없는 이름뿐이다:
 
-- **이름** — 한국어 이름은 형태만으로 구분되지 않아 규칙만으로는 문맥 없는 이름을 놓친다. 이것이 **로컬 LLM 하이브리드**(`--llm`)가 필요한 이유이고, 그 효과는 [#46](https://github.com/ChoHyeonChan/maskingtape/issues/46)에서 같은 데이터셋으로 비교 측정한다 — 하이브리드로 켜면 F1이 **0.817 → 0.950**(precision 0.982→0.971, recall 0.699→0.931)으로 오른다. 하이브리드 수치 자체는 [#128](https://github.com/ChoHyeonChan/maskingtape/pull/128) 이후로 변화가 없다 — 하이브리드는 규칙판을 `min_confidence=0.75` 안전망으로만 쓰는데, #150이 고친 버그는 confidence 0.5짜리라 애초에 하이브리드 결과에 영향을 안 줬다. 상세는 [bench/](bench/) 참고.
+- **이름** — 한국어 이름은 형태만으로 구분되지 않아 규칙만으로는 문맥 없는 이름을 놓친다. 이것이 **로컬 LLM 하이브리드**(`--llm`)가 필요한 이유이고, 그 효과는 [#46](https://github.com/ChoHyeonChan/maskingtape/issues/46)에서 같은 데이터셋으로 비교 측정한다 — 하이브리드로 켜면 F1이 **0.796 → 0.939**(precision 0.958→0.968, recall 0.681→0.911)로 오른다. 하이브리드 수치 자체는 [#128](https://github.com/ChoHyeonChan/maskingtape/pull/128) 이후로 거의 변화가 없다 — 하이브리드는 규칙판을 `min_confidence=0.75` 안전망으로만 쓰는데, #150이 고친 버그는 confidence 0.5짜리라 애초에 하이브리드 결과에 거의 영향을 안 줬다. 상세는 [bench/](bench/) 참고.
 
 마스킹 결과에 개인정보가 실제로 남는지도 따로 측정한다 — `python -m bench.evaluators.evaluate_masking bench/datasets/synth_v1.jsonl`. 상세는 [bench/](bench/) 참고.
 
