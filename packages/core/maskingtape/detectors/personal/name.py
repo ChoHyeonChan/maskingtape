@@ -59,9 +59,16 @@ _SURNAME_ALT = "|".join(sorted(_SURNAMES, key=len, reverse=True))
 _PREFIX_ALT = "|".join(sorted(_PREFIX_CUES, key=len, reverse=True))
 _SUFFIX_ALT = "|".join(sorted(_SUFFIX_CUES, key=len, reverse=True))
 
+# 이름의 2번째 글자로 삼키면 안 되는 단일 존칭 — 뒤 suffix 그룹이 잡도록 양보한다(#147).
+# 탐욕적 매칭이 "고객 심진님"의 "심진님"을 통째로 삼켜 gold("심진")와 어긋나던 문제.
+# 조사(이·가·은 등)는 이름 글자와 겹쳐(재이·지은·박도) 규칙으로 뺄 수 없어 제외한다 —
+# 문맥 판단이 필요한 조사 삼킴은 LLM판(name_llm)이 처리한다.
+_HONORIFIC_TAIL = "님씨군양"
+
 _NAME_RE = re.compile(
     r"(?:(?P<prefix>" + _PREFIX_ALT + r")[:\s]{1,2})?"
-    r"(?P<name>(?:" + _SURNAME_ALT + r")[가-힣]{1,2})"
+    # 성씨 + 1글자, 2번째 글자는 단일 존칭이 아닐 때만 붙인다(#147) — 존칭은 suffix 그룹이 잡는다.
+    r"(?P<name>(?:" + _SURNAME_ALT + r")[가-힣](?:(?![" + _HONORIFIC_TAIL + r"])[가-힣])?)"
     r"(?:\s?(?P<suffix>" + _SUFFIX_ALT + r"))?"
 )
 
