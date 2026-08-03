@@ -19,6 +19,7 @@ from bench.generator.distractors import (
     gen_business_reg_number,
     gen_invalid_phone_like,
     gen_invalid_rrn_like,
+    gen_passport_like_code,
     gen_region_mention_like,
     generate_distractor,
 )
@@ -319,6 +320,16 @@ def test_distractors_are_never_detected_as_passport():
     detector = PassportDetector()
     for _ in range(300):
         text = generate_distractor(rng)
+        assert detector.detect(text) == [], f"distractor가 passport로 오탐됨: {text!r}"
+
+
+def test_passport_like_code_distractor_is_rejected_by_core_detector():
+    """#145: 사원번호·상품 코드처럼 여권번호와 문자는 같지만 자릿수가 다른 근접 미스
+    distractor는 core가 걸러내야 한다."""
+    rng = random.Random(31)
+    detector = PassportDetector()
+    for _ in range(300):
+        text = gen_passport_like_code(rng)
         assert detector.detect(text) == [], f"distractor가 passport로 오탐됨: {text!r}"
 
 

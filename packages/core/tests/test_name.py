@@ -46,3 +46,29 @@ def test_ignores_domain_label_words_that_start_with_a_surname():
     assert detect("고객 주민번호 800101-1234560 확인 부탁드립니다") == []
     assert detect("고객 전화번호는 010-1234-5678입니다") == []
     assert detect("신청자: 이메일로 회신 부탁드립니다") == []
+
+
+def test_does_not_swallow_honorific_into_two_char_name():
+    # #147: 성씨+1글자 이름 뒤에 붙은 존칭을 이름으로 삼키지 않는다 — 스팬은 "심진", 님은 존칭
+    found = detect("고객 심진님 연락 부탁드립니다")
+    assert len(found) == 1
+    assert found[0].text == "심진"
+    assert found[0].confidence == 0.75  # 역할어 + 존칭 둘 다 → 높은 확신도
+
+
+def test_does_not_swallow_ssi_honorific_without_space():
+    found = detect("고객 최민씨 확인 바랍니다")
+    assert found[0].text == "최민"
+
+
+def test_preserves_legit_two_char_name_before_honorific():
+    # 존칭 양보가 정당한 2글자 이름("이도")을 깨면 안 된다 — 이름은 "이도", 님은 존칭
+    found = detect("환자 이도님께 안내드립니다")
+    assert len(found) == 1
+    assert found[0].text == "이도"
+
+
+def test_preserves_two_char_name_when_no_honorific_follows():
+    # "도"는 존칭이 아니므로 "박도"는 그대로 2글자 이름으로 유지된다
+    found = detect("박도 담당자에게 전달")
+    assert found[0].text == "박도"
