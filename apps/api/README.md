@@ -101,7 +101,7 @@ FastAPI 라우터는 core를 직접 호출하지 않고 `maskingtape_api.service
 { "text": "주민번호 ************** 문의주세요", "detections": [ /* 위와 동일 */ ] }
 ```
 
-- `kind` 값: `rrn`, `phone`, `email`, `name`, `address`, `card` (core에 전부 구현됨)
+- `kind` 값: `rrn`, `passport`, `phone`, `email`, `name`, `address`, `card`, `biz_reg` (core에 전부 구현됨)
 - `start`/`end`는 파이썬 슬라이스 규약 (`text[start:end]` == 탐지된 원문)
 - 계약 변경은 팀장 승인 후 이 문서부터 갱신한다
 

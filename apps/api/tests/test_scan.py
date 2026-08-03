@@ -1,5 +1,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
+from fastapi.testclient import TestClient
+
+from maskingtape_api.main import create_app
 from maskingtape_api.routers.pii import anonymize, scan
 from maskingtape_api.schemas import AnonymizeRequest, AnonymizeStrategy, DetectionKind, ScanRequest
 from maskingtape_api.services.core_adapter import CoreEngineAdapter
@@ -29,6 +32,16 @@ def test_scan_endpoint_returns_empty_list_for_clean_text() -> None:
     assert response.detections == []
 
 
+def test_scan_http_endpoint_accepts_passport_detection_kind() -> None:
+    response = TestClient(create_app()).post(
+        "/scan",
+        json={"text": "여권번호 M12345678 확인"},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["detections"][0]["kind"] == DetectionKind.PASSPORT
+
+
 def test_anonymize_endpoint_returns_masked_text_and_detections() -> None:
     response = anonymize(
         AnonymizeRequest(text="문의는 010-1234-5678로 주세요"),
@@ -38,6 +51,20 @@ def test_anonymize_endpoint_returns_masked_text_and_detections() -> None:
     assert response.text == "문의는 *************로 주세요"
     assert len(response.detections) == 1
     assert response.detections[0].kind == DetectionKind.PHONE
+
+
+def test_anonymize_http_endpoint_accepts_passport_detection_kind() -> None:
+    passport = "M12345678"
+
+    response = TestClient(create_app()).post(
+        "/anonymize",
+        json={"text": f"여권번호 {passport} 확인"},
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["detections"][0]["kind"] == DetectionKind.PASSPORT
+    assert passport not in payload["text"]
 
 
 def test_anonymize_endpoint_supports_label_strategy() -> None:
