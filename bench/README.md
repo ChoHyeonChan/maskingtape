@@ -38,15 +38,16 @@ python -m bench.generate_dataset --count 500 --seed 42 --out bench/datasets/synt
 python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl --report bench/reports/report_v1.md
 ```
 
-500건 기준 최신 실측(여권번호 전용 distractor 추가 후 재측정, seed=42):
+500건 기준 최신 실측(외국인등록번호 데이터 추가 후 재측정, seed=42):
 
 | kind | precision | recall | f1 | 비고 |
 |---|---|---|---|---|
-| rrn / phone / email / card | 1.000 | 1.000 | 1.000 | 유선전화·plus 이메일·서브도메인·복합 문장 추가돼도 그대로 유지 |
+| phone / email / card | 1.000 | 1.000 | 1.000 | 유선전화·plus 이메일·서브도메인·복합 문장 추가돼도 그대로 유지 |
+| rrn | 1.000 | 1.000 | 1.000 | [#148](https://github.com/ChoHyeonChan/maskingtape/issues/148)에서 외국인등록번호(성별코드 5~8)도 섞음 — core가 이미 지원하던 걸 처음으로 실측 |
 | address | 1.000 | 1.000 | 1.000 | [#118](https://github.com/ChoHyeonChan/maskingtape/issues/118)에서 시/도 없는 시/군 시작 주소 positive를 추가 — core 수정([#117](https://github.com/ChoHyeonChan/maskingtape/pull/117))이 이미 머지돼 recall도 1.000으로 정상 측정됨 |
 | biz_reg | 1.000 | 1.000 | 1.000 | [#123](https://github.com/ChoHyeonChan/maskingtape/issues/123)에서 새 kind로 추가 |
 | passport | 1.000 | 1.000 | 1.000 | [#139](https://github.com/ChoHyeonChan/maskingtape/issues/139)에서 새 kind로 추가, [#145](https://github.com/ChoHyeonChan/maskingtape/issues/145)에서 전용 distractor(`gen_passport_like_code`)까지 추가했는데도 오탐 0건 유지 |
-| name | 0.877 | 0.484 | 0.624 | 규칙판. 문맥 단서 없으면 탐지 안 함(오탐↓재현율↓) — 아래 "이름 탐지 방식 비교" 절 참고 |
+| name | 0.964 | 0.675 | 0.794 | 규칙판. [#150](https://github.com/ChoHyeonChan/maskingtape/pull/150)(존칭 '님'/'씨' 삼킴 버그 수정)으로 크게 개선 — 아래 "이름 탐지 방식 비교" 절 참고 |
 
 address·card는 한때 이 표에서 문제(F1 0.371, 오탐 2건)가 있었는데, core 쪽에서 이미 수정됐다
 (각각 [#86](https://github.com/ChoHyeonChan/maskingtape/issues/86), [#87](https://github.com/ChoHyeonChan/maskingtape/issues/87)로
@@ -101,7 +102,10 @@ core가 개인정보 아닌 걸 잘못 잡아내는지(정밀도, precision)는 
 - **이메일**: 기본 표기에 더해 **plus 표기**(`user+tag@example.com`)와 **서브도메인**
   (`user@mail.example.com`)도 섞는다 — core `EmailDetector`의 로컬 파트 문자 집합(`+` 포함)과
   다중 도메인 라벨 지원을 실제로 검증한다.
-- **주민번호**: 하이픈/공백/구분자 없음, 1900·2000년대 성별코드를 모두 커버
+- **주민번호**: 하이픈/공백/구분자 없음, 1900·2000년대 성별코드를 모두 커버. **외국인등록번호**
+  (성별코드 5~8)도 15% 확률로 섞는다([#148](https://github.com/ChoHyeonChan/maskingtape/issues/148)) —
+  core `RRNDetector`의 `_CENTURY` 매핑이 이미 5~8을 내국인과 동일한 정규식·체크섬으로 처리하는데
+  bench가 1~4만 만들어서 한 번도 실측된 적이 없었다
 - **주소**: 지번 주소(`강남구 역삼동 12-3`)와 도로명 주소(`테헤란로12길 3`, 아파트 동/호 포함)에 더해,
   **시/도 없이 시/군으로 시작하는 표기**(`성남시 분당구 정자동 45-6`, `김포시 사우동 12-3`,
   `양평군 양서면 8-7`)도 `hard`/`mixed` 난이도에서 섞는다([#118](https://github.com/ChoHyeonChan/maskingtape/issues/118)) —
