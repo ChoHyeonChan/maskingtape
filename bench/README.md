@@ -38,7 +38,7 @@ python -m bench.generate_dataset --count 500 --seed 42 --out bench/datasets/synt
 python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl --report bench/reports/report_v1.md
 ```
 
-500건 기준 최신 실측(여권번호 데이터 추가 후 재측정, seed=42):
+500건 기준 최신 실측(#150 이름 존칭 삼킴 버그 수정 반영 후 재측정, seed=42):
 
 | kind | precision | recall | f1 | 비고 |
 |---|---|---|---|---|
@@ -46,7 +46,7 @@ python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl --report bench
 | address | 1.000 | 1.000 | 1.000 | [#118](https://github.com/ChoHyeonChan/maskingtape/issues/118)에서 시/도 없는 시/군 시작 주소 positive를 추가 — core 수정([#117](https://github.com/ChoHyeonChan/maskingtape/pull/117))이 이미 머지돼 recall도 1.000으로 정상 측정됨 |
 | biz_reg | 1.000 | 1.000 | 1.000 | [#123](https://github.com/ChoHyeonChan/maskingtape/issues/123)에서 새 kind로 추가 |
 | passport | 1.000 | 1.000 | 1.000 | [#139](https://github.com/ChoHyeonChan/maskingtape/issues/139)에서 새 kind로 추가. core에 체크섬이 없어(형식+문맥어만) distractor 오탐 위험이 특히 큰 kind — 회귀 테스트로 고정 |
-| name | 0.928 | 0.532 | 0.676 | 규칙판. 문맥 단서 없으면 탐지 안 함(오탐↓재현율↓) — 아래 "이름 탐지 방식 비교" 절 참고 |
+| name | 0.982 | 0.699 | 0.817 | 규칙판. [#150](https://github.com/ChoHyeonChan/maskingtape/pull/150)(존칭 '님'/'씨' 삼킴 버그 수정)으로 0.676→0.817로 크게 개선 — 아래 "이름 탐지 방식 비교" 절 참고 |
 
 address·card는 한때 이 표에서 문제(F1 0.371, 오탐 2건)가 있었는데, core 쪽에서 이미 수정됐다
 (각각 [#86](https://github.com/ChoHyeonChan/maskingtape/issues/86), [#87](https://github.com/ChoHyeonChan/maskingtape/issues/87)로
@@ -201,17 +201,23 @@ python -m bench.evaluators.compare_name_detectors bench/datasets/synth_v1.jsonl
 로컬 Ollama가 안 떠 있으면 하이브리드 쪽은 "LLM 사용 불가"로 표시되고 규칙판 결과만 나온다 —
 CI 등 Ollama 없는 환경에서도 도구 자체는 안 죽는다.
 
-500건 기준 실측 결과(로컬 Ollama `qwen2.5:7b` 기준, #128 LLM 이름 존칭(님/씨) 스팬 정합 + 여권번호(#139) 데이터까지 반영 후 재측정):
+500건 기준 실측 결과(로컬 Ollama `qwen2.5:7b` 기준, #150 규칙판 존칭 삼킴 버그 수정 반영 후 재측정):
 
 | 방식 | precision | recall | F1 |
 |---|---|---|---|
-| 규칙판 | 0.928 | 0.532 | 0.676 |
+| 규칙판 | 0.982 | 0.699 | 0.817 |
 | 하이브리드(LLM) | 0.971 | 0.931 | **0.950** |
 
 규칙판은 앞뒤에 역할어·존칭 같은 문맥 단서가 없으면 아예 탐지하지 않도록 설계돼 오탐은
 적지만(precision 高), 그만큼 단서 없는 이름은 다 놓친다(recall 低). 하이브리드는 LLM이 문맥을
-직접 판단해 단서 없는 이름까지 잡아내면서(recall 0.532→0.931) precision도 오히려 더 높다
-(0.928→0.971) — 규칙판이 흔한 단어를 성씨로 오인하던 오탐 일부를 LLM이 걸러낸 결과로 보인다.
+직접 판단해 단서 없는 이름까지 잡아내면서(recall 0.699→0.931) F1도 더 높다
+(0.817→0.950) — 이제 격차의 대부분은 "문맥 단서가 아예 없는 이름"으로 좁혀졌다.
+
+**#150 반영 효과**: 규칙판 F1이 **0.676 → 0.817**로 크게 올랐다(존칭 '님'/'씨'를 이름에
+삼켜 FP·FN이 동시에 발생하던 문제가 해소). 반면 **하이브리드 수치는 #128 이후로 변화가
+없다(F1 0.950 그대로)** — 하이브리드는 규칙판을 `min_confidence=0.75` 안전망으로만 쓰는데,
+#150이 고친 버그는 confidence가 0.5로 낮게 나오는 케이스라 애초에 하이브리드 결과에
+반영된 적이 없었다. 즉 #150은 **규칙 전용 모드 사용자에게만** 의미 있는 개선이다.
 
 **#128 반영 효과(회귀 이전 실측 대비)**: 하이브리드 F1이 **0.933 → 0.950**으로 올랐다. `허성님`처럼
 LLM이 이름 뒤에 존칭을 붙여 반환하던 스팬이 gold(`허성`)와 어긋나 오탐(FP)이자 미탐(FN)으로 동시에
