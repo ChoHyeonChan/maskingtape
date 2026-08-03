@@ -38,15 +38,15 @@ python -m bench.generate_dataset --count 500 --seed 42 --out bench/datasets/synt
 python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl --report bench/reports/report_v1.md
 ```
 
-500건 기준 최신 실측(여권번호 데이터 추가 후 재측정, seed=42):
+500건 기준 최신 실측(여권번호 전용 distractor 추가 후 재측정, seed=42):
 
 | kind | precision | recall | f1 | 비고 |
 |---|---|---|---|---|
 | rrn / phone / email / card | 1.000 | 1.000 | 1.000 | 유선전화·plus 이메일·서브도메인·복합 문장 추가돼도 그대로 유지 |
 | address | 1.000 | 1.000 | 1.000 | [#118](https://github.com/ChoHyeonChan/maskingtape/issues/118)에서 시/도 없는 시/군 시작 주소 positive를 추가 — core 수정([#117](https://github.com/ChoHyeonChan/maskingtape/pull/117))이 이미 머지돼 recall도 1.000으로 정상 측정됨 |
 | biz_reg | 1.000 | 1.000 | 1.000 | [#123](https://github.com/ChoHyeonChan/maskingtape/issues/123)에서 새 kind로 추가 |
-| passport | 1.000 | 1.000 | 1.000 | [#139](https://github.com/ChoHyeonChan/maskingtape/issues/139)에서 새 kind로 추가. core에 체크섬이 없어(형식+문맥어만) distractor 오탐 위험이 특히 큰 kind — 회귀 테스트로 고정 |
-| name | 0.928 | 0.532 | 0.676 | 규칙판. 문맥 단서 없으면 탐지 안 함(오탐↓재현율↓) — 아래 "이름 탐지 방식 비교" 절 참고 |
+| passport | 1.000 | 1.000 | 1.000 | [#139](https://github.com/ChoHyeonChan/maskingtape/issues/139)에서 새 kind로 추가, [#145](https://github.com/ChoHyeonChan/maskingtape/issues/145)에서 전용 distractor(`gen_passport_like_code`)까지 추가했는데도 오탐 0건 유지 |
+| name | 0.877 | 0.484 | 0.624 | 규칙판. 문맥 단서 없으면 탐지 안 함(오탐↓재현율↓) — 아래 "이름 탐지 방식 비교" 절 참고 |
 
 address·card는 한때 이 표에서 문제(F1 0.371, 오탐 2건)가 있었는데, core 쪽에서 이미 수정됐다
 (각각 [#86](https://github.com/ChoHyeonChan/maskingtape/issues/86), [#87](https://github.com/ChoHyeonChan/maskingtape/issues/87)로
@@ -71,15 +71,24 @@ card는 `gen_card`(Visa/Mastercard/Amex 계열 IIN + Luhn 체크섬)로 데이�
 전체 풀에 대해 300회 반복 회귀 테스트(`test_distractors_are_never_detected_as_passport`)를 추가해
 앞으로도 우연히 겹치지 않는지 계속 확인한다.
 
+다른 kind들(`phone`/`rrn`/`biz_reg`)은 형식은 비슷하지만 실제로는 아닌 값을 **일부러 만드는**
+전용 distractor가 있는데(`gen_invalid_phone_like`·`gen_invalid_rrn_like`·`gen_business_reg_number`),
+`passport`만 그런 전용 distractor가 없어 "기존 풀이 우연히 안 겹치는지" 소극적으로만 확인하고
+있었다(#145). `gen_passport_like_code`를 추가해 사원번호·상품 시리얼·로트번호처럼 실제 업무에
+흔한 "M/S/R/O/D + 숫자" 코드를 만들되, core 정규식이 요구하는 정확한 자릿수(8자리, 또는
+3자리+문자+4자리)에서 하나 벗어나게(7·9자리) 해서 체크섬 없는 kind에서도 명시적인 근접 미스
+방어를 갖췄다.
+
 ## 오탐(False Positive) 측정
 
 기존에는 데이터셋 전체가 "개인정보가 있는 문서"뿐이라 재현율(recall)만 측정 가능했고,
 core가 개인정보 아닌 걸 잘못 잡아내는지(정밀도, precision)는 검증 불가능했다.
 
 `generator/distractors.py`가 주문번호·사업자등록번호·날짜·가격처럼 숫자가 섞여 있지만
-개인정보는 아닌 값과, 지역번호·생년월일이 실제로는 존재하지 않는 '전화번호/주민번호 모양'
-값을 만든다. `--negative-ratio`(기본 0.25)만큼의 문서는 정답 라벨이 0개인 채로 생성되고,
-core가 여기서 뭔가를 탐지하면 `evaluate.py`가 그대로 FP로 집계한다.
+개인정보는 아닌 값과, 지역번호·생년월일이 실제로는 존재하지 않는 '전화번호/주민번호 모양',
+사원번호·상품 코드처럼 자릿수만 다른 '여권번호 모양' 값을 만든다. `--negative-ratio`(기본
+0.25)만큼의 문서는 정답 라벨이 0개인 채로 생성되고, core가 여기서 뭔가를 탐지하면
+`evaluate.py`가 그대로 FP로 집계한다.
 
 ## 문장·표기 다양성
 

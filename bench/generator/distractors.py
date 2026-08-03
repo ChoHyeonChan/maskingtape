@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import random
 
-from bench.generator.entities import _biz_reg_check_digit
+from bench.generator.entities import _biz_reg_check_digit, _PASSPORT_TYPE_CODES
 
 # core RRNDetector가 허용하는 지역번호(rrn.py 참고)에 없는 국번 — 형식은 유선전화 같지만 매칭되면 안 됨.
 _INVALID_AREA_CODES = ["09", "07", "00", "08"]
@@ -81,6 +81,20 @@ def gen_region_mention_like(rng: random.Random) -> str:
     return rng.choice(_REGION_MENTION_PHRASES)
 
 
+def gen_passport_like_code(rng: random.Random) -> str:
+    """여권번호 모양(M/S/R/O/D + 숫자)이지만 자릿수가 하나 어긋난 코드 — PassportDetector가
+    걸러내야 정상.
+
+    core는 체크섬이 없어(passport.py) 정확한 자릿수(8자리, 또는 3자리+문자+4자리)만으로
+    판별한다 — 그래서 gen_business_reg_number처럼 "체크섬 무효화"는 못 쓰고, 대신 자릿수를
+    하나 빼거나 더해 사원번호·상품 시리얼처럼 실제 업무에 흔한 근접 미스를 만든다.
+    """
+    code = rng.choice(_PASSPORT_TYPE_CODES)
+    digit_count = rng.choice([7, 9])  # 구여권 형식(8자리)과 자릿수만 다르게
+    digits = f"{rng.randint(0, 10**digit_count - 1):0{digit_count}d}"
+    return f"{code}{digits}"
+
+
 _DISTRACTOR_GENERATORS = [
     gen_order_number,
     gen_business_reg_number,
@@ -91,6 +105,7 @@ _DISTRACTOR_GENERATORS = [
     gen_invalid_phone_like,
     gen_invalid_rrn_like,
     gen_region_mention_like,
+    gen_passport_like_code,
 ]
 
 
