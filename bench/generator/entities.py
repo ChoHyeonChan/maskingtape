@@ -61,8 +61,11 @@ _EMAIL_DOMAINS = [
 
 # rrn.py의 체크섬 검증 로직과 동일한 가중치 — 생성기가 만드는 번호도 유효하게 만든다.
 _RRN_WEIGHTS = (2, 3, 4, 5, 6, 7, 8, 9, 2, 3, 4, 5)
-# 성별코드 1/2=1900년대, 3/4=2000년대 (rrn.py _CENTURY 기준). 5~8(외국인)은 별도 표기라 제외.
+# 성별코드 1/2=내국인 1900년대, 3/4=내국인 2000년대 (rrn.py _CENTURY 기준).
 _CENTURY_CODES = {1900: ("1", "2"), 2000: ("3", "4")}
+# 5/6=외국인등록번호 1900년대, 7/8=외국인등록번호 2000년대(#148) — rrn.py의 _CENTURY가
+# 이미 5~8을 지원하고 정규식·체크섬 로직도 내국인과 완전히 동일하게 처리한다(직접 확인함).
+_FOREIGN_CENTURY_CODES = {1900: ("5", "6"), 2000: ("7", "8")}
 
 _PHONE_SEPARATORS_MIXED = ["-", "-", "-", " ", ".", ""]  # 하이픈이 가장 흔한 표기라 가중치를 둔다.
 _PHONE_SEPARATORS_HARD = ["", ".", " "]  # 하이픈 없는(탐지가 상대적으로 더 까다로운) 표기만.
@@ -157,7 +160,8 @@ def gen_rrn(rng: random.Random, difficulty: str = "mixed") -> Entity:
     year = rng.randint(0, 99)
     month = rng.randint(1, 12)
     day = rng.randint(1, 28)
-    century_code = rng.choice(_CENTURY_CODES[century])
+    codes = _FOREIGN_CENTURY_CODES[century] if rng.random() < 0.15 else _CENTURY_CODES[century]
+    century_code = rng.choice(codes)
     front = f"{year:02d}{month:02d}{day:02d}"
     serial = f"{rng.randint(0, 99999):05d}"  # 뒷자리 7개 = 성별코드(1) + 일련번호(5) + 검증번호(1)
     digits = front + century_code + serial  # 12자리 — 검증번호 계산 대상

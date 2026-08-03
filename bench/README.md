@@ -47,7 +47,7 @@ python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl --report bench
 | address | 1.000 | 1.000 | 1.000 | [#118](https://github.com/ChoHyeonChan/maskingtape/issues/118)에서 시/도 없는 시/군 시작 주소 positive를 추가 — core 수정([#117](https://github.com/ChoHyeonChan/maskingtape/pull/117))이 이미 머지돼 recall도 1.000으로 정상 측정됨 |
 | biz_reg | 1.000 | 1.000 | 1.000 | [#123](https://github.com/ChoHyeonChan/maskingtape/issues/123)에서 새 kind로 추가 |
 | passport | 1.000 | 1.000 | 1.000 | [#139](https://github.com/ChoHyeonChan/maskingtape/issues/139)에서 새 kind로 추가, [#145](https://github.com/ChoHyeonChan/maskingtape/issues/145)에서 전용 distractor(`gen_passport_like_code`)까지 추가했는데도 오탐 0건 유지 |
-| name | 0.958 | 0.681 | 0.796 | 규칙판. [#150](https://github.com/ChoHyeonChan/maskingtape/pull/150)(존칭 '님'/'씨' 삼킴 버그 수정)으로 크게 개선 — 아래 "이름 탐지 방식 비교" 절 참고 |
+| name | 0.964 | 0.675 | 0.794 | 규칙판. [#150](https://github.com/ChoHyeonChan/maskingtape/pull/150)(존칭 '님'/'씨' 삼킴 버그 수정)으로 크게 개선 — 아래 "이름 탐지 방식 비교" 절 참고 |
 
 address·card는 한때 이 표에서 문제(F1 0.371, 오탐 2건)가 있었는데, core 쪽에서 이미 수정됐다
 (각각 [#86](https://github.com/ChoHyeonChan/maskingtape/issues/86), [#87](https://github.com/ChoHyeonChan/maskingtape/issues/87)로
@@ -102,7 +102,10 @@ core가 개인정보 아닌 걸 잘못 잡아내는지(정밀도, precision)는 
 - **이메일**: 기본 표기에 더해 **plus 표기**(`user+tag@example.com`)와 **서브도메인**
   (`user@mail.example.com`)도 섞는다 — core `EmailDetector`의 로컬 파트 문자 집합(`+` 포함)과
   다중 도메인 라벨 지원을 실제로 검증한다.
-- **주민번호**: 하이픈/공백/구분자 없음, 1900·2000년대 성별코드를 모두 커버
+- **주민번호**: 하이픈/공백/구분자 없음, 1900·2000년대 성별코드를 모두 커버. **외국인등록번호**
+  (성별코드 5~8)도 15% 확률로 섞는다([#148](https://github.com/ChoHyeonChan/maskingtape/issues/148)) —
+  core `RRNDetector`의 `_CENTURY` 매핑이 이미 5~8을 내국인과 동일한 정규식·체크섬으로 처리하는데
+  bench가 1~4만 만들어서 한 번도 실측된 적이 없었다
 - **주소**: 지번 주소(`강남구 역삼동 12-3`)와 도로명 주소(`테헤란로12길 3`, 아파트 동/호 포함)에 더해,
   **시/도 없이 시/군으로 시작하는 표기**(`성남시 분당구 정자동 45-6`, `김포시 사우동 12-3`,
   `양평군 양서면 8-7`)도 `hard`/`mixed` 난이도에서 섞는다([#118](https://github.com/ChoHyeonChan/maskingtape/issues/118)) —
@@ -219,17 +222,17 @@ CI 등 Ollama 없는 환경에서도 도구 자체는 안 죽는다.
 
 | 방식 | precision | recall | F1 |
 |---|---|---|---|
-| 규칙판 | 0.958 | 0.681 | 0.796 |
-| 하이브리드(LLM) | 0.968 | 0.911 | **0.939** |
+| 규칙판 | 0.964 | 0.675 | 0.794 |
+| 하이브리드(LLM) | 0.967 | 0.906 | **0.935** |
 
 규칙판은 앞뒤에 역할어·존칭 같은 문맥 단서가 없으면 아예 탐지하지 않도록 설계돼 오탐은
 적지만(precision 高), 그만큼 단서 없는 이름은 다 놓친다(recall 低). 하이브리드는 LLM이 문맥을
-직접 판단해 단서 없는 이름까지 잡아내면서(recall 0.681→0.911) F1도 더 높다
-(0.796→0.939) — 이제 격차의 대부분은 "문맥 단서가 아예 없는 이름"으로 좁혀졌다.
+직접 판단해 단서 없는 이름까지 잡아내면서(recall 0.675→0.906) F1도 더 높다
+(0.794→0.935) — 이제 격차의 대부분은 "문맥 단서가 아예 없는 이름"으로 좁혀졌다.
 
-**#150 반영 효과**: 규칙판 F1이 **0.676 → 0.796**으로 크게 올랐다(존칭 '님'/'씨'를 이름에
+**#150 반영 효과**: 규칙판 F1이 **0.676 → 0.794**로 크게 올랐다(존칭 '님'/'씨'를 이름에
 삼켜 FP·FN이 동시에 발생하던 문제가 해소). 반면 **하이브리드 수치는 #128 이후로 거의 변화가
-없다(F1 0.933→0.939, 오차 범위)** — 하이브리드는 규칙판을 `min_confidence=0.75` 안전망으로만
+없다(F1 0.933→0.935, 오차 범위)** — 하이브리드는 규칙판을 `min_confidence=0.75` 안전망으로만
 쓰는데, #150이 고친 버그는 confidence가 0.5로 낮게 나오는 케이스라 애초에 하이브리드 결과에
 거의 반영된 적이 없었다. 즉 #150은 **규칙 전용 모드 사용자에게 특히 의미 있는** 개선이다.
 
