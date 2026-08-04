@@ -67,6 +67,11 @@ _CENTURY_CODES = {1900: ("1", "2"), 2000: ("3", "4")}
 # 이미 5~8을 지원하고 정규식·체크섬 로직도 내국인과 완전히 동일하게 처리한다(직접 확인함).
 _FOREIGN_CENTURY_CODES = {1900: ("5", "6"), 2000: ("7", "8")}
 
+# 2020년 10월 이후 발급분은 뒷자리가 난수라 체크섬이 없다(rrn.py 6~7행) — core는 생년월일만
+# 유효하면 체크섬이 틀려도 confidence 0.85로 여전히 탐지한다(#159). 이 비율만큼 일부러 체크섬을
+# 틀리게 만들어, "이 케이스가 존재한다"는 사실 자체를 데이터셋에 반영한다.
+_INVALID_CHECKSUM_RATE = 0.15
+
 _PHONE_SEPARATORS_MIXED = ["-", "-", "-", " ", ".", ""]  # 하이픈이 가장 흔한 표기라 가중치를 둔다.
 _PHONE_SEPARATORS_HARD = ["", ".", " "]  # 하이픈 없는(탐지가 상대적으로 더 까다로운) 표기만.
 # phone.py의 _LANDLINE_RE가 허용하는 지역번호만 나열한다(그 외는 core가 아예 안 잡음).
@@ -167,6 +172,10 @@ def gen_rrn(rng: random.Random, difficulty: str = "mixed") -> Entity:
     digits = front + century_code + serial  # 12자리 — 검증번호 계산 대상
     total = sum(int(d) * w for d, w in zip(digits, _RRN_WEIGHTS))
     check = (11 - total % 11) % 10
+    if rng.random() < _INVALID_CHECKSUM_RATE:
+        # 2020-10 이후 발급분 흉내 — 생년월일은 그대로 유효하게 두고 검증 번호만 다른 숫자로 바꿔
+        # 항상 체크섬이 틀리게 만든다(core는 이 경우도 confidence 0.85로 탐지해야 한다).
+        check = (check + rng.randint(1, 9)) % 10
 
     if difficulty == "easy":
         sep = "-"

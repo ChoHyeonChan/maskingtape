@@ -153,6 +153,21 @@ def test_rrn_generator_covers_foreign_registration_gender_codes():
     assert gender_codes & {"1", "2", "3", "4"}  # 내국인 성별코드도 여전히 나온다
 
 
+def test_rrn_generator_covers_invalid_checksum_case():
+    """#159: 2020-10 이후 발급분(체크섬 없음)도 나오고, core가 confidence 0.85로도 여전히 잡아야 한다."""
+    rng = random.Random(32)
+    detector = RRNDetector()
+    confidences = set()
+    for _ in range(300):
+        entity = generate_entity("rrn", rng, difficulty="easy")
+        found = detector.detect(entity.text)
+        assert len(found) == 1, f"탐지 실패: {entity.text!r}"  # 체크섬 무효라도 탐지 자체는 돼야 한다
+        assert found[0].text == entity.text
+        confidences.add(found[0].confidence)
+    assert 0.85 in confidences  # 체크섬 무효 케이스가 실제로 나오고 0.85로 탐지된다
+    assert 1.0 in confidences  # 체크섬 유효 케이스도 여전히 나온다
+
+
 def test_address_generator_covers_road_and_jibun_styles():
     """지번 주소(예: 강남구 역삼동 12-3)와 도로명 주소(예: 테헤란로12길 3)가 둘 다 나오는지 확인한다."""
     rng = random.Random(12)
