@@ -72,3 +72,16 @@ def test_preserves_two_char_name_when_no_honorific_follows():
     # "도"는 존칭이 아니므로 "박도"는 그대로 2글자 이름으로 유지된다
     found = detect("박도 담당자에게 전달")
     assert found[0].text == "박도"
+
+
+def test_does_not_match_surname_in_middle_of_word():
+    # #158: "감지되어"의 "지"(성씨 사전)가 단어 중간이라 이름 후보가 되면 안 된다.
+    # 오탐 "지되어"가 사라지고, 뒤의 진짜 이름 "양빈도"가 대신 잡혀야 한다.
+    found = detect("카드 결제가 감지되어 양빈도님께 확인 연락드립니다")
+    assert [d.text for d in found] == ["양빈도"]
+
+
+def test_recovers_real_name_previously_swallowed_by_midword_fp():
+    # #158: 단어 중간 오탐이 뒤 이름의 첫 글자를 존칭으로 삼키던 문제 — 이제 진짜 이름을 잡는다.
+    found = detect("이상 거래가 감지되어 양연준님께 안내드립니다")
+    assert [d.text for d in found] == ["양연준"]
