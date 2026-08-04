@@ -7,7 +7,7 @@ from collections.abc import Sequence
 
 from maskingtape.anonymizers import LabelAnonymizer, PseudonymAnonymizer
 from maskingtape.anonymizers.base import Anonymizer
-from maskingtape.detectors import CreditCardDetector, RRNDetector
+from maskingtape.detectors import CreditCardDetector, PhoneDetector, RRNDetector
 from maskingtape.detectors.financial.creditcard import _luhn_ok
 from maskingtape.detectors.identity.rrn import _checksum_ok
 from maskingtape.pipeline import Pipeline
@@ -127,6 +127,29 @@ def test_pseudonym_generated_rrn_never_passes_real_checksum():
         digits = "".join(c for c in fake_text if c.isdigit())
         assert len(digits) == 13
         assert not _checksum_ok(digits), f"가짜 주민번호가 진짜 체크섬을 통과함: {fake_text!r}"
+
+
+def test_numbered_label_gives_same_number_to_identical_repeated_value():
+    """#164: label(numbered=True)는 표기가 완전히 같은 반복 값에 같은 번호를 매겨야 한다."""
+    text = "자택 번호는 010-1234-5678이고, 직장 번호는 010-1234-5678 입니다."
+    detections = PhoneDetector().detect(text)
+    assert len(detections) == 2
+    result = LabelAnonymizer(numbered=True).apply(text, detections)
+    assert result == "자택 번호는 [전화번호1]이고, 직장 번호는 [전화번호1] 입니다."
+
+
+def test_numbered_label_splits_identical_real_value_with_different_formatting():
+    """#164: 알려진 한계 — 같은 실제 번호라도 표기(하이픈 유무 등)가 다르면 다른 번호로 잘못
+    분리된다. label.py docstring은 "같은 값은 같은 번호를 받아 동일 인물/번호라는 정보가
+    유지된다"고 약속하지만, 비교 기준이 Detection.text(탐지된 원문 그대로)라 표기 차이를
+    구분 못 한다. core가 표기 정규화 후 비교하도록 고치면 이 테스트가 깨져서 알 수 있다 —
+    그때 이 테스트를 갱신하면 된다(지금은 현재 동작을 고정해두는 회귀 테스트).
+    """
+    text = "자택 번호는 010-1234-5678이고, 직장 번호는 01012345678 입니다."
+    detections = PhoneDetector().detect(text)
+    assert len(detections) == 2
+    result = LabelAnonymizer(numbered=True).apply(text, detections)
+    assert result == "자택 번호는 [전화번호1]이고, 직장 번호는 [전화번호2] 입니다."
 
 
 def test_pseudonym_generated_card_never_passes_real_luhn():
