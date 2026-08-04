@@ -191,6 +191,14 @@ python -m bench.evaluators.evaluate_masking bench/datasets/synth_v1.jsonl --stra
 통과하면 안 된다"는 설계를 코드에 명시하고 있다 — bench 테스트가 core의 실제 검증 함수
 (`_checksum_ok`, `_luhn_ok`)로 이 속성이 항상 지켜지는지 회귀 확인한다.
 
+**pseudonym 동일 개체 일관성 검증**: `PseudonymAnonymizer`도 "같은 원본값은 같은 가명으로
+치환되어 '그 사람'이라는 문맥이 유지된다"고 문서화돼 있는데, bench가 이 속성을 한 번도
+테스트한 적이 없었다([#166](https://github.com/ChoHyeonChan/maskingtape/issues/166)). label
+`numbered=True`의 [#164](https://github.com/ChoHyeonChan/maskingtape/issues/164)와 근본
+원인이 같다 — 판별 기준이 `Detection.text`라서, **같은 실제 번호라도 표기가 다르면 서로
+다른 가명 두 개를 받아** "그 사람" 문맥이 깨진다. 정상 케이스와 이 한계 둘 다 회귀
+테스트로 고정해뒀다.
+
 ## 신뢰도(confidence) 임계값 분석
 
 core의 각 `Detection`에는 `confidence`(0.0~1.0)가 붙어있지만 지금까지 어디에도 쓰이지 않았다.
