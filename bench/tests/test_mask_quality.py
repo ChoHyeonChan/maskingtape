@@ -5,9 +5,9 @@ from __future__ import annotations
 import random
 from collections.abc import Sequence
 
-from maskingtape.anonymizers import LabelAnonymizer, PseudonymAnonymizer
+from maskingtape.anonymizers import LabelAnonymizer, MaskAnonymizer, PseudonymAnonymizer
 from maskingtape.anonymizers.base import Anonymizer
-from maskingtape.detectors import CreditCardDetector, RRNDetector
+from maskingtape.detectors import CreditCardDetector, NameDetector, RRNDetector
 from maskingtape.detectors.financial.creditcard import _luhn_ok
 from maskingtape.detectors.identity.rrn import _checksum_ok
 from maskingtape.pipeline import Pipeline
@@ -24,6 +24,17 @@ class _HalfMaskAnonymizer(Anonymizer):
         for d in sorted(detections, key=lambda d: d.start, reverse=True):
             half = (d.end - d.start) // 2
             masked = "*" * half + text[d.start + half : d.end]
+            text = text[: d.start] + masked + text[d.end :]
+        return text
+
+
+class _OverExposedAnonymizer(Anonymizer):
+    """테스트 전용 — 앞 5글자를 남겨 keep_head=2로 '선언'한 것보다 더 많이 새는 버그를 흉내낸다."""
+
+    def apply(self, text: str, detections: Sequence[Detection]) -> str:
+        for d in sorted(detections, key=lambda d: d.start, reverse=True):
+            keep = min(5, d.end - d.start)
+            masked = text[d.start : d.start + keep] + "*" * (d.end - d.start - keep)
             text = text[: d.start] + masked + text[d.end :]
         return text
 
@@ -141,3 +152,46 @@ def test_pseudonym_generated_card_never_passes_real_luhn():
         digits = "".join(c for c in fake_text if c.isdigit())
         assert len(digits) == 16
         assert not _luhn_ok(digits), f"가짜 카드번호가 진짜 Luhn을 통과함: {fake_text!r}"
+def test_keep_head_excludes_intentional_prefix_from_leak():
+    """#166: MaskAnonymizer(keep_head=N)로 앞 N글자를 의도적으로 남겼으면, keep_head를
+    맞춰서 넘겼을 때 그 부분은 유출로 잡히면 안 된다(직접 재현해 발견한 문제 — 안 맞추면
+    설계대로 동작한 마스킹도 '부분 유출'로 오판됐다)."""
+    rows = [{"text": "주민번호 800101-1234560 입니다.", "labels": [{"kind": "rrn", "start": 5, "end": 19}]}]
+    result = evaluate_mask_quality(rows, Pipeline(anonymizer=MaskAnonymizer(keep_head=2)), keep_head=2)
+    assert result.leak_count == 0
+    assert result.full_leak_count == 0
+    assert result.partial_leak_count == 0
+
+
+def test_keep_head_without_matching_param_still_shows_old_misjudgment():
+    """keep_head를 쓰는 걸 evaluate_mask_quality에 안 알려주면(기본 0) 의도된 노출이
+    부분 유출로 오판된다는 걸 회귀 고정한다 — #166 발견 당시 실측 그대로(14% 노출)."""
+    rows = [{"text": "주민번호 800101-1234560 입니다.", "labels": [{"kind": "rrn", "start": 5, "end": 19}]}]
+    result = evaluate_mask_quality(rows, Pipeline(anonymizer=MaskAnonymizer(keep_head=2)))  # keep_head 인자 생략
+    assert result.leak_count == 1
+    assert result.partial_leak_count == 1
+
+
+def test_keep_head_still_catches_leak_beyond_declared_prefix():
+    """keep_head=2라고 '선언'했는데 실제로는 더 많이 새는 버그가 있으면(_OverExposedAnonymizer,
+    앞 5글자 노출) 여전히 부분 유출로 잡혀야 한다 — keep_head 지원이 진짜 버그까지 숨기면 안 된다."""
+    rows = [{"text": "주민번호 800101-1234560 입니다.", "labels": [{"kind": "rrn", "start": 5, "end": 19}]}]
+    result = evaluate_mask_quality(rows, Pipeline(anonymizer=_OverExposedAnonymizer()), keep_head=2)
+    assert result.leak_count == 1
+    assert result.partial_leak_count == 1
+    assert 0 < result.leaks[0].exposed_ratio < 1.0
+
+
+def test_keep_head_can_fully_expose_values_shorter_than_it():
+    """[core#169] MaskAnonymizer(keep_head=N)는 kind 구분 없이 파이프라인 전체에 적용되므로,
+    N보다 짧은 값(예: 2글자 이름)은 keep=min(keep_head, span_len)에 의해 통째로 노출된다.
+    RRN(14자)을 겨냥해 keep_head=2를 설정해도 같은 파이프라인의 2글자 이름은 완전 노출된다 —
+    core 설계 위험으로 별도 이슈(#169)를 남겼다. mask_quality.py 입장에서는 keep_head 계약을
+    그대로 따른 것이므로 유출 오판은 아니다(#168) — 이 테스트는 그 경계 사례를 고정해둔다.
+    """
+    text = "고객 김민 님 안녕하세요."
+    detections = NameDetector().detect(text)
+    assert len(detections) == 1
+    assert detections[0].text == "김민"
+    result = MaskAnonymizer(keep_head=2).apply(text, detections)
+    assert result == text  # 마스킹이 전혀 안 됨 — 짧은 값이 keep_head에 의해 완전 노출

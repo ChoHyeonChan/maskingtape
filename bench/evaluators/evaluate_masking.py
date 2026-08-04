@@ -33,11 +33,19 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="합성 데이터셋으로 마스킹 결과물의 개인정보 유출 여부 평가")
     parser.add_argument("dataset", type=Path, help="평가할 JSONL 데이터셋 경로")
     parser.add_argument("--strategy", choices=sorted(_STRATEGIES), default="mask", help="검증할 비식별화 전략")
+    parser.add_argument(
+        "--keep-head",
+        type=int,
+        default=0,
+        help="mask 전략에서 구간 앞 N글자를 의도적으로 남길 때(MaskAnonymizer(keep_head=N)) 그 값과 "
+        "맞춰서 넘긴다 — 안 맞추면 의도된 노출이 유출로 오판된다(#166). mask 외 전략에는 영향 없음.",
+    )
     args = parser.parse_args()
 
     rows = load_dataset(args.dataset)
-    pipeline = Pipeline(anonymizer=_STRATEGIES[args.strategy]())
-    result = evaluate_mask_quality(rows, pipeline, strategy=args.strategy)
+    anonymizer_kwargs = {"keep_head": args.keep_head} if args.strategy == "mask" else {}
+    pipeline = Pipeline(anonymizer=_STRATEGIES[args.strategy](**anonymizer_kwargs))
+    result = evaluate_mask_quality(rows, pipeline, strategy=args.strategy, keep_head=args.keep_head)
     print(format_mask_quality_report(result))
 
 
