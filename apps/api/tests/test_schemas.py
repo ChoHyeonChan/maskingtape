@@ -3,6 +3,7 @@
 import pytest
 from pydantic import ValidationError
 
+from maskingtape.detectors import default_detectors
 from maskingtape_api.schemas import (
     AnonymizeRequest,
     AnonymizeStrategy,
@@ -61,3 +62,24 @@ def test_detection_response_accepts_business_registration_kind() -> None:
 
     assert detection.kind == DetectionKind.BIZ_REG
     assert detection.model_dump(mode="json")["kind"] == "biz_reg"
+
+
+def test_detection_response_accepts_passport_kind() -> None:
+    detection = DetectionResponse(
+        kind=DetectionKind.PASSPORT,
+        start=0,
+        end=9,
+        text="M12345678",
+        confidence=0.9,
+        detector="PassportDetector",
+    )
+
+    assert detection.kind == DetectionKind.PASSPORT
+    assert detection.model_dump(mode="json")["kind"] == "passport"
+
+
+def test_detection_kind_matches_core_default_detector_kinds() -> None:
+    core_kinds = {detector.kind for detector in default_detectors()}
+    api_kinds = {kind.value for kind in DetectionKind}
+
+    assert api_kinds == core_kinds
