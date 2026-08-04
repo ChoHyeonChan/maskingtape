@@ -109,7 +109,7 @@
 
 ## 현재 정확도
 
-합성 평가 데이터셋 500건 기준 (`python -m bench.evaluators.evaluate`, **규칙 전용 모드**, 측정 기준 `1a9a303` — #159(체크섬 없는 RRN)·#160(core 단어경계 수정) 전부 반영):
+합성 평가 데이터셋 500건 기준 (`python -m bench.evaluators.evaluate`, **규칙 전용 모드**, 측정 기준 `e7b47a7` — #159(체크섬 없는 RRN)·#160(core 단어경계 수정) 전부 반영):
 
 | 종류 | precision | recall | F1 |
 |---|---|---|---|
