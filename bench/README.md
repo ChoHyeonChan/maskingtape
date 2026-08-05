@@ -203,6 +203,14 @@ python -m bench.evaluators.evaluate_masking bench/datasets/synth_v1.jsonl --stra
 통과하면 안 된다"는 설계를 코드에 명시하고 있다 — bench 테스트가 core의 실제 검증 함수
 (`_checksum_ok`, `_luhn_ok`)로 이 속성이 항상 지켜지는지 회귀 확인한다.
 
+**label(numbered=True) 동일 개체 연결 검증**: `LabelAnonymizer(numbered=True)`는 같은 값이
+반복되면 같은 번호(`[전화번호1]`)를 매겨 "동일 인물/번호"라는 문맥 정보를 보존한다고
+문서화돼 있는데, bench가 이 모드를 한 번도 테스트한 적이 없었다([#164](https://github.com/ChoHyeonChan/maskingtape/issues/164)). 직접 확인해보니 판별 기준이 `Detection.text`(탐지된 원문
+그대로)라서, **같은 실제 번호라도 표기(하이픈 유무 등)가 다르면 서로 다른 번호로 잘못
+분리**된다(`[전화번호1]`...`[전화번호2]`) — 실제 문서에서 같은 사람 번호를 문단마다 다르게
+쓰는 건 흔하므로 이 케이스에선 문서화된 약속이 지켜지지 않는다. 정상 케이스(표기 동일)와
+이 한계(표기 다름) 둘 다 회귀 테스트로 고정해뒀다.
+
 ## 신뢰도(confidence) 임계값 분석
 
 core의 각 `Detection`에는 `confidence`(0.0~1.0)가 붙어있지만 지금까지 어디에도 쓰이지 않았다.
