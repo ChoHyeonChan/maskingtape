@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import random
+import re
 from collections.abc import Sequence
 
 from maskingtape.anonymizers import LabelAnonymizer, PseudonymAnonymizer
@@ -164,3 +165,32 @@ def test_pseudonym_generated_card_never_passes_real_luhn():
         digits = "".join(c for c in fake_text if c.isdigit())
         assert len(digits) == 16
         assert not _luhn_ok(digits), f"가짜 카드번호가 진짜 Luhn을 통과함: {fake_text!r}"
+
+
+_FAKE_PHONE_RE = re.compile(r"010-\d{4}-\d{4}")
+
+
+def test_pseudonym_gives_same_fake_value_to_identical_repeated_value():
+    """#166: pseudonym은 표기가 완전히 같은 반복 값에 같은 가명을 배정해야 한다(문맥 일관성)."""
+    text = "자택 번호는 010-1234-5678이고, 직장 번호는 010-1234-5678 입니다."
+    detections = PhoneDetector().detect(text)
+    assert len(detections) == 2
+    result = PseudonymAnonymizer(seed=1).apply(text, detections)
+    fake_phones = _FAKE_PHONE_RE.findall(result)
+    assert len(fake_phones) == 2
+    assert fake_phones[0] == fake_phones[1]
+
+
+def test_pseudonym_splits_identical_real_value_with_different_formatting():
+    """#166: 알려진 한계 — label.py의 #164와 동일한 근본 원인. pseudonym도 (kind, Detection.text)
+    로 "같은 개체"를 판별해서, 같은 실제 번호라도 표기(하이픈 유무 등)가 다르면 서로 다른
+    가명 두 개를 받는다 — docstring이 약속하는 "그 사람이라는 문맥이 유지된다"가 깨진다.
+    core가 표기 정규화 후 비교하도록 고치면 이 테스트가 깨져서 알 수 있다(현재 동작 고정용).
+    """
+    text = "자택 번호는 010-1234-5678이고, 직장 번호는 01012345678 입니다."
+    detections = PhoneDetector().detect(text)
+    assert len(detections) == 2
+    result = PseudonymAnonymizer(seed=1).apply(text, detections)
+    fake_phones = _FAKE_PHONE_RE.findall(result)
+    assert len(fake_phones) == 2
+    assert fake_phones[0] != fake_phones[1]
