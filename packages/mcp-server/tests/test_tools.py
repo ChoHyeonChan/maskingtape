@@ -9,6 +9,13 @@ SYNTHETIC = "고객 연락처 010-1234-5678, 주민번호 800101-1234560"
 REPEATED = "김철수 010-1234-5678, 김철수 010-1234-5678"
 
 
+@pytest.fixture(autouse=True)
+def _reset_llm_mode():
+    """LLM 모드는 전역 상태라, 각 테스트 후 규칙 전용으로 되돌려 다른 테스트를 오염시키지 않는다."""
+    yield
+    tools.set_llm_mode(False)
+
+
 def test_scan_text_reports_detections():
     report = tools.scan_text(SYNTHETIC)
     kinds = {d["kind"] for d in report}
@@ -72,3 +79,37 @@ def test_server_module_registers_tools():
     from maskingtape_mcp import server
 
     assert server.mcp.name == "maskingtape"
+
+
+def test_default_mode_is_rule_only_without_ollama():
+    # 기본은 규칙 전용(Ollama 불필요 안전 바닥) — _detectors()가 None이면 Pipeline이 규칙 기본을 쓴다
+    assert tools._detectors() is None
+    report = tools.scan_text("연락처 010-1234-5678")
+    assert any(d["kind"] == "phone" for d in report)
+
+
+def test_llm_mode_uses_llm_detectors():
+    # --llm이 켜지면 탐지기 세트에 LLM 이름 탐지기가 들어간다
+    from maskingtape.detectors import LLMNameDetector
+
+    tools.set_llm_mode(True)
+    assert any(isinstance(d, LLMNameDetector) for d in tools._detectors())
+
+
+def test_server_llm_flag_enables_llm_mode(monkeypatch):
+    # server.main()이 --llm을 파싱해 LLM 모드를 켠다 (mcp.run은 막아 실제 서버는 안 띄운다)
+    from maskingtape_mcp import server
+
+    monkeypatch.setattr("sys.argv", ["maskingtape-mcp", "--llm"])
+    monkeypatch.setattr(server.mcp, "run", lambda: None)
+    server.main()
+    assert tools._detectors() is not None
+
+
+def test_server_without_flag_keeps_rule_mode(monkeypatch):
+    from maskingtape_mcp import server
+
+    monkeypatch.setattr("sys.argv", ["maskingtape-mcp"])
+    monkeypatch.setattr(server.mcp, "run", lambda: None)
+    server.main()
+    assert tools._detectors() is None

@@ -21,14 +21,27 @@ AI 에이전트가 한국어 데이터를 다루기 전에 거치는 **프라이
 pip install -e packages/core -e packages/mcp-server
 
 maskingtape-mcp        # stdio 전송으로 서버 시작 (보통 MCP 클라이언트가 대신 띄움)
+maskingtape-mcp --llm  # 하이브리드 모드 — 이름을 로컬 LLM으로 문맥 판단 (Ollama 필요)
 ```
+
+## 규칙 전용 vs 하이브리드(`--llm`)
+
+- **기본(`maskingtape-mcp`)**: 규칙 전용. Ollama 없이 어디서나 동작하는 **안전 바닥**.
+- **`--llm`**: 이름을 로컬 LLM(Ollama + Qwen)으로 문맥 판단하는 하이브리드. 문맥 단서 없는
+  이름("이서준 대표"의 서명 등)까지 잡는다. **로컬 Ollama가 실행 중이어야 한다.**
+
+LLM 사용 여부를 도구 파라미터가 아닌 **서버 플래그**로 두는 이유: MCP 도구는 "에이전트가
+조작된다"고 가정하므로, 마스킹 강도를 신뢰 주체(서버 세운 사람)가 정하게 한다. `--llm`인데
+Ollama가 없으면 **조용히 규칙으로 강등하지 않고 명확히 에러**난다(하이브리드인 줄 알고 이름이
+새는 것을 막기 위함).
 
 ## 클라이언트 등록
 
 Claude Code:
 
 ```bash
-claude mcp add maskingtape -- maskingtape-mcp
+claude mcp add maskingtape -- maskingtape-mcp          # 규칙 전용
+claude mcp add maskingtape -- maskingtape-mcp --llm    # 하이브리드 (Ollama 필요)
 ```
 
 Claude Desktop (`claude_desktop_config.json`):

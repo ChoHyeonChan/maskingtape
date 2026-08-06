@@ -10,25 +10,46 @@ from dataclasses import asdict
 
 from maskingtape import Pipeline
 from maskingtape.anonymizers import LabelAnonymizer, MaskAnonymizer
+from maskingtape.detectors import llm_detectors
 
 from maskingtape_mcp.safe_file import read_text_file, write_masked_copy
 
-# 탐지기는 상태가 없으므로 파이프라인을 재사용한다
-_scan_pipeline = Pipeline()
+# LLM(하이브리드) 탐지 사용 여부. 서버 레벨 결정 — server.py가 --llm에 따라 한 번 set_llm_mode를 부른다.
+# 도구 파라미터가 아니라 서버 설정으로 두는 이유: MCP는 "에이전트가 조작된다"고 가정하므로,
+# 조작된 에이전트가 마스킹 강도를 낮추지 못하게 신뢰 주체(서버 세운 사람)가 정한다.
+_use_llm = False
+
+
+def set_llm_mode(enabled: bool) -> None:
+    """LLM(하이브리드) 탐지 사용 여부를 설정한다.
+
+    기본(False)은 규칙 전용 — Ollama 없이 어디서나 동작하는 안전 바닥. True면 이름을
+    로컬 LLM으로 문맥 판단하는 llm_detectors()를 쓴다(**로컬 Ollama 필요**).
+    Ollama가 없으면 호출 시 명확히 에러난다 — 조용히 규칙으로 강등하지 않는다
+    (하이브리드인 줄 알고 이름이 새는 silent downgrade를 막기 위함).
+    """
+    global _use_llm
+    _use_llm = enabled
+
+
+def _detectors():
+    """현재 모드에 맞는 탐지기 세트. None이면 Pipeline이 규칙 전용 기본(default_detectors)을 쓴다."""
+    return llm_detectors() if _use_llm else None
 
 
 def _build_pipeline(strategy: str, numbered: bool) -> Pipeline:
     """strategy/numbered 조합으로 파이프라인을 만든다. 잘못된 strategy는 ValueError."""
+    detectors = _detectors()
     if strategy == "mask":
-        return Pipeline(anonymizer=MaskAnonymizer())
+        return Pipeline(detectors=detectors, anonymizer=MaskAnonymizer())
     if strategy == "label":
-        return Pipeline(anonymizer=LabelAnonymizer(numbered=numbered))
+        return Pipeline(detectors=detectors, anonymizer=LabelAnonymizer(numbered=numbered))
     raise ValueError(f"지원하지 않는 strategy: {strategy!r} (mask 또는 label)")
 
 
 def scan_text(text: str) -> list[dict]:
     """텍스트에서 개인정보를 탐지해 리포트(dict 목록)로 반환한다."""
-    return [asdict(d) for d in _scan_pipeline.scan(text)]
+    return [asdict(d) for d in Pipeline(detectors=_detectors()).scan(text)]
 
 
 def anonymize_text(text: str, strategy: str = "mask", numbered: bool = False) -> str:
