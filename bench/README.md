@@ -219,6 +219,21 @@ python -m bench.evaluators.evaluate_masking bench/datasets/synth_v1.jsonl --stra
 다른 가명 두 개를 받아** "그 사람" 문맥이 깨진다. 정상 케이스와 이 한계 둘 다 회귀
 테스트로 고정해뒀다.
 
+**mask(keep_head) 유출 오판 수정**: `MaskAnonymizer(keep_head=N)`는 구간 앞 N글자를 의도적으로
+남기는 옵션인데, bench가 CLI/테스트 어디서도 쓴 적이 없었다([#168](https://github.com/ChoHyeonChan/maskingtape/issues/168)). 직접 재현해보니 `mask_quality.py`가 keep_head를 몰라서
+**의도된 노출을 전부 "부분 유출"로 오판**했다(RRN에 keep_head=2 적용 시 유출률 100%로 표시).
+이건 core 버그가 아니라 bench 자체 도구의 문제라 직접 고쳤다 — `evaluate_mask_quality()`에
+`keep_head` 파라미터를 추가해 앞 N글자를 유출 판정에서 제외하고, `evaluate_masking.py`에
+`--keep-head` CLI 플래그도 연결했다. keep_head보다 실제로 더 많이 새는 진짜 버그는 여전히
+잡히는지도 회귀 테스트로 확인했다.
+
+그런데 이 과정에서 core 쪽 실제 위험도 하나 발견했다: keep_head는 파이프라인 전체(모든
+kind)에 적용되는 단일 값이라, **RRN(14자)을 겨냥해 keep_head=2를 설정하면 같은 파이프라인이
+탐지하는 2글자 이름은 완전히 노출된다**(`min(keep_head, span_len)`이 짧은 값 전체를 삼킴) —
+"일부만 보여주려던" 설정이 조용히 "이름은 전혀 안 가림"이 되는 셈이다. bench 소관이 아니라
+core에 [#169](https://github.com/ChoHyeonChan/maskingtape/issues/169)로 남겼고, 이 현재
+동작 자체는 회귀 테스트로 고정해뒀다(core가 고치면 테스트가 깨져서 알 수 있다).
+
 ## 신뢰도(confidence) 임계값 분석
 
 core의 각 `Detection`에는 `confidence`(0.0~1.0)가 붙어있지만 지금까지 어디에도 쓰이지 않았다.

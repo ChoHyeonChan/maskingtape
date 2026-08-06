@@ -32,13 +32,22 @@ class Leak:
         return self.exposed_ratio < 1.0
 
 
-def _exposed_ratio(original_text: str, masked_text: str, start: int, end: int) -> float:
-    """[start, end) 구간에서 원문 글자가 마스킹 후에도 그대로 남아있는 비율."""
+def _exposed_ratio(original_text: str, masked_text: str, start: int, end: int, keep_head: int = 0) -> float:
+    """[start, end) 구간에서 원문 글자가 마스킹 후에도 그대로 남아있는 비율.
+
+    keep_head(MaskAnonymizer의 동명 옵션과 대응)만큼 앞쪽은 "의도적으로 남긴 부분"이므로
+    노출로 치지 않는다 — 유출 판정은 그 뒤 구간에서만 계산한다. keep_head가 구간 길이보다
+    크거나 같으면(전부 의도적 노출) 남는 구간이 없어 유출 판정 대상 자체가 없다(0.0).
+    """
     span_len = end - start
     if span_len <= 0:
         return 0.0
-    exposed = sum(1 for i in range(start, end) if masked_text[i] == original_text[i])
-    return exposed / span_len
+    check_start = start + min(keep_head, span_len)
+    remaining_len = end - check_start
+    if remaining_len <= 0:
+        return 0.0
+    exposed = sum(1 for i in range(check_start, end) if masked_text[i] == original_text[i])
+    return exposed / remaining_len
 
 
 @dataclass
@@ -48,6 +57,7 @@ class MaskQualityResult:
     leaks: list[Leak] | None = None
     length_mismatch_count: int = 0
     strategy: str = "mask"
+    keep_head: int = 0
 
     def __post_init__(self) -> None:
         if self.leaks is None:
@@ -75,7 +85,9 @@ class MaskQualityResult:
         return 1 - (self.length_mismatch_count / self.doc_count) if self.doc_count else 0.0
 
 
-def evaluate_mask_quality(rows: list[dict], pipeline: Pipeline, strategy: str = "mask") -> MaskQualityResult:
+def evaluate_mask_quality(
+    rows: list[dict], pipeline: Pipeline, strategy: str = "mask", keep_head: int = 0
+) -> MaskQualityResult:
     """strategy에 따라 유출 판정 방식이 달라진다 — "mask"만 자리별 비교가 성립한다.
 
     위치별 문자 비교(_exposed_ratio)는 "같은 위치는 안 바뀐 원문"이라는 가정에 기대는데, 이건
@@ -85,8 +97,14 @@ def evaluate_mask_quality(rows: list[dict], pipeline: Pipeline, strategy: str = 
     문자가 일치해 실제로는 안 새어나간 값이 "부분 유출"로 오판된다(실측으로 확인한 문제).
     그래서 "mask"만 위치 비교를 쓰고, 나머지는 원문 전체가 결과에 통째로 남아있는지만 본다
     (부분 유출 개념 자체가 없음 — label/pseudonym은 구간을 전부 바꾸거나 전혀 안 바꾸거나 둘 중 하나).
+
+    keep_head: 평가 대상 파이프라인의 MaskAnonymizer가 실제로 쓰는 keep_head 값과 반드시
+    맞춰서 넘겨야 한다(#166) — MaskAnonymizer(keep_head=N)로 앞 N글자를 의도적으로 남겼는데
+    이 함수가 keep_head=0인 채로 평가하면, 의도된 노출을 전부 "부분 유출"로 오판한다(직접
+    재현 확인: RRN에 keep_head=2를 썼더니 평가 결과가 "14% 노출, 부분 유출 1건"으로 나왔다 —
+    실제로는 설계대로 동작한 것이었다).
     """
-    result = MaskQualityResult(strategy=strategy)
+    result = MaskQualityResult(strategy=strategy, keep_head=keep_head)
     for row in rows:
         original_text = row["text"]
         masked_text = pipeline.anonymize(original_text).text
@@ -104,7 +122,7 @@ def evaluate_mask_quality(rows: list[dict], pipeline: Pipeline, strategy: str = 
                 continue
 
             if strategy == "mask" and lengths_match:
-                ratio = _exposed_ratio(original_text, masked_text, start, end)
+                ratio = _exposed_ratio(original_text, masked_text, start, end, keep_head=keep_head)
             else:
                 # 위치 비교가 성립하지 않는 경우(mask가 아니거나 길이가 다름) — 원문이
                 # 통째로 남아있는지만 본다.
@@ -126,6 +144,10 @@ def format_mask_quality_report(result: MaskQualityResult) -> str:
     lines = [
         title,
         "-" * len(title),
+    ]
+    if result.keep_head:
+        lines.append(f"keep_head:          {result.keep_head} (앞 {result.keep_head}글자는 의도적 노출 — 유출 판정 제외)")
+    lines += [
         f"평가 문서 수:        {result.doc_count}",
         f"정답 개인정보 항목 수: {result.gold_pii_count}",
         f"유출 항목 수:        {result.leak_count} (유출률 {result.leak_rate:.1%}) "
