@@ -47,9 +47,20 @@ def _build_pipeline(strategy: str, numbered: bool) -> Pipeline:
     raise ValueError(f"지원하지 않는 strategy: {strategy!r} (mask 또는 label)")
 
 
+def _report(detection) -> dict:
+    """탐지 리포트 dict — 종류·위치·확신도만. **원문 PII 값(text)은 싣지 않는다**(데이터 최소화).
+
+    에이전트는 start/end로 필요하면 원문을 잘라볼 수 있고, 리포트를 로그·외부로 넘겨도
+    원문 개인정보가 함께 새지 않는다(리포트를 "안전한 요약"으로 오인하는 footgun 차단).
+    """
+    report = asdict(detection)
+    report.pop("text", None)
+    return report
+
+
 def scan_text(text: str) -> list[dict]:
-    """텍스트에서 개인정보를 탐지해 리포트(dict 목록)로 반환한다."""
-    return [asdict(d) for d in Pipeline(detectors=_detectors()).scan(text)]
+    """텍스트에서 개인정보를 탐지해 리포트(종류·위치·확신도)를 반환한다."""
+    return [_report(d) for d in Pipeline(detectors=_detectors()).scan(text)]
 
 
 def anonymize_text(text: str, strategy: str = "mask", numbered: bool = False) -> str:
