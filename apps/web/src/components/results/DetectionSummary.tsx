@@ -22,28 +22,50 @@ export function DetectionSummary({ detections, activeFilter, onFilterSelect }: P
   return (
     <div className="summary" role="status">
       <span className="summary__total">개인정보 {detections.length}건 발견</span>
-      <div className="summary__filters" aria-label="개인정보 유형 필터">
-        <button
-          type="button"
-          className={`summary__filter${!activeFilter ? " is-active" : ""}`}
-          aria-pressed={!activeFilter}
-          onClick={() => onFilterSelect(null)}
-        >
-          전체
-        </button>
+      <div className="summary__cards" aria-label="발견된 개인정보 유형">
         {counts.map(({ kind, count }) => (
           <button
             key={kind}
             type="button"
-            className={`summary__filter summary__filter--${kind}${activeFilter === kind ? " is-active" : ""}`}
+            className={`summary-card summary-card--${kind}${activeFilter === kind ? " is-active" : ""}`}
             aria-pressed={activeFilter === kind}
-            onClick={() => onFilterSelect(kind)}
+            onClick={() => onFilterSelect(activeFilter === kind ? null : kind)}
           >
-            <span className={`summary__dot summary__dot--${kind}`} aria-hidden="true" />
-            {KIND_LABELS[kind] ?? kind} {count}
+            <span className="summary-card__icon" aria-hidden="true" />
+            <span className="summary-card__sr">{KIND_LABELS[kind] ?? kind} {count}</span>
+            <span className="summary-card__body">
+              <span>{KIND_LABELS[kind] ?? kind}</span>
+              <strong>{count}건</strong>
+            </span>
           </button>
         ))}
       </div>
+      <details className="summary__details">
+        <summary>필터 초기화</summary>
+        <div className="summary__filters" aria-label="개인정보 유형 필터">
+          <button
+            type="button"
+            className={`summary__filter${!activeFilter ? " is-active" : ""}`}
+            aria-pressed={!activeFilter}
+            onClick={() => onFilterSelect(null)}
+          >
+            전체
+          </button>
+          {counts.map(({ kind }) => (
+            <button
+              key={kind}
+              type="button"
+              className={`summary__filter summary__filter--${kind}${activeFilter === kind ? " is-active" : ""}`}
+            aria-pressed={activeFilter === kind}
+            aria-label={`${KIND_LABELS[kind] ?? kind} 보기`}
+            onClick={() => onFilterSelect(kind)}
+          >
+            <span className={`summary__dot summary__dot--${kind}`} aria-hidden="true" />
+            {KIND_LABELS[kind] ?? kind}
+          </button>
+          ))}
+        </div>
+      </details>
     </div>
   );
 }

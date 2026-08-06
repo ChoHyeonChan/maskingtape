@@ -1,11 +1,9 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { scanText } from "../../api/scanClient";
 import type { Detection } from "../../types/detection";
 
 const PLACEHOLDER = "예: 고객 홍길동님은 010-1234-5678 또는 hong@example.com으로 연락 가능합니다.";
 const MAX_TEXT_LENGTH = 100_000;
-const TEXTAREA_BOTTOM_MARGIN = 118;
-const TEXTAREA_MIN_HEIGHT = 260;
 
 const PRESETS: { label: string; text: string }[] = [
   {
@@ -19,37 +17,37 @@ const PRESETS: { label: string; text: string }[] = [
 ];
 
 interface Props {
+  text: string;
+  hasResult: boolean;
+  resultVersion: number;
+  onTextChange: (text: string) => void;
+  onClear: () => void;
   onResult: (text: string, detections: Detection[]) => void;
 }
 
-export function InputPanel({ onResult }: Props) {
-  const [text, setText] = useState("");
+export function InputPanel({ text, hasResult, resultVersion, onTextChange, onClear, onResult }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
+  const [copied, setCopied] = useState(false);
+  const [presetsOpen, setPresetsOpen] = useState(false);
+  const [revealingResult, setRevealingResult] = useState(false);
   const trimmedLength = text.trim().length;
   const isTooLong = text.length > MAX_TEXT_LENGTH;
   const canScan = trimmedLength > 0 && !isTooLong;
 
-  useLayoutEffect(() => {
-    function resizeTextarea() {
-      const textarea = textareaRef.current;
-      if (!textarea) return;
+  useEffect(() => {
+    if (!hasResult || resultVersion === 0) return;
 
-      const top = textarea.getBoundingClientRect().top;
-      const maxHeight = Math.max(TEXTAREA_MIN_HEIGHT, window.innerHeight - top - TEXTAREA_BOTTOM_MARGIN);
-      textarea.style.height = "auto";
-      textarea.style.height = `${Math.min(maxHeight, textarea.scrollHeight)}px`;
-      textarea.style.overflowY = textarea.scrollHeight > maxHeight ? "auto" : "hidden";
-    }
-
-    resizeTextarea();
-    window.addEventListener("resize", resizeTextarea);
-    return () => window.removeEventListener("resize", resizeTextarea);
-  }, [text]);
+    setRevealingResult(true);
+    const timeout = window.setTimeout(() => setRevealingResult(false), 950);
+    return () => window.clearTimeout(timeout);
+  }, [hasResult, resultVersion]);
 
   async function handleScan() {
+    if (hasResult) {
+      handleClear();
+      return;
+    }
     if (!canScan) return;
     setLoading(true);
     setError(null);
@@ -64,43 +62,95 @@ export function InputPanel({ onResult }: Props) {
   }
 
   function handlePreset(text: string) {
-    setText(text);
+    onTextChange(text);
     setError(null);
+    setCopied(false);
+    setPresetsOpen(false);
   }
 
   function handleClear() {
-    setText("");
+    onClear();
     setError(null);
+    setCopied(false);
+  }
+
+  async function handleCopy() {
+    if (!text) return;
+    await navigator.clipboard.writeText(text);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1400);
   }
 
   return (
     <div className="input-panel">
-      <div className="input-panel__presets" data-coach="presets">
-        <span className="input-panel__presets-label">예제</span>
-        {PRESETS.map((preset) => (
-          <button
-            key={preset.label}
-            type="button"
-            className="input-panel__preset"
-            onClick={() => handlePreset(preset.text)}
+      <div className="input-panel__header">
+        <h2><span aria-hidden="true">▤</span> {hasResult ? "탐지 결과" : "문서 입력"}</h2>
+        <div className="input-panel__tools">
+          <details
+            className="input-panel__presets"
+            data-coach="presets"
+            open={presetsOpen}
+            onToggle={(event) => setPresetsOpen(event.currentTarget.open)}
           >
-            {preset.label}
+            <summary className="input-panel__presets-label">예제 불러오기</summary>
+            <div className="input-panel__preset-list">
+              {PRESETS.map((preset) => (
+                <button
+                  key={preset.label}
+                  type="button"
+                  className="input-panel__preset"
+                  onClick={() => handlePreset(preset.text)}
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+          </details>
+          <button type="button" className="input-panel__sample" onClick={() => handlePreset(PRESETS[1].text)}>
+            신청서 샘플
           </button>
-        ))}
+        </div>
       </div>
 
-      <textarea
-        ref={textareaRef}
-        value={text}
-        onChange={(event) => {
-          setText(event.target.value);
-          if (error) setError(null);
-        }}
-        placeholder={PLACEHOLDER}
-        rows={8}
-        aria-label="탐지할 텍스트 입력"
-        aria-describedby="input-meta"
-      />
+      <div className={`input-panel__textarea-wrap${revealingResult ? " is-revealing" : ""}`}>
+        {hasResult && (
+          <>
+            <button
+              type="button"
+              className="input-panel__copy-inline"
+              onClick={handleCopy}
+              disabled={!text}
+              aria-label={copied ? "복사됨" : "마스킹 결과 복사"}
+              title={copied ? "복사됨" : "복사"}
+            >
+              <span className="copy-icon" aria-hidden="true" />
+            </button>
+            {copied && (
+              <span className="input-panel__copy-toast" role="status">
+                복사되었습니다
+              </span>
+            )}
+          </>
+        )}
+        <textarea
+          className={revealingResult ? "is-text-revealing" : undefined}
+          value={text}
+          onChange={(event) => {
+            onTextChange(event.target.value);
+            if (error) setError(null);
+            if (copied) setCopied(false);
+          }}
+          placeholder={PLACEHOLDER}
+          rows={8}
+          aria-label={hasResult ? "마스킹된 탐지 결과" : "탐지할 텍스트 입력"}
+          aria-describedby="input-meta"
+        />
+        {revealingResult && (
+          <pre className="input-panel__result-reveal" aria-hidden="true">
+            {text}
+          </pre>
+        )}
+      </div>
 
       <div className="input-panel__meta" id="input-meta">
         <span>{text.length.toLocaleString()} / {MAX_TEXT_LENGTH.toLocaleString()}자</span>
@@ -111,15 +161,19 @@ export function InputPanel({ onResult }: Props) {
         <button
           type="button"
           onClick={handleScan}
-          disabled={loading || !canScan}
+          disabled={loading || (!canScan && !hasResult)}
           data-coach="scan"
-          className={`input-panel__primary${canScan && !loading ? " is-ready" : " is-idle"}`}
+          className={`input-panel__primary${canScan && !loading && !hasResult ? " is-ready" : " is-static"}`}
         >
-          {loading ? "탐지 중..." : canScan ? "개인정보 탐지" : "텍스트 입력 필요"}
+          <span aria-hidden="true">{hasResult ? "↻" : "⌕"}</span>
+          {hasResult ? "초기화 하기" : loading ? "처리 중..." : canScan ? "개인정보 탐지 및 마스킹 하기" : "텍스트 입력 필요"}
         </button>
-        <button type="button" className="input-panel__secondary" onClick={handleClear} disabled={!text && !error}>
-          지우기
-        </button>
+        {!hasResult && (
+          <button type="button" className="input-panel__secondary" onClick={handleClear} disabled={!text && !error}>
+            <span aria-hidden="true">↻</span>
+            초기화
+          </button>
+        )}
       </div>
 
       {error && (

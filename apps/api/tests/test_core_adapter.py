@@ -33,12 +33,36 @@ class FailingPipeline:
         raise ValueError("boom")
 
 
+class PassportPipeline:
+    def scan(self, text: str) -> list[Detection]:
+        return [
+            Detection(
+                kind="passport",
+                start=0,
+                end=len(text),
+                text=text,
+                confidence=1.0,
+                detector="PassportDetector",
+            )
+        ]
+
+    def anonymize(self, text: str) -> AnonymizeResult:
+        detections = self.scan(text)
+        return AnonymizeResult(text="*" * len(text), detections=detections)
+
+
 def test_core_adapter_accepts_injected_pipeline() -> None:
     result = CoreEngineAdapter(pipeline=FakePipeline()).scan("sample@example.com")
 
     assert len(result.detections) == 1
     assert result.detections[0].kind == DetectionKind.EMAIL
     assert result.detections[0].detector == "FakeDetector"
+
+
+def test_core_adapter_accepts_all_default_core_kinds() -> None:
+    result = CoreEngineAdapter(pipeline=PassportPipeline()).scan("M12345678")
+
+    assert result.detections[0].kind == DetectionKind.PASSPORT
 
 
 def test_core_adapter_anonymize_masks_detected_spans() -> None:

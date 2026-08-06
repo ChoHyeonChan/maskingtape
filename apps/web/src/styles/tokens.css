@@ -1,37 +1,23 @@
 :root {
   color-scheme: light;
-  --surface: #f4f7fb;
+  --surface: #f4f7fc;
   --surface-strong: #ffffff;
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --border: rgba(15, 23, 42, 0.12);
-  --shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+  --text-primary: #10203d;
+  --text-secondary: #4b5f7d;
+  --border: rgba(24, 58, 139, 0.14);
+  --shadow: 0 18px 45px rgba(24, 58, 139, 0.12);
+  --brand-blue: #183a8b;
+  --brand-blue-deep: #102a68;
+  --brand-blue-soft: #e8eefb;
+  --brand-blue-tint: #f5f8fe;
+  --brand-cyan: #167f9f;
 
-  --kind-rrn: #2563eb;
-  --kind-phone: #16a34a;
-  --kind-email: #db2777;
-  --kind-card: #ea580c;
-  --kind-address: #7c3aed;
-  --kind-name: #0f766e;
-  --kind-business: #0891b2;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
-    --surface: #07111f;
-    --surface-strong: #111c2e;
-    --text-primary: #f8fafc;
-    --text-secondary: #cbd5e1;
-    --border: rgba(255, 255, 255, 0.12);
-    --shadow: 0 20px 45px rgba(2, 8, 23, 0.35);
-
-    --kind-rrn: #60a5fa;
-    --kind-phone: #4ade80;
-    --kind-email: #f472b6;
-    --kind-card: #fb923c;
-    --kind-address: #a78bfa;
-    --kind-name: #2dd4bf;
-    --kind-business: #22d3ee;
-  }
+  --kind-rrn: #183a8b;
+  --kind-passport: #3158b7;
+  --kind-phone: #16806f;
+  --kind-email: #b83b75;
+  --kind-card: #b9671d;
+  --kind-address: #6751b8;
+  --kind-name: #0f6f7d;
+  --kind-business: #167f9f;
 }
