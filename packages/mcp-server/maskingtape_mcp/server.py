@@ -2,9 +2,12 @@
 
 실행: `maskingtape-mcp` (stdio 전송 — MCP 클라이언트가 이 프로세스를 띄운다)
 Claude Code 등록 예: `claude mcp add maskingtape -- maskingtape-mcp`
+하이브리드(로컬 LLM) 이름 판단까지 켜려면: `claude mcp add maskingtape -- maskingtape-mcp --llm`
 """
 
 from __future__ import annotations
+
+import argparse
 
 from mcp.server.fastmcp import FastMCP
 
@@ -45,7 +48,24 @@ def anonymize_file(path: str, strategy: str = "mask", numbered: bool = False) ->
 
 
 def main() -> None:
-    """stdio 전송으로 서버를 시작한다."""
+    """stdio 전송으로 서버를 시작한다.
+
+    --llm: 이름을 로컬 LLM(Ollama+Qwen)으로 문맥 판단하는 하이브리드 모드. 미지정 시
+    규칙 전용(Ollama 불필요). 마스킹 강도를 서버 세운 사람이 정하도록 도구 파라미터가
+    아닌 서버 플래그로 둔다(조작된 에이전트가 낮추지 못하게).
+    """
+    parser = argparse.ArgumentParser(
+        prog="maskingtape-mcp",
+        description="한국어 개인정보 비식별화 MCP 서버 (stdio)",
+    )
+    parser.add_argument(
+        "--llm",
+        action="store_true",
+        help="이름을 로컬 LLM으로 문맥 판단(하이브리드). 로컬 Ollama 필요. 미지정 시 규칙 전용.",
+    )
+    args = parser.parse_args()
+    if args.llm:
+        tools.set_llm_mode(True)
     mcp.run()
 
 
