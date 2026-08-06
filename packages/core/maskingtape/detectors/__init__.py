@@ -16,6 +16,7 @@ from maskingtape.detectors.base import Detector
 from maskingtape.detectors.business.business_registration import BusinessRegistrationDetector
 from maskingtape.detectors.contact.email import EmailDetector
 from maskingtape.detectors.contact.phone import PhoneDetector
+from maskingtape.detectors.financial.account import AccountDetector
 from maskingtape.detectors.financial.creditcard import CreditCardDetector
 from maskingtape.detectors.identity.passport import PassportDetector
 from maskingtape.detectors.identity.rrn import RRNDetector
@@ -24,6 +25,7 @@ from maskingtape.detectors.personal.name import NameDetector
 from maskingtape.detectors.personal.name_llm import DEFAULT_MODEL, LLMNameDetector
 
 __all__ = [
+    "AccountDetector",
     "AddressDetector",
     "BusinessRegistrationDetector",
     "CreditCardDetector",
@@ -48,6 +50,7 @@ def default_detectors() -> list[Detector]:
         EmailDetector(),
         AddressDetector(),
         CreditCardDetector(),
+        AccountDetector(),
         BusinessRegistrationDetector(),
         NameDetector(),
     ]
@@ -71,6 +74,7 @@ def llm_detectors(model: str = DEFAULT_MODEL) -> list[Detector]:
         EmailDetector(),
         AddressDetector(),
         CreditCardDetector(),
+        AccountDetector(),
         BusinessRegistrationDetector(),
         LLMNameDetector(model=model),
         NameDetector(min_confidence=0.75),

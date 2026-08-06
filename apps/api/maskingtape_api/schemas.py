@@ -18,6 +18,7 @@ class DetectionKind(str, Enum):
     NAME = "name"
     ADDRESS = "address"
     CARD = "card"
+    ACCOUNT = "account"
     BIZ_REG = "biz_reg"
     PASSPORT = "passport"
 
