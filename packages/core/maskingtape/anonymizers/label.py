@@ -22,6 +22,7 @@ DEFAULT_LABELS = {
     "name": "이름",
     "address": "주소",
     "card": "카드번호",
+    "account": "계좌번호",
     "biz_reg": "사업자등록번호",
     "passport": "여권번호",
 }
