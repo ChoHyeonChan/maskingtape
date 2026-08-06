@@ -30,6 +30,7 @@ const FILTER_REVEAL_MS = 6500;
 export function HighlightedText({ text, detections, activeFilter }: Props) {
   const [coveredKeys, setCoveredKeys] = useState<Set<string>>(() => new Set());
   const [temporarilyRevealedKind, setTemporarilyRevealedKind] = useState<string | null>(null);
+  const [copiedOriginal, setCopiedOriginal] = useState(false);
   const allCovered = detections.length > 0 && coveredKeys.size === detections.length;
 
   useEffect(() => {
@@ -49,6 +50,12 @@ export function HighlightedText({ text, detections, activeFilter }: Props) {
 
   const segments = buildSegments(text, detections);
   const maskedText = segments.map((segment) => (segment.kind === "plain" ? segment.text : maskText(segment.text))).join("");
+  const copyText = segments
+    .map((segment) => {
+      if (segment.kind === "plain") return segment.text;
+      return coveredKeys.has(detectionKey(segment.detection)) ? maskText(segment.text) : segment.text;
+    })
+    .join("");
 
   function toggleCovered(key: string) {
     setCoveredKeys((current) => {
@@ -66,85 +73,107 @@ export function HighlightedText({ text, detections, activeFilter }: Props) {
     setCoveredKeys(allCovered ? new Set() : new Set(detections.map(detectionKey)));
   }
 
+  async function copyOriginal() {
+    await navigator.clipboard.writeText(copyText);
+    setCopiedOriginal(true);
+    window.setTimeout(() => setCopiedOriginal(false), 1400);
+  }
+
   return (
     <>
-      <p className="highlighted-text__hint">강조된 개인정보를 클릭하면 해당 값만 가리거나 다시 볼 수 있습니다.</p>
-      <p className="highlighted-text" data-testid="highlighted-text">
-        {segments.map((segment, i) => {
-          const isDetectionMatch = segment.kind !== "plain" && segment.detection.kind === activeFilter;
-          const hasFilter = Boolean(activeFilter);
-          const shouldDim = hasFilter && !isDetectionMatch;
+      <div className="analysis-result" aria-label="분석 하이라이트 결과">
+        <div className="analysis-result__toolbar">
+          <p className="analysis-result__hint">! 원하는 테이프를 누르면 해당 개인정보가 가려집니다 !</p>
+          <button
+            type="button"
+            className="analysis-result__cover-all"
+            onClick={toggleCoverAll}
+            disabled={detections.length === 0}
+            aria-pressed={allCovered}
+          >
+            {allCovered ? "가리기 전으로" : "모두 가리기"}
+          </button>
+        </div>
 
-          if (segment.kind === "plain") {
-            return (
-              <span
-                key={i}
-                className={classNames(
-                  "highlighted-text__plain",
-                  shouldDim && "highlighted-text__plain--dimmed",
-                )}
-              >
-                {segment.text}
-              </span>
-            );
-          }
+        <div className="analysis-result__body">
+          <p className="highlighted-text" data-testid="highlighted-text">
+            {segments.map((segment, i) => {
+              const isDetectionMatch = segment.kind !== "plain" && segment.detection.kind === activeFilter;
+              const hasFilter = Boolean(activeFilter);
+              const shouldDim = hasFilter && !isDetectionMatch;
 
-          const key = detectionKey(segment.detection);
-          const isCovered = coveredKeys.has(key);
-          const isTemporarilyRevealed = temporarilyRevealedKind === segment.detection.kind;
-          const shouldFocus = hasFilter && isDetectionMatch;
-          const label = KIND_LABELS[segment.detection.kind] ?? segment.detection.kind;
+              if (segment.kind === "plain") {
+                return (
+                  <span
+                    key={i}
+                    className={classNames(
+                      "highlighted-text__plain",
+                      shouldDim && "highlighted-text__plain--dimmed",
+                    )}
+                  >
+                    {segment.text}
+                  </span>
+                );
+              }
 
-          return (
-            <mark
-              key={i}
-              className={classNames(
-                "highlight",
-                "highlight--animated",
-                `highlight--${segment.detection.kind}`,
-                isLowConfidence(segment.detection) && "highlight--uncertain",
-                shouldFocus && "highlight--focused",
-                shouldDim && "highlight--dimmed",
-                isCovered && !isTemporarilyRevealed && "highlight--covered",
-                isCovered && isTemporarilyRevealed && "highlight--revealed",
-              )}
-              style={{ animationDelay: `${i * 40}ms` }}
-              title={`${label} · 신뢰도 ${Math.round(segment.detection.confidence * 100)}%`}
-              role="button"
-              tabIndex={0}
-              aria-pressed={isCovered}
-              aria-label={`${label} ${isCovered ? "가림 해제" : "가리기"}`}
-              onClick={() => toggleCovered(key)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  event.preventDefault();
-                  toggleCovered(key);
-                }
-              }}
-            >
-              {segment.text}
-              <span className="highlight__tag">{label}</span>
-            </mark>
-          );
-        })}
-      </p>
-      <div className="result-actions">
-        <button
-          type="button"
-          className="result-actions__button"
-          onClick={toggleCoverAll}
-          disabled={detections.length === 0}
-          aria-pressed={allCovered}
-        >
-          {allCovered ? "가리기 전으로" : "모두 가리기"}
-        </button>
+              const key = detectionKey(segment.detection);
+              const isCovered = coveredKeys.has(key);
+              const isTemporarilyRevealed = temporarilyRevealedKind === segment.detection.kind;
+              const shouldFocus = hasFilter && isDetectionMatch;
+              const label = KIND_LABELS[segment.detection.kind] ?? segment.detection.kind;
+
+              return (
+                <mark
+                  key={i}
+                  className={classNames(
+                    "highlight",
+                    "highlight--animated",
+                    `highlight--${segment.detection.kind}`,
+                    isLowConfidence(segment.detection) && "highlight--uncertain",
+                    shouldFocus && "highlight--focused",
+                    shouldDim && "highlight--dimmed",
+                    isCovered && !isTemporarilyRevealed && "highlight--covered",
+                    isCovered && isTemporarilyRevealed && "highlight--revealed",
+                  )}
+                  style={{ animationDelay: `${i * 40}ms` }}
+                  title={`${label} · 신뢰도 ${Math.round(segment.detection.confidence * 100)}%`}
+                  role="button"
+                  tabIndex={0}
+                  aria-pressed={isCovered}
+                  aria-label={`${label} ${isCovered ? "가림 해제" : "가리기"}`}
+                  onClick={() => toggleCovered(key)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      toggleCovered(key);
+                    }
+                  }}
+                >
+                  {segment.text}
+                  <span className="highlight__tag">{label}</span>
+                </mark>
+              );
+            })}
+          </p>
+
+          <button
+            type="button"
+            className="analysis-result__copy"
+            onClick={copyOriginal}
+            aria-label={copiedOriginal ? "분석 결과 복사됨" : "분석 결과 내용 복사"}
+            title={copiedOriginal ? "복사됨" : "복사"}
+          >
+            <span className="copy-icon" aria-hidden="true" />
+            <span>이대로 복사하기</span>
+          </button>
+          {copiedOriginal && (
+            <span className="analysis-result__copy-toast" role="status">
+              복사되었습니다
+            </span>
+          )}
+        </div>
       </div>
-      <section className="masked-result" aria-label="개인정보가 가려진 결과">
-        <h3 className="masked-result__title">마스킹 미리보기</h3>
-        <p className="masked-result__text" data-testid="masked-result">
-          {maskedText}
-        </p>
-      </section>
+      <span className="masked-result__text" data-testid="masked-result">{maskedText}</span>
     </>
   );
 }

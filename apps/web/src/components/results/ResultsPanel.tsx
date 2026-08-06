@@ -10,13 +10,22 @@ interface Props {
 }
 
 export function ResultsPanel({ scanned, activeFilter, scanRun, onFilterSelect }: Props) {
+  function handleFilterSelect(kind: string | null) {
+    onFilterSelect(kind);
+  }
+
   return (
-    <section className="panel panel--results" aria-label="탐지 결과">
+    <section className="panel panel--results" aria-label="분석 결과">
       <div className="panel__header">
         <div>
-          <p className="eyebrow">실시간 결과</p>
-          <h2>탐지 결과</h2>
+          <h2>
+            <span aria-hidden="true">▱</span>
+            분석 결과
+          </h2>
         </div>
+        {scanned && scanned.detections.length > 0 && (
+          <span className="panel__badge">총 {scanned.detections.length}건 발견</span>
+        )}
       </div>
 
       {scanned ? (
@@ -24,7 +33,7 @@ export function ResultsPanel({ scanned, activeFilter, scanRun, onFilterSelect }:
           <DetectionSummary
             detections={scanned.detections}
             activeFilter={activeFilter}
-            onFilterSelect={onFilterSelect}
+            onFilterSelect={handleFilterSelect}
           />
           <HighlightedText
             key={scanRun}
@@ -35,7 +44,7 @@ export function ResultsPanel({ scanned, activeFilter, scanRun, onFilterSelect }:
         </>
       ) : (
         <div className="empty-state">
-          <p>왼쪽에 텍스트를 입력하고 개인정보 탐지를 실행하면 결과가 여기에 표시됩니다.</p>
+          <p>왼쪽에 텍스트를 입력하고 개인정보 탐지 및 마스킹을 실행하면 결과가 여기에 표시됩니다.</p>
         </div>
       )}
     </section>

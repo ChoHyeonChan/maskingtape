@@ -91,6 +91,18 @@ core가 개인정보 아닌 걸 잘못 잡아내는지(정밀도, precision)는 
 0.25)만큼의 문서는 정답 라벨이 0개인 채로 생성되고, core가 여기서 뭔가를 탐지하면
 `evaluate.py`가 그대로 FP로 집계한다.
 
+## ReDoS 방지 회귀 테스트
+
+core detector 여러 개가 "정규식 반복에 상한을 둬 ReDoS(정규식 과다 역추적)를 막는다"를
+docstring/주석에 명시하고 있다(`email.py`는 상한이 없던 시절 40만 자·`@` 없음 입력에서
+1.4초 걸렸던 실측 사례까지 남겨뒀다). 하지만 이 속성을 지키는지 확인하는 자동 테스트가
+없어서, 누군가 나중에 정규식을 느슨하게 고치면 이 회귀를 아무도 못 잡는 사각지대였다([#162](https://github.com/ChoHyeonChan/maskingtape/issues/162)).
+
+`tests/test_detector_redos.py`가 core의 8개 규칙판 detector 전부에 구분자 없이 이어진
+40만 자 적대적 입력을 넣고, 시간 예산(5초, 여유 있게 잡음) 안에 끝나는지 확인한다 —
+직접 측정해보면 현재는 전부 0.15초 이내로 통과하지만, 이 테스트가 없으면 앞으로 그렇다는
+보장이 없다.
+
 ## 문장·표기 다양성
 
 실제 문서는 같은 개인정보라도 표기 형식이 제각각이라, 생성기도 그 다양성을 반영한다:
@@ -190,6 +202,22 @@ python -m bench.evaluators.evaluate_masking bench/datasets/synth_v1.jsonl --stra
 **pseudonym 보안 속성 검증**: `PseudonymAnonymizer`는 "가짜 주민번호/카드번호가 진짜 체크섬을
 통과하면 안 된다"는 설계를 코드에 명시하고 있다 — bench 테스트가 core의 실제 검증 함수
 (`_checksum_ok`, `_luhn_ok`)로 이 속성이 항상 지켜지는지 회귀 확인한다.
+
+**label(numbered=True) 동일 개체 연결 검증**: `LabelAnonymizer(numbered=True)`는 같은 값이
+반복되면 같은 번호(`[전화번호1]`)를 매겨 "동일 인물/번호"라는 문맥 정보를 보존한다고
+문서화돼 있는데, bench가 이 모드를 한 번도 테스트한 적이 없었다([#164](https://github.com/ChoHyeonChan/maskingtape/issues/164)). 직접 확인해보니 판별 기준이 `Detection.text`(탐지된 원문
+그대로)라서, **같은 실제 번호라도 표기(하이픈 유무 등)가 다르면 서로 다른 번호로 잘못
+분리**된다(`[전화번호1]`...`[전화번호2]`) — 실제 문서에서 같은 사람 번호를 문단마다 다르게
+쓰는 건 흔하므로 이 케이스에선 문서화된 약속이 지켜지지 않는다. 정상 케이스(표기 동일)와
+이 한계(표기 다름) 둘 다 회귀 테스트로 고정해뒀다.
+
+**pseudonym 동일 개체 일관성 검증**: `PseudonymAnonymizer`도 "같은 원본값은 같은 가명으로
+치환되어 '그 사람'이라는 문맥이 유지된다"고 문서화돼 있는데, bench가 이 속성을 한 번도
+테스트한 적이 없었다([#166](https://github.com/ChoHyeonChan/maskingtape/issues/166)). label
+`numbered=True`의 [#164](https://github.com/ChoHyeonChan/maskingtape/issues/164)와 근본
+원인이 같다 — 판별 기준이 `Detection.text`라서, **같은 실제 번호라도 표기가 다르면 서로
+다른 가명 두 개를 받아** "그 사람" 문맥이 깨진다. 정상 케이스와 이 한계 둘 다 회귀
+테스트로 고정해뒀다.
 
 **mask(keep_head) 유출 오판 수정**: `MaskAnonymizer(keep_head=N)`는 구간 앞 N글자를 의도적으로
 남기는 옵션인데, bench가 CLI/테스트 어디서도 쓴 적이 없었다([#168](https://github.com/ChoHyeonChan/maskingtape/issues/168)). 직접 재현해보니 `mask_quality.py`가 keep_head를 몰라서
