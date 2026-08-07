@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import random
 
-from bench.generator.entities import _biz_reg_check_digit, _PASSPORT_TYPE_CODES
+from bench.generator.entities import _ACCOUNT_GROUP_PATTERNS, _biz_reg_check_digit, _PASSPORT_TYPE_CODES
 
 # core RRNDetector가 허용하는 지역번호(rrn.py 참고)에 없는 국번 — 형식은 유선전화 같지만 매칭되면 안 됨.
 _INVALID_AREA_CODES = ["09", "07", "00", "08"]
@@ -95,6 +95,20 @@ def gen_passport_like_code(rng: random.Random) -> str:
     return f"{code}{digits}"
 
 
+def gen_account_number_like(rng: random.Random) -> str:
+    """계좌번호와 형식(그룹 자릿수)이 완전히 같지만, distractor라 문맥어 없는 문장에 심어진다
+    — AccountDetector의 문맥어 하드 게이트가 실제로 작동하는지 확인하는 용도(#180).
+
+    core는 체크섬이 없어(account.py) biz_reg처럼 "체크섬 무효화"를 못 쓴다 — 대신 이 값
+    자체는 진짜 계좌번호와 형식상 구분이 안 되고, documents.py가 계좌·은행 문맥어가 전혀
+    없는 템플릿(주문번호·일련번호 등)에만 심어서 문맥 게이트가 걸러내는지를 검증한다.
+    """
+    pattern = rng.choice(_ACCOUNT_GROUP_PATTERNS)
+    groups = [f"{rng.randint(0, 10**n - 1):0{n}d}" for n in pattern]
+    sep = rng.choice(["-", ""])
+    return sep.join(groups) if sep else "".join(groups)
+
+
 _DISTRACTOR_GENERATORS = [
     gen_order_number,
     gen_business_reg_number,
@@ -106,6 +120,7 @@ _DISTRACTOR_GENERATORS = [
     gen_invalid_rrn_like,
     gen_region_mention_like,
     gen_passport_like_code,
+    gen_account_number_like,
 ]
 
 

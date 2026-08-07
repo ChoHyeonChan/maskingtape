@@ -14,6 +14,7 @@ import time
 import pytest
 
 from maskingtape.detectors import (
+    AccountDetector,
     AddressDetector,
     BusinessRegistrationDetector,
     CreditCardDetector,
@@ -39,6 +40,7 @@ _CASES = [
     ("passport", PassportDetector(), "M" * _LENGTH),
     ("address", AddressDetector(), "가" * _LENGTH),
     ("name", NameDetector(), "김" * _LENGTH),
+    ("account", AccountDetector(), "1" * _LENGTH),
 ]
 
 
