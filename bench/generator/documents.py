@@ -17,7 +17,7 @@ from bench.generator.distractors import generate_distractor
 from bench.generator.entities import ALL_KINDS, generate_entity
 
 # distractor는 개인정보가 아니므로 라벨을 붙이지 않는다 — _NON_LABEL_KINDS에서 분기 처리.
-_PLACEHOLDER_RE = re.compile(r"\{(name|phone|email|rrn|address|card|biz_reg|passport|distractor)\}")
+_PLACEHOLDER_RE = re.compile(r"\{(name|phone|email|rrn|address|card|biz_reg|passport|account|distractor)\}")
 _NON_LABEL_KINDS = frozenset({"distractor"})
 
 # 개인정보가 실제로 포함된 템플릿 — 다양한 업무 맥락(고객센터/병원/학교/관공서/인사/배송/금융)을 커버한다.
@@ -75,6 +75,16 @@ _TEMPLATES = [
     # 외국인등록번호(rrn 성별코드 5~8) — core RRNDetector가 내국인과 동일한 규칙으로 잡는다(#148).
     "외국인등록번호 {rrn}로 체류 자격을 확인했습니다.",
     "{name}님의 외국인등록번호는 {rrn}이며, 담당자는 {phone}로 연락드립니다.",
+    # 계좌번호(account) — core AccountDetector는 문맥어(계좌/입금/이체/은행/뱅크 등)가 매치
+    # 앞뒤 15자 안에 없으면 아예 탐지하지 않는 하드 게이트라(#180), 모든 positive 템플릿에
+    # 문맥어를 반드시 포함한다.
+    "환불 계좌번호는 {account}이며, 예금주는 {name}입니다.",
+    "{name}님 앞으로 {account} 계좌에 입금 완료했습니다.",
+    "이체할 계좌: {account}, 은행 확인 부탁드립니다.",
+    "신한은행 {account}로 송금 부탁드립니다. 문의는 {phone}로.",
+    # "정산 담당자"는 쓰지 않는다 — "정"이 성씨라 "정산" 자체가 이름 후보가 되고 바로 뒤
+    # "담당자"가 존칭 단서로 잡혀 오탐이 난다(직접 재현 확인, #180). "출금"은 성씨가 아니라 안전하다.
+    "출금 담당자 {name}, 계좌는 {account}입니다.",
 ]
 
 # 개인정보가 전혀 없는(또는 distractor만 있는) 템플릿 — 정답 라벨이 0개인 문서를 만든다.

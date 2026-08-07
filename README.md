@@ -63,7 +63,7 @@ python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl
 
 합성 데이터셋(500건)도 시드로 고정돼 있어 바이트 단위로 똑같이 재생성된다 — `python -m bench.generate_dataset --count 500 --seed 42 --out bench/datasets/synth_v1.jsonl`
 
-**측정 기준: `e7b47a7` · 규칙 전용 모드(LLM 미사용)**
+**측정 기준: `40315e4` · 규칙 전용 모드(LLM 미사용)**
 
 | 종류 | precision | recall | F1 |
 |---|---|---|---|
@@ -74,21 +74,26 @@ python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl
 | 신용카드번호 | 1.000 | 1.000 | 1.000 |
 | 사업자등록번호 | 1.000 | 1.000 | 1.000 |
 | 여권번호 | 1.000 | 1.000 | 1.000 |
-| 이름 (규칙 전용) | 0.977 | 0.681 | 0.803 |
-| **전체** | **0.993** | **0.885** | **0.936** |
+| 계좌번호 | 1.000 | 1.000 | 1.000 |
+| 이름 (규칙 전용) | 0.981 | 0.715 | 0.827 |
+| **전체** | **0.995** | **0.900** | **0.945** |
 
-번호·주소·카드·사업자등록번호·여권번호는 형태(와 있는 경우 체크섬)로 완전히 잡힌다(유선전화·plus
-이메일·서브도메인·여러 문장으로 구성된 복합 문서까지 섞어도 흔들리지 않음을 확인했다) — 주소는
-[#118](https://github.com/ChoHyeonChan/maskingtape/issues/118), 사업자등록번호는
+번호·주소·카드·사업자등록번호·여권번호·계좌번호는 형태(와 있는 경우 체크섬)로 완전히 잡힌다
+(유선전화·plus 이메일·서브도메인·여러 문장으로 구성된 복합 문서까지 섞어도 흔들리지 않음을
+확인했다) — 주소는 [#118](https://github.com/ChoHyeonChan/maskingtape/issues/118), 사업자등록번호는
 [#123](https://github.com/ChoHyeonChan/maskingtape/issues/123), 여권번호는
-[#139](https://github.com/ChoHyeonChan/maskingtape/issues/139)에서 각각 새 kind를 추가해
+[#139](https://github.com/ChoHyeonChan/maskingtape/issues/139), 계좌번호는
+[#180](https://github.com/ChoHyeonChan/maskingtape/issues/180)에서 각각 새 kind를 추가해
 측정 사각지대를 없앴다. 주민등록번호는 [#159](https://github.com/ChoHyeonChan/maskingtape/issues/159)에서
 체크섬 없는(2020-10 이후 발급분) 케이스도 섞었는데 precision/recall엔 영향이 없다 — core가 체크섬과
 무관하게 탐지 자체는 하기 때문(다만 confidence가 0.85로 낮아져 임계값 필터를 쓰면 새기 쉽다,
-[bench/](bench/) 참고). 여권번호는 core에 체크섬 검증이 없어(형식+문맥어만으로 판단) distractor가
-우연히 형식과 겹치지 않는지 별도 회귀 테스트로 고정해뒀다. 이름 규칙판도 [#150](https://github.com/ChoHyeonChan/maskingtape/pull/150)(존칭 삼킴 수정)과 [#160](https://github.com/ChoHyeonChan/maskingtape/pull/160)(단어 중간 성씨 오탐 수정)으로 F1이 **0.676 → 0.803**으로 올라 이제 남은 과제는 문맥 없는 이름뿐이다:
+[bench/](bench/) 참고). 계좌번호는 core `AccountDetector`가 문맥어(계좌/입금/은행 등)가 없으면
+아예 탐지를 안 하는 하드 게이트인 데다, 체크섬이 없어 confidence가 **항상 정확히 0.6으로
+고정**된다 — confidence 임계값을 0.7 이상으로만 올려도 계좌번호가 전량 걸러진다는 걸 확인했다
+([bench/](bench/) 참고). 여권번호는 core에 체크섬 검증이 없어(형식+문맥어만으로 판단) distractor가
+우연히 형식과 겹치지 않는지 별도 회귀 테스트로 고정해뒀다. 이름 규칙판도 [#150](https://github.com/ChoHyeonChan/maskingtape/pull/150)(존칭 삼킴 수정)과 [#160](https://github.com/ChoHyeonChan/maskingtape/pull/160)(단어 중간 성씨 오탐 수정)으로 F1이 **0.676 → 0.827**로 올라 이제 남은 과제는 문맥 없는 이름뿐이다:
 
-- **이름** — 한국어 이름은 형태만으로 구분되지 않아 규칙만으로는 문맥 없는 이름을 놓친다. 이것이 **로컬 LLM 하이브리드**(`--llm`)가 필요한 이유이고, 그 효과는 [#46](https://github.com/ChoHyeonChan/maskingtape/issues/46)에서 같은 데이터셋으로 비교 측정한다 — 하이브리드로 켜면 F1이 **0.803 → 0.937**(precision 0.977→0.977, recall 0.681→0.900)로 오른다. 상세는 [bench/](bench/) 참고.
+- **이름** — 한국어 이름은 형태만으로 구분되지 않아 규칙만으로는 문맥 없는 이름을 놓친다. 이것이 **로컬 LLM 하이브리드**(`--llm`)가 필요한 이유이고, 그 효과는 [#46](https://github.com/ChoHyeonChan/maskingtape/issues/46)에서 같은 데이터셋으로 비교 측정한다 — 하이브리드로 켜면 F1이 **0.827 → 0.934**(precision 0.981→0.973, recall 0.715→0.899)로 오른다. 상세는 [bench/](bench/) 참고.
 
 마스킹 결과에 개인정보가 실제로 남는지도 따로 측정한다 — `python -m bench.evaluators.evaluate_masking bench/datasets/synth_v1.jsonl`. 상세는 [bench/](bench/) 참고.
 

@@ -17,6 +17,8 @@ from __future__ import annotations
 import random
 from dataclasses import dataclass
 
+from maskingtape.detectors.financial.creditcard import _luhn_ok
+
 # 성씨 상위 30종(통계청 인구총조사 기준 다빈도 성씨) — 특정 인물이 아닌 통계적 분포만 참고.
 _SURNAMES = [
     "김", "이", "박", "최", "정", "강", "조", "윤", "장", "임",
@@ -283,6 +285,49 @@ def gen_passport(rng: random.Random, difficulty: str = "mixed") -> Entity:
     return Entity(kind="passport", text=text)
 
 
+# 계좌번호 그룹 자릿수 패턴(그룹 수, 각 그룹 자릿수) — 실제 은행별 표기를 본떴다.
+# core AccountDetector의 정규식(2~7자리 그룹 2~4개, 총 10~14자리)을 만족해야 한다(#180).
+_ACCOUNT_GROUP_PATTERNS = [
+    (6, 2, 6),  # 국민은행 스타일 — 14자리
+    (3, 3, 6),  # 신한은행 스타일 — 12자리
+    (4, 2, 7),  # 카카오뱅크 스타일 — 13자리(account.py docstring 예시와 동일 그룹 수)
+    (4, 3, 6),  # 우리은행 스타일 — 13자리
+    (3, 2, 3, 4),  # 하나은행 스타일 — 12자리, 4그룹
+]
+
+# AccountDetector가 요구하는 문맥어(±15자) — account.py의 _ALL_CUES와 동일해야 실제로 탐지된다.
+_ACCOUNT_CONTEXT_WORDS = ("계좌", "입금", "이체", "예금주", "예금", "출금", "송금", "은행", "뱅크")
+
+
+def gen_account(rng: random.Random, difficulty: str = "mixed") -> Entity:
+    """계좌번호. core는 체크섬이 없고 문맥어(은행/계좌 관련어)가 근처에 있어야만 탐지하는
+    하드 게이트라(#180, account.py), 표기 자체는 은행별 그룹 자릿수 다양성만 반영한다 —
+    문맥어를 문서에 배치하는 건 documents.py 템플릿의 몫이다.
+
+    구분자 없이 붙여 쓰면(13~14자리) core `CreditCardDetector`의 "구분자 없는 13~19자리"
+    분기와 우연히 겹칠 수 있다 — Luhn 체크섬까지 우연히 통과하면(~10% 확률) 같은 구간이
+    card로도 잡혀 겹침 병합이 얽힌다. `gen_business_reg_number` distractor가 겪은 것과
+    같은 종류의 우연한 겹침이라, 붙여 쓴 자릿수가 13자리 이상이면 Luhn을 확인해 우연히
+    통과하면 마지막 자리를 일부러 바꿔 항상 무효로 만든다.
+    """
+    pattern = rng.choice(_ACCOUNT_GROUP_PATTERNS)
+    groups = [f"{rng.randint(0, 10**n - 1):0{n}d}" for n in pattern]
+
+    if difficulty == "easy":
+        sep = "-"
+    elif difficulty == "hard":
+        sep = ""
+    else:
+        sep = rng.choice(["-", "-", ""])
+
+    if not sep and len(groups[-1]) >= 1 and sum(len(g) for g in groups) >= 13 and _luhn_ok("".join(groups)):
+        last_digit = (int(groups[-1][-1]) + 1) % 10
+        groups[-1] = groups[-1][:-1] + str(last_digit)
+
+    text = sep.join(groups) if sep else "".join(groups)
+    return Entity(kind="account", text=text)
+
+
 def gen_address(rng: random.Random, difficulty: str = "mixed") -> Entity:
     if difficulty == "easy":
         style = "jibun"  # 지번 주소가 더 짧고 표준적인 형태
@@ -323,6 +368,7 @@ _GENERATORS = {
     "card": gen_card,
     "biz_reg": gen_biz_reg,
     "passport": gen_passport,
+    "account": gen_account,
 }
 
 ALL_KINDS = tuple(_GENERATORS.keys())

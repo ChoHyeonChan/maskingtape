@@ -13,7 +13,7 @@
 
 ```
 generator/
-  entities.py     # 종류별 합성 값 생성 (name/phone/email/rrn/address/card/biz_reg/passport)
+  entities.py     # 종류별 합성 값 생성 (name/phone/email/rrn/address/card/biz_reg/passport/account)
   distractors.py  # 개인정보가 아닌 '헷갈리는' 값 생성 (오탐 측정용)
   documents.py    # 문장 템플릿에 값을 심어 문서 + 라벨(span) 생성
 generate_dataset.py  # CLI — JSONL 데이터셋 생성
@@ -38,7 +38,7 @@ python -m bench.generate_dataset --count 500 --seed 42 --out bench/datasets/synt
 python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl --report bench/reports/report_v1.md
 ```
 
-500건 기준 최신 실측(#159 체크섬 없는 RRN + #160 core 단어경계 수정 반영 후 재측정, seed=42):
+500건 기준 최신 실측(#180 계좌번호 신규 kind 반영 후 재측정, seed=42):
 
 | kind | precision | recall | f1 | 비고 |
 |---|---|---|---|---|
@@ -47,7 +47,8 @@ python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl --report bench
 | address | 1.000 | 1.000 | 1.000 | [#118](https://github.com/ChoHyeonChan/maskingtape/issues/118)에서 시/도 없는 시/군 시작 주소 positive를 추가 — core 수정([#117](https://github.com/ChoHyeonChan/maskingtape/pull/117))이 이미 머지돼 recall도 1.000으로 정상 측정됨 |
 | biz_reg | 1.000 | 1.000 | 1.000 | [#123](https://github.com/ChoHyeonChan/maskingtape/issues/123)에서 새 kind로 추가 |
 | passport | 1.000 | 1.000 | 1.000 | [#139](https://github.com/ChoHyeonChan/maskingtape/issues/139)에서 새 kind로 추가, [#145](https://github.com/ChoHyeonChan/maskingtape/issues/145)에서 전용 distractor(`gen_passport_like_code`)까지 추가했는데도 오탐 0건 유지 |
-| name | 0.977 | 0.681 | 0.803 | 규칙판. [#150](https://github.com/ChoHyeonChan/maskingtape/pull/150)(존칭 삼킴 수정)과 [#160](https://github.com/ChoHyeonChan/maskingtape/pull/160)(단어 중간 성씨 오탐 수정, [#158](https://github.com/ChoHyeonChan/maskingtape/issues/158) 대응)으로 개선 — 아래 "이름 탐지 방식 비교" 절 참고. #158은 부분만 해결됐다 — 잔여 FP 상세는 confidence 절 참고 |
+| account | 1.000 | 1.000 | 1.000 | [#180](https://github.com/ChoHyeonChan/maskingtape/issues/180)에서 새 kind로 추가 — 문맥어(계좌/입금/은행 등) 하드 게이트라 confidence가 항상 정확히 0.6으로 고정된다는 걸 발견, 아래 confidence 절 참고 |
+| name | 0.958 | 0.699 | 0.808 | 규칙판. [#150](https://github.com/ChoHyeonChan/maskingtape/pull/150)(존칭 삼킴 수정)과 [#160](https://github.com/ChoHyeonChan/maskingtape/pull/160)(단어 중간 성씨 오탐 수정, [#158](https://github.com/ChoHyeonChan/maskingtape/issues/158) 대응)으로 개선 — 아래 "이름 탐지 방식 비교" 절 참고. #158은 부분만 해결됐다 — 잔여 FP 상세는 confidence 절 참고. 수치가 이전과 살짝 다른 건 #180이 데이터셋 생성 시 소비하는 난수 순서를 바꿔서다(로직은 그대로, 재현 시드 결과만 이동) |
 
 address·card는 한때 이 표에서 문제(F1 0.371, 오탐 2건)가 있었는데, core 쪽에서 이미 수정됐다
 (각각 [#86](https://github.com/ChoHyeonChan/maskingtape/issues/86), [#87](https://github.com/ChoHyeonChan/maskingtape/issues/87)로
@@ -80,6 +81,18 @@ card는 `gen_card`(Visa/Mastercard/Amex 계열 IIN + Luhn 체크섬)로 데이�
 3자리+문자+4자리)에서 하나 벗어나게(7·9자리) 해서 체크섬 없는 kind에서도 명시적인 근접 미스
 방어를 갖췄다.
 
+`account`(계좌번호)는 core에 `AccountDetector`가 새로 추가되면서([#176](https://github.com/ChoHyeonChan/maskingtape/pull/177))
+생긴 kind다(#180). 다른 체크섬 없는 kind(`passport`)와도 다른 독특한 설계다 — 문맥어("계좌",
+"입금", "은행", "뱅크" 등)가 매치 앞뒤 15자 안에 없으면 **confidence를 낮추는 게 아니라 아예
+탐지를 안 한다**(하드 게이트). `gen_account`로 은행별 그룹 자릿수 다양성(2~4그룹, 그룹당
+2~7자리)을 만들고, 모든 positive 템플릿에 문맥어를 반드시 포함시켰다. distractor
+쪽은 `gen_account_number_like`(형식은 같지만 문맥어 없는 문장에만 심는다)로 하드 게이트가
+실제로 오탐 없이 작동하는지 확인한다. 구분자 없이 붙여 쓴 13~14자리 표기는 core
+`CreditCardDetector`의 "구분자 없는 13~19자리" 분기와 형식이 겹칠 수 있어(Luhn까지 우연히
+통과하면 card로도 잡혀 겹침 병합이 얽힘 — `gen_business_reg_number`가 겪은 것과 같은 종류의
+우연) `gen_account`가 생성 시점에 직접 Luhn을 확인해 우연히 통과하면 마지막 자리를 일부러
+바꿔 항상 무효로 만든다.
+
 ## 오탐(False Positive) 측정
 
 기존에는 데이터셋 전체가 "개인정보가 있는 문서"뿐이라 재현율(recall)만 측정 가능했고,
@@ -98,10 +111,10 @@ docstring/주석에 명시하고 있다(`email.py`는 상한이 없던 시절 40
 1.4초 걸렸던 실측 사례까지 남겨뒀다). 하지만 이 속성을 지키는지 확인하는 자동 테스트가
 없어서, 누군가 나중에 정규식을 느슨하게 고치면 이 회귀를 아무도 못 잡는 사각지대였다([#162](https://github.com/ChoHyeonChan/maskingtape/issues/162)).
 
-`tests/test_detector_redos.py`가 core의 8개 규칙판 detector 전부에 구분자 없이 이어진
-40만 자 적대적 입력을 넣고, 시간 예산(5초, 여유 있게 잡음) 안에 끝나는지 확인한다 —
-직접 측정해보면 현재는 전부 0.15초 이내로 통과하지만, 이 테스트가 없으면 앞으로 그렇다는
-보장이 없다.
+`tests/test_detector_redos.py`가 core의 9개 규칙판 detector 전부(#180에서 추가된
+`account` 포함)에 구분자 없이 이어진 40만 자 적대적 입력을 넣고, 시간 예산(5초, 여유
+있게 잡음) 안에 끝나는지 확인한다 — 직접 측정해보면 현재는 전부 0.15초 이내로 통과하지만,
+이 테스트가 없으면 앞으로 그렇다는 보장이 없다.
 
 ## 문장·표기 다양성
 
@@ -136,6 +149,9 @@ docstring/주석에 명시하고 있다(`email.py`는 상한이 없던 시절 40
   둘 다 섞는다. core가 확신도를 문맥어("여권")로 가르므로, "여권번호 {passport}"처럼 문맥어가
   가까이 있는 템플릿과 문맥어 없이 번호만 나오는 템플릿을 모두 둬서 confidence 0.9/0.6 두
   경로를 다 검증한다
+- **계좌번호**: 국민·신한·카카오뱅크·우리·하나은행 스타일 그룹 자릿수(2~4그룹, 그룹당 2~7자리,
+  총 10~14자리) + 하이픈/구분자없음 표기를 섞는다. core가 문맥어 하드 게이트라, 모든 positive
+  템플릿에 "계좌"/"입금"/"이체"/"은행" 등 문맥어를 반드시 포함시킨다
 - **이름**: 성씨 30종 × 이름 음절 30종 조합, 통계청 다빈도 성씨 기준(특정 인물 아님)
 - **문장 맥락**: 고객센터/병원/학교/관공서/인사/배송/금융 등 10여 개 업무 시나리오, 한 문서에
   같은 종류 개인정보가 두 번 등장하는 경우(담당자 교체, 자택/직장 번호 등)도 포함
@@ -189,14 +205,15 @@ python -m bench.evaluators.evaluate_masking bench/datasets/synth_v1.jsonl --stra
 분리했다. 마스킹 후 텍스트 길이가 원본과 같은지(구조 보존)도 확인하는데, 이건 `mask`에서만
 불일치가 core 회귀 버그 신호이고 `label`/`pseudonym`은 길이가 달라지는 게 정상이라 참고용이다.
 
-500건 기준 실측 결과(#159 체크섬 없는 RRN + #160 core 단어경계 수정 반영 후 재측정) — mask 기준
-유출률 11.0%(1025건 중 113건, 전부 완전유출·전부 `name`). #150 이전(15.7%, 1066건 중 167건)보다
-크게 낮아졌다 — 규칙판 이름 recall이 0.529→0.681로 오르면서 완전 유출(탐지 자체 실패) 건수가
+500건 기준 실측 결과(#180 계좌번호 신규 kind 반영 후 재측정) — mask 기준 유출률 10.2%
+(1013건 중 103건, 전부 완전유출·전부 `name`). #150 이전(15.7%, 1066건 중 167건)보다 크게
+낮아졌다 — 규칙판 이름 recall이 0.529→0.699로 오르면서 완전 유출(탐지 자체 실패) 건수가
 그만큼 줄었기 때문이다.
-`phone`/`email`/`rrn`/`address`/`card`/`biz_reg`/`passport`는 유선전화·plus 이메일·서브도메인·
-복합 문장이 섞여도 유출 0건, 부분 유출도 0건 — core 탐지기들이 새로 추가된 kind·표기·문장
-구조에서도 경계까지 정확히 맞춘다는 뜻이다(체크섬 없는 RRN도 confidence 0.85로 여전히 탐지되므로
-여기엔 안 걸린다 — 아래 confidence 절 참고). label/pseudonym도 같은 패턴(유출은 전부 `name`,
+`phone`/`email`/`rrn`/`address`/`card`/`biz_reg`/`passport`/`account`는 유선전화·plus
+이메일·서브도메인·복합 문장이 섞여도 유출 0건, 부분 유출도 0건 — core 탐지기들이 새로
+추가된 kind·표기·문장 구조에서도 경계까지 정확히 맞춘다는 뜻이다(체크섬 없는 RRN도
+confidence 0.85로, 문맥어 있는 계좌번호도 confidence 0.6으로 여전히 탐지되므로 여기엔
+안 걸린다 — 아래 confidence 절 참고). label/pseudonym도 같은 패턴(유출은 전부 `name`,
 길이 보존율만 전략별로 다르게 정상 표시)을 유지한다 — 자세한 비교 방법론은 위 참고.
 
 **pseudonym 보안 속성 검증**: `PseudonymAnonymizer`는 "가짜 주민번호/카드번호가 진짜 체크섬을
@@ -246,32 +263,33 @@ python -m bench.evaluators.confidence_analysis bench/datasets/synth_v1.jsonl
 후보 임계값마다 그보다 confidence가 낮은 예측을 버린 뒤 다시 채점해서, 임계값을 올릴수록
 precision이 오르고 recall이 내려가는 트레이드오프를 표로 보여준다.
 
-500건 기준 실측 결과(#159 체크섬 없는 RRN + #160 core 단어경계 수정 반영 후 재측정): 임계값 0.5
-이하에서는 precision이 0.993(오탐 6건)로 완벽하지 않다 — #150 이전(0.982, 오탐 16건)보다 줄었다.
-직접 확인해보니 6건 전부 `name` kind, confidence 정확히 0.5(문맥 단서 없이 형태만으로 판단한
-최저 확신도 케이스)였다. 5건은 `name.py`에 이미 문서화된 한계(성씨+이름 뒤 조사 '이'가 이름
-글자와 겹쳐 함께 탐지됨, 예: "저는 양정이고"에서 "양정" 대신 "양정이"를 잡음 — 규칙만으로는
-조사와 이름 글자를 구분 못 해 LLM판(name_llm)에 맡기기로 한 케이스)였다.
+500건 기준 실측 결과(#180 계좌번호 신규 kind 반영 후 재측정): 임계값 0.5 이하에서는 precision이
+0.995(오탐 5건)로 완벽하지 않다 — #150 이전(0.982, 오탐 16건)보다 크게 줄었다. 직접 확인해보니
+5건 전부 `name` kind, confidence 정확히 0.5(문맥 단서 없이 형태만으로 판단한 최저 확신도
+케이스)였다. 4건은 `name.py`에 이미 문서화된 한계(성씨+이름 뒤 조사 '이'가 이름 글자와 겹쳐
+함께 탐지됨, 예: "저는 김규이고"에서 "김규" 대신 "김규이"를 잡음 — 규칙만으로는 조사와 이름
+글자를 구분 못 해 LLM판(name_llm)에 맡기기로 한 케이스)였다.
 
-나머지 1건("지원자 양인훈 이력서 접수..."에서 "지원자"를 이름으로 오탐)은
-[#158](https://github.com/ChoHyeonChan/maskingtape/issues/158)에서 제기한 패턴(단일 글자 존칭이
-단어 경계 없이 매칭돼 뒤따르는 별개 이름의 첫 글자를 삼킴)이 그대로 남은 사례다 — 직접 재현해
-확인해보니 [#160](https://github.com/ChoHyeonChan/maskingtape/pull/160)의 수정(성씨가 어절
-시작일 때만 매칭)은 #158의 두 사례 중 "감지되어"(성씨가 단어 중간)만 고쳤고, "지원자"는 성씨
-"지"가 이미 어절 시작이라 이 lookbehind로는 걸러지지 않는다. 즉 **#158은 부분만 해결됐다** —
-"뒤따르는 이름의 첫 글자를 존칭으로 오인식"하는 suffix 쪽 원인은 아직 남아있어, 재오픈이 필요할
-수 있다(이 PR 범위 아니라 코드는 안 고쳤다). 임계값 0.7부터 이 FP가 전부 걸러져 precision이
-1.000이 되지만, **recall은 0.885(임계값 0.5 이하) → 0.648(0.7) → 0.620(0.8) → 0.609(0.85) →
-0.592(0.9) → 0.417(1.0)로 계속 떨어진다** — name의 규칙판 confidence 구간이 잘려나가는 게
-대부분이다.
+나머지 1건("...신한은행 ...송금... 민원인 양아님, 주민등록번호..."에서 "민원인"을 이름으로
+오탐)은 [#158](https://github.com/ChoHyeonChan/maskingtape/issues/158)에서 제기한 패턴(단일
+글자 존칭이 단어 경계 없이 매칭돼 뒤따르는 별개 이름의 첫 글자를 삼킴 — 이번엔 "양아님"의 첫
+글자 "양"을 "민원인"의 존칭으로 오인식)의 또 다른 사례다. [#160](https://github.com/ChoHyeonChan/maskingtape/pull/160)의
+수정(성씨가 어절 시작일 때만 매칭)은 #158의 "감지되어"(성씨가 단어 중간) 사례만 고쳤을 뿐,
+"뒤따르는 이름의 첫 글자를 존칭으로 오인식"하는 suffix 쪽 원인은 그대로라 **#158은 여전히
+부분만 해결된 상태다**(이 PR 범위 아니라 코드는 안 고쳤다). 임계값 0.7부터 이 FP가 전부 걸러져
+precision이 1.000이 되지만, **recall은 0.900(임계값 0.5 이하) → 0.606(0.7) → 0.587(0.8) →
+0.580(0.85) → 0.567(0.9) → 0.397(1.0)로 계속 떨어진다** — name의 규칙판 confidence 구간이
+잘려나가는 게 대부분이다.
 
-**🚨 임계값을 0.85 초과로 올리면 안 되는 진짜 이유**: 0.85→0.9 구간에서 recall이 유독 더 크게
-떨어지는데(0.609→0.592), 이건 name 때문이 아니다. [#159](https://github.com/ChoHyeonChan/maskingtape/issues/159)에서
-추가한 "체크섬 없는(2020-10 이후 발급분) 주민등록번호"가 전부 confidence 정확히 0.85라서, 임계값을
-0.9 이상으로 올리는 순간 **정답 rrn 89건 중 17건(19%)이 통째로 걸러진다** — name의 오탐 몇 건을
-줄이려다 훨씬 민감한 고유식별정보(주민등록번호)가 실제로 유출되는 트레이드오프다. 즉 **임계값을
-높여도 얻는 정밀도 이득보다 recall 손해가(그것도 name보다 훨씬 심각한 kind에서) 훨씬 크므로**,
-지금 core 기준으로는 기본값(필터 없음)을 유지하는 게 낫다는 근거가 된다.
+**🚨 임계값을 0.6 초과로 올리면 안 되는 진짜 이유**: 0.5→0.7 구간에서 recall이 0.900→0.606으로
+유독 크게(0.294p) 떨어지는데, name 하나만으로는 이 폭을 설명 못 한다. [#180](https://github.com/ChoHyeonChan/maskingtape/issues/180)에서
+추가한 `account`(계좌번호)는 core가 체크섬이 없어 문맥어가 있어도 **confidence를 항상 정확히
+0.6으로 고정**한다(직접 확인: 정답 account 42건 전부 confidence 0.6). 즉 **임계값을 0.7 이상
+으로만 올려도 계좌번호가 100% 통째로 사라진다** — [#159](https://github.com/ChoHyeonChan/maskingtape/issues/159)의
+RRN(threshold 0.9에서 19%만 걸러짐, 확률적)보다 더 심각하다. name의 오탐 몇 건을 줄이려다
+가장 민감한 금융정보가 전량 유출되는 트레이드오프인 셈이다. 즉 **임계값을 높여도 얻는 정밀도
+이득보다 recall 손해가(그것도 name보다 훨씬 심각한 kind에서, 그것도 100% 확정적으로) 훨씬
+크므로**, 지금 core 기준으로는 기본값(필터 없음)을 유지하는 게 낫다는 근거가 된다.
 
 ## 이름 탐지 방식 비교 — 규칙판 vs 하이브리드(LLM)
 
@@ -286,26 +304,28 @@ python -m bench.evaluators.compare_name_detectors bench/datasets/synth_v1.jsonl
 로컬 Ollama가 안 떠 있으면 하이브리드 쪽은 "LLM 사용 불가"로 표시되고 규칙판 결과만 나온다 —
 CI 등 Ollama 없는 환경에서도 도구 자체는 안 죽는다.
 
-500건 기준 실측 결과(로컬 Ollama `qwen2.5:7b` 기준, #159 체크섬 없는 RRN + #160 core 단어경계
-수정까지 전부 반영 후 재측정):
+500건 기준 실측 결과(#180 계좌번호 신규 kind 반영 후 재측정, 로컬 Ollama `qwen2.5:7b`):
 
 | 방식 | precision | recall | F1 |
 |---|---|---|---|
-| 규칙판 | 0.977 | 0.681 | 0.803 |
-| 하이브리드(LLM) | 0.977 | 0.900 | **0.937** |
+| 규칙판 | 0.981 | 0.715 | 0.827 |
+| 하이브리드(LLM) | 0.973 | 0.899 | **0.934** |
+
+**측정 환경 메모**: 로컬 Ollama 호출이 "localhost"를 IPv6(`::1`)로 먼저 시도하는데 Ollama는
+IPv4(`127.0.0.1`)에만 리스닝하고 있어 연결이 `SYN_SENT`에서 멈추는 환경 문제를 겪었다 —
+`LLMNameDetector(host=...)`에 `127.0.0.1`을 명시하면 우회된다. 이 저장소 환경에서 재발할 수
+있으니 하이브리드 재측정이 원인 없이 멈추면 우선 의심해볼 것.
 
 규칙판은 앞뒤에 역할어·존칭 같은 문맥 단서가 없으면 아예 탐지하지 않도록 설계돼 오탐은
 적지만(precision 高), 그만큼 단서 없는 이름은 다 놓친다(recall 低). 하이브리드는 LLM이 문맥을
-직접 판단해 단서 없는 이름까지 잡아내면서(recall 0.681→0.900) F1도 더 높다
-(0.803→0.937) — 이제 격차의 대부분은 "문맥 단서가 아예 없는 이름"으로 좁혀졌다.
+직접 판단해 단서 없는 이름까지 잡아내면서(recall 0.715→0.899) F1도 더 높다(0.827→0.934) —
+이제 격차의 대부분은 "문맥 단서가 아예 없는 이름"으로 좁혀졌다.
 
-**#150·#160 반영 효과**: 규칙판 F1이 **0.676 → 0.803**으로 크게 올랐다(존칭 삼킴 수정 +
-단어 중간 성씨 오탐 수정). 반면 **하이브리드 수치는 #128 이후로 거의 변화가 없다(F1
-0.933→0.937, 오차 범위)** — 하이브리드는 규칙판을 `min_confidence=0.75` 안전망으로만
-쓰는데, #150·#160이 고친 버그들은 confidence가 0.5로 낮게 나오는 케이스라 애초에 하이브리드
-결과에 거의 반영된 적이 없었다. 즉 두 수정은 **규칙 전용 모드 사용자에게 특히 의미 있는**
-개선이다. 수치가 #150 직후(0.794/0.935)와 살짝 다른 건 #159가 데이터셋 생성 시 소비하는
-난수 순서를 바꿔서다(로직은 그대로, 재현 시드 결과만 이동).
+**#150·#160 반영 효과**: 규칙판 F1이 **0.676 → 0.827**로 크게 올랐다(존칭 삼킴 수정 +
+단어 중간 성씨 오탐 수정). 하이브리드는 규칙판을 `min_confidence=0.75` 안전망으로만 쓰는데,
+#150·#160이 고친 버그들은 confidence가 0.5로 낮게 나오는 케이스라 애초에 하이브리드 결과에
+거의 반영된 적이 없었다(#159/#160 재측정 당시 F1 0.933→0.937, 이번 #180 재측정은 0.934로
+오차 범위 안에서 유지) — 즉 두 수정은 **규칙 전용 모드 사용자에게 특히 의미 있는** 개선이다.
 
 ## Pipeline 겹침 병합 회귀 테스트
 

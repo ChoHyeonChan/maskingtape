@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import random
 
+from maskingtape.detectors import AccountDetector
 from maskingtape.detectors import AddressDetector
 from maskingtape.detectors import BusinessRegistrationDetector
 from maskingtape.detectors import CreditCardDetector
@@ -16,6 +17,7 @@ from maskingtape.detectors import PassportDetector
 from maskingtape.detectors import PhoneDetector
 from maskingtape.detectors import RRNDetector
 from bench.generator.distractors import (
+    gen_account_number_like,
     gen_business_reg_number,
     gen_invalid_phone_like,
     gen_invalid_rrn_like,
@@ -410,3 +412,59 @@ def test_multi_sentence_document_has_multiple_sentences_worth_of_text():
     multi = generate_multi_sentence_document(rng, sentence_count=3)
     assert len(multi.text) > len(single.text)
     assert multi.text.count(" ") >= 2
+
+
+def test_generated_account_passes_core_detector_with_context():
+    """#180: 계좌번호는 문맥어(계좌/입금/은행 등)가 근처에 있어야만 탐지되는 하드 게이트다 —
+    문맥어를 붙인 문장에서는 정확히 한 건으로 잡혀야 한다."""
+    rng = random.Random(32)
+    detector = AccountDetector()
+    for _ in range(50):
+        entity = generate_entity("account", rng)
+        text = f"계좌번호는 {entity.text}이며 입금 확인 부탁드립니다."
+        found = detector.detect(text)
+        assert len(found) == 1, f"탐지 실패: {entity.text!r}"
+        assert found[0].text == entity.text
+        assert found[0].kind == "account"
+
+
+def test_generated_account_without_context_is_not_detected():
+    """#180: 같은 형식이라도 문맥어가 전혀 없으면 core가 탐지하면 안 된다(하드 게이트 검증)."""
+    rng = random.Random(33)
+    detector = AccountDetector()
+    for _ in range(50):
+        entity = generate_entity("account", rng)
+        text = f"참고 번호는 {entity.text}입니다."
+        assert detector.detect(text) == [], f"문맥어 없이도 탐지됨: {text!r}"
+
+
+def test_account_generator_covers_multiple_group_patterns_and_separators():
+    """은행별 그룹 자릿수 다양성과 하이픈/구분자없음 표기가 실제로 섞여 나오는지 확인한다."""
+    rng = random.Random(34)
+    samples = [generate_entity("account", rng).text for _ in range(200)]
+    has_hyphen = any("-" in s for s in samples)
+    has_bare = any(s.isdigit() for s in samples)
+    group_counts = {s.count("-") + 1 for s in samples if "-" in s}
+    assert has_hyphen
+    assert has_bare
+    assert group_counts & {3, 4}  # 3~4그룹 표기가 실제로 섞여 나온다
+
+
+def test_account_number_like_distractor_is_rejected_without_context():
+    """#180: 계좌번호와 형식이 같아도 문맥어 없는 문장에서는 core가 걸러내야 한다."""
+    rng = random.Random(35)
+    detector = AccountDetector()
+    for _ in range(300):
+        text = gen_account_number_like(rng)
+        wrapped = f"참고 코드: {text} 입니다."
+        assert detector.detect(wrapped) == [], f"문맥어 없이도 탐지됨: {wrapped!r}"
+
+
+def test_distractors_are_never_detected_as_account():
+    """#180 회귀 방지 — generate_distractor 전체 풀이 실제 문서 템플릿(문맥어 없음)에 쓰이므로,
+    account로 오탐되지 않아야 한다."""
+    rng = random.Random(36)
+    detector = AccountDetector()
+    for _ in range(300):
+        text = generate_distractor(rng)
+        assert detector.detect(text) == [], f"distractor가 account로 오탐됨: {text!r}"
