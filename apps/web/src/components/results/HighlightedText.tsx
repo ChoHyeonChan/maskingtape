@@ -121,6 +121,12 @@ export function HighlightedText({ text, detections, activeFilter }: Props) {
               const isTemporarilyRevealed = temporarilyRevealedKind === segment.detection.kind;
               const shouldFocus = hasFilter && isDetectionMatch;
               const label = KIND_LABELS[segment.detection.kind] ?? segment.detection.kind;
+              const confidencePct = Math.round(segment.detection.confidence * 100);
+              const uncertain = isLowConfidence(segment.detection);
+              // 확신도는 hover 전용 title 툴팁만으론 키보드·터치 사용자에게 전달되지 않는다(#106).
+              // 애매한(확신도<100%) 건만 태그에 %를 붙여 시각적으로도 드러내고, aria-label에는
+              // 모든 건에 확신도를 넣어 스크린리더로도 항상 전달되게 한다.
+              const tagText = uncertain ? `${label} · ${confidencePct}%` : label;
 
               return (
                 <mark
@@ -129,18 +135,18 @@ export function HighlightedText({ text, detections, activeFilter }: Props) {
                     "highlight",
                     "highlight--animated",
                     `highlight--${segment.detection.kind}`,
-                    isLowConfidence(segment.detection) && "highlight--uncertain",
+                    uncertain && "highlight--uncertain",
                     shouldFocus && "highlight--focused",
                     shouldDim && "highlight--dimmed",
                     isCovered && !isTemporarilyRevealed && "highlight--covered",
                     isCovered && isTemporarilyRevealed && "highlight--revealed",
                   )}
                   style={{ animationDelay: `${i * 40}ms` }}
-                  title={`${label} · 신뢰도 ${Math.round(segment.detection.confidence * 100)}%`}
+                  title={`${label} · 신뢰도 ${confidencePct}%`}
                   role="button"
                   tabIndex={0}
                   aria-pressed={isCovered}
-                  aria-label={`${label} ${isCovered ? "가림 해제" : "가리기"}`}
+                  aria-label={`${label} · 신뢰도 ${confidencePct}% · ${isCovered ? "가림 해제" : "가리기"}`}
                   onClick={() => toggleCovered(key)}
                   onKeyDown={(event) => {
                     if (event.key === "Enter" || event.key === " ") {
@@ -150,7 +156,7 @@ export function HighlightedText({ text, detections, activeFilter }: Props) {
                   }}
                 >
                   {segment.text}
-                  <span className="highlight__tag">{label}</span>
+                  <span className="highlight__tag">{tagText}</span>
                 </mark>
               );
             })}
