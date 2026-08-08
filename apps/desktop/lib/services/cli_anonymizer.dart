@@ -50,7 +50,8 @@ class CliAnonymizer implements Anonymizer {
         environment: {'PYTHONUTF8': '1'},
       );
     } on ProcessException {
-      throw const AnonymizerException(
+      // CLI 자체가 없는 것이므로 다른 백엔드로 넘길 수 있다 (FallbackAnonymizer 참고).
+      throw const AnonymizerUnavailableException(
         'maskingtape CLI를 찾을 수 없습니다 — packages/core 설치와 PATH를 확인하세요',
       );
     }

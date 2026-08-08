@@ -56,7 +56,7 @@ abstract interface class Anonymizer {
   });
 }
 
-/// 백엔드 호출 실패 (CLI 없음, 비정상 종료, Ollama 미실행 등).
+/// 백엔드 호출 실패 (비정상 종료, Ollama 미실행, API가 준 에러 등).
 class AnonymizerException implements Exception {
   const AnonymizerException(this.message);
 
@@ -64,4 +64,13 @@ class AnonymizerException implements Exception {
 
   @override
   String toString() => message;
+}
+
+/// 백엔드 자체에 닿지 못한 경우 — CLI가 PATH에 없거나 API 서버가 안 떠 있다.
+///
+/// 처리 중 발생한 오류(AnonymizerException)와 구분하는 이유: 닿지 못한 것뿐이면
+/// 다른 백엔드로 넘겨 다시 시도할 수 있지만, 처리 중 오류는 백엔드를 바꿔도
+/// 같은 결과가 나오므로 그대로 사용자에게 보여야 한다.
+class AnonymizerUnavailableException extends AnonymizerException {
+  const AnonymizerUnavailableException(super.message);
 }
