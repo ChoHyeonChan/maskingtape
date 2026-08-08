@@ -1,4 +1,4 @@
-import { useLayoutEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 
 interface Props {
   onDismiss: () => void;
@@ -98,6 +98,17 @@ export function CoachMark({ onDismiss }: Props) {
       window.removeEventListener("scroll", syncTargets, true);
     };
   }, []);
+
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        onDismiss();
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onDismiss]);
 
   return (
     <div className="coachmark" role="dialog" aria-modal="true" aria-label="사용 방법 안내" onClick={onDismiss}>
