@@ -108,3 +108,17 @@ button,
 textarea {
   font: inherit;
 }
+
+/* 모션에 민감한 사용자를 위한 설정(전정기관 이슈 등) — 테이프 펄스·반짝임·스윕 같은
+   장식용 애니메이션을 전부 사실상 끈다. 개별 규칙마다 따로 막지 않고 전역으로 걸어
+   두면 앞으로 추가되는 애니메이션에도 자동으로 적용된다(#189). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
