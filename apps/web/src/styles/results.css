@@ -197,19 +197,24 @@
   padding-bottom: 0.2rem;
 }
 
-.analysis-result__copy {
+.analysis-result__export {
   position: sticky;
   right: 0;
   bottom: 0.1rem;
   align-self: flex-end;
   z-index: 4;
+  display: flex;
+  gap: 0.55rem;
+  margin-top: 1rem;
+  margin-right: 0.1rem;
+}
+
+.analysis-result__copy {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.52rem;
   min-height: 2.7rem;
-  margin-top: 1rem;
-  margin-right: 0.1rem;
   padding: 0 1.05rem;
   border: 1px solid var(--border);
   border-radius: 30px;

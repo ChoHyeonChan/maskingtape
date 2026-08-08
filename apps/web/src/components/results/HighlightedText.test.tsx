@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { HighlightedText } from "./HighlightedText";
 import type { Detection } from "../../types/detection";
@@ -133,5 +133,41 @@ describe("HighlightedText", () => {
     expect(screen.getByTestId("masked-result")).toHaveTextContent("문의 ************* / ****************");
     expect(screen.getByTestId("masked-result")).not.toHaveTextContent("010-1234-5678");
     expect(screen.getByTestId("masked-result")).not.toHaveTextContent("hong@example.com");
+  });
+
+  it("copies the fully masked result even when nothing has been manually covered on screen (#104)", async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, { clipboard: { writeText } });
+
+    const rrn = detection({ kind: "rrn", start: 3, end: 17, text: "800101-1234560", confidence: 1 });
+    render(<HighlightedText text="번호 800101-1234560 입니다" detections={[rrn]} activeFilter={null} />);
+
+    // 아무 항목도 수동으로 가리지 않은 기본 상태에서 눌러도 원문이 아니라 마스킹본이 나가야 한다.
+    fireEvent.click(screen.getByRole("button", { name: "마스킹 결과 복사" }));
+
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith("번호 ************** 입니다"));
+    expect(writeText).not.toHaveBeenCalledWith(expect.stringContaining("800101-1234560"));
+  });
+
+  it("downloads the fully masked result as a .txt file (#104)", async () => {
+    const rrn = detection({ kind: "rrn", start: 3, end: 17, text: "800101-1234560", confidence: 1 });
+    render(<HighlightedText text="번호 800101-1234560 입니다" detections={[rrn]} activeFilter={null} />);
+
+    const createObjectURL = vi.fn().mockReturnValue("blob:mock-url");
+    const revokeObjectURL = vi.fn();
+    vi.stubGlobal("URL", { ...URL, createObjectURL, revokeObjectURL });
+    const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+
+    fireEvent.click(screen.getByRole("button", { name: "마스킹 결과 다운로드 (.txt)" }));
+
+    expect(createObjectURL).toHaveBeenCalledTimes(1);
+    const blob = createObjectURL.mock.calls[0][0] as Blob;
+    expect(blob.type).toContain("text/plain");
+    await expect(blob.text()).resolves.toBe("번호 ************** 입니다");
+    expect(clickSpy).toHaveBeenCalledTimes(1);
+    expect(revokeObjectURL).toHaveBeenCalledWith("blob:mock-url");
+
+    clickSpy.mockRestore();
+    vi.unstubAllGlobals();
   });
 });
