@@ -19,6 +19,8 @@ void main() {
       expect(_d('biz_reg').kindLabel, '사업자등록번호');
       // 코어에 추가된 여권번호 탐지기 (#129) 대응
       expect(_d('passport').kindLabel, '여권번호');
+      // 코어에 추가된 계좌번호 탐지기 (#180) 대응
+      expect(_d('account').kindLabel, '계좌번호');
     });
 
     test('라벨 맵에 없는 kind는 kind(?)로 표시해 누락을 드러낸다', () {
