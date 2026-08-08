@@ -36,6 +36,19 @@ describe("HighlightedText", () => {
     expect(screen.getByText("전화번호", { selector: ".highlight__tag" })).toBeInTheDocument();
   });
 
+  it("exposes kind and confidence via aria-label so keyboard/screen-reader users don't need the hover tooltip (#106)", () => {
+    const confident = detection({ kind: "phone", start: 4, end: 17, text: "010-1234-5678", confidence: 1 });
+    render(<HighlightedText text="연락처 010-1234-5678 입니다" detections={[confident]} activeFilter={null} />);
+    expect(screen.getByRole("button", { name: "전화번호 · 신뢰도 100% · 가리기" })).toBeInTheDocument();
+  });
+
+  it("shows the exact confidence percentage on the visible tag for uncertain detections (#106)", () => {
+    const unsure = detection({ kind: "name", start: 0, end: 3, text: "김영희", confidence: 0.5 });
+    render(<HighlightedText text="김영희" detections={[unsure]} activeFilter={null} />);
+    expect(screen.getByText("이름 · 50%", { selector: ".highlight__tag" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "이름 · 신뢰도 50% · 가리기" })).toBeInTheDocument();
+  });
+
   it("renders core business registration detections with the business color class", () => {
     const d = detection({ kind: "biz_reg", start: 3, end: 15, text: "123-45-67890", confidence: 1 });
     render(<HighlightedText text="번호 123-45-67890 확인" detections={[d]} activeFilter={null} />);
@@ -66,7 +79,7 @@ describe("HighlightedText", () => {
     const d = detection({ kind: "phone", start: 4, end: 17, text: "010-1234-5678", confidence: 1 });
     render(<HighlightedText text="연락처 010-1234-5678 입니다" detections={[d]} activeFilter={null} />);
 
-    const mark = screen.getByRole("button", { name: "전화번호 가리기" });
+    const mark = screen.getByRole("button", { name: "전화번호 · 신뢰도 100% · 가리기" });
     fireEvent.click(mark);
 
     expect(mark).toHaveClass("highlight--covered");
@@ -87,13 +100,13 @@ describe("HighlightedText", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "모두 가리기" }));
 
-    expect(screen.getByRole("button", { name: "전화번호 가림 해제" })).toHaveClass("highlight--covered");
-    expect(screen.getByRole("button", { name: "이메일 가림 해제" })).toHaveClass("highlight--covered");
+    expect(screen.getByRole("button", { name: "전화번호 · 신뢰도 100% · 가림 해제" })).toHaveClass("highlight--covered");
+    expect(screen.getByRole("button", { name: "이메일 · 신뢰도 100% · 가림 해제" })).toHaveClass("highlight--covered");
 
     fireEvent.click(screen.getByRole("button", { name: "가리기 전으로" }));
 
-    expect(screen.getByRole("button", { name: "전화번호 가리기" })).not.toHaveClass("highlight--covered");
-    expect(screen.getByRole("button", { name: "이메일 가리기" })).not.toHaveClass("highlight--covered");
+    expect(screen.getByRole("button", { name: "전화번호 · 신뢰도 100% · 가리기" })).not.toHaveClass("highlight--covered");
+    expect(screen.getByRole("button", { name: "이메일 · 신뢰도 100% · 가리기" })).not.toHaveClass("highlight--covered");
   });
 
   it("briefly reveals covered items when their filter is selected", () => {
@@ -105,7 +118,7 @@ describe("HighlightedText", () => {
     );
 
     fireEvent.click(screen.getByRole("button", { name: "모두 가리기" }));
-    const mark = screen.getByRole("button", { name: "전화번호 가림 해제" });
+    const mark = screen.getByRole("button", { name: "전화번호 · 신뢰도 100% · 가림 해제" });
     expect(mark).toHaveClass("highlight--covered");
 
     rerender(<HighlightedText text="문의 010-1234-5678" detections={[phone]} activeFilter="phone" />);
