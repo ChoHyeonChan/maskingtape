@@ -41,6 +41,14 @@ export function App() {
     <div className="app-shell">
       <AppHeader onHelpClick={() => setShowCoachMark(true)} />
 
+      <div className="privacy-note" role="note" aria-label="개인정보 입력 주의 안내">
+        <span className="privacy-note__icon" aria-hidden="true">▣</span>
+        <span>
+          이 데모는 시연·학습용입니다. <strong>실제 개인정보를 입력하지 마세요.</strong> 입력 내용은
+          저장되지 않으며, 로컬(브라우저 ↔ 로컬 API)에서만 처리됩니다. 실사용은 로컬 설치를 권장합니다.
+        </span>
+      </div>
+
       <main className="app-grid">
         <section className="panel panel--main">
           <InputPanel
@@ -60,11 +68,6 @@ export function App() {
           onFilterSelect={setActiveFilter}
         />
       </main>
-
-      <aside className="privacy-note" aria-label="로컬 처리 안내">
-        <span className="privacy-note__icon" aria-hidden="true">▣</span>
-        <span>입력하신 데이터는 로컬에서만 처리되며, 외부로 전송되지 않습니다.</span>
-      </aside>
 
       {showCoachMark && <CoachMark onDismiss={dismissCoachMark} />}
     </div>

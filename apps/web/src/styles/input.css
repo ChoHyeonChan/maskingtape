@@ -133,6 +133,11 @@
   font-size: 0.82rem;
 }
 
+.input-panel__count--over {
+  color: var(--kind-card);
+  font-weight: 900;
+}
+
 .input-panel__limit {
   color: var(--kind-card);
   font-weight: 800;

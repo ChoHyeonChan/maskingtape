@@ -161,8 +161,14 @@ export function InputPanel({ text, hasResult, resultVersion, onTextChange, onCle
       </div>
 
       <div className="input-panel__meta" id="input-meta">
-        <span>{text.length.toLocaleString()} / {MAX_TEXT_LENGTH.toLocaleString()}자</span>
-        {isTooLong && <span className="input-panel__limit">입력 길이를 줄여주세요.</span>}
+        <span className={isTooLong ? "input-panel__count input-panel__count--over" : "input-panel__count"}>
+          {text.length.toLocaleString()} / {MAX_TEXT_LENGTH.toLocaleString()}자
+        </span>
+        {isTooLong && (
+          <span className="input-panel__limit" role="alert">
+            입력 길이가 상한을 초과했습니다. {(text.length - MAX_TEXT_LENGTH).toLocaleString()}자를 줄여주세요.
+          </span>
+        )}
       </div>
 
       <div className="input-panel__actions">
