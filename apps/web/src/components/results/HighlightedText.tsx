@@ -30,7 +30,7 @@ const FILTER_REVEAL_MS = 6500;
 export function HighlightedText({ text, detections, activeFilter }: Props) {
   const [coveredKeys, setCoveredKeys] = useState<Set<string>>(() => new Set());
   const [temporarilyRevealedKind, setTemporarilyRevealedKind] = useState<string | null>(null);
-  const [copiedOriginal, setCopiedOriginal] = useState(false);
+  const [copied, setCopied] = useState(false);
   const allCovered = detections.length > 0 && coveredKeys.size === detections.length;
 
   useEffect(() => {
@@ -49,13 +49,9 @@ export function HighlightedText({ text, detections, activeFilter }: Props) {
   }
 
   const segments = buildSegments(text, detections);
+  // 복사·다운로드는 항상 이 완전 마스킹본만 내보낸다 — 개별 "가리기" 토글은 화면 데모용일 뿐,
+  // 아무것도 안 가린 기본 상태에서 내보내면 원문이 그대로 유출되므로 토글 상태를 절대 참조하지 않는다(#104).
   const maskedText = segments.map((segment) => (segment.kind === "plain" ? segment.text : maskText(segment.text))).join("");
-  const copyText = segments
-    .map((segment) => {
-      if (segment.kind === "plain") return segment.text;
-      return coveredKeys.has(detectionKey(segment.detection)) ? maskText(segment.text) : segment.text;
-    })
-    .join("");
 
   function toggleCovered(key: string) {
     setCoveredKeys((current) => {
@@ -73,10 +69,20 @@ export function HighlightedText({ text, detections, activeFilter }: Props) {
     setCoveredKeys(allCovered ? new Set() : new Set(detections.map(detectionKey)));
   }
 
-  async function copyOriginal() {
-    await navigator.clipboard.writeText(copyText);
-    setCopiedOriginal(true);
-    window.setTimeout(() => setCopiedOriginal(false), 1400);
+  async function copyMaskedResult() {
+    await navigator.clipboard.writeText(maskedText);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1400);
+  }
+
+  function downloadMaskedResult() {
+    const blob = new Blob([maskedText], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "masked-result.txt";
+    link.click();
+    URL.revokeObjectURL(url);
   }
 
   return (
@@ -162,17 +168,29 @@ export function HighlightedText({ text, detections, activeFilter }: Props) {
             })}
           </p>
 
-          <button
-            type="button"
-            className="analysis-result__copy"
-            onClick={copyOriginal}
-            aria-label={copiedOriginal ? "분석 결과 복사됨" : "분석 결과 내용 복사"}
-            title={copiedOriginal ? "복사됨" : "복사"}
-          >
-            <span className="copy-icon" aria-hidden="true" />
-            <span>이대로 복사하기</span>
-          </button>
-          {copiedOriginal && (
+          <div className="analysis-result__export">
+            <button
+              type="button"
+              className="analysis-result__copy"
+              onClick={copyMaskedResult}
+              aria-label={copied ? "마스킹 결과 복사됨" : "마스킹 결과 복사"}
+              title={copied ? "복사됨" : "복사"}
+            >
+              <span className="copy-icon" aria-hidden="true" />
+              <span>마스킹 결과 복사</span>
+            </button>
+            <button
+              type="button"
+              className="analysis-result__copy"
+              onClick={downloadMaskedResult}
+              aria-label="마스킹 결과 다운로드 (.txt)"
+              title="다운로드"
+            >
+              <span aria-hidden="true">⬇</span>
+              <span>다운로드</span>
+            </button>
+          </div>
+          {copied && (
             <span className="analysis-result__copy-toast" role="status">
               복사되었습니다
             </span>
