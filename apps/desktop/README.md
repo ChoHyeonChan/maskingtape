@@ -1,6 +1,6 @@
 # apps/desktop — Flutter 데스크톱 앱
 
-**담당: 김준형** · 상태: 🚧 기능 완성 (드롭 → 일괄 비식별화 → `_masked` 저장, 전략 선택·이름 정밀 탐지·결과 미리보기) — 다음: core CLI → REST API 전환
+**담당: 김준형** · 상태: ✅ 기능 완성 (드롭 → 일괄 비식별화 → `_masked` 저장, 전략 선택·이름 정밀 탐지·결과 미리보기) — 백엔드는 로컬 CLI 우선 + REST API 폴백
 
 파일 드래그&드롭으로 문서 여러 개를 한 번에 비식별화하는 데스크톱 도구.
 
@@ -25,8 +25,11 @@ lib/
     detection.dart             # core Detection과 1:1 (API 계약 v1 스키마) + 한국어 요약
     file_task.dart             # 파일 1개의 처리 상태 (대기/처리 중/완료/실패)
   services/
-    anonymizer.dart            # 비식별화 백엔드 인터페이스 (CLI ↔ REST 교체 지점)
+    anonymizer.dart            # 비식별화 백엔드 인터페이스 + 예외 타입
     cli_anonymizer.dart        # core CLI 서브프로세스 호출 (stdin UTF-8)
+    rest_anonymizer.dart       # apps/api REST 호출 (dart:io HttpClient, 의존성 추가 없음)
+    fallback_anonymizer.dart   # 백엔드를 순서대로 시도 (조합만 담당)
+    default_backend.dart       # 기본 조립 — CLI 먼저, 없으면 REST
     file_reader.dart           # 파일 검증(확장자·크기·바이너리) + UTF-8/CP949 디코딩
     file_picker.dart           # OS 파일 선택 대화상자 (file_selector)
     shell.dart                 # 탐색기에서 결과 파일 열기
@@ -40,9 +43,25 @@ lib/
 test/
   batch_processor_test.dart    # 배치 로직 유닛 테스트 (가짜 백엔드, 취소 포함)
   file_reader_test.dart        # 인코딩 폴백·검증 규칙 테스트
+  rest_anonymizer_test.dart    # REST 호출 — 루프백에 실제 HTTP 서버를 띄워 검증
+  fallback_anonymizer_test.dart# 백엔드 전환 규칙 테스트
   widget_test.dart             # 드롭존·목록·처리 흐름 위젯 테스트
   fakes.dart                   # 테스트용 가짜 Anonymizer
+  manual_rest_smoke.dart       # 수동 확인용 — 실제로 뜬 apps/api에 붙여본다 (자동 실행 아님)
 ```
+
+## 비식별화 백엔드 — 로컬 CLI 먼저, 없으면 REST API
+
+처리는 **core CLI를 먼저** 시도하고, 이 PC에 CLI가 없으면 **`apps/api` REST**(기본 `http://127.0.0.1:8000`)로 넘어간다.
+
+순서를 이렇게 둔 이유:
+
+- 로컬 CLI는 기능이 온전하다 — 가명처리(`pseudonym`)와 이름 정밀 탐지(LLM)는 **API가 지원하지 않는다**(배포판은 규칙 기반 탐지만 제공하고 strategy도 mask·label 두 가지뿐). 텍스트가 이 PC를 벗어나지도 않는다.
+- CLI를 설치하지 않은 PC에서도 앱이 그냥 동작해야 한다 — 설치 없이 실행하는 배포판·시연 상황.
+
+백엔드를 넘기는 건 **닿지 못했을 때뿐**이다(`AnonymizerUnavailableException` — CLI가 PATH에 없거나 API 서버가 안 떠 있음). 처리 중 발생한 오류(예: Ollama 미실행)는 백엔드를 바꿔도 같은 결과라 그대로 보여준다 — 넘기면 원인만 가려진다.
+
+API 경로에서 지원하지 않는 옵션을 고르면 네트워크를 타기 전에 거절하고, "CLI를 설치하면 이 PC에서 처리할 수 있습니다"라고 안내한다.
 
 입력 파일 규칙: txt·csv·tsv·md·json·log, 10MB 이하, UTF-8 또는 CP949(자동 판별).
 결과 `_masked` 파일은 항상 UTF-8로 저장한다. `_masked` 파일 재드롭·바이너리·빈 파일은 건너뛴다.
@@ -57,8 +76,10 @@ test/
 - 준비가 안 됐으면 해당 파일만 실패로 표시되고 **core가 준 안내 문구가 그대로** 보인다(앱이 덮어쓰지 않는다). 나머지 파일 처리는 계속된다.
 - CLI를 탐지·마스킹 두 번 호출하므로 LLM 모드에서는 파일당 모델 호출도 두 번이다 — 그만큼 느리다.
 
+- 이름 정밀 탐지는 **CLI 경로에서만** 동작한다 — API 백엔드로 넘어간 상태에서 켜면 안내와 함께 거절된다.
+
 - Windows에서 플러그인 빌드에는 **개발자 모드**가 필요하다 (설정 → 개발자용 → 개발자 모드 켬).
-- 실행하는 PC에 `maskingtape` CLI가 PATH에 있어야 처리가 동작한다 (`pip install -e packages/core` 후 venv Scripts를 PATH에 — REST API 전환 전까지의 개발용 전제).
+- CLI를 쓰려면 PATH에 `maskingtape`가 있어야 한다 (`pip install -e packages/core` 후 venv Scripts를 PATH에). 없으면 REST로 넘어가므로 앱은 그대로 동작하지만, 가명처리·이름 정밀 탐지는 쓸 수 없다.
 
 ## 규칙
 

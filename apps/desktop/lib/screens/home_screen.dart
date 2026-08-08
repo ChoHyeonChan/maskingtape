@@ -4,7 +4,7 @@ import '../models/detection.dart';
 import '../models/file_task.dart';
 import '../services/anonymizer.dart';
 import '../services/batch_processor.dart';
-import '../services/cli_anonymizer.dart';
+import '../services/default_backend.dart';
 import '../services/file_picker.dart';
 import '../services/shell.dart';
 import '../widgets/drop_zone.dart';
@@ -16,15 +16,16 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen({
     super.key,
     this.initialFiles = const [],
-    this.anonymizer = const CliAnonymizer(),
+    this.anonymizer,
     this.pickFiles = pickTextFiles,
   });
 
   /// 위젯 테스트에서 목록 상태를 주입하기 위한 초기값.
   final List<String> initialFiles;
 
-  /// 비식별화 백엔드 — 기본은 core CLI, 테스트에선 가짜 구현 주입.
-  final Anonymizer anonymizer;
+  /// 비식별화 백엔드 — 비우면 [defaultAnonymizer], 테스트에선 가짜 구현 주입.
+  /// const 생성자를 유지하려고 여기서 기본값을 만들지 않고 State에서 만든다.
+  final Anonymizer? anonymizer;
 
   /// 파일 선택 대화상자 — 기본은 OS 대화상자, 테스트에선 가짜 주입.
   final Future<List<String>> Function() pickFiles;
@@ -37,6 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late final List<FileTask> _tasks = [
     for (final path in widget.initialFiles) FileTask(path),
   ];
+  late final Anonymizer _anonymizer = widget.anonymizer ?? defaultAnonymizer();
   bool _running = false;
   bool _cancelRequested = false;
   AnonymizeOptions _options = const AnonymizeOptions();
@@ -72,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _running = true;
       _cancelRequested = false;
     });
-    await BatchProcessor(widget.anonymizer).processAll(
+    await BatchProcessor(_anonymizer).processAll(
       _tasks,
       () {
         if (mounted) setState(() {});
