@@ -16,8 +16,9 @@ npm run build    # 타입 체크 + 프로덕션 빌드
 
 ### 빠른 실행 순서
 
+레포 루트에서:
+
 ```bash
-cd c:/MT/maskingtape
 python -m venv .venv
 .\.venv\Scripts\activate
 pip install -e packages/core
@@ -28,7 +29,7 @@ python -m uvicorn maskingtape_api.main:app --reload --host 127.0.0.1 --port 8000
 다른 터미널에서:
 
 ```bash
-cd c:/MT/maskingtape/apps/web
+cd apps/web
 npm install
 npm run dev
 ```
@@ -68,39 +69,7 @@ Node.js 24 기준 (Vite 8 / React 19 / TypeScript 7). 새 패키지 추가 전 �
 
 ## GitHub에 올리는 방법
 
-### 1) 브랜치 생성
-```bash
-cd c:/MT/maskingtape
-git checkout -b feat/web-ui-refresh
-```
-
-### 2) 변경 내용 확인
-```bash
-git status
-git diff -- apps/web README.md
-```
-
-### 3) 스테이지 및 커밋
-```bash
-git add apps/web README.md
-git commit -m "feat(web): refresh demo UI and interaction"
-```
-
-### 4) GitHub 원격 저장소에 푸시
-```bash
-git push -u origin feat/web-ui-refresh
-```
-
-처음 올리는 경우 원격 저장소가 아직 없다면 아래처럼 추가합니다.
-```bash
-git remote add origin https://github.com/<your-username>/maskingtape.git
-```
-
-### 5) GitHub에서 PR 생성
-1. GitHub 저장소 페이지에서 Compare & pull request를 클릭합니다.
-2. 제목과 설명을 작성합니다.
-3. 예: "웹 데모 UI/UX 개선 및 결과 필터링 기능 추가"
-4. Create pull request를 누르면 리뷰 요청이 완료됩니다.
+우리는 개인 포크가 아니라 팀 공유 저장소에 직접 브랜치를 만들고 PR을 올립니다. 이슈 생성부터 PR·리뷰까지 전체 흐름은 [CONTRIBUTING.md](../../CONTRIBUTING.md)를 따르세요 — 요약하면 이슈 → (이슈 번호로) 브랜치 → 커밋 → `git push -u origin <브랜치>` → PR 생성(`Closes #이슈번호` 포함) → 리뷰·머지 순서입니다.
 
 ## API 연동
 
@@ -123,7 +92,7 @@ src/
 
 - 하이라이트 색상은 5종 고정 팔레트(CVD 접근성 검증 완료, `src/index.css`의 `--kind-*` 변수) — 색만으로 구분하지 않도록 종류 라벨을 항상 텍스트로 같이 표시하고, 요약 바가 색상 범례를 겸한다.
 - 확신도(confidence) 1.0 미만 탐지(이름·주소 등 규칙만으론 애매한 것)는 점선 밑줄로 "불확실"을 표시한다.
-- 다크모드는 `prefers-color-scheme`로 자동 대응.
+- 다크모드는 아직 지원하지 않는다 — 색상이 전부 `src/styles/tokens.css`의 CSS 변수 기반이라, 나중에 `prefers-color-scheme` 미디어 쿼리로 다크 팔레트만 추가하면 확장 가능하다.
 
 ## 다음 (imsoo 담당 — 결과·배치 화면)
 
