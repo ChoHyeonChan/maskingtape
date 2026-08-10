@@ -3,7 +3,7 @@ import { summarize } from "./summary";
 import type { Detection } from "../types/detection";
 
 function d(kind: string): Detection {
-  return { kind, start: 0, end: 0, text: "", confidence: 1, detector: "T" };
+  return { kind, start: 0, end: 0, confidence: 1, detector: "T" };
 }
 
 describe("summarize", () => {

@@ -15,8 +15,8 @@ def test_core_adapter_returns_core_detections() -> None:
 
     assert len(detections) == 1
     assert detections[0].kind == DetectionKind.RRN
-    assert detections[0].text == "800101-1234560"
-    assert text[detections[0].start : detections[0].end] == detections[0].text
+    assert text[detections[0].start : detections[0].end] == "800101-1234560"
+    assert "text" not in detections[0].model_dump(mode="json")
 
 
 def test_scan_endpoint_returns_response_model() -> None:
@@ -33,13 +33,18 @@ def test_scan_endpoint_returns_empty_list_for_clean_text() -> None:
 
 
 def test_scan_http_endpoint_accepts_passport_detection_kind() -> None:
+    passport = "M12345678"
+
     response = TestClient(create_app()).post(
         "/scan",
-        json={"text": "여권번호 M12345678 확인"},
+        json={"text": f"여권번호 {passport} 확인"},
     )
 
     assert response.status_code == 200
-    assert response.json()["detections"][0]["kind"] == DetectionKind.PASSPORT
+    payload = response.json()
+    assert payload["detections"][0]["kind"] == DetectionKind.PASSPORT
+    assert "text" not in payload["detections"][0]
+    assert passport not in response.text
 
 
 def test_anonymize_endpoint_returns_masked_text_and_detections() -> None:
@@ -64,7 +69,9 @@ def test_anonymize_http_endpoint_accepts_passport_detection_kind() -> None:
     assert response.status_code == 200
     payload = response.json()
     assert payload["detections"][0]["kind"] == DetectionKind.PASSPORT
+    assert "text" not in payload["detections"][0]
     assert passport not in payload["text"]
+    assert passport not in response.text
 
 
 def test_anonymize_endpoint_supports_label_strategy() -> None:

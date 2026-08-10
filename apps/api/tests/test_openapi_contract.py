@@ -37,3 +37,6 @@ def test_openapi_contains_scan_and_anonymize_contracts() -> None:
         assert anonymize_operation["responses"][status_code]["content"]["application/json"][
             "schema"
         ]["$ref"].endswith("/ErrorResponse")
+
+    detection_properties = schema["components"]["schemas"]["DetectionResponse"]["properties"]
+    assert "text" not in detection_properties

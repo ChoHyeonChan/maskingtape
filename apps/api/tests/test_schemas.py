@@ -30,12 +30,11 @@ def test_anonymize_request_defaults_to_mask_strategy() -> None:
     assert request.strategy == AnonymizeStrategy.MASK
 
 
-def test_detection_response_matches_core_detection_shape() -> None:
+def test_detection_response_excludes_original_text() -> None:
     detection = DetectionResponse(
         kind=DetectionKind.RRN,
         start=10,
         end=24,
-        text="000000-0000000",
         confidence=1.0,
         detector="RRNDetector",
     )
@@ -44,7 +43,6 @@ def test_detection_response_matches_core_detection_shape() -> None:
         "kind": "rrn",
         "start": 10,
         "end": 24,
-        "text": "000000-0000000",
         "confidence": 1.0,
         "detector": "RRNDetector",
     }
@@ -55,7 +53,6 @@ def test_detection_response_accepts_business_registration_kind() -> None:
         kind=DetectionKind.BIZ_REG,
         start=0,
         end=12,
-        text="123-45-67890",
         confidence=1.0,
         detector="BusinessRegistrationDetector",
     )
@@ -69,7 +66,6 @@ def test_detection_response_accepts_passport_kind() -> None:
         kind=DetectionKind.PASSPORT,
         start=0,
         end=9,
-        text="M12345678",
         confidence=0.9,
         detector="PassportDetector",
     )

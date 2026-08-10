@@ -3,7 +3,6 @@ export interface Detection {
   kind: string;
   start: number;
   end: number;
-  text: string;
   confidence: number;
   detector: string;
 }

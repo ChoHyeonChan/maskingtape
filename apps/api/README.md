@@ -86,11 +86,10 @@ FastAPI 라우터는 core를 직접 호출하지 않고 `maskingtape_api.service
 ```json
 // 요청
 { "text": "주민번호 800101-1234560 문의주세요" }
-// 응답 — detections는 core의 Detection 타입 그대로
+// 응답 — detections는 원문 조각(text)을 제외한 span metadata만 반환
 {
   "detections": [
-    { "kind": "rrn", "start": 5, "end": 19, "text": "800101-1234560",
-      "confidence": 1.0, "detector": "RRNDetector" }
+    { "kind": "rrn", "start": 5, "end": 19, "confidence": 1.0, "detector": "RRNDetector" }
   ]
 }
 ```
@@ -108,6 +107,7 @@ FastAPI 라우터는 core를 직접 호출하지 않고 `maskingtape_api.service
 
 - `kind` 값: `rrn`, `passport`, `phone`, `email`, `name`, `address`, `card`, `account`, `biz_reg` (core에 전부 구현됨)
 - `start`/`end`는 파이썬 슬라이스 규약 (`text[start:end]` == 탐지된 원문)
+- `detections`는 원문 PII 값을 담는 `text` 필드를 반환하지 않는다. 클라이언트 하이라이트는 자신이 이미 가진 입력 원문과 `start`/`end`로 처리한다.
 - 계약 변경은 팀장 승인 후 이 문서부터 갱신한다
 
 ## 🔒 배포 시 보안 요구사항 (필수 — 구현할 때부터 지킬 것)
@@ -122,7 +122,7 @@ FastAPI 라우터는 core를 직접 호출하지 않고 `maskingtape_api.service
    # ✓ logger.error(f"처리 실패: 입력 {len(text)}자")
    ```
 2. **저장하지 않는다(stateless).** 요청 내용을 DB·파일·캐시에 쓰지 않는다. 처리 후 메모리에서 끝난다.
-3. **응답에 원문을 불필요하게 담지 않는다.** `/anonymize`는 비식별화된 텍스트를 돌려주는 게 목적이다. 디버그 필드로 원문을 반환하지 않는다.
+3. **응답에 원문을 불필요하게 담지 않는다.** `/anonymize`는 비식별화된 텍스트를 돌려주는 게 목적이다. 디버그 필드로 원문을 반환하지 않고, `/scan`·`/anonymize`의 `detections`에도 원문 PII 조각을 넣지 않는다.
 4. **입력 크기 상한**을 둔다(예: 100KB). 초과 시 413으로 거절 — 비용·자원 보호.
 5. **호출 빈도 제한(rate limit)**을 둔다. 공개 URL은 남용된다. 현재 API는 `/scan`·`/anonymize`에 IP별 인메모리 제한을 적용하며 초과 시 429로 거절한다. 다중 인스턴스 배포에서는 플랫폼/WAF 제한도 함께 둔다.
 6. **CORS를 우리 프론트 도메인으로 제한**한다. `*` 금지.

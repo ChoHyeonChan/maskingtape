@@ -7,7 +7,6 @@ function detection(overrides: Partial<Detection>): Detection {
     kind: "phone",
     start: 0,
     end: 0,
-    text: "",
     confidence: 1,
     detector: "Test",
     ...overrides,
@@ -22,7 +21,7 @@ describe("buildSegments", () => {
 
   it("splits plain text around a single detection", () => {
     const text = "연락처 010-1234-5678 입니다";
-    const d = detection({ kind: "phone", start: 4, end: 17, text: "010-1234-5678" });
+    const d = detection({ kind: "phone", start: 4, end: 17 });
     const segments = buildSegments(text, [d]);
     expect(segments).toEqual([
       { kind: "plain", text: "연락처 " },
@@ -33,8 +32,8 @@ describe("buildSegments", () => {
 
   it("handles multiple non-overlapping detections in order", () => {
     const text = "AB010-1234-5678CDtest@example.comEF";
-    const phone = detection({ kind: "phone", start: 2, end: 15, text: "010-1234-5678" });
-    const email = detection({ kind: "email", start: 17, end: 34, text: "test@example.com" });
+    const phone = detection({ kind: "phone", start: 2, end: 15 });
+    const email = detection({ kind: "email", start: 17, end: 34 });
     const segments = buildSegments(text, [phone, email]);
     expect(segments.map((s) => s.text).join("")).toBe(text);
     expect(segments.filter((s) => s.kind === "detection")).toHaveLength(2);
@@ -42,8 +41,8 @@ describe("buildSegments", () => {
 
   it("keeps the earlier-starting detection when two overlap", () => {
     const text = "0101234567890123";
-    const first = detection({ kind: "phone", start: 0, end: 11, text: text.slice(0, 11) });
-    const overlapping = detection({ kind: "rrn", start: 5, end: 16, text: text.slice(5, 16) });
+    const first = detection({ kind: "phone", start: 0, end: 11 });
+    const overlapping = detection({ kind: "rrn", start: 5, end: 16 });
     const segments = buildSegments(text, [first, overlapping]);
     const detections = segments.filter((s) => s.kind === "detection");
     expect(detections).toHaveLength(1);
