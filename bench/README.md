@@ -281,6 +281,14 @@ confidence 0.85로, 문맥어 있는 계좌번호도 confidence 0.6으로 여전
 통과하면 안 된다"는 설계를 코드에 명시하고 있다 — bench 테스트가 core의 실제 검증 함수
 (`_checksum_ok`, `_luhn_ok`)로 이 속성이 항상 지켜지는지 회귀 확인한다.
 
+**pseudonym 라벨 폴백 경로 검증**([#230](https://github.com/ChoHyeonChan/maskingtape/issues/230)):
+`PseudonymAnonymizer`의 `_GENERATORS`는 `name`/`phone`/`email`/`rrn`/`card`/`address` 6종에만
+가짜 값 생성기를 두고, 나머지 3종(`biz_reg`/`passport`/`account` — 전부 core에 나중에 추가된
+kind)은 docstring에 명시된 대로 `[라벨]` 형태로 폴백한다. 원본 유출은 없지만(직접 확인함),
+이 3종은 core에 새 kind가 추가될 때마다 pseudonym.py가 갱신되지 않은 채 지금까지 방치돼
+있었고 bench도 이 폴백 경로를 한 번도 검증한 적이 없었다 — 회귀 테스트로 원본 미유출과
+라벨 형식을 고정해뒀다.
+
 **label(numbered=True) 동일 개체 연결 검증**: `LabelAnonymizer(numbered=True)`는 같은 값이
 반복되면 같은 번호(`[전화번호1]`)를 매겨 "동일 인물/번호"라는 문맥 정보를 보존한다고
 문서화돼 있는데, bench가 이 모드를 한 번도 테스트한 적이 없었다([#164](https://github.com/ChoHyeonChan/maskingtape/issues/164)). 직접 확인해보니 판별 기준이 `Detection.text`(탐지된 원문
