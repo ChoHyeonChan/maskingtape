@@ -69,3 +69,37 @@ def test_overlapping_detections_are_merged_not_dropped():
     # 탐지된 구간들이 주소 시작부터 주민번호 끝까지를 빠짐없이 덮어야 한다
     assert covered >= len("서울특별시 강남구 역삼동") + len("800101-1234560")
     assert all(text[d.start : d.end] == d.text for d in detections)
+
+
+def test_fully_contained_overlap_reports_the_higher_confidence_kind():
+    """[#172] 완전 포함 겹침도 부분 겹침처럼 확신도 높은 쪽이 kind를 담당한다.
+
+    넓은 address(0.9) 안에 rrn(1.0)이 완전히 포함되면, 넓은 구간을 그대로 가리되
+    더 민감한 rrn을 감추지 않고 kind='rrn'으로 보고한다.
+    """
+    from maskingtape.detectors.base import Detector
+    from maskingtape.types import Detection
+
+    class _Fixed(Detector):
+        def __init__(self, kind: str, start: int, end: int, confidence: float) -> None:
+            self.kind = kind
+            self._start, self._end, self._conf = start, end, confidence
+
+        def detect(self, text: str) -> list[Detection]:
+            return [
+                Detection(
+                    kind=self.kind,
+                    start=self._start,
+                    end=self._end,
+                    text=text[self._start : self._end],
+                    confidence=self._conf,
+                    detector="Fixed",
+                )
+            ]
+
+    text = "서울특별시 강남구 역삼동 800101-1234560"
+    result = Pipeline(detectors=[_Fixed("address", 0, 24, 0.9), _Fixed("rrn", 10, 24, 1.0)]).scan(text)
+    assert len(result) == 1
+    assert result[0].kind == "rrn"  # 더 민감한 종류를 감추지 않는다
+    assert result[0].confidence == 1.0
+    assert (result[0].start, result[0].end) == (0, 24)  # 넓은 쪽 구간은 그대로(더 가리기=안전)

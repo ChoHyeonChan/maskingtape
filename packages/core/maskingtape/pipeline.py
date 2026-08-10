@@ -61,7 +61,12 @@ def _resolve_overlaps(detections: list[Detection], text: str) -> list[Detection]
 
         previous = result[-1]
         if d.end <= previous.end:
-            continue  # 앞의 구간이 이미 완전히 덮고 있다
+            # 완전 포함 — 넓은 쪽(previous) 구간을 유지한다(더 가리기=안전). 종류(kind)는
+            # 부분 겹침과 동일하게 확신도 높은 쪽을 따라, 더 민감한 종류가 감춰져 보고되지
+            # 않게 한다(예: address 안에 완전히 든 rrn을 address가 아니라 rrn으로 보고). (#172)
+            if d.confidence > previous.confidence:
+                result[-1] = replace(previous, kind=d.kind, confidence=d.confidence)
+            continue
 
         # 부분적으로 겹친다 — 가리는 범위는 합집합, 종류는 확신도가 높은 쪽을 남긴다
         winner = d if d.confidence > previous.confidence else previous
