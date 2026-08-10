@@ -120,16 +120,12 @@ def test_fully_contained_overlap_keeps_the_wider_span():
     assert result[0].end == 24
 
 
-def test_fully_contained_overlap_does_not_apply_confidence_based_kind_rule():
-    """[core#172] 알려진 한계 — 완전 포함(fully-contained) 겹침은 부분 겹침과 달리 confidence
-    비교 없이 무조건 바깥쪽(먼저 온) 구간이 이긴다(`_resolve_overlaps`의 `d.end <= previous.end:
-    continue` 분기가 병합 없이 그냥 건너뜀). 그래서 confidence 1.0짜리 rrn이 confidence 0.9짜리
-    address 안에 완전히 포함되면, kind="rrn"이 아니라 **kind="address", confidence=0.9로
-    보고된다** — docstring이 약속한 "확신도 높은 쪽이 kind 담당"이 부분 겹침에서만 지켜지고
-    완전 포함에서는 안 지켜지는 비일관성이다. 마스킹 범위 자체(넓은 쪽 전체를 가림)는 안전해서
-    직접적인 유출은 아니지만, kind·confidence 보고가 틀려 이걸로 종류별 통계·정책을 판단하는
-    코드가 있다면 오판할 수 있다. bench 소관이 아니라 core 이슈로 남겼다(코드는 안 고침) —
-    core가 고치면 이 테스트가 깨져서 알 수 있다.
+def test_fully_contained_overlap_applies_confidence_based_kind_rule():
+    """[core#172 해결됨] 완전 포함(fully-contained) 겹침도 부분 겹침과 동일하게 confidence가
+    높은 쪽이 kind를 담당한다. confidence 1.0짜리 rrn이 confidence 0.9짜리 address 안에 완전히
+    포함되면, 넓은 구간(0~24)은 그대로 가리되 kind는 **rrn(confidence 1.0)**으로 보고된다 —
+    더 민감한 종류를 감추지 않는다. (원래 이 테스트는 core가 고치기 전의 비일관 동작을 잡아두던
+    canary였고, core #172 수정으로 새 동작에 맞춰 갱신했다.)
     """
     pipeline = Pipeline(
         detectors=[
@@ -139,5 +135,6 @@ def test_fully_contained_overlap_does_not_apply_confidence_based_kind_rule():
     )
     result = pipeline.scan(_TEXT)
     assert len(result) == 1
-    assert result[0].kind == "address"  # 기대와 다르게 confidence 낮은 쪽(0.9)이 kind를 차지
-    assert result[0].confidence == 0.9  # rrn의 confidence 1.0은 통째로 사라짐
+    assert result[0].kind == "rrn"  # 확신도 높은 쪽(1.0)이 kind를 담당
+    assert result[0].confidence == 1.0
+    assert result[0].start == 0 and result[0].end == 24  # 넓은 쪽 구간은 유지(더 가리기=안전)
