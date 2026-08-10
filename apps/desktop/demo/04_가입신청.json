@@ -1,0 +1,20 @@
+{
+  "_comment": "합성 예시 데이터 — 실제 개인정보가 아닙니다",
+  "batch_id": "SIGNUP-2026-08-04",
+  "applicants": [
+    {
+      "name": "장하람",
+      "email": "haram.jang@example.com",
+      "phone": "010-3456-7890",
+      "rrn": "851203-2345677",
+      "address": "부산광역시 해운대구 센텀중앙로 55"
+    },
+    {
+      "name": "서지안",
+      "email": "jian.seo@example.com",
+      "phone": "051-600-0300",
+      "card": "5123-4567-8901-2346",
+      "refund_account": "우리은행 1002-345-678901"
+    }
+  ]
+}
