@@ -13,6 +13,7 @@ from maskingtape.detectors import AddressDetector
 from maskingtape.detectors import BusinessRegistrationDetector
 from maskingtape.detectors import CreditCardDetector
 from maskingtape.detectors import EmailDetector
+from maskingtape.detectors import NameDetector
 from maskingtape.detectors import PassportDetector
 from maskingtape.detectors import PhoneDetector
 from maskingtape.detectors import RRNDetector
@@ -168,6 +169,20 @@ def test_rrn_generator_covers_invalid_checksum_case():
         confidences.add(found[0].confidence)
     assert 0.85 in confidences  # 체크섬 무효 케이스가 실제로 나오고 0.85로 탐지된다
     assert 1.0 in confidences  # 체크섬 유효 케이스도 여전히 나온다
+
+
+def test_rrn_generator_covers_dot_separator():
+    """#209: 점(.) 구분자도 나오고, core RRNDetector가 그대로 잡아야 한다."""
+    rng = random.Random(21)
+    detector = RRNDetector()
+    samples = []
+    for _ in range(200):
+        entity = generate_entity("rrn", rng, difficulty="mixed")
+        found = detector.detect(entity.text)
+        assert len(found) == 1, f"탐지 실패: {entity.text!r}"
+        assert found[0].text == entity.text
+        samples.append(entity.text)
+    assert any("." in s for s in samples)  # 점 구분자가 실제로 나온다
 
 
 def test_address_generator_covers_road_and_jibun_styles():
@@ -394,6 +409,21 @@ def test_generated_phone_covers_landline_and_passes_core_detector():
     assert found_landline
 
 
+def test_phone_generator_covers_safe050_numbers():
+    """#211: 평생번호·안심번호(050/0502~0508)도 나오고, core가 정확히 한 건으로 잡아야 한다."""
+    rng = random.Random(40)
+    detector = PhoneDetector()
+    found_050 = False
+    for _ in range(300):
+        entity = generate_entity("phone", rng, difficulty="mixed")
+        found = detector.detect(entity.text)
+        assert len(found) == 1, f"탐지 실패: {entity.text!r}"
+        assert found[0].text == entity.text
+        if entity.text.replace("-", "").replace(".", "").replace(" ", "").startswith("050"):
+            found_050 = True
+    assert found_050
+
+
 def test_generated_email_covers_plus_tag_and_subdomain():
     """plus 표기·서브도메인도 core EmailDetector가 정확히 한 건으로 잡아야 한다."""
     rng = random.Random(23)
@@ -492,3 +522,38 @@ def test_distractors_are_never_detected_as_account():
     for _ in range(300):
         text = generate_distractor(rng)
         assert detector.detect(text) == [], f"distractor가 account로 오탐됨: {text!r}"
+
+
+def test_account_number_like_distractor_is_never_detected_as_card():
+    """#223에서 실측 재현 — gen_account_number_like가 구분자 없이 13자리 이상을 만들면
+    core CreditCardDetector의 "구분자 없는 13~19자리" 분기와 우연히 겹칠 수 있다(Luhn까지
+    통과하면 ~10% 확률로 card 오탐). gen_account가 이미 갖고 있던 Luhn 무효화 가드를
+    distractor 쪽에도 똑같이 적용해 회귀를 막는다."""
+    rng = random.Random(41)
+    detector = CreditCardDetector()
+    for _ in range(500):
+        text = gen_account_number_like(rng)
+        assert detector.detect(text) == [], f"distractor가 card로 오탐됨: {text!r}"
+
+
+def test_full_name_with_title_only_is_detected():
+    """#213: 역할어·존칭 없이 직함만 있어도, 3글자 이상 풀네임이면 core가 잡아야 한다."""
+    detector = NameDetector()
+    found = detector.detect("홍길동 대표가 계약서에 서명했습니다.")
+    assert [f.text for f in found] == ["홍길동"]
+    assert found[0].confidence == 0.5
+
+
+def test_two_syllable_name_with_title_only_is_not_detected():
+    """#213 설계된 한계 — 직함 단서 하나뿐이고 2음절 이름(성씨+1음절)이면 core가 일부러 놓친다
+    (부서·업무어 오탐을 막는 성+2자 풀네임 가드). 버그가 아니라 문서화된 트레이드오프다."""
+    detector = NameDetector()
+    assert detector.detect("김민 부장이 결재했습니다.") == []
+
+
+def test_department_word_with_title_is_not_detected_as_name():
+    """#213 core 이슈 예시 그대로 — 성씨로 시작하는 2음절 부서·업무어가 직함 단서만으로
+    이름으로 오탐되면 안 된다."""
+    detector = NameDetector()
+    for text in ("구매 부장이 결재했습니다.", "정기 이사가 참석했습니다.", "홍보 사원이 채용되었습니다."):
+        assert detector.detect(text) == [], f"부서어가 이름으로 오탐됨: {text!r}"

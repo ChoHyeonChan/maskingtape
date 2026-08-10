@@ -12,6 +12,8 @@ from __future__ import annotations
 
 import random
 
+from maskingtape.detectors.financial.creditcard import _luhn_ok
+
 from bench.generator.entities import _ACCOUNT_GROUP_PATTERNS, _biz_reg_check_digit, _PASSPORT_TYPE_CODES
 
 # core RRNDetector가 허용하는 지역번호(rrn.py 참고)에 없는 국번 — 형식은 유선전화 같지만 매칭되면 안 됨.
@@ -102,10 +104,21 @@ def gen_account_number_like(rng: random.Random) -> str:
     core는 체크섬이 없어(account.py) biz_reg처럼 "체크섬 무효화"를 못 쓴다 — 대신 이 값
     자체는 진짜 계좌번호와 형식상 구분이 안 되고, documents.py가 계좌·은행 문맥어가 전혀
     없는 템플릿(주문번호·일련번호 등)에만 심어서 문맥 게이트가 걸러내는지를 검증한다.
+
+    구분자 없이 붙여 쓰면(13자리 이상) `gen_account`가 겪는 것과 똑같이 core
+    `CreditCardDetector`의 "구분자 없는 13~19자리" 분기와 우연히 겹칠 수 있다 — Luhn까지
+    우연히 통과하면(~10% 확률) 문맥어 하드 게이트와 무관하게 card로 오탐된다(#223에서 실측
+    재현: "주문번호 7957621463516"). `gen_account`와 동일하게 우연히 통과하면 마지막 자리를
+    일부러 바꿔 항상 무효로 만든다.
     """
     pattern = rng.choice(_ACCOUNT_GROUP_PATTERNS)
     groups = [f"{rng.randint(0, 10**n - 1):0{n}d}" for n in pattern]
     sep = rng.choice(["-", ""])
+
+    if not sep and sum(len(g) for g in groups) >= 13 and _luhn_ok("".join(groups)):
+        last_digit = (int(groups[-1][-1]) + 1) % 10
+        groups[-1] = groups[-1][:-1] + str(last_digit)
+
     return sep.join(groups) if sep else "".join(groups)
 
 
