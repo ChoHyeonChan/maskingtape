@@ -24,7 +24,8 @@
 }
 
 .summary-card {
-  --summary-color: var(--kind-rrn);
+  /* 매칭되는 .summary-card--<kind>가 없는(알 수 없는) kind를 위한 기본값(#216). */
+  --summary-color: var(--kind-fallback);
   display: flex;
   align-items: center;
   gap: 0.65rem;
@@ -104,7 +105,8 @@
 }
 
 .summary__filter {
-  --summary-color: var(--kind-rrn);
+  /* 매칭되는 .summary__filter--<kind>가 없는(알 수 없는) kind를 위한 기본값(#216). */
+  --summary-color: var(--kind-fallback);
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
@@ -123,6 +125,8 @@
   height: 0.5rem;
   border-radius: 50%;
   display: inline-block;
+  /* 매칭되는 .summary__dot--<kind>가 없는(알 수 없는) kind를 위한 기본값(#216). */
+  background: var(--kind-fallback);
 }
 
 .summary__dot--rrn { background: var(--kind-rrn); }
@@ -277,6 +281,9 @@
   --highlight-strength: 48%;
   --highlight-edge-strength: 34%;
   --highlight-tag-strength: 20%;
+  /* 아래 .highlight--<kind> 규칙이 없는(core가 새로 추가했는데 웹이 아직 모르는) kind를
+     위한 기본값 — 매칭되는 규칙이 있으면 소스 순서상 이 기본값을 덮어쓴다(#216). */
+  --highlight-color: var(--kind-fallback);
   background: transparent;
   border-radius: 0;
   margin-right: 0.28rem;

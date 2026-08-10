@@ -19,4 +19,11 @@ describe("DetectionSummary", () => {
     expect(screen.getByText(/전화번호 2/)).toBeInTheDocument();
     expect(screen.getByText(/주민등록번호 1/)).toBeInTheDocument();
   });
+
+  it("falls back to the raw kind string for a kind with no Korean label mapping, without crashing (#216)", () => {
+    render(<DetectionSummary detections={[d("account")]} activeFilter={null} onFilterSelect={() => {}} />);
+    expect(screen.getByText(/개인정보 1건 발견/)).toBeInTheDocument();
+    expect(screen.getByText(/account 1/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "account 보기" })).toHaveClass("summary__filter--account");
+  });
 });
