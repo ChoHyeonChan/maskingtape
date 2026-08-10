@@ -4,7 +4,8 @@
   "outputDirectory": "apps/web/dist",
   "functions": {
     "api/**/*.py": {
-      "excludeFiles": "{apps/web/**,apps/desktop/**,bench/**,packages/mcp-server/**,**/tests/**,**/*.test.py,**/test_*.py,**/__pycache__/**,**/*.pyc}"
+      "includeFiles": "apps/web/dist/**",
+      "excludeFiles": "{apps/web/node_modules/**,apps/web/src/**,apps/desktop/**,bench/**,packages/mcp-server/**,**/tests/**,**/*.test.py,**/test_*.py,**/__pycache__/**,**/*.pyc}"
     }
   }
 }
