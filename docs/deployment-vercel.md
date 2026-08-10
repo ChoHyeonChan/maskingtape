@@ -8,7 +8,7 @@ Use one Vercel project from the repository root.
 
 - `apps/web` is built as the static Vite frontend.
 - `api/index.py` exports a FastAPI `app` mounted at `/api`.
-- `requirements.txt` installs `packages/core` and `apps/api` into the Python function bundle.
+- `pyproject.toml` + `uv.lock` install `packages/core` (`maskingtape`) and `apps/api` (`maskingtape-api`) into the Python function bundle. The local packages are declared with their correct names in `[tool.uv.sources]`. (A bare `-e ./apps/api` in `requirements.txt` made uv infer the wrong package name `api` and fail `uv lock` during the Vercel build — see #228.)
 - The deployed browser calls same-origin `/api/scan`, so no cross-origin API URL is needed for the normal demo.
 
 This follows the current Vercel Python/FastAPI model: a Python file under `api/` exports an ASGI `app`, dependencies are read from root Python dependency files, and the Vite build output is served as static assets.

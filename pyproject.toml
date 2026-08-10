@@ -1,0 +1,15 @@
+# 배포(Vercel) 전용 루트 프로젝트 — 웹 데모 서버리스 함수의 파이썬 의존성을 고정한다.
+# 로컬 패키지 두 개(core·api)를 올바른 이름으로 uv에 알려, uv가 경로 basename을
+# 패키지 이름으로 잘못 추론하던 배포 빌드 실패를 막는다.
+[project]
+name = "maskingtape-web-demo"
+version = "0.0.0"
+requires-python = ">=3.10"
+dependencies = [
+    "maskingtape",
+    "maskingtape-api",
+]
+
+[tool.uv.sources]
+maskingtape = { path = "packages/core", editable = true }
+maskingtape-api = { path = "apps/api", editable = true }
