@@ -6,5 +6,8 @@
     "api/**/*.py": {
       "excludeFiles": "{apps/web/**,apps/desktop/**,bench/**,packages/mcp-server/**,**/tests/**,**/*.test.py,**/test_*.py,**/__pycache__/**,**/*.pyc}"
     }
-  }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api" }
+  ]
 }
