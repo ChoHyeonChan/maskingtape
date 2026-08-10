@@ -10,6 +10,7 @@ from maskingtape_api.schemas import (
     ScanRequest,
     ScanResponse,
 )
+from maskingtape_api.rate_limit import enforce_rate_limit
 from maskingtape_api.services.core_adapter import (
     CoreEngineAdapter,
     CoreEngineError,
@@ -27,6 +28,7 @@ router = APIRouter(tags=["pii"])
 def scan(
     request: ScanRequest,
     core: CoreEngineAdapter = Depends(get_core_adapter),
+    _rate_limit: None = Depends(enforce_rate_limit),
 ) -> ScanResponse | JSONResponse:
     """Detect personal information using the rule-based core pipeline."""
     try:
@@ -43,6 +45,7 @@ def scan(
 def anonymize(
     request: AnonymizeRequest,
     core: CoreEngineAdapter = Depends(get_core_adapter),
+    _rate_limit: None = Depends(enforce_rate_limit),
 ) -> AnonymizeResponse | JSONResponse:
     """Anonymize personal information using the rule-based core pipeline."""
     try:

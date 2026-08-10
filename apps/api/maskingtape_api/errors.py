@@ -11,6 +11,7 @@ from maskingtape_api.schemas import ErrorResponse, MAX_TEXT_LENGTH
 ERROR_RESPONSES = {
     400: {"model": ErrorResponse, "description": "Invalid request"},
     413: {"model": ErrorResponse, "description": "Text payload too large"},
+    429: {"model": ErrorResponse, "description": "Too many requests"},
     500: {"model": ErrorResponse, "description": "Internal server error"},
 }
 
@@ -24,11 +25,13 @@ def error_response(
     code: str,
     message: str,
     details: dict[str, Any] | None = None,
+    headers: dict[str, str] | None = None,
 ) -> JSONResponse:
     error = ErrorResponse(code=code, message=message, details=details)
     return JSONResponse(
         status_code=status_code,
         content=error.model_dump(mode="json"),
+        headers=headers,
     )
 
 

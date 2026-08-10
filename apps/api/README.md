@@ -34,10 +34,15 @@ Development environment variables:
 ```powershell
 $env:MASKINGTAPE_API_ENV="development"
 $env:MASKINGTAPE_API_CORS_ORIGINS="http://localhost:5173,http://127.0.0.1:5173"
+$env:MASKINGTAPE_API_RATE_LIMIT_REQUESTS="60"
+$env:MASKINGTAPE_API_RATE_LIMIT_WINDOW_SECONDS="60"
 ```
 
 `MASKINGTAPE_API_CORS_ORIGINS` is a comma-separated allowlist. Do not use `*`;
 set the deployed web origin explicitly when the frontend domain is decided.
+`MASKINGTAPE_API_RATE_LIMIT_REQUESTS` and `MASKINGTAPE_API_RATE_LIMIT_WINDOW_SECONDS`
+control the in-memory per-client limit for `/scan` and `/anonymize`. Requests over
+the window return 429 with `Retry-After`.
 
 헬스체크:
 
@@ -119,7 +124,7 @@ FastAPI 라우터는 core를 직접 호출하지 않고 `maskingtape_api.service
 2. **저장하지 않는다(stateless).** 요청 내용을 DB·파일·캐시에 쓰지 않는다. 처리 후 메모리에서 끝난다.
 3. **응답에 원문을 불필요하게 담지 않는다.** `/anonymize`는 비식별화된 텍스트를 돌려주는 게 목적이다. 디버그 필드로 원문을 반환하지 않는다.
 4. **입력 크기 상한**을 둔다(예: 100KB). 초과 시 413으로 거절 — 비용·자원 보호.
-5. **호출 빈도 제한(rate limit)**을 둔다. 공개 URL은 남용된다.
+5. **호출 빈도 제한(rate limit)**을 둔다. 공개 URL은 남용된다. 현재 API는 `/scan`·`/anonymize`에 IP별 인메모리 제한을 적용하며 초과 시 429로 거절한다. 다중 인스턴스 배포에서는 플랫폼/WAF 제한도 함께 둔다.
 6. **CORS를 우리 프론트 도메인으로 제한**한다. `*` 금지.
 7. **HTTPS만 허용**한다.
 
