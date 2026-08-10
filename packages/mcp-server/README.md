@@ -9,10 +9,13 @@ AI 에이전트가 한국어 데이터를 다루기 전에 거치는 **프라이
 
 | 도구 | 역할 |
 |---|---|
-| `scan_text(text)` | 개인정보 탐지 리포트 반환 (종류·위치·확신도) |
+| `scan_text(text)` | 개인정보 탐지 리포트 반환 (종류·위치·확신도 — **원문 값은 싣지 않음**) |
 | `anonymize_text(text, strategy)` | 비식별화된 텍스트 반환 — `mask`(\*로 가림) / `label`([전화번호] 치환) |
+| `anonymize_file(path, strategy)` | 로컬 텍스트 파일을 `<이름>_masked.<확장자>`로 저장 |
 
-계획: `anonymize_file`(파일 배치 처리) — 코어 v2 이후.
+**파일 접근 안전**: `anonymize_file`은 **허용 루트 안의 경로만** 읽고 쓴다(기본=서버 작업 디렉터리,
+환경변수 `MASKINGTAPE_MCP_ROOT`로 재정의). 조작된 에이전트가 `~/.ssh/id_rsa` 같은 임의 경로를
+넘겨도 거부한다. 심볼릭 링크·덮어쓰기·10MB 초과·비UTF-8도 막는다(`safe_file.py`).
 
 ## 설치·실행
 
