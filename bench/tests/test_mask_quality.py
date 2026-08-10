@@ -235,16 +235,16 @@ def test_keep_head_still_catches_leak_beyond_declared_prefix():
     assert 0 < result.leaks[0].exposed_ratio < 1.0
 
 
-def test_keep_head_can_fully_expose_values_shorter_than_it():
-    """[core#169] MaskAnonymizer(keep_head=N)는 kind 구분 없이 파이프라인 전체에 적용되므로,
-    N보다 짧은 값(예: 2글자 이름)은 keep=min(keep_head, span_len)에 의해 통째로 노출된다.
-    RRN(14자)을 겨냥해 keep_head=2를 설정해도 같은 파이프라인의 2글자 이름은 완전 노출된다 —
-    core 설계 위험으로 별도 이슈(#169)를 남겼다. mask_quality.py 입장에서는 keep_head 계약을
-    그대로 따른 것이므로 유출 오판은 아니다(#168) — 이 테스트는 그 경계 사례를 고정해둔다.
+def test_keep_head_no_longer_fully_exposes_values_shorter_than_it():
+    """[core#169 해결됨] MaskAnonymizer(keep_head=N)는 파이프라인 전체에 적용되지만, 이제 실제
+    보존은 구간 길이의 절반을 넘지 않아(min(keep_head, span_len//2)) 짧은 값이 통째로 노출되지
+    않는다. RRN(14자)용으로 keep_head=2를 줘도 2글자 이름은 최대 1글자만 보존된다. (원래 이
+    테스트는 core가 고치기 전의 완전 노출을 잡아두던 canary였고, core #169 수정으로 갱신했다.)
     """
     text = "고객 김민 님 안녕하세요."
     detections = NameDetector().detect(text)
     assert len(detections) == 1
     assert detections[0].text == "김민"
     result = MaskAnonymizer(keep_head=2).apply(text, detections)
-    assert result == text  # 마스킹이 전혀 안 됨 — 짧은 값이 keep_head에 의해 완전 노출
+    assert result == "고객 김* 님 안녕하세요."  # 절반 상한 → 최대 1글자 보존, 통째 노출 안 됨
+    assert "김민" not in result
