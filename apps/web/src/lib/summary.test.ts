@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import { summarize } from "./summary";
 import type { Detection } from "../types/detection";
 
-function d(kind: string): Detection {
-  return { kind, start: 0, end: 0, confidence: 1, detector: "T" };
+function d(kind: string, confidence = 1): Detection {
+  return { kind, start: 0, end: 0, confidence, detector: "T" };
 }
 
 describe("summarize", () => {
@@ -14,8 +14,8 @@ describe("summarize", () => {
   it("counts detections per kind", () => {
     const result = summarize([d("phone"), d("phone"), d("email")]);
     expect(result).toEqual([
-      { kind: "phone", count: 2 },
-      { kind: "email", count: 1 },
+      { kind: "phone", count: 2, minConfidence: 1 },
+      { kind: "email", count: 1, minConfidence: 1 },
     ]);
   });
 
@@ -33,5 +33,10 @@ describe("summarize", () => {
   it("appends unknown kinds after the known ones", () => {
     const result = summarize([d("mystery"), d("phone")]);
     expect(result.map((r) => r.kind)).toEqual(["phone", "mystery"]);
+  });
+
+  it("tracks the lowest confidence within a kind, not the average (#237)", () => {
+    const result = summarize([d("name", 0.9), d("name", 0.5), d("name", 0.75)]);
+    expect(result).toEqual([{ kind: "name", count: 3, minConfidence: 0.5 }]);
   });
 });

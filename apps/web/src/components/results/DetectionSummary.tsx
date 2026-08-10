@@ -23,22 +23,34 @@ export function DetectionSummary({ detections, activeFilter, onFilterSelect }: P
     <div className="summary" role="status">
       <span className="summary__total">개인정보 {detections.length}건 발견</span>
       <div className="summary__cards" aria-label="발견된 개인정보 유형">
-        {counts.map(({ kind, count }) => (
-          <button
-            key={kind}
-            type="button"
-            className={`summary-card summary-card--${kind}${activeFilter === kind ? " is-active" : ""}`}
-            aria-pressed={activeFilter === kind}
-            onClick={() => onFilterSelect(activeFilter === kind ? null : kind)}
-          >
-            <span className="summary-card__icon" aria-hidden="true" />
-            <span className="summary-card__sr">{KIND_LABELS[kind] ?? kind} {count}</span>
-            <span className="summary-card__body">
-              <span>{KIND_LABELS[kind] ?? kind}</span>
-              <strong>{count}건</strong>
-            </span>
-          </button>
-        ))}
+        {counts.map(({ kind, count, minConfidence }) => {
+          const confidencePct = Math.round(minConfidence * 100);
+          return (
+            <button
+              key={kind}
+              type="button"
+              className={`summary-card summary-card--${kind}${activeFilter === kind ? " is-active" : ""}`}
+              aria-pressed={activeFilter === kind}
+              onClick={() => onFilterSelect(activeFilter === kind ? null : kind)}
+            >
+              <span className="summary-card__icon" aria-hidden="true" />
+              <span className="summary-card__sr">
+                {KIND_LABELS[kind] ?? kind} {count}건, 최소 확신도 {confidencePct}%
+              </span>
+              <span className="summary-card__body">
+                <span>{KIND_LABELS[kind] ?? kind}</span>
+                <strong>{count}건</strong>
+                <span
+                  className="summary-card__bar"
+                  aria-hidden="true"
+                  title={`최소 확신도 ${confidencePct}%`}
+                >
+                  <span className="summary-card__bar-fill" style={{ width: `${confidencePct}%` }} />
+                </span>
+              </span>
+            </button>
+          );
+        })}
       </div>
       <details className="summary__details">
         <summary>필터 초기화</summary>
