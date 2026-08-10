@@ -29,6 +29,14 @@ def test_detects_without_separator():
     assert found[0].confidence == 1.0
 
 
+def test_detects_with_dot_separator():
+    # 점(.)으로 구분한 서식도 잡아야 한다 (미탐=유출) — 앞 6자리와 뒤 7자리는 VALID_RRN과 동일
+    found = RRNDetector().detect("주민번호 800101.1234560")
+    assert len(found) == 1
+    assert found[0].text == "800101.1234560"
+    assert found[0].confidence == 1.0
+
+
 def test_rejects_impossible_birthdate():
     # 13월 32일은 날짜가 아니므로 탐지하면 안 된다
     assert RRNDetector().detect("991332-1234567") == []
