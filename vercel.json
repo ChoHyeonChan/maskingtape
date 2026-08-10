@@ -1,0 +1,10 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "cd apps/web && npm ci && npm run build",
+  "outputDirectory": "apps/web/dist",
+  "functions": {
+    "api/**/*.py": {
+      "excludeFiles": "{apps/web/**,apps/desktop/**,bench/**,packages/mcp-server/**,**/tests/**,**/*.test.py,**/test_*.py,**/__pycache__/**,**/*.pyc}"
+    }
+  }
+}

@@ -54,7 +54,7 @@ class ScanRequest(TextRequest):
 
 
 class DetectionResponse(BaseModel):
-    """One personal information span detected from the input text."""
+    """One detected span without echoing the original personal information value."""
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -62,7 +62,6 @@ class DetectionResponse(BaseModel):
                 "kind": "rrn",
                 "start": 10,
                 "end": 24,
-                "text": "000000-0000000",
                 "confidence": 1.0,
                 "detector": "RRNDetector",
             }
@@ -72,7 +71,6 @@ class DetectionResponse(BaseModel):
     kind: DetectionKind = Field(..., description="개인정보 종류.")
     start: int = Field(..., ge=0, description="원문 기준 시작 위치. Python 슬라이스 규약.")
     end: int = Field(..., ge=0, description="원문 기준 끝 위치. Python 슬라이스 규약.")
-    text: str = Field(..., description="탐지된 원문 조각.")
     confidence: float = Field(..., ge=0.0, le=1.0, description="탐지 확신도.")
     detector: str = Field(..., description="탐지를 수행한 core detector 이름.")
 

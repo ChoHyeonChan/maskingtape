@@ -20,6 +20,7 @@ apps/desktop/build/
 .env
 .env.*
 *.local.json
+.vercel/
 
 # Claude 메모리 미러 (팀장 로컬 전용, 공유 금지)
 .claude-memory/

@@ -80,7 +80,6 @@ def _to_detection_response(detection: Detection) -> DetectionResponse:
         kind=detection.kind,
         start=detection.start,
         end=detection.end,
-        text=detection.text,
         confidence=detection.confidence,
         detector=detection.detector,
     )

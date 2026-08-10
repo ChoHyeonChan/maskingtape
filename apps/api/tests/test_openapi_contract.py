@@ -20,7 +20,7 @@ def test_openapi_contains_scan_and_anonymize_contracts() -> None:
     ].endswith("/ScanResponse")
     assert "501" not in scan_operation["responses"]
     assert "422" not in scan_operation["responses"]
-    for status_code in ("400", "413", "500"):
+    for status_code in ("400", "413", "429", "500"):
         assert scan_operation["responses"][status_code]["content"]["application/json"][
             "schema"
         ]["$ref"].endswith("/ErrorResponse")
@@ -33,7 +33,10 @@ def test_openapi_contains_scan_and_anonymize_contracts() -> None:
     assert "501" not in anonymize_operation["responses"]
 
     assert "422" not in anonymize_operation["responses"]
-    for status_code in ("400", "413", "500"):
+    for status_code in ("400", "413", "429", "500"):
         assert anonymize_operation["responses"][status_code]["content"]["application/json"][
             "schema"
         ]["$ref"].endswith("/ErrorResponse")
+
+    detection_properties = schema["components"]["schemas"]["DetectionResponse"]["properties"]
+    assert "text" not in detection_properties

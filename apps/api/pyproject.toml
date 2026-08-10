@@ -30,4 +30,4 @@ include = ["maskingtape_api*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = [".", "../../packages/core"]
+pythonpath = [".", "../../packages/core", "../.."]

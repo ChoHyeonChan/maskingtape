@@ -57,6 +57,8 @@ def test_core_adapter_accepts_injected_pipeline() -> None:
     assert len(result.detections) == 1
     assert result.detections[0].kind == DetectionKind.EMAIL
     assert result.detections[0].detector == "FakeDetector"
+    assert "sample@example.com" not in result.model_dump_json()
+    assert "text" not in result.detections[0].model_dump(mode="json")
 
 
 def test_core_adapter_accepts_all_default_core_kinds() -> None:
@@ -73,6 +75,7 @@ def test_core_adapter_anonymize_masks_detected_spans() -> None:
     assert result.text == "*" * len(text)
     assert len(result.detections) == 1
     assert result.detections[0].kind == DetectionKind.EMAIL
+    assert "sample@example.com" not in result.detections[0].model_dump_json()
 
 
 def test_core_adapter_anonymize_supports_label_strategy() -> None:

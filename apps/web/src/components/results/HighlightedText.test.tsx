@@ -8,7 +8,6 @@ function detection(overrides: Partial<Detection>): Detection {
     kind: "phone",
     start: 0,
     end: 0,
-    text: "",
     confidence: 1,
     detector: "Test",
     ...overrides,
@@ -26,7 +25,7 @@ describe("HighlightedText", () => {
   });
 
   it("renders the detected span with its kind label and confidence in the tooltip", () => {
-    const d = detection({ kind: "phone", start: 4, end: 17, text: "010-1234-5678", confidence: 1 });
+    const d = detection({ kind: "phone", start: 4, end: 17, confidence: 1 });
     render(<HighlightedText text="연락처 010-1234-5678 입니다" detections={[d]} activeFilter={null} />);
 
     const mark = screen.getByText("010-1234-5678");
@@ -37,20 +36,20 @@ describe("HighlightedText", () => {
   });
 
   it("exposes kind and confidence via aria-label so keyboard/screen-reader users don't need the hover tooltip (#106)", () => {
-    const confident = detection({ kind: "phone", start: 4, end: 17, text: "010-1234-5678", confidence: 1 });
+    const confident = detection({ kind: "phone", start: 4, end: 17, confidence: 1 });
     render(<HighlightedText text="연락처 010-1234-5678 입니다" detections={[confident]} activeFilter={null} />);
     expect(screen.getByRole("button", { name: "전화번호 · 신뢰도 100% · 가리기" })).toBeInTheDocument();
   });
 
   it("shows the exact confidence percentage on the visible tag for uncertain detections (#106)", () => {
-    const unsure = detection({ kind: "name", start: 0, end: 3, text: "김영희", confidence: 0.5 });
+    const unsure = detection({ kind: "name", start: 0, end: 3, confidence: 0.5 });
     render(<HighlightedText text="김영희" detections={[unsure]} activeFilter={null} />);
     expect(screen.getByText("이름 · 50%", { selector: ".highlight__tag" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "이름 · 신뢰도 50% · 가리기" })).toBeInTheDocument();
   });
 
   it("renders core business registration detections with the business color class", () => {
-    const d = detection({ kind: "biz_reg", start: 3, end: 15, text: "123-45-67890", confidence: 1 });
+    const d = detection({ kind: "biz_reg", start: 3, end: 15, confidence: 1 });
     render(<HighlightedText text="번호 123-45-67890 확인" detections={[d]} activeFilter={null} />);
 
     const mark = screen.getByText("123-45-67890");
@@ -60,23 +59,23 @@ describe("HighlightedText", () => {
 
   it("preserves the full original text across plain and highlighted segments", () => {
     const text = "이메일 test@example.com 로 문의";
-    const d = detection({ kind: "email", start: 4, end: 20, text: "test@example.com" });
+    const d = detection({ kind: "email", start: 4, end: 20 });
     render(<HighlightedText text={text} detections={[d]} activeFilter={null} />);
     expect(screen.getByTestId("highlighted-text")).toHaveTextContent("이메일 test@example.com이메일 로 문의");
   });
 
   it("marks low-confidence detections as uncertain but leaves confident ones plain", () => {
-    const confident = detection({ kind: "phone", start: 0, end: 3, text: "확실함", confidence: 1 });
+    const confident = detection({ kind: "phone", start: 0, end: 3, confidence: 1 });
     render(<HighlightedText text="확실함" detections={[confident]} activeFilter={null} />);
     expect(screen.getByText("확실함")).not.toHaveClass("highlight--uncertain");
 
-    const unsure = detection({ kind: "name", start: 0, end: 3, text: "김영희", confidence: 0.5 });
+    const unsure = detection({ kind: "name", start: 0, end: 3, confidence: 0.5 });
     render(<HighlightedText text="김영희" detections={[unsure]} activeFilter={null} />);
     expect(screen.getByText("김영희")).toHaveClass("highlight--uncertain");
   });
 
   it("covers a detected item when it is clicked", () => {
-    const d = detection({ kind: "phone", start: 4, end: 17, text: "010-1234-5678", confidence: 1 });
+    const d = detection({ kind: "phone", start: 4, end: 17, confidence: 1 });
     render(<HighlightedText text="연락처 010-1234-5678 입니다" detections={[d]} activeFilter={null} />);
 
     const mark = screen.getByRole("button", { name: "전화번호 · 신뢰도 100% · 가리기" });
@@ -87,8 +86,8 @@ describe("HighlightedText", () => {
   });
 
   it("toggles every detected item from the cover-all button", () => {
-    const phone = detection({ kind: "phone", start: 4, end: 17, text: "010-1234-5678", confidence: 1 });
-    const email = detection({ kind: "email", start: 20, end: 36, text: "hong@example.com", confidence: 1 });
+    const phone = detection({ kind: "phone", start: 4, end: 17, confidence: 1 });
+    const email = detection({ kind: "email", start: 20, end: 36, confidence: 1 });
 
     render(
       <HighlightedText
@@ -111,7 +110,7 @@ describe("HighlightedText", () => {
 
   it("briefly reveals covered items when their filter is selected", () => {
     vi.useFakeTimers();
-    const phone = detection({ kind: "phone", start: 4, end: 17, text: "010-1234-5678", confidence: 1 });
+    const phone = detection({ kind: "phone", start: 4, end: 17, confidence: 1 });
 
     const { rerender } = render(
       <HighlightedText text="문의 010-1234-5678" detections={[phone]} activeFilter={null} />,
@@ -131,8 +130,8 @@ describe("HighlightedText", () => {
   });
 
   it("shows an additional masked result below the interactive result", () => {
-    const phone = detection({ kind: "phone", start: 3, end: 16, text: "010-1234-5678", confidence: 1 });
-    const email = detection({ kind: "email", start: 19, end: 35, text: "hong@example.com", confidence: 1 });
+    const phone = detection({ kind: "phone", start: 3, end: 16, confidence: 1 });
+    const email = detection({ kind: "email", start: 19, end: 35, confidence: 1 });
 
     render(
       <HighlightedText
@@ -152,7 +151,7 @@ describe("HighlightedText", () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.assign(navigator, { clipboard: { writeText } });
 
-    const rrn = detection({ kind: "rrn", start: 3, end: 17, text: "800101-1234560", confidence: 1 });
+    const rrn = detection({ kind: "rrn", start: 3, end: 17, confidence: 1 });
     render(<HighlightedText text="번호 800101-1234560 입니다" detections={[rrn]} activeFilter={null} />);
 
     // 아무 항목도 수동으로 가리지 않은 기본 상태에서 눌러도 원문이 아니라 마스킹본이 나가야 한다.
@@ -163,7 +162,7 @@ describe("HighlightedText", () => {
   });
 
   it("downloads the fully masked result as a .txt file (#104)", async () => {
-    const rrn = detection({ kind: "rrn", start: 3, end: 17, text: "800101-1234560", confidence: 1 });
+    const rrn = detection({ kind: "rrn", start: 3, end: 17, confidence: 1 });
     render(<HighlightedText text="번호 800101-1234560 입니다" detections={[rrn]} activeFilter={null} />);
 
     const createObjectURL = vi.fn().mockReturnValue("blob:mock-url");
