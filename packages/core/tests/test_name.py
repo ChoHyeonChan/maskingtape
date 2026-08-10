@@ -85,3 +85,27 @@ def test_recovers_real_name_previously_swallowed_by_midword_fp():
     # #158: 단어 중간 오탐이 뒤 이름의 첫 글자를 존칭으로 삼키던 문제 — 이제 진짜 이름을 잡는다.
     found = detect("이상 거래가 감지되어 양연준님께 안내드립니다")
     assert [d.text for d in found] == ["양연준"]
+
+
+def test_detects_name_with_job_title_suffix():
+    # #213: 업무·계약 문서의 "이름 + 직함" — 직함이 이름과 존칭 사이에 껴도 이름을 잡는다.
+    found = detect("홍길동 대표가 서명했다")
+    assert [d.text for d in found] == ["홍길동"]
+    assert found[0].confidence == 0.5
+    # 직함 뒤에 존칭이 더 붙어도(부장님) 이름 스팬은 이름만
+    assert detect("김민수 부장님께 전달")[0].text == "김민수"
+
+
+def test_department_word_before_title_is_not_a_name():
+    # #213: 부서·업무어(2자)가 직함 앞에 오는 건 이름이 아니다 — 직함만 단서일 땐 성+2자(3글자)를 요구.
+    assert detect("구매 부장에게 문의") == []
+    assert detect("정기 이사회 안건 상정") == []
+    assert detect("홍보 팀장 회의록") == []
+
+
+def test_two_char_name_with_title_only_is_dropped_by_design():
+    # #213 트레이드오프: 직함만 단서인 2글자 이름("김민 대표")은 부서어와 구분이 안 돼 규칙에선 버린다.
+    # 문맥을 이해하는 하이브리드(LLM)판이 이런 경우를 담당한다.
+    assert detect("김민 대표 서명") == []
+    # 단, 존칭(님)이 붙으면 2글자 이름도 그대로 잡는다 — 님은 강한 단서라 3글자 제약을 안 건다.
+    assert detect("김민님 안내")[0].text == "김민"
