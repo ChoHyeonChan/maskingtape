@@ -117,6 +117,13 @@ export function InputPanel({ text, hasResult, resultVersion, onTextChange, onCle
           <button type="button" className="input-panel__sample" onClick={() => handlePreset(PRESETS[1].text)}>
             신청서 샘플
           </button>
+          <button
+            type="button"
+            className="input-panel__sample input-panel__sample--contract"
+            onClick={() => handlePreset(PRESETS[2].text)}
+          >
+            계약서 예제
+          </button>
         </div>
       </div>
 

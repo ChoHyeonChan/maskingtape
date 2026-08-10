@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { InputPanel } from "./InputPanel";
 
@@ -32,5 +32,25 @@ describe("InputPanel input length safety (#154)", () => {
 
     const count = screen.getByText(`${overLength.length.toLocaleString()} / ${MAX_TEXT_LENGTH.toLocaleString()}자`);
     expect(count).toHaveClass("input-panel__count--over");
+  });
+});
+
+describe("InputPanel contract demo preset (#215)", () => {
+  it("loads the contract example text in one click, without opening the presets dropdown", () => {
+    const onTextChange = vi.fn();
+    render(
+      <InputPanel
+        text=""
+        hasResult={false}
+        resultVersion={0}
+        onTextChange={onTextChange}
+        onClear={vi.fn()}
+        onResult={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "계약서 예제" }));
+
+    expect(onTextChange).toHaveBeenCalledWith(expect.stringContaining("근로계약서"));
   });
 });
