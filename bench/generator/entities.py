@@ -38,6 +38,10 @@ _GU_DONG = [
 ]
 _CITIES = ["서울특별시", "부산광역시", "대전광역시", "인천광역시", "대구광역시", "광주광역시", "울산광역시"]
 _APARTMENT_NAMES = ["래미안", "자이", "푸르지오", "e편한세상", "힐스테이트", "더샵"]
+# 시/도(+구)까지만 있고 동/번지가 없는 부분 주소 — 명함·채용공고·회사 소개처럼 실제 문서에
+# 흔하지만, 아래 동/번지가 항상 붙는 스타일들만으로는 한 번도 만들어진 적이 없었다(#195).
+# address.py의 _score()는 이 구간에서 confidence 0.5(시/도만)~0.65(시/도+구)를 매긴다.
+_GU_NAMES = ["강남구", "마포구", "종로구", "수영구", "유성구", "해운대구", "광진구", "노원구"]
 # 시/도(광역단체명) 없이 시/군으로 시작하는 주소(#118) — core AddressDetector가 시작점으로
 # 인정하려면 시/군 바로 뒤에 구 또는 동/읍/면/리가 와야 한다(조사 '로'·구 단독과 구분하기 위함).
 # 각 항목은 그 조건을 만족하도록 "<시|군> <구|동|읍|면>..." 형태만 담는다.
@@ -328,7 +332,16 @@ def gen_account(rng: random.Random, difficulty: str = "mixed") -> Entity:
     return Entity(kind="account", text=text)
 
 
+_PARTIAL_ADDRESS_RATE = 0.12  # 명함·회사소개 등 동/번지 없는 부분 주소도 실제로 나오니 일부 섞는다(#195).
+
+
 def gen_address(rng: random.Random, difficulty: str = "mixed") -> Entity:
+    if rng.random() < _PARTIAL_ADDRESS_RATE:
+        city = rng.choice(_CITIES)
+        if rng.random() < 0.5:
+            return Entity(kind="address", text=city)  # 시/도만 — core confidence 0.5
+        return Entity(kind="address", text=f"{city} {rng.choice(_GU_NAMES)}")  # 시/도+구 — 0.65
+
     if difficulty == "easy":
         style = "jibun"  # 지번 주소가 더 짧고 표준적인 형태
     elif difficulty == "hard":
