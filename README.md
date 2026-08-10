@@ -100,7 +100,7 @@ recall이 0.968로 떨어졌지만, core [#196](https://github.com/ChoHyeonChan/
 직함-only(역할어·존칭 없음) 이름을 새로 잡게 되면서 그 케이스 중 2음절 이름은 설계상 여전히
 놓치는 게 반영돼 recall이 소폭 낮아졌다(0.791) — 남은 과제는 문맥 없는 이름뿐이다:
 
-- **이름** — 한국어 이름은 형태만으로 구분되지 않아 규칙만으로는 문맥 없는 이름을 놓친다. 이것이 **로컬 LLM 하이브리드**(`--llm`)가 필요한 이유이고, 그 효과는 [#46](https://github.com/ChoHyeonChan/maskingtape/issues/46)에서 같은 데이터셋으로 비교 측정한다 — 하이브리드로 켜면 F1이 **0.808 → 0.947**(precision 0.973→0.979, recall 0.691→0.916)로 오른다. 상세는 [bench/](bench/) 참고.
+- **이름** — 한국어 이름은 형태만으로 구분되지 않아 규칙만으로는 문맥 없는 이름을 놓친다. 이것이 **로컬 LLM 하이브리드**(`--llm`)가 필요한 이유이고, 그 효과는 [#46](https://github.com/ChoHyeonChan/maskingtape/issues/46)에서 같은 데이터셋으로 비교 측정한다 — 하이브리드로 켜면 recall이 **0.661 → 0.916**로 크게 오르지만, LLM은 규칙판의 "부서어 오탐 방지" 가드를 그대로 적용받지 않아 precision은 오히려 소폭 낮아진다(0.984→0.959, F1 0.791→0.937) — 상세는 [bench/](bench/) 참고.
 
 마스킹 결과에 개인정보가 실제로 남는지도 따로 측정한다 — `python -m bench.evaluators.evaluate_masking bench/datasets/synth_v1.jsonl`. 상세는 [bench/](bench/) 참고.
 
