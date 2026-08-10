@@ -20,6 +20,9 @@ def test_scan_text_reports_detections():
     report = tools.scan_text(SYNTHETIC)
     kinds = {d["kind"] for d in report}
     assert {"phone", "rrn"} <= kinds
+    # 리포트에 원문 PII 값(text)은 담지 않는다 — 종류·위치·확신도만 (데이터 최소화)
+    assert all("text" not in d for d in report)
+    assert all("start" in d and "end" in d for d in report)
 
 
 def test_anonymize_text_mask():
@@ -46,7 +49,8 @@ def test_anonymize_text_numbered_labels_same_value_consistently():
     assert "[전화번호2]" not in out
 
 
-def test_anonymize_file_writes_masked_copy_and_reports(tmp_path):
+def test_anonymize_file_writes_masked_copy_and_reports(tmp_path, monkeypatch):
+    monkeypatch.setenv("MASKINGTAPE_MCP_ROOT", str(tmp_path))
     src = tmp_path / "문서.txt"
     src.write_text(SYNTHETIC, encoding="utf-8")
 
@@ -67,11 +71,23 @@ def test_anonymize_file_missing_path_raises():
         tools.anonymize_file("존재하지_않는_파일.txt")
 
 
-def test_anonymize_file_rejects_non_utf8(tmp_path):
+def test_anonymize_file_rejects_non_utf8(tmp_path, monkeypatch):
+    monkeypatch.setenv("MASKINGTAPE_MCP_ROOT", str(tmp_path))
     src = tmp_path / "cp949.txt"
     src.write_bytes("주민번호 800101-1234560".encode("cp949"))
     with pytest.raises(ValueError):
         tools.anonymize_file(str(src))
+
+
+def test_anonymize_file_rejects_path_outside_root(tmp_path, monkeypatch):
+    # 조작된 에이전트가 허용 루트 밖의 임의 파일을 넘겨도 읽지 않는다
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+    monkeypatch.setenv("MASKINGTAPE_MCP_ROOT", str(workspace))
+    outside = tmp_path / "outside.txt"
+    outside.write_text(SYNTHETIC, encoding="utf-8")
+    with pytest.raises(ValueError, match="작업 디렉터리 밖"):
+        tools.anonymize_file(str(outside))
 
 
 def test_server_module_registers_tools():
