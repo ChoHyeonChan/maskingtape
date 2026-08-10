@@ -89,8 +89,8 @@ _LANDLINE_AREA_CODES = [
     "061", "062", "063", "064",
     "070",
 ]
-_RRN_SEPARATORS_MIXED = ["-", "-", "-", " ", ""]  # RRN 정규식은 '.'을 구분자로 허용하지 않는다(rrn.py 참고).
-_RRN_SEPARATORS_HARD = ["", " "]
+_RRN_SEPARATORS_MIXED = ["-", "-", "-", " ", ".", ""]  # '.'도 허용 표기다(#209, rrn.py 참고).
+_RRN_SEPARATORS_HARD = ["", " ", "."]
 
 # (접두사, 전체 자릿수) — 업계 표준 IIN/BIN 대역만 쓰고 나머지는 난수로 채운다(실제 발급 번호 아님).
 # Visa=4로 시작 16자리, Mastercard=51~55로 시작 16자리, Amex=34/37로 시작 15자리.
@@ -128,13 +128,13 @@ def gen_name(rng: random.Random, difficulty: str = "mixed") -> Entity:
 def gen_phone(rng: random.Random, difficulty: str = "mixed") -> Entity:
     if difficulty == "easy":
         sep = "-"
-        variant = rng.choices(["mobile", "landline"], weights=[3, 1])[0]
+        variant = rng.choices(["mobile", "landline", "safe050"], weights=[3, 1, 1])[0]
     elif difficulty == "hard":
         sep = rng.choice(_PHONE_SEPARATORS_HARD)
-        variant = rng.choices(["mobile", "landline", "intl"], weights=[4, 2, 3])[0]
+        variant = rng.choices(["mobile", "landline", "intl", "safe050"], weights=[4, 2, 3, 2])[0]
     else:
         sep = rng.choice(_PHONE_SEPARATORS_MIXED)
-        variant = rng.choices(["mobile", "landline", "intl"], weights=[6, 2, 1])[0]
+        variant = rng.choices(["mobile", "landline", "intl", "safe050"], weights=[6, 2, 1, 1])[0]
 
     mid_len = 4
     if variant == "intl":
@@ -143,6 +143,11 @@ def gen_phone(rng: random.Random, difficulty: str = "mixed") -> Entity:
     elif variant == "landline":
         # 유선전화 — 자택·사무실 번호. 서울(02)은 국번이 3자리인 경우도 흔해 길이를 섞는다.
         prefix = rng.choice(_LANDLINE_AREA_CODES)
+        mid_len = rng.choice([3, 4])
+    elif variant == "safe050":
+        # 평생번호·안심번호(050/0502~0508) — 실번호를 숨기는 개인 연락처라 그 자체가
+        # 개인정보다(#211, phone.py `50\d?` 분기와 같은 confidence tier로 탐지된다).
+        prefix = rng.choice(["050", "0502", "0503", "0504", "0505", "0506", "0507", "0508"])
         mid_len = rng.choice([3, 4])
     else:
         prefix = rng.choice(["010", "011", "016", "017", "018", "019"])
