@@ -70,21 +70,26 @@ python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl
 | 주민등록번호 | 1.000 | 1.000 | 1.000 |
 | 전화번호(휴대폰+유선) | 1.000 | 1.000 | 1.000 |
 | 이메일 | 1.000 | 1.000 | 1.000 |
-| 주소 | 1.000 | 1.000 | 1.000 |
+| 주소 | 1.000 | 0.968 | 0.984 |
 | 신용카드번호 | 1.000 | 1.000 | 1.000 |
 | 사업자등록번호 | 1.000 | 1.000 | 1.000 |
 | 여권번호 | 1.000 | 1.000 | 1.000 |
 | 계좌번호 | 1.000 | 1.000 | 1.000 |
-| 이름 (규칙 전용) | 0.981 | 0.715 | 0.827 |
-| **전체** | **0.995** | **0.900** | **0.945** |
+| 이름 (규칙 전용) | 0.973 | 0.691 | 0.808 |
+| **전체** | **0.992** | **0.887** | **0.937** |
 
-번호·주소·카드·사업자등록번호·여권번호·계좌번호는 형태(와 있는 경우 체크섬)로 완전히 잡힌다
+번호·카드·사업자등록번호·여권번호·계좌번호는 형태(와 있는 경우 체크섬)로 완전히 잡힌다
 (유선전화·plus 이메일·서브도메인·여러 문장으로 구성된 복합 문서까지 섞어도 흔들리지 않음을
-확인했다) — 주소는 [#118](https://github.com/ChoHyeonChan/maskingtape/issues/118), 사업자등록번호는
+확인했다) — 사업자등록번호는
 [#123](https://github.com/ChoHyeonChan/maskingtape/issues/123), 여권번호는
 [#139](https://github.com/ChoHyeonChan/maskingtape/issues/139), 계좌번호는
 [#180](https://github.com/ChoHyeonChan/maskingtape/issues/180)에서 각각 새 kind를 추가해
-측정 사각지대를 없앴다. 주민등록번호는 [#159](https://github.com/ChoHyeonChan/maskingtape/issues/159)에서
+측정 사각지대를 없앴다. 주소는 [#118](https://github.com/ChoHyeonChan/maskingtape/issues/118)에서
+시/도 없는 시/군 표기까지 새 kind로 추가한 뒤 recall 1.000이었지만, [#195](https://github.com/ChoHyeonChan/maskingtape/issues/195)에서
+명함·채용공고처럼 동/번지 없이 시/도(+구)까지만 나오는 **부분 주소**를 처음 추가하자 recall이
+0.968로 떨어졌다 — 시/도명 뒤에 조사가 공백 없이 바로 붙으면(예: "서울특별시에") core가
+아예 못 잡는 버그를 새로 발견해서다([#196](https://github.com/ChoHyeonChan/maskingtape/issues/196), core 담당자 대응 대기).
+주민등록번호는 [#159](https://github.com/ChoHyeonChan/maskingtape/issues/159)에서
 체크섬 없는(2020-10 이후 발급분) 케이스도 섞었는데 precision/recall엔 영향이 없다 — core가 체크섬과
 무관하게 탐지 자체는 하기 때문(다만 confidence가 0.85로 낮아져 임계값 필터를 쓰면 새기 쉽다,
 [bench/](bench/) 참고). 계좌번호는 core `AccountDetector`가 문맥어(계좌/입금/은행 등)가 없으면

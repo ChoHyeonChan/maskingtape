@@ -38,17 +38,17 @@ python -m bench.generate_dataset --count 500 --seed 42 --out bench/datasets/synt
 python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl --report bench/reports/report_v1.md
 ```
 
-500건 기준 최신 실측(#180 계좌번호 신규 kind 반영 후 재측정, seed=42):
+500건 기준 최신 실측(#195 부분 주소 반영 후 재측정, seed=42):
 
 | kind | precision | recall | f1 | 비고 |
 |---|---|---|---|---|
 | phone / email / card | 1.000 | 1.000 | 1.000 | 유선전화·plus 이메일·서브도메인·복합 문장 추가돼도 그대로 유지 |
 | rrn | 1.000 | 1.000 | 1.000 | [#148](https://github.com/ChoHyeonChan/maskingtape/issues/148)에서 외국인등록번호(성별코드 5~8), [#159](https://github.com/ChoHyeonChan/maskingtape/issues/159)에서 체크섬 없는(2020-10 이후 발급분) 케이스도 섞음 — 둘 다 core가 이미 지원하던 걸 처음으로 실측(탐지 자체는 체크섬과 무관해 precision/recall엔 영향 없음 — 아래 confidence 절 참고) |
-| address | 1.000 | 1.000 | 1.000 | [#118](https://github.com/ChoHyeonChan/maskingtape/issues/118)에서 시/도 없는 시/군 시작 주소 positive를 추가 — core 수정([#117](https://github.com/ChoHyeonChan/maskingtape/pull/117))이 이미 머지돼 recall도 1.000으로 정상 측정됨 |
+| address | 1.000 | 0.968 | 0.984 | [#195](https://github.com/ChoHyeonChan/maskingtape/issues/195)에서 동/번지 없는 부분 주소(시/도만·시/도+구만)를 처음 추가 — confidence만 낮아질 줄 알았는데, **시/도명 뒤에 조사가 공백 없이 바로 붙으면 core가 아예 못 잡는** 새 버그를 발견해 FN 3건이 생겼다([#196](https://github.com/ChoHyeonChan/maskingtape/issues/196), core 대응 대기). 자세한 내용은 아래 confidence 절 참고 |
 | biz_reg | 1.000 | 1.000 | 1.000 | [#123](https://github.com/ChoHyeonChan/maskingtape/issues/123)에서 새 kind로 추가 |
 | passport | 1.000 | 1.000 | 1.000 | [#139](https://github.com/ChoHyeonChan/maskingtape/issues/139)에서 새 kind로 추가, [#145](https://github.com/ChoHyeonChan/maskingtape/issues/145)에서 전용 distractor(`gen_passport_like_code`)까지 추가했는데도 오탐 0건 유지 |
 | account | 1.000 | 1.000 | 1.000 | [#180](https://github.com/ChoHyeonChan/maskingtape/issues/180)에서 새 kind로 추가 — 문맥어(계좌/입금/은행 등) 하드 게이트라 confidence가 항상 정확히 0.6으로 고정된다는 걸 발견, 아래 confidence 절 참고 |
-| name | 0.958 | 0.699 | 0.808 | 규칙판. [#150](https://github.com/ChoHyeonChan/maskingtape/pull/150)(존칭 삼킴 수정)과 [#160](https://github.com/ChoHyeonChan/maskingtape/pull/160)(단어 중간 성씨 오탐 수정, [#158](https://github.com/ChoHyeonChan/maskingtape/issues/158) 대응)으로 개선 — 아래 "이름 탐지 방식 비교" 절 참고. #158은 부분만 해결됐다 — 잔여 FP 상세는 confidence 절 참고. 수치가 이전과 살짝 다른 건 #180이 데이터셋 생성 시 소비하는 난수 순서를 바꿔서다(로직은 그대로, 재현 시드 결과만 이동) |
+| name | 0.973 | 0.691 | 0.808 | 규칙판. [#150](https://github.com/ChoHyeonChan/maskingtape/pull/150)(존칭 삼킴 수정)과 [#160](https://github.com/ChoHyeonChan/maskingtape/pull/160)(단어 중간 성씨 오탐 수정, [#158](https://github.com/ChoHyeonChan/maskingtape/issues/158) 대응)으로 개선 — 아래 "이름 탐지 방식 비교" 절 참고. #158은 부분만 해결됐다 — 잔여 FP 상세는 confidence 절 참고. 수치가 이전과 살짝 다른 건 #195가 데이터셋 생성 시 소비하는 난수 순서를 바꿔서다(로직은 그대로, 재현 시드 결과만 이동) |
 
 address·card는 한때 이 표에서 문제(F1 0.371, 오탐 2건)가 있었는데, core 쪽에서 이미 수정됐다
 (각각 [#86](https://github.com/ChoHyeonChan/maskingtape/issues/86), [#87](https://github.com/ChoHyeonChan/maskingtape/issues/87)로
@@ -92,6 +92,30 @@ card는 `gen_card`(Visa/Mastercard/Amex 계열 IIN + Luhn 체크섬)로 데이�
 통과하면 card로도 잡혀 겹침 병합이 얽힘 — `gen_business_reg_number`가 겪은 것과 같은 종류의
 우연) `gen_account`가 생성 시점에 직접 Luhn을 확인해 우연히 통과하면 마지막 자리를 일부러
 바꿔 항상 무효로 만든다.
+
+`address`(주소)는 지금까지 지번·도로명·시/도 없는 시/군 표기까지 늘 동/번지(또는 도로명)를
+포함한 "완전한" 주소만 만들었다(#195). `AddressDetector`의 `_score()`는 매칭 요소 수에 따라
+confidence를 0.4~1.0으로 매기는데, bench 데이터는 항상 동/번지가 있어 confidence가 한 번도
+0.75 밑으로 내려간 적이 없었다 — 직접 `synth_v1.jsonl`을 스캔해 최솟값이 0.75임을 확인했다.
+명함·채용공고·회사소개처럼 "시/도(+구)까지만" 나오는 흔한 실제 케이스가 데이터에 전혀 없었던
+셈이다. `gen_address`에 12% 확률로 시/도만(confidence 0.5) 또는 시/도+구만(confidence 0.65)
+생성하는 분기를 추가해 이 구간을 처음 실측했다.
+
+그런데 재측정해보니 confidence만 낮아질 거라는 예상과 달리 **recall 자체가 1.000→0.968로
+떨어졌다**(FN 3건). 원인을 코드로 직접 추적해보니 confidence 문제가 아니라 core의 진짜 버그였다
+— `_ADDR_RE`는 시/도명 바로 뒤에 `(?![가-힣])`(뒤에 한글이 오면 안 됨) 가드를 두는데("서울특별시청"처럼
+다른 단어의 일부가 되는 걸 막으려는 의도), 이 가드가 **조사가 공백 없이 바로 붙는 정상적인 한국어
+표기**에도 그대로 걸린다:
+
+```python
+d.detect("본사는 서울특별시에 위치하며...")  # -> [] 완전 미탐지 (조사 '에'가 공백 없이 붙음)
+d.detect("본사는 서울특별시 강남구에 위치하며...")  # -> 정상 탐지 (구가 있으면 영향 없음)
+```
+
+시/도 뒤에 구·동이 이어지면 영향이 없어 지금까지 한 번도 드러나지 않았다. bench 소관이 아니라
+[#196](https://github.com/ChoHyeonChan/maskingtape/issues/196)으로 core에 남겼다 — RRN(#159)·계좌번호(#180)가
+"confidence가 낮아지는" 위험이었다면, 이건 **confidence와 무관하게 탐지 자체가 통째로 실패하는**
+더 심각한 유형이라 구분해서 문서화한다.
 
 ## 오탐(False Positive) 측정
 
@@ -140,7 +164,10 @@ docstring/주석에 명시하고 있다(`email.py`는 상한이 없던 시절 40
   `양평군 양서면 8-7`)도 `hard`/`mixed` 난이도에서 섞는다([#118](https://github.com/ChoHyeonChan/maskingtape/issues/118)) —
   core의 `_ADDR_NO_PROVINCE_RE` 게이트(시/군 바로 뒤에 구·동/읍/면/리가 와야 함)를 만족하는
   조합만 쓴다. 조사 '로'가 붙거나(`성남시로`) 구가 단독으로 오는(`강남구에서`) 지역 언급은
-  distractor(`gen_region_mention_like`)로 별도 추가해 오탐 여부를 검증한다.
+  distractor(`gen_region_mention_like`)로 별도 추가해 오탐 여부를 검증한다. **부분 주소**(시/도만·
+  시/도+구만, 동/번지 없음)도 12% 확률로 섞는다([#195](https://github.com/ChoHyeonChan/maskingtape/issues/195)) —
+  명함·채용공고처럼 실제로 흔하지만, 기존 스타일은 전부 동/번지를 포함해 confidence 0.4~0.7
+  구간이 한 번도 실측된 적이 없었다.
 - **카드번호**: Visa(16자리)·Mastercard(16자리)·Amex(15자리) 계열 IIN 대역 + 하이픈/점/공백/구분자
   없음까지, 실제 발급 번호가 아닌 합성 값에 Luhn 체크섬만 유효하게 맞춘다
 - **사업자등록번호**: `XXX-XX-XXXXX` 하이픈 표기(core가 지원하는 유일한 형식)에 국세청 검증
@@ -205,15 +232,16 @@ python -m bench.evaluators.evaluate_masking bench/datasets/synth_v1.jsonl --stra
 분리했다. 마스킹 후 텍스트 길이가 원본과 같은지(구조 보존)도 확인하는데, 이건 `mask`에서만
 불일치가 core 회귀 버그 신호이고 `label`/`pseudonym`은 길이가 달라지는 게 정상이라 참고용이다.
 
-500건 기준 실측 결과(#180 계좌번호 신규 kind 반영 후 재측정) — mask 기준 유출률 10.2%
-(1013건 중 103건, 전부 완전유출·전부 `name`). #150 이전(15.7%, 1066건 중 167건)보다 크게
-낮아졌다 — 규칙판 이름 recall이 0.529→0.699로 오르면서 완전 유출(탐지 자체 실패) 건수가
-그만큼 줄었기 때문이다.
-`phone`/`email`/`rrn`/`address`/`card`/`biz_reg`/`passport`/`account`는 유선전화·plus
+500건 기준 실측 결과(#195 부분 주소 반영 후 재측정) — mask 기준 유출률 10.8%
+(1010건 중 109건, 전부 완전유출 — `name` 106건 + **`address` 3건, 신규**).
+`address` 3건은 confidence 문제가 아니라 [#196](https://github.com/ChoHyeonChan/maskingtape/issues/196)에서
+발견한 core 버그(시/도명 뒤에 조사가 공백 없이 붙으면 아예 미탐지)가 그대로 마스킹 결과에
+드러난 것이다 — "탐지 실패는 곧 유출"이라는 CONTRIBUTING의 원칙을 그대로 보여주는 사례다.
+`phone`/`email`/`rrn`/`card`/`biz_reg`/`passport`/`account`는 유선전화·plus
 이메일·서브도메인·복합 문장이 섞여도 유출 0건, 부분 유출도 0건 — core 탐지기들이 새로
 추가된 kind·표기·문장 구조에서도 경계까지 정확히 맞춘다는 뜻이다(체크섬 없는 RRN도
 confidence 0.85로, 문맥어 있는 계좌번호도 confidence 0.6으로 여전히 탐지되므로 여기엔
-안 걸린다 — 아래 confidence 절 참고). label/pseudonym도 같은 패턴(유출은 전부 `name`,
+안 걸린다 — 아래 confidence 절 참고). label/pseudonym도 같은 패턴(유출은 `name`+`address`,
 길이 보존율만 전략별로 다르게 정상 표시)을 유지한다 — 자세한 비교 방법론은 위 참고.
 
 **pseudonym 보안 속성 검증**: `PseudonymAnonymizer`는 "가짜 주민번호/카드번호가 진짜 체크섬을
@@ -291,6 +319,13 @@ RRN(threshold 0.9에서 19%만 걸러짐, 확률적)보다 더 심각하다. nam
 이득보다 recall 손해가(그것도 name보다 훨씬 심각한 kind에서, 그것도 100% 확정적으로) 훨씬
 크므로**, 지금 core 기준으로는 기본값(필터 없음)을 유지하는 게 낫다는 근거가 된다.
 
+**address(주소)도 confidence 임계값에 취약하다**: 부분 주소(#195)가 만든 confidence
+0.5(4건)/0.65(7건) 구간이 임계값 0.7 이상에서 전부 걸러진다 — 정답 address 94건 중 정상
+탐지되는 91건(FN 3건은 [#196](https://github.com/ChoHyeonChan/maskingtape/issues/196) 버그로
+confidence와 무관하게 이미 유실) 기준, 임계값 0.7에서 recall이 0.851로, 0.95 이상에서는
+0.755까지 떨어진다. RRN(#159, 확률적 19%)·계좌번호(#180, 확정적 100%)에 이어 confidence
+필터를 쓰면 안 되는 세 번째 근거다.
+
 ## 이름 탐지 방식 비교 — 규칙판 vs 하이브리드(LLM)
 
 core에는 이름을 찾는 방법이 두 가지 있다 — `default_detectors()`(성씨 사전 + 문맥 단서 기반
@@ -358,7 +393,7 @@ JSONL — 한 줄에 문서 하나:
 ```
 
 - `start`/`end`는 파이썬 슬라이스 규약 (`text[start:end]` == 개인정보 원문)
-- `kind`는 core의 `Detection.kind`와 동일한 문자열: `rrn`, `phone`, `email`, `name`, `address`, `card`, `biz_reg`, `passport`
+- `kind`는 core의 `Detection.kind`와 동일한 문자열: `rrn`, `phone`, `email`, `name`, `address`, `card`, `biz_reg`, `passport`, `account`
 - `difficulty`는 `easy`/`hard`/`negative` 중 하나 (없으면 evaluate.py가 `unknown`으로 취급 — 하위 호환)
 - 평가 기준: span 완전 일치(exact match)로 precision / recall / F1 산출
 - 포맷 변경은 팀장 승인 후 이 문서부터 갱신한다

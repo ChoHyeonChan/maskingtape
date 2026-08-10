@@ -203,9 +203,33 @@ def test_hard_difficulty_avoids_hyphen_and_uses_road_address():
         addresses.append(generate_entity("address", rng, difficulty="hard").text)
         assert phone.count("-") == 0
         assert rrn.count("-") == 0
+    # 부분 주소(#195, 시/도 단독·시/도+구까지만 — 공백 1~2개뿐)는 jibun/road/no_province
+    # 어느 스타일도 아닌 별도 카테고리라 이 assertion 대상에서 제외한다(전용 테스트는 아래 참고).
+    full_addresses = [a for a in addresses if a.count(" ") >= 2]
     # hard 주소는 지번(구/동으로만 끝나는 표준형)이 아니라 도로명 또는 시/도 없는 형태여야 한다.
-    assert all("길" in a or not any(a.startswith(city) for city in _CITIES) for a in addresses)
-    assert any("길" in a for a in addresses)  # 도로명 주소도 나온다
+    assert all("길" in a or not any(a.startswith(city) for city in _CITIES) for a in full_addresses)
+    assert any("길" in a for a in full_addresses)  # 도로명 주소도 나온다
+
+
+def test_address_generator_covers_partial_style():
+    """#195: 동/번지 없는 부분 주소(시/도만·시/도+구만)도 나오고, core가 낮은 confidence로도
+    여전히 잡아야 한다(단, 시/도명 뒤에 한글 조사가 공백 없이 붙는 경우는 예외 — #196)."""
+    rng = random.Random(20)
+    detector = AddressDetector()
+    confidences = set()
+    partial_count = 0
+    for _ in range(300):
+        entity = generate_entity("address", rng, difficulty="mixed")
+        if entity.text.count(" ") > 1:
+            continue  # 완전한 주소(동/번지 포함)는 이 테스트 대상이 아니다
+        partial_count += 1
+        found = detector.detect(entity.text)
+        assert len(found) == 1, f"탐지 실패: {entity.text!r}"
+        assert found[0].text == entity.text
+        confidences.add(found[0].confidence)
+    assert partial_count > 0  # 부분 주소가 실제로 나온다
+    assert 0.5 in confidences  # 시/도만 — 최저 확신도
+    assert 0.65 in confidences  # 시/도+구 — 그 다음 확신도
 
 
 def test_hard_difficulty_can_produce_no_province_address():
