@@ -109,7 +109,7 @@
 
 ## 현재 정확도
 
-합성 평가 데이터셋 500건 기준 (`python -m bench.evaluators.evaluate`, **규칙 전용 모드**, 측정 기준 `f1cb7af` — #223(RRN 점 구분자·전화 050X·이름+직함) 전부 반영, 해시는 이 PR 머지 후 갱신):
+합성 평가 데이터셋 500건 기준 (`python -m bench.evaluators.evaluate`, **규칙 전용 모드**, 측정 기준 `8ee1b3a` — #223(RRN 점 구분자·전화 050X·이름+직함) 전부 반영):
 
 | 종류 | precision | recall | F1 |
 |---|---|---|---|
