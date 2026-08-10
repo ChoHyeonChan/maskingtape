@@ -8,7 +8,16 @@ from collections.abc import Sequence
 
 from maskingtape.anonymizers import LabelAnonymizer, MaskAnonymizer, PseudonymAnonymizer
 from maskingtape.anonymizers.base import Anonymizer
-from maskingtape.detectors import CreditCardDetector, NameDetector, PhoneDetector, RRNDetector
+from maskingtape.anonymizers.label import DEFAULT_LABELS
+from maskingtape.detectors import (
+    AccountDetector,
+    BusinessRegistrationDetector,
+    CreditCardDetector,
+    NameDetector,
+    PassportDetector,
+    PhoneDetector,
+    RRNDetector,
+)
 from maskingtape.detectors.financial.creditcard import _luhn_ok
 from maskingtape.detectors.identity.rrn import _checksum_ok
 from maskingtape.pipeline import Pipeline
@@ -188,6 +197,29 @@ def test_pseudonym_gives_same_fake_value_to_identical_repeated_value():
     fake_phones = _FAKE_PHONE_RE.findall(result)
     assert len(fake_phones) == 2
     assert fake_phones[0] == fake_phones[1]
+
+
+def test_pseudonym_falls_back_to_label_for_kinds_without_a_fake_value_generator():
+    """#230: pseudonym.py의 `_GENERATORS`는 name/phone/email/rrn/card/address 6종만 두고,
+    나머지(biz_reg/passport/account)는 docstring에 명시된 대로 `[라벨]` 형태로 폴백한다.
+    core에 나중에 추가된 이 3개 kind에 대해 이 폴백 경로가 지금까지 회귀 테스트로 한 번도
+    고정된 적이 없었다 — 원본이 새지 않는지, 라벨 형식이 맞는지 직접 확인한다."""
+    rng = random.Random(50)
+    cases = [
+        ("biz_reg", BusinessRegistrationDetector(), "사업자등록번호는 {}입니다."),
+        ("passport", PassportDetector(), "참고용 값: {} 입니다."),
+        # account는 문맥어(계좌 등)가 앞뒤 15자 안에 없으면 core가 아예 탐지하지 않는
+        # 하드 게이트라(#180), 다른 kind와 달리 문맥어를 반드시 포함해야 한다.
+        ("account", AccountDetector(), "계좌번호는 {}입니다."),
+    ]
+    for kind, detector, template in cases:
+        entity = generate_entity(kind, rng, difficulty="easy")
+        text = template.format(entity.text)
+        detections = detector.detect(text)
+        assert len(detections) == 1, f"{kind} 탐지 실패: {text!r}"
+        result = PseudonymAnonymizer(seed=1).apply(text, detections)
+        assert entity.text not in result, f"{kind} 원본이 그대로 남음: {result!r}"
+        assert f"[{DEFAULT_LABELS[kind]}]" in result, f"{kind} 라벨 폴백 형식이 아님: {result!r}"
 
 
 def test_pseudonym_splits_identical_real_value_with_different_formatting():
