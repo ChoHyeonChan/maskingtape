@@ -23,13 +23,25 @@ void main() {
       expect(_d('account').kindLabel, '계좌번호');
     });
 
-    test('라벨 맵에 없는 kind는 kind(?)로 표시해 누락을 드러낸다', () {
+    test('라벨 맵에 없는 kind는 기타(kind)로 표시한다', () {
       // 코어가 새 탐지기를 추가했는데 앱 라벨을 안 넣은 상황을 흉내 낸다.
       // 실재할 수 있는 이름(passport 등)을 쓰면 코어가 그 탐지기를 실제로 추가하는
       // 순간 "미지의 kind"라는 전제가 거짓이 되므로, 절대 kind가 될 수 없는 값을 쓴다.
       final unknown = _d('not_a_real_kind');
       expect(unknown.hasLabel, isFalse);
-      expect(unknown.kindLabel, 'not_a_real_kind(?)');
+      // 사용자에겐 읽을 수 있는 한국어가, 개발자에겐 빠진 kind가 보여야 한다.
+      expect(unknown.kindLabel, startsWith('기타'));
+      expect(unknown.kindLabel, contains('not_a_real_kind'));
+    });
+
+    test('알 수 없는 kind도 요약에 정상적으로 합산된다', () {
+      // #220 — 라벨이 없다고 요약이 깨지거나 항목이 빠지면 안 된다.
+      final summary = Detection.summarize([
+        _d('rrn'),
+        _d('not_a_real_kind'),
+        _d('not_a_real_kind'),
+      ]);
+      expect(summary, '주민번호 1 · 기타(not_a_real_kind) 2');
     });
   });
 

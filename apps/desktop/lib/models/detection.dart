@@ -38,12 +38,17 @@ class Detection {
     'account': '계좌번호',
   };
 
-  /// 코어가 라벨 맵에 없는 새 kind를 내보내면(예: 새 탐지기 추가) 한국어 대신
-  /// `kind(?)`로 표시한다 — 사용자에게 원시 영어가 그대로 새는 대신,
-  /// 개발 중 "라벨을 추가해야 한다"를 눈에 띄게 알린다.
+  /// 라벨 맵에 이 kind가 있는지 — 코어에 새 탐지기가 추가됐는데 라벨을 안 넣은
+  /// 상황을 테스트가 잡을 수 있게 남겨둔다.
   bool get hasLabel => _kindLabels.containsKey(kind);
 
-  String get kindLabel => _kindLabels[kind] ?? '$kind(?)';
+  /// 라벨 맵에 없는 kind는 `기타(account)` 형태로 표시한다.
+  ///
+  /// 사용자에게는 읽을 수 있는 한국어("기타")가 보이고, 마스킹 자체는 코어가 이미
+  /// 처리했으므로 결과에 영향이 없다. 괄호 안에 원래 kind를 남기는 이유는, 라벨
+  /// 누락을 "기타"로 완전히 뭉뚱그리면 어떤 종류가 빠졌는지 알 수 없어져서다 —
+  /// 실제로 card·biz_reg·passport·account가 이 표시 덕분에 발견됐다.
+  String get kindLabel => _kindLabels[kind] ?? '기타($kind)';
 
   /// "주민번호 1 · 전화번호 2" 식 종류별 개수 요약. 빈 목록이면 "탐지 없음".
   static String summarize(List<Detection> detections) {
