@@ -2,6 +2,7 @@
 
 from maskingtape_api.settings import (
     DEFAULT_CORS_ALLOWED_ORIGINS,
+    DEFAULT_PRODUCTION_CORS_ALLOWED_ORIGINS,
     DEFAULT_RATE_LIMIT_REQUESTS,
     DEFAULT_RATE_LIMIT_WINDOW_SECONDS,
     get_api_settings,
@@ -34,6 +35,16 @@ def test_settings_read_cors_origins_from_comma_separated_env(monkeypatch) -> Non
         "https://demo.example",
         "http://localhost:5173",
     )
+
+
+def test_settings_disable_cors_by_default_in_production(monkeypatch) -> None:
+    monkeypatch.setenv("MASKINGTAPE_API_ENV", "production")
+    monkeypatch.delenv("MASKINGTAPE_API_CORS_ORIGINS", raising=False)
+
+    settings = get_api_settings()
+
+    assert settings.environment == "production"
+    assert settings.cors_allowed_origins == DEFAULT_PRODUCTION_CORS_ALLOWED_ORIGINS
 
 
 def test_settings_read_rate_limit_from_env(monkeypatch) -> None:

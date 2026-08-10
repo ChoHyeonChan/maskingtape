@@ -7,6 +7,7 @@ DEFAULT_CORS_ALLOWED_ORIGINS = (
     "http://localhost:5173",
     "http://127.0.0.1:5173",
 )
+DEFAULT_PRODUCTION_CORS_ALLOWED_ORIGINS: tuple[str, ...] = ()
 DEFAULT_RATE_LIMIT_REQUESTS = 60
 DEFAULT_RATE_LIMIT_WINDOW_SECONDS = 60
 
@@ -22,11 +23,17 @@ class ApiSettings:
 
 
 def get_api_settings() -> ApiSettings:
+    environment = _env_value("MASKINGTAPE_API_ENV", "development")
+    default_cors_origins = (
+        DEFAULT_PRODUCTION_CORS_ALLOWED_ORIGINS
+        if environment == "production"
+        else DEFAULT_CORS_ALLOWED_ORIGINS
+    )
     return ApiSettings(
-        environment=_env_value("MASKINGTAPE_API_ENV", "development"),
+        environment=environment,
         cors_allowed_origins=_env_tuple(
             "MASKINGTAPE_API_CORS_ORIGINS",
-            DEFAULT_CORS_ALLOWED_ORIGINS,
+            default_cors_origins,
         ),
         rate_limit_requests=_env_int(
             "MASKINGTAPE_API_RATE_LIMIT_REQUESTS",

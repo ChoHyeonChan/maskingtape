@@ -140,5 +140,5 @@ FastAPI 라우터는 core를 직접 호출하지 않고 `maskingtape_api.service
 
 ### 미정 (구현 시 실제로 확인할 것)
 
-- 호스팅: Vercel 유력(정적 프론트 + Python 서버리스 함수). **단, Vercel의 Python 런타임에서 `packages/core`를 함께 배포하는 방법은 문서를 확인하고 실제로 배포해봐야 한다 — 기억이나 추측으로 진행하지 말 것.**
+- 호스팅: Vercel 단일 프로젝트 기준 설정을 둔다(정적 프론트 + Python FastAPI 함수). 배포 절차와 검증은 [docs/deployment-vercel.md](../../docs/deployment-vercel.md)를 따른다. **실제 URL 검증 전에는 완료로 보지 않는다.**
 - 대안: Render·Fly.io 등 일반 컨테이너 호스팅(제약이 적음).

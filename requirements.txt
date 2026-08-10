@@ -1,0 +1,2 @@
+-e ./packages/core
+-e ./apps/api
