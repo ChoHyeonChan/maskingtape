@@ -32,6 +32,18 @@ def test_does_not_match_province_name_as_part_of_another_word():
     assert detect("서울특별시청 홈페이지 공지") == []
 
 
+def test_detects_province_with_attached_josa():
+    # #196: 시/도명 뒤에 조사가 공백 없이 붙어도(에/로/에서) 시/도만으로 주소를 잡는다 — 이전엔 통째로 미탐
+    assert detect("본사는 서울특별시에 있습니다")[0].text == "서울특별시"
+    assert detect("서울특별시로 발령났습니다")[0].text == "서울특별시"
+    assert detect("근무지는 경기도에서 시작합니다")[0].text == "경기도"
+
+
+def test_institution_name_excluded_even_with_trailing_josa():
+    # "서울특별시청에"는 기관명(시청)+조사이므로 여전히 주소로 잡지 않는다 — 조사 허용이 이걸 깨면 안 됨
+    assert detect("서울특별시청에 문의하세요") == []
+
+
 def test_rejects_text_without_province():
     assert detect("강남 어딘가에서 만나요") == []
 
