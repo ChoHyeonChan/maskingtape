@@ -37,6 +37,14 @@ def test_detects_internet_phone():
     assert len(found) == 1
 
 
+def test_detects_050x_personal_numbers():
+    # 050X 평생번호·안심번호는 실번호를 숨기는 개인 연락처라 개인정보다 (미탐=유출)
+    for number in ("0507-1234-5678", "0505-123-4567", "050-1234-5678"):
+        found = detect(f"연락처 {number}")
+        assert len(found) == 1, number
+        assert found[0].text == number
+
+
 def test_rejects_non_phone_numbers():
     # 전화번호 형태가 아닌 숫자열은 잡지 않는다
     assert detect("가격은 1234-5678원") == []
