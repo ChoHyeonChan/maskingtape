@@ -20,4 +20,7 @@
   --kind-address: #6751b8;
   --kind-name: #0f6f7d;
   --kind-business: #167f9f;
+  /* core에 새 탐지 kind가 추가됐는데 웹이 아직 색·라벨을 모를 때 쓰는 중립 회색(#216).
+     highlight--dimmed에 쓰는 회색과 같은 톤이라 "정보 없음/불확실" 느낌이 일관된다. */
+  --kind-fallback: #8a94a5;
 }
