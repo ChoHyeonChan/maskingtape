@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest";
 import { DetectionSummary } from "./DetectionSummary";
 import type { Detection } from "../../types/detection";
 
-function d(kind: string): Detection {
-  return { kind, start: 0, end: 0, confidence: 1, detector: "T" };
+function d(kind: string, confidence = 1): Detection {
+  return { kind, start: 0, end: 0, confidence, detector: "T" };
 }
 
 describe("DetectionSummary", () => {
@@ -25,5 +25,19 @@ describe("DetectionSummary", () => {
     expect(screen.getByText(/개인정보 1건 발견/)).toBeInTheDocument();
     expect(screen.getByText(/account 1/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "account 보기" })).toHaveClass("summary__filter--account");
+  });
+
+  it("renders a confidence bar sized to the lowest confidence within a kind, not the average (#237)", () => {
+    const { container } = render(
+      <DetectionSummary
+        detections={[d("name", 0.9), d("name", 0.5)]}
+        activeFilter={null}
+        onFilterSelect={() => {}}
+      />,
+    );
+
+    expect(screen.getByText(/이름 2건, 최소 확신도 50%/)).toBeInTheDocument();
+    const barFill = container.querySelector(".summary-card--name .summary-card__bar-fill") as HTMLElement;
+    expect(barFill.style.width).toBe("50%");
   });
 });
