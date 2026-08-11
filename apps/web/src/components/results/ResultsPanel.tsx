@@ -72,6 +72,7 @@ export function ResultsPanel({ scanned, activeFilter, scanRun, onFilterSelect }:
             detections={visibleDetections}
             activeFilter={activeFilter}
             onFilterSelect={handleFilterSelect}
+            hiddenByThreshold={allDetections.length > 0 && visibleDetections.length === 0}
           />
           <HighlightedText
             key={scanRun}
