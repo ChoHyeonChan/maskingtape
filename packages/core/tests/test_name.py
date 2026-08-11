@@ -109,3 +109,18 @@ def test_two_char_name_with_title_only_is_dropped_by_design():
     assert detect("김민 대표 서명") == []
     # 단, 존칭(님)이 붙으면 2글자 이름도 그대로 잡는다 — 님은 강한 단서라 3글자 제약을 안 건다.
     assert detect("김민님 안내")[0].text == "김민"
+
+
+def test_detects_name_with_title_prefix():
+    # #239: 직함이 이름 앞에 오는 형태("대표 홍길동", "부장 김철수")도 잡는다.
+    assert detect("대표 홍길동이 서명했다")[0].text == "홍길동"
+    assert detect("부장 김철수 확인")[0].text == "김철수"
+    assert detect("사장 이영수")[0].text == "이영수"
+
+
+def test_title_prefix_before_department_word_is_not_a_name():
+    # #239: 직함 뒤에 부서·업무어가 오면 이름이 아니다. 2자 부서어는 3자 가드로,
+    # "대표이사"가 띄어쓰기된 "대표 이사가/이사회"는 '이사'를 비이름 단어로 막는다.
+    assert detect("대표 이사회 안건 상정") == []
+    assert detect("대표 이사가 참석했다") == []
+    assert detect("구매 부장에게 문의") == []

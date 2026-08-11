@@ -53,13 +53,22 @@ _SUFFIX_CUES = [
 
 # 성씨로 시작하지만 실제로는 이 도메인(개인정보 서식)에서 라벨로 흔히 쓰이는 일반 단어 —
 # "고객 전화번호", "성명 및 주소" 처럼 역할어 바로 뒤에 붙어 나오면 이름으로 오탐하기 쉽다.
+# "이사"는 "대표이사"가 띄어쓰기돼("대표 이사가") 이름으로 오탐되던 걸 막는다(#239).
 _NON_NAME_WORDS = (
     "전화번호", "이메일", "주민등록번호", "주민번호", "주민등록증",
-    "주소", "나이", "성별", "생년월일", "이용", "이유",
+    "주소", "나이", "성별", "생년월일", "이용", "이유", "이사",
 )
 
+# 직함 전용 단서(존칭 '님' 제외). 이것만으로(다른 단서 없이) 이름을 잡을 땐 성+2자 풀네임을
+# 요구한다 — 부서·업무어("구매 부장"의 구매, "대표 이사"의 이사)가 직함과 붙어 이름으로
+# 오탐되는 걸 막는다. 존칭(님)은 강한 단서라 이 제약을 걸지 않는다. (앞·뒤 직함 공용)
+_TITLE_ONLY_CUES = frozenset(_TITLE_CUES) - frozenset(_SUFFIX_CUES)
+
 _SURNAME_ALT = "|".join(sorted(_SURNAMES, key=len, reverse=True))
-_PREFIX_ALT = "|".join(sorted(_PREFIX_CUES, key=len, reverse=True))
+# 이름 앞 단서 = 역할어 + 직함. 직함이 이름 앞에 오는 형태("대표 홍길동")도 잡는다(#239).
+_PREFIX_ALT = "|".join(
+    sorted(dict.fromkeys(_PREFIX_CUES + sorted(_TITLE_ONLY_CUES)), key=len, reverse=True)
+)
 # 이름 뒤 단서 = 존칭·역할어 + 직함. 직함도 규칙 매칭 단서로 편입한다(#213). "님"은 양쪽에
 # 있으므로 dict.fromkeys로 중복을 없앤 뒤 긴 것부터 매칭한다.
 _SUFFIX_ALT = "|".join(sorted(dict.fromkeys(_SUFFIX_CUES + _TITLE_CUES), key=len, reverse=True))
@@ -86,11 +95,6 @@ _CANDIDATE_RE = re.compile(r"(?:" + _SURNAME_ALT + r")[가-힣]")
 
 # 후보 판정에 쓰는 문맥 단서 전체 (역할어 + 존칭 + 직함)
 _ALL_CUES = tuple(dict.fromkeys(_PREFIX_CUES + _SUFFIX_CUES + _TITLE_CUES))
-
-# 직함 전용 단서(존칭 '님' 제외). 이것만으로(앞 역할어·뒤 존칭 없이) 이름을 잡을 땐 성+2자
-# 풀네임(3글자)을 요구한다 — 부서·업무어("구매 부장"의 구매, "정기 이사"의 정기)가 직함 앞에
-# 와서 이름으로 오탐되는 걸 막는다. 존칭(님)은 강한 단서라 이 제약을 걸지 않는다.
-_TITLE_ONLY_CUES = frozenset(_TITLE_CUES) - frozenset(_SUFFIX_CUES)
 
 
 def has_name_candidate(text: str) -> bool:
@@ -128,14 +132,19 @@ class NameDetector(Detector):
             if any(text.startswith(word, m.start("name")) for word in _NON_NAME_WORDS):
                 continue  # "주민번호"처럼 성씨로 시작하는 도메인 라벨 단어는 이름이 아니다
 
-            has_prefix = m.group("prefix") is not None
+            prefix = m.group("prefix")
             suffix = m.group("suffix")
+            has_prefix = prefix is not None
             has_suffix = suffix is not None
             if not has_prefix and not has_suffix:
                 continue  # 문맥 단서가 하나도 없으면 일반 단어와 구분 못 하므로 버린다
 
-            # 직함 하나만 단서일 땐 성+2자 풀네임(3글자)만 인정 — 부서·업무어 오탐 억제(#213)
-            if suffix in _TITLE_ONLY_CUES and not has_prefix and len(m.group("name")) < 3:
+            # 직함 하나만 단서일 땐(앞이든 뒤든) 성+2자 풀네임(3글자)만 인정 — 부서·업무어가
+            # 직함에 붙어 이름으로 오탐되는 걸 막는다(#213 뒤 직함, #239 앞 직함).
+            title_only = (suffix in _TITLE_ONLY_CUES and not has_prefix) or (
+                prefix in _TITLE_ONLY_CUES and not has_suffix
+            )
+            if title_only and len(m.group("name")) < 3:
                 continue
 
             confidence = 0.75 if (has_prefix and has_suffix) else 0.5
