@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:maskingtape_desktop/main.dart';
 import 'package:maskingtape_desktop/screens/home_screen.dart';
 import 'package:maskingtape_desktop/services/anonymizer.dart';
+import 'package:maskingtape_desktop/services/llm_status.dart';
 
 import 'fakes.dart';
 
@@ -224,5 +225,52 @@ void main() {
 
     expect(find.byIcon(Icons.error_outline), findsOneWidget);
     expect(find.textContaining(ollamaMessage), findsOneWidget);
+  });
+
+  testWidgets('로컬 LLM 상태가 툴바에 표시된다', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: HomeScreen(
+          anonymizer: FakeAnonymizer(),
+          initialFiles: const [r'C:\docs\상담기록.txt'],
+          checkLlmStatus: () async => const LlmStatus(
+            LlmReadiness.offline,
+            detail: 'Ollama에 연결하지 못했습니다',
+          ),
+        ),
+      ),
+    );
+    await tester.pump(); // initState의 확인이 끝나길 기다린다
+
+    expect(find.text('Ollama 미실행'), findsOneWidget);
+  });
+
+  testWidgets('이름 정밀 탐지를 켜면 LLM 상태를 다시 확인한다',
+      (WidgetTester tester) async {
+    // 사용자가 그 사이 Ollama를 띄웠을 수 있으니, 켜는 시점에 다시 봐야 한다.
+    var checks = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: HomeScreen(
+          anonymizer: FakeAnonymizer(),
+          initialFiles: const [r'C:\docs\상담기록.txt'],
+          checkLlmStatus: () async {
+            checks++;
+            return checks == 1
+                ? const LlmStatus(LlmReadiness.offline)
+                : const LlmStatus(LlmReadiness.loaded, detail: 'qwen2.5:7b');
+          },
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(find.text('Ollama 미실행'), findsOneWidget);
+
+    await tester.tap(find.text('이름 정밀 탐지'));
+    await tester.pump();
+    await tester.pump();
+
+    expect(checks, 2);
+    expect(find.text('LLM 로드됨'), findsOneWidget);
   });
 }
