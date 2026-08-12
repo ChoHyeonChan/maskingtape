@@ -6,10 +6,21 @@ interface Props {
   detections: Detection[];
   activeFilter: string | null;
   onFilterSelect: (kind: string | null) => void;
+  /** 확신도 임계값 슬라이더 때문에 전부 걸러져서 비어 있는 상태인지(#243).
+   *  실제로 아무것도 안 잡힌 것과 구분해야 "개인정보 없음"이라는 잘못된 안심 메시지를
+   *  피할 수 있다 — 슬라이더로 가려진 것도 실제로는 탐지된 개인정보다. */
+  hiddenByThreshold?: boolean;
 }
 
-export function DetectionSummary({ detections, activeFilter, onFilterSelect }: Props) {
+export function DetectionSummary({ detections, activeFilter, onFilterSelect, hiddenByThreshold = false }: Props) {
   if (detections.length === 0) {
+    if (hiddenByThreshold) {
+      return (
+        <p className="summary summary--filtered" role="status">
+          ⚠ 개인정보가 탐지됐지만 확신도 임계값보다 낮아 전부 가려져 있습니다. 슬라이더를 낮추면 다시 보입니다.
+        </p>
+      );
+    }
     return (
       <p className="summary summary--clean" role="status">
         개인정보가 발견되지 않았습니다.

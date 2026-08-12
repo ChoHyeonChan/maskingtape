@@ -6,8 +6,10 @@ import '../services/anonymizer.dart';
 import '../services/batch_processor.dart';
 import '../services/default_backend.dart';
 import '../services/file_picker.dart';
+import '../services/llm_status.dart';
 import '../services/shell.dart';
 import '../widgets/drop_zone.dart';
+import '../widgets/llm_status_pill.dart';
 import '../widgets/result_preview_dialog.dart';
 import '../widgets/status_pill.dart';
 
@@ -18,6 +20,7 @@ class HomeScreen extends StatefulWidget {
     this.initialFiles = const [],
     this.anonymizer,
     this.pickFiles = pickTextFiles,
+    this.checkLlmStatus,
   });
 
   /// 위젯 테스트에서 목록 상태를 주입하기 위한 초기값.
@@ -30,6 +33,10 @@ class HomeScreen extends StatefulWidget {
   /// 파일 선택 대화상자 — 기본은 OS 대화상자, 테스트에선 가짜 주입.
   final Future<List<String>> Function() pickFiles;
 
+  /// 로컬 LLM 상태 확인 — 비우면 실제 Ollama에 물어본다. 테스트에선 가짜 주입.
+  /// pickFiles와 같은 함수 주입 방식으로 맞춰, 위젯 테스트가 소켓을 타지 않게 한다.
+  final Future<LlmStatus> Function()? checkLlmStatus;
+
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -39,9 +46,25 @@ class _HomeScreenState extends State<HomeScreen> {
     for (final path in widget.initialFiles) FileTask(path),
   ];
   late final Anonymizer _anonymizer = widget.anonymizer ?? defaultAnonymizer();
+  late final Future<LlmStatus> Function() _checkLlmStatus =
+      widget.checkLlmStatus ?? OllamaProbe().check;
   bool _running = false;
   bool _cancelRequested = false;
   AnonymizeOptions _options = const AnonymizeOptions();
+  LlmStatus _llmStatus = const LlmStatus.checking();
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshLlmStatus();
+  }
+
+  /// 로컬 LLM 상태를 다시 확인한다. 확인 실패도 상태값으로 오므로 예외 처리가 없다.
+  Future<void> _refreshLlmStatus() async {
+    if (mounted) setState(() => _llmStatus = const LlmStatus.checking());
+    final status = await _checkLlmStatus();
+    if (mounted) setState(() => _llmStatus = status);
+  }
 
   bool get _hasWaiting =>
       _tasks.any((t) => t.status == FileTaskStatus.waiting);
@@ -148,6 +171,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     crossAxisAlignment: WrapCrossAlignment.center,
                     alignment: WrapAlignment.end,
                     children: [
+                      LlmStatusPill(
+                        status: _llmStatus,
+                        onRefresh: _refreshLlmStatus,
+                      ),
                       Tooltip(
                         message: '이름을 규칙 대신 로컬 LLM으로 판단합니다.\n'
                             '이 PC에서 Ollama가 실행 중이어야 합니다.',
@@ -158,10 +185,15 @@ class _HomeScreenState extends State<HomeScreen> {
                           selected: _options.useLlm,
                           onSelected: _running
                               ? null
-                              : (on) => setState(
-                                    () =>
-                                        _options = _options.copyWith(useLlm: on),
-                                  ),
+                              : (on) {
+                                  setState(
+                                    () => _options =
+                                        _options.copyWith(useLlm: on),
+                                  );
+                                  // 켜는 순간 상태를 새로 확인한다 — 그 사이 Ollama를
+                                  // 띄웠을 수 있고, 지금이 사용자가 가장 알고 싶은 시점이다.
+                                  if (on) _refreshLlmStatus();
+                                },
                         ),
                       ),
                       SegmentedButton<MaskStrategy>(

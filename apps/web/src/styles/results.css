@@ -42,6 +42,11 @@
   color: var(--text-secondary);
 }
 
+.summary--filtered {
+  color: var(--kind-card);
+  font-weight: 800;
+}
+
 .summary__total {
   position: absolute;
   width: 1px;

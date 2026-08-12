@@ -30,6 +30,7 @@ lib/
     rest_anonymizer.dart       # apps/api REST 호출 (dart:io HttpClient, 의존성 추가 없음)
     fallback_anonymizer.dart   # 백엔드를 순서대로 시도 (조합만 담당)
     default_backend.dart       # 기본 조립 — CLI 먼저, 없으면 REST
+    llm_status.dart            # 로컬 Ollama 준비 상태 확인 (상태만 조회 — 탐지는 하지 않는다)
     file_reader.dart           # 파일 검증(확장자·크기·바이너리) + UTF-8/CP949 디코딩
     file_picker.dart           # OS 파일 선택 대화상자 (file_selector)
     shell.dart                 # 탐색기에서 결과 파일 열기
@@ -39,12 +40,14 @@ lib/
   widgets/
     drop_zone.dart             # 드래그&드롭 수신 + 찾아보기 버튼 (desktop_drop, 점선 드롭존)
     status_pill.dart           # 파일 상태 파스텔 칩
+    llm_status_pill.dart       # 로컬 LLM 준비 상태 칩 (누르면 다시 확인)
     result_preview_dialog.dart # 원문 하이라이트 vs 마스킹 결과 비교 다이얼로그
 test/
   batch_processor_test.dart    # 배치 로직 유닛 테스트 (가짜 백엔드, 취소 포함)
   file_reader_test.dart        # 인코딩 폴백·검증 규칙 테스트
   rest_anonymizer_test.dart    # REST 호출 — 루프백에 실제 HTTP 서버를 띄워 검증
   fallback_anonymizer_test.dart# 백엔드 전환 규칙 테스트
+  llm_status_test.dart         # Ollama 상태 확인 — 가짜 Ollama 서버로 4가지 상태 검증
   widget_test.dart             # 드롭존·목록·처리 흐름 위젯 테스트
   fakes.dart                   # 테스트용 가짜 Anonymizer
   manual_rest_smoke.dart       # 수동 확인용 — 실제로 뜬 apps/api에 붙여본다 (자동 실행 아님)
@@ -70,6 +73,21 @@ API 경로에서 지원하지 않는 옵션을 고르면 네트워크를 타기 
 
 툴바의 **이름 정밀 탐지**를 켜면 CLI에 `--llm`을 붙여 이름을 로컬 LLM으로 판단한다
 (규칙판이 놓치거나 오탐하는 인명을 문맥으로 걸러낸다).
+
+툴바의 **상태 칩**이 이 PC의 로컬 LLM 준비 상태를 미리 보여준다 — 처리에 실패한 뒤에야
+"Ollama를 켰어야 했구나"를 알게 되는 걸 막기 위해서다. 누르면 다시 확인한다.
+
+| 표시 | 뜻 | 할 일 |
+|---|---|---|
+| `LLM 확인 중…` | 확인 중 | — |
+| `Ollama 미실행` | 연결 실패 | Ollama를 실행한다 |
+| `모델 없음` | Ollama는 떠 있는데 모델이 없다 | `ollama pull qwen2.5:7b` |
+| `LLM 준비됨` | 모델은 받아뒀지만 메모리에 없다 | 그대로 써도 된다 (첫 호출에서 로딩 시간) |
+| `LLM 로드됨` | 메모리에 올라가 있다 | 바로 응답한다 |
+
+상태 확인은 Ollama의 `/api/tags`·`/api/ps`를 **읽기만** 한다 — 원문 텍스트를 보내지 않고,
+탐지도 하지 않는다(탐지는 core의 몫). 확인 대상 모델은 core `name_llm.py`의
+`DEFAULT_MODEL`과 같은 값을 유지해야 한다.
 
 - **꺼짐이 기본** — 끈 상태에서는 규칙 전용이라 Ollama 없이도 그대로 동작한다.
 - 켜려면 이 PC에서 **Ollama가 실행 중**이고 모델(`ollama pull qwen2.5:7b`)이 있어야 한다.
