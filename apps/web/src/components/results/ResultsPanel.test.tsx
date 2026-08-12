@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { ResultsPanel } from "./ResultsPanel";
 import type { Detection } from "../../types/detection";
 
@@ -28,6 +28,26 @@ describe("ResultsPanel confidence threshold slider (#237)", () => {
     // phone(40%)만 제외되고 name(90%)은 그대로 마스킹된다
     expect(screen.getByText("1건은 마스킹되지 않고 원문 그대로 표시됩니다.", { exact: false })).toBeInTheDocument();
     expect(screen.getByTestId("masked-result")).toHaveTextContent(`${"*".repeat(3)} 010-1234-5678`);
+  });
+
+  it("automatically clears the filter once its target kind is hidden by the threshold, instead of leaving results stuck dimmed (#250)", () => {
+    const onFilterSelect = vi.fn();
+    render(<ResultsPanel scanned={scanned} activeFilter="phone" scanRun={1} onFilterSelect={onFilterSelect} />);
+
+    // phone(40%)이 걸러지도록 임계값을 올린다 -- 필터 대상 카드 자체가 사라진다
+    fireEvent.change(screen.getByLabelText(/확신도/), { target: { value: "50" } });
+
+    expect(onFilterSelect).toHaveBeenCalledWith(null);
+  });
+
+  it("leaves the filter alone while its target kind is still visible", () => {
+    const onFilterSelect = vi.fn();
+    render(<ResultsPanel scanned={scanned} activeFilter="name" scanRun={1} onFilterSelect={onFilterSelect} />);
+
+    fireEvent.change(screen.getByLabelText(/확신도/), { target: { value: "50" } });
+
+    // name(90%)은 여전히 보이므로 필터를 건드리지 않는다
+    expect(onFilterSelect).not.toHaveBeenCalled();
   });
 
   it("does not show the 'nothing found' reassurance when the threshold filters out every detection (#243)", () => {
