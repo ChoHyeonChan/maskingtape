@@ -31,6 +31,18 @@ export function ResultsPanel({ scanned, activeFilter, scanRun, onFilterSelect }:
   );
   const hiddenCount = allDetections.length - visibleDetections.length;
 
+  // 필터 중인 종류가 확신도 임계값 때문에 화면에서 완전히 사라지면, 그 카드를 다시 눌러
+  // 끌 방법이 없어 필터가 고정돼 버린다 — 남은 결과가 전부 흐려진 채로 갇히지 않도록
+  // 자동으로 필터를 해제한다(#250).
+  const activeFilterStillVisible =
+    !activeFilter || visibleDetections.some((detection) => detection.kind === activeFilter);
+
+  useEffect(() => {
+    if (!activeFilterStillVisible) {
+      onFilterSelect(null);
+    }
+  }, [activeFilterStillVisible, onFilterSelect]);
+
   return (
     <section className="panel panel--results" aria-label="분석 결과">
       <div className="panel__header">
