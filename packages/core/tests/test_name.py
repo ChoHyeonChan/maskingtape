@@ -124,3 +124,13 @@ def test_title_prefix_before_department_word_is_not_a_name():
     assert detect("대표 이사회 안건 상정") == []
     assert detect("대표 이사가 참석했다") == []
     assert detect("구매 부장에게 문의") == []
+
+
+def test_department_word_with_particle_does_not_bypass_title_guard():
+    # #247: 부서·업무어(2자) 뒤에 조사가 붙어 3자로 보여도(정기가=정기+가) 이름이 아니다.
+    assert detect("대표 정기가 참석했습니다") == []
+    assert detect("부장 구매가 결재를 승인") == []
+    # 유출 방지: 실명은 조사로 끝나도(김지은) stem이 부서어가 아니라 그대로 잡히고,
+    # 부서 stem이어도 조사 아닌 글자로 끝나면(정기훈) 실명으로 잡힌다.
+    assert detect("대표 정기훈 참석")[0].text == "정기훈"
+    assert detect("대표 김지은 확인")[0].text == "김지은"
