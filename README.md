@@ -63,20 +63,20 @@ python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl
 
 합성 데이터셋(500건)도 시드로 고정돼 있어 바이트 단위로 똑같이 재생성된다 — `python -m bench.generate_dataset --count 500 --seed 42 --out bench/datasets/synth_v1.jsonl`
 
-**측정 기준: `8ee1b3a` · 규칙 전용 모드(LLM 미사용)**
+**측정 기준: `8ee1b3a` · 규칙 전용 모드(LLM 미사용)** (해시는 이 PR 머지 후 갱신)
 
 | 종류 | precision | recall | F1 |
 |---|---|---|---|
 | 주민등록번호 | 1.000 | 1.000 | 1.000 |
 | 전화번호(휴대폰+유선+050X) | 1.000 | 1.000 | 1.000 |
 | 이메일 | 1.000 | 1.000 | 1.000 |
-| 주소 | 1.000 | 1.000 | 1.000 |
+| 주소 | 1.000 | 0.988 | 0.994 |
 | 신용카드번호 | 1.000 | 1.000 | 1.000 |
 | 사업자등록번호 | 1.000 | 1.000 | 1.000 |
 | 여권번호 | 1.000 | 1.000 | 1.000 |
 | 계좌번호 | 1.000 | 1.000 | 1.000 |
-| 이름 (규칙 전용) | 0.984 | 0.661 | 0.791 |
-| **전체** | **0.996** | **0.876** | **0.932** |
+| 이름 (규칙 전용) | 0.937 | 0.657 | 0.772 |
+| **전체** | **0.981** | **0.865** | **0.919** |
 
 번호·카드·사업자등록번호·여권번호·계좌번호는 형태(와 있는 경우 체크섬)로 완전히 잡힌다
 (유선전화·plus 이메일·서브도메인·여러 문장으로 구성된 복합 문서까지 섞어도 흔들리지 않음을
@@ -84,10 +84,10 @@ python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl
 [#123](https://github.com/ChoHyeonChan/maskingtape/issues/123), 여권번호는
 [#139](https://github.com/ChoHyeonChan/maskingtape/issues/139), 계좌번호는
 [#180](https://github.com/ChoHyeonChan/maskingtape/issues/180)에서 각각 새 kind를 추가해
-측정 사각지대를 없앴다. 주소는 [#195](https://github.com/ChoHyeonChan/maskingtape/issues/195)에서
-부분 주소(시/도만·시/도+구만)를 처음 추가했을 때 시/도명 뒤 조사 미탐 버그를 발견해 잠깐
-recall이 0.968로 떨어졌지만, core [#196](https://github.com/ChoHyeonChan/maskingtape/issues/196)이
-머지되며 1.000으로 복구됐다(직접 재확인함). 주민등록번호는 [#159](https://github.com/ChoHyeonChan/maskingtape/issues/159)에서
+측정 사각지대를 없앴다. 주소는 [#195](https://github.com/ChoHyeonChan/maskingtape/issues/195)/[#196](https://github.com/ChoHyeonChan/maskingtape/issues/196)에서
+시/도명 뒤 **조사** 미탐 버그를 발견·수정했지만, [#248](https://github.com/ChoHyeonChan/maskingtape/issues/248)에서
+"입니다"/"예요" 같은 **계사 어미**는 그 수정 범위 밖이라 여전히 놓치는 걸 새로 발견했다(recall
+0.988, core 대응 대기). 주민등록번호는 [#159](https://github.com/ChoHyeonChan/maskingtape/issues/159)에서
 체크섬 없는(2020-10 이후 발급분) 케이스, [#209](https://github.com/ChoHyeonChan/maskingtape/issues/209)에서
 점(.) 구분자 표기도 섞었는데 precision/recall엔 영향이 없다 — core가 형식만으로 탐지 자체는
 하기 때문(체크섬 없는 케이스는 confidence가 0.85로 낮아져 임계값 필터를 쓰면 새기 쉽다,
@@ -96,11 +96,13 @@ recall이 0.968로 떨어졌지만, core [#196](https://github.com/ChoHyeonChan/
 없으면 아예 탐지를 안 하는 하드 게이트인 데다, 체크섬이 없어 confidence가 **항상 정확히 0.6으로
 고정**된다 — confidence 임계값을 0.7 이상으로만 올려도 계좌번호가 전량 걸러진다는 걸 확인했다
 ([bench/](bench/) 참고). 여권번호는 core에 체크섬 검증이 없어(형식+문맥어만으로 판단) distractor가
-우연히 형식과 겹치지 않는지 별도 회귀 테스트로 고정해뒀다. 이름 규칙판은 [#150](https://github.com/ChoHyeonChan/maskingtape/pull/150)(존칭 삼킴 수정)과 [#160](https://github.com/ChoHyeonChan/maskingtape/pull/160)(단어 중간 성씨 오탐 수정)으로 F1이 **0.676 → 0.827**까지 올랐다가, [#213](https://github.com/ChoHyeonChan/maskingtape/issues/213)에서
-직함-only(역할어·존칭 없음) 이름을 새로 잡게 되면서 그 케이스 중 2음절 이름은 설계상 여전히
-놓치는 게 반영돼 recall이 소폭 낮아졌다(0.791) — 남은 과제는 문맥 없는 이름뿐이다:
+우연히 형식과 겹치지 않는지 별도 회귀 테스트로 고정해뒀다. 이름 규칙판은 [#213](https://github.com/ChoHyeonChan/maskingtape/issues/213)(직함이
+이름 뒤)·[#239](https://github.com/ChoHyeonChan/maskingtape/issues/239)(직함이 이름 앞) 둘 다
+지원하게 됐지만, [#247](https://github.com/ChoHyeonChan/maskingtape/issues/247)에서 이 오탐
+방지 가드가 **조사가 이름 글자와 겹치면 뚫린다**는 새 버그를 발견해 precision이 눈에 띄게
+낮아졌다(0.937) — 남은 과제는 문맥 없는 이름뿐이다:
 
-- **이름** — 한국어 이름은 형태만으로 구분되지 않아 규칙만으로는 문맥 없는 이름을 놓친다. 이것이 **로컬 LLM 하이브리드**(`--llm`)가 필요한 이유이고, 그 효과는 [#46](https://github.com/ChoHyeonChan/maskingtape/issues/46)에서 같은 데이터셋으로 비교 측정한다 — 하이브리드로 켜면 recall이 **0.661 → 0.916**로 크게 오르지만, LLM은 규칙판의 "부서어 오탐 방지" 가드를 그대로 적용받지 않아 precision은 오히려 소폭 낮아진다(0.984→0.959, F1 0.791→0.937) — 상세는 [bench/](bench/) 참고.
+- **이름** — 한국어 이름은 형태만으로 구분되지 않아 규칙만으로는 문맥 없는 이름을 놓친다. 이것이 **로컬 LLM 하이브리드**(`--llm`)가 필요한 이유이고, 그 효과는 [#46](https://github.com/ChoHyeonChan/maskingtape/issues/46)에서 같은 데이터셋으로 비교 측정한다 — 상세는 [bench/](bench/) 참고(하이브리드 수치는 이 PR 머지 후 갱신).
 
 마스킹 결과에 개인정보가 실제로 남는지도 따로 측정한다 — `python -m bench.evaluators.evaluate_masking bench/datasets/synth_v1.jsonl`. 상세는 [bench/](bench/) 참고.
 
