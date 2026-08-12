@@ -247,6 +247,17 @@ def test_address_generator_covers_partial_style():
     assert 0.65 in confidences  # 시/도+구 — 그 다음 확신도
 
 
+def test_bare_province_before_copula_ending_is_not_detected():
+    """#248 (신규 발견, core 미해결) — #196의 조사 화이트리스트는 "에/로/은/는" 같은 조사만
+    다루고, "이다"의 활용형(계사 어미 "입니다"/"예요")은 포함하지 않는다. "주소는 X입니다"는
+    "주소는 X에 있습니다"만큼 흔한 표현인데도 여전히 놓친다 — 기존 템플릿
+    ("...{address}입니다.")이 부분 주소(#195)와 만나 500건 재측정 중 실제로 재현됨(#246).
+    bench 소관이 아니라 core에 남겼다(코드는 안 고침). core가 고치면 이 테스트가 깨져서 알 수 있다."""
+    detector = AddressDetector()
+    assert detector.detect("자택 주소는 광주광역시입니다.") == []
+    assert detector.detect("자택 주소는 광주광역시예요.") == []
+
+
 def test_hard_difficulty_can_produce_no_province_address():
     """#118: 시/도 없이 시/군으로 시작하는 주소도 hard 난이도에서 실제로 나와야 측정 사각지대가 없다."""
     rng = random.Random(17)
@@ -557,3 +568,39 @@ def test_department_word_with_title_is_not_detected_as_name():
     detector = NameDetector()
     for text in ("구매 부장이 결재했습니다.", "정기 이사가 참석했습니다.", "홍보 사원이 채용되었습니다."):
         assert detector.detect(text) == [], f"부서어가 이름으로 오탐됨: {text!r}"
+
+
+def test_full_name_with_title_prefix_is_detected():
+    """#239: 직함이 이름 뒤가 아니라 앞에 와도("대표 홍길동"), 3글자 이상 풀네임이면 잡혀야 한다."""
+    detector = NameDetector()
+    found = detector.detect("대표 홍길동이 계약서에 서명했습니다.")
+    assert [f.text for f in found] == ["홍길동"]
+    assert found[0].confidence == 0.5
+
+
+def test_two_syllable_name_with_title_prefix_is_not_detected():
+    """#239 설계된 한계 — #213과 대칭으로, 직함이 앞에 와도 2음절 이름은 일부러 놓친다.
+    쉼표로 끊어 뒤에 조사가 바로 안 붙는 경우만 확인한다 — 조사가 바로 붙는 경우는
+    #247의 알려진 버그(아래 test_title_prefix_guard_is_bypassed_when_particle_attaches)로 별도 고정."""
+    detector = NameDetector()
+    assert detector.detect("대표 김민, 계약서에 서명했습니다.") == []
+
+
+def test_isa_after_title_prefix_is_not_detected_as_name():
+    """#239 core 커밋 예시 그대로 — "대표이사"가 띄어써지면("대표 이사가") "이사"가 성씨
+    "이"+"사"로 오탐되면 안 된다(core가 _NON_NAME_WORDS에 "이사" 추가로 막음)."""
+    detector = NameDetector()
+    for text in ("대표 이사가 참석했습니다.", "대표 이사회에서 발표했습니다."):
+        assert detector.detect(text) == [], f"'이사'가 이름으로 오탐됨: {text!r}"
+
+
+def test_title_prefix_guard_is_bypassed_when_particle_attaches():
+    """#247 (신규 발견, core 미해결) — #239의 "성+2자 풀네임만 인정" 가드는 2음절 후보
+    바로 뒤에 조사가 공백 없이 붙으면(정상적인 한국어 표기, "정기가"·"구매가") 조사까지
+    선택적 2번째 글자로 삼켜져 "3글자"로 둔갑해 가드를 그대로 통과해버린다. 부서어가
+    문장의 주어로 자연스럽게 쓰이면("대표 정기가 참석했습니다") 오히려 더 잘 오탐되는
+    역설적인 상황이다 — bench 소관이 아니라 core에 남겼다(코드는 안 고침).
+    core가 고치면 이 테스트가 깨져서 알 수 있다."""
+    detector = NameDetector()
+    assert [d.text for d in detector.detect("대표 정기가 참석했습니다.")] == ["정기가"]
+    assert [d.text for d in detector.detect("부장 구매가 결재를 승인했습니다.")] == ["구매가"]
