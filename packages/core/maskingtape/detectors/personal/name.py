@@ -64,6 +64,13 @@ _NON_NAME_WORDS = (
 # 오탐되는 걸 막는다. 존칭(님)은 강한 단서라 이 제약을 걸지 않는다. (앞·뒤 직함 공용)
 _TITLE_ONLY_CUES = frozenset(_TITLE_CUES) - frozenset(_SUFFIX_CUES)
 
+# 직함만 단서일 때 걸러낼 2자 부서·업무어 — 성씨로 시작해 이름처럼 보인다. 뒤에 조사가 붙어
+# 3자로 보여도(#247, "정기가"=정기+가) stem으로 걸러낸다. 완전한 목록은 아니고(긴 꼬리는 LLM
+# 담당) 흔한 것만 둔다. 실명은 조사로 끝나도 stem이 여기 없으면 그대로 잡혀 유출되지 않는다.
+_DEPT_STEMS = frozenset({"구매", "정기", "홍보", "안전", "노무"})
+# 이름 뒤에 붙는 단일 음절 조사 — 부서어 뒤에 붙어 3글자 가드를 우회하는지 판별에만 쓴다(#247).
+_JOSA_CHARS = frozenset("이가은는을를도만의에로과와")
+
 _SURNAME_ALT = "|".join(sorted(_SURNAMES, key=len, reverse=True))
 # 이름 앞 단서 = 역할어 + 직함. 직함이 이름 앞에 오는 형태("대표 홍길동")도 잡는다(#239).
 _PREFIX_ALT = "|".join(
@@ -144,8 +151,14 @@ class NameDetector(Detector):
             title_only = (suffix in _TITLE_ONLY_CUES and not has_prefix) or (
                 prefix in _TITLE_ONLY_CUES and not has_suffix
             )
-            if title_only and len(m.group("name")) < 3:
-                continue
+            if title_only:
+                name = m.group("name")
+                # 부서·업무어(2자) 뒤에 조사가 붙어 3자로 보이는 경우("정기가"=정기+가)도 버린다(#247).
+                # 실명이 우연히 조사로 끝나면(김지은) stem이 부서어가 아니라 그대로 잡힌다.
+                if len(name) < 3 or (
+                    len(name) == 3 and name[-1] in _JOSA_CHARS and name[:2] in _DEPT_STEMS
+                ):
+                    continue
 
             confidence = 0.75 if (has_prefix and has_suffix) else 0.5
             if confidence < self.min_confidence:

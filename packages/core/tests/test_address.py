@@ -154,3 +154,11 @@ def test_si_anchor_rejects_region_mentions_and_common_words():
     assert detect("강남구에서 만나요") == []
     assert detect("요구사항을 먼저 정리했다") == []
     assert detect("부산시 마케팅부 소속입니다") == []
+
+
+def test_detects_province_before_copula_ending():
+    # #248: "주소는 X입니다/예요"의 계사 어미도 조사처럼 허용 — 시/도만으로도 주소로 인정한다.
+    assert detect("자택 주소는 광주광역시입니다.")[0].text == "광주광역시"
+    assert detect("자택 주소는 광주광역시예요.")[0].text == "광주광역시"
+    # 회귀: 계사가 아닌 한글이 붙으면(서울특별시청) 여전히 제외
+    assert detect("서울특별시청에서 회의") == []
