@@ -13,6 +13,19 @@ describe("DetectionSummary", () => {
     expect(screen.getByText(/발견되지 않았습니다/)).toBeInTheDocument();
   });
 
+  it("does not claim nothing was found when detections were merely filtered out by the confidence threshold (#243)", () => {
+    render(
+      <DetectionSummary
+        detections={[]}
+        activeFilter={null}
+        onFilterSelect={() => {}}
+        hiddenByThreshold
+      />,
+    );
+    expect(screen.queryByText(/발견되지 않았습니다/)).not.toBeInTheDocument();
+    expect(screen.getByText(/확신도 임계값보다 낮아 전부 가려져 있습니다/)).toBeInTheDocument();
+  });
+
   it("shows the total count and per-kind breakdown with Korean labels", () => {
     render(<DetectionSummary detections={[d("phone"), d("phone"), d("rrn")]} activeFilter={null} onFilterSelect={() => {}} />);
     expect(screen.getByText(/개인정보 3건 발견/)).toBeInTheDocument();

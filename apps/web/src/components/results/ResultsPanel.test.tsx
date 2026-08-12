@@ -30,6 +30,17 @@ describe("ResultsPanel confidence threshold slider (#237)", () => {
     expect(screen.getByTestId("masked-result")).toHaveTextContent(`${"*".repeat(3)} 010-1234-5678`);
   });
 
+  it("does not show the 'nothing found' reassurance when the threshold filters out every detection (#243)", () => {
+    render(<ResultsPanel scanned={scanned} activeFilter={null} scanRun={1} onFilterSelect={() => {}} />);
+
+    // name(90%)·phone(40%) 둘 다 100% 미만이라 임계값을 100으로 올리면 전부 걸러진다
+    fireEvent.change(screen.getByLabelText(/확신도/), { target: { value: "100" } });
+
+    expect(screen.queryByText(/개인정보가 발견되지 않았습니다/)).not.toBeInTheDocument();
+    expect(screen.getByText(/확신도 임계값보다 낮아 전부 가려져 있습니다/)).toBeInTheDocument();
+    expect(screen.getByText("2건은 마스킹되지 않고 원문 그대로 표시됩니다.", { exact: false })).toBeInTheDocument();
+  });
+
   it("resets the threshold to 0 whenever a new scan (scanRun) comes in", () => {
     const { rerender } = render(
       <ResultsPanel scanned={scanned} activeFilter={null} scanRun={1} onFilterSelect={() => {}} />,
