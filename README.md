@@ -102,7 +102,7 @@ python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl
 방지 가드가 **조사가 이름 글자와 겹치면 뚫린다**는 새 버그를 발견해 precision이 눈에 띄게
 낮아졌다(0.937) — 남은 과제는 문맥 없는 이름뿐이다:
 
-- **이름** — 한국어 이름은 형태만으로 구분되지 않아 규칙만으로는 문맥 없는 이름을 놓친다. 이것이 **로컬 LLM 하이브리드**(`--llm`)가 필요한 이유이고, 그 효과는 [#46](https://github.com/ChoHyeonChan/maskingtape/issues/46)에서 같은 데이터셋으로 비교 측정한다 — 상세는 [bench/](bench/) 참고(하이브리드 수치는 이 PR 머지 후 갱신).
+- **이름** — 한국어 이름은 형태만으로 구분되지 않아 규칙만으로는 문맥 없는 이름을 놓친다. 이것이 **로컬 LLM 하이브리드**(`--llm`)가 필요한 이유이고, 그 효과는 [#46](https://github.com/ChoHyeonChan/maskingtape/issues/46)에서 같은 데이터셋으로 비교 측정한다 — 하이브리드로 켜면 recall이 **0.657 → 0.918**로 크게 오르고, 이번 재측정에서는 precision도 오히려 규칙판보다 살짝 높다(0.937→0.954, F1 0.772→0.936) — 상세는 [bench/](bench/) 참고.
 
 마스킹 결과에 개인정보가 실제로 남는지도 따로 측정한다 — `python -m bench.evaluators.evaluate_masking bench/datasets/synth_v1.jsonl`. 상세는 [bench/](bench/) 참고.
 
