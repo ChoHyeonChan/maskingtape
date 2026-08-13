@@ -606,3 +606,20 @@ def test_title_prefix_guard_holds_when_particle_attaches():
     assert detector.detect("부장 구매가 결재를 승인했습니다.") == []
     # 유출 방지 경계: 실명은 조사로 끝나도(김지은) 부서 stem이 아니라 그대로 잡힌다.
     assert [d.text for d in detector.detect("대표 김지은 확인 바랍니다.")] == ["김지은"]
+
+
+def test_title_prefix_dept_word_guard_only_covers_hardcoded_stems():
+    """#255 (신규 발견, core 부분 해결·의도된 트레이드오프일 수 있음) — core #252가 #247을
+    고친 방식은 하드코딩 5개 stem(구매/정기/홍보/안전/노무)만 차단하는 목록 기반이다. 목록
+    밖의 흔한 업무어("차량"·"허가"·"성과"·"안내", 전부 성씨와 우연히 겹침)는 조사가 붙으면
+    여전히 오탐된다 — bench 소관이 아니라 core 이슈로 남겼다(코드는 안 고침). core가 목록을
+    넓히거나 일반화하면 이 테스트가 깨져서 알 수 있다."""
+    detector = NameDetector()
+    for text in (
+        "대표 차량이 배정되었습니다.",
+        "대표 허가가 필요합니다.",
+        "부장 성과가 좋았습니다.",
+        "팀장 안내가 시작되었습니다.",
+    ):
+        found = detector.detect(text)
+        assert len(found) == 1 and found[0].confidence == 0.5, f"예상과 다른 동작: {text!r} -> {found!r}"
