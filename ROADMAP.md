@@ -90,10 +90,10 @@
 - 상시: 팀원 PR 리뷰·아키텍처
 
 **수연 — `web`**
-- [ ] 접근성: `prefers-reduced-motion`, 코치마크 ESC로 닫기 (PR #76 리뷰 반영)
-- [ ] README 정리: 로컬 경로·포크 안내 제거
-- [ ] API 연동되면 임시 프록시(`dev-server`) → 실제 `/api/scan`으로 교체
-- [ ] 결과 화면에 확신도 표시(막대) → "N% 이상만 마스킹" 슬라이더
+- [x] 접근성: `prefers-reduced-motion`, 코치마크 ESC로 닫기 (PR #76 리뷰 반영) — #189, #190
+- [x] README 정리: 로컬 경로·포크 안내 제거 — #191
+- [x] API 연동되면 임시 프록시(`dev-server`) → 실제 `/api/scan`으로 교체 — 완료(`apps/web/src/api/scanClient.ts`가 `/api/scan` 실호출, `vite.config.ts` 프록시가 `VITE_API_TARGET`로 실제 FastAPI 백엔드 지정)
+- [x] 결과 화면에 확신도 표시(막대) → "N% 이상만 마스킹" 슬라이더 — #237, #243, #250
 
 **준형 — `desktop`**
 - [x] UX·안정성 완성도 (에러 처리·취소·진행 표시) — #13 (CP949 폴백·입력 검증·처리 취소·진행률·결과 미리보기)
