@@ -31,7 +31,7 @@ export function HighlightedText({ text, detections, activeFilter }: Props) {
   const [coveredKeys, setCoveredKeys] = useState<Set<string>>(() => new Set());
   const [temporarilyRevealedKind, setTemporarilyRevealedKind] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const allCovered = detections.length > 0 && coveredKeys.size === detections.length;
+  const allCovered = false;
 
   useEffect(() => {
     if (!activeFilter) {
@@ -66,7 +66,7 @@ export function HighlightedText({ text, detections, activeFilter }: Props) {
   }
 
   function toggleCoverAll() {
-    setCoveredKeys(allCovered ? new Set() : new Set(detections.map(detectionKey)));
+    return;
   }
 
   async function copyMaskedResult() {

@@ -9,7 +9,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 0.75rem;
   margin-bottom: 0.85rem;
 }
 
@@ -29,8 +29,43 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 0.75rem;
-  flex-wrap: wrap;
+  gap: 0.45rem;
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+
+.input-panel__tools--hidden {
+  display: none;
+}
+
+.input-panel__header-actions {
+  position: relative;
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.input-panel__copy-header {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 2.35rem;
+  padding: 0 0.86rem;
+  border: 1px solid rgba(24, 58, 139, 0.18);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--brand-blue);
+  font-size: 0.84rem;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(24, 58, 139, 0.08);
+}
+
+.input-panel__copy-header:hover {
+  border-color: rgba(24, 58, 139, 0.34);
+  background: #f9fbff;
 }
 
 .input-panel__textarea-wrap {
@@ -72,9 +107,9 @@
 .input-panel textarea {
   width: 100%;
   padding: 1.45rem 1.55rem 3.45rem;
-  border: 1px solid var(--border);
+  border: 1.5px solid rgba(24, 58, 139, 0.28);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.8);
+  background: #ffffff;
   color: inherit;
   resize: none;
   height: 100%;
@@ -84,31 +119,18 @@
   transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
 }
 
-.input-panel__copy-inline {
-  position: absolute;
-  bottom: 1.05rem;
-  right: 1.15rem;
-  z-index: 2;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.2rem;
-  height: 2.2rem;
-  border: 0;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.78);
-  color: var(--text-primary);
-  cursor: pointer;
-}
-
-.input-panel__copy-inline:hover {
-  background: #ffffff;
+.input-panel--result textarea {
+  padding: 0.35rem 0.25rem 0.6rem;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  cursor: default;
 }
 
 .input-panel__copy-toast {
   position: absolute;
-  right: 1.15rem;
-  bottom: 3.55rem;
+  right: 0;
+  top: calc(100% + 0.45rem);
   z-index: 3;
   padding: 0.42rem 0.68rem;
   border: 1px solid rgba(24, 58, 139, 0.14);
@@ -126,6 +148,12 @@
   border-color: rgba(24, 58, 139, 0.42);
   box-shadow: 0 0 0 4px rgba(24, 58, 139, 0.1);
   background: rgba(255, 255, 255, 0.94);
+}
+
+.input-panel--result textarea:focus {
+  border-color: transparent;
+  box-shadow: none;
+  background: transparent;
 }
 
 .input-panel__meta {
@@ -153,7 +181,7 @@
 
 .input-panel__presets-label,
 .input-panel__sample {
-  min-height: 2.6rem;
+  min-height: 2.25rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -161,19 +189,19 @@
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.85);
   color: var(--text-primary);
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   font-weight: 800;
   cursor: pointer;
 }
 
 .input-panel__presets-label {
   gap: 0.65rem;
-  padding: 0 0.9rem;
+  padding: 0 0.72rem;
   list-style: none;
 }
 
 .input-panel__sample {
-  padding: 0 1rem;
+  padding: 0 0.78rem;
 }
 
 /* 시연 영상용 대표 시나리오라 다른 예제 버튼보다 살짝 눈에 띄게 브랜드 컬러로 강조한다(#215). */
@@ -260,7 +288,7 @@
   flex: 1 1 14rem;
   background: #0b55f0;
   color: #ffffff;
-  box-shadow: 0 12px 24px rgba(24, 58, 139, 0.2);
+  box-shadow: 0 3px 8px rgba(24, 58, 139, 0.16);
   transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease, background 180ms ease, color 180ms ease;
 }
 
@@ -291,8 +319,8 @@
 }
 
 .input-panel__primary:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 15px 30px rgba(24, 58, 139, 0.24);
+  transform: none;
+  box-shadow: 0 4px 10px rgba(24, 58, 139, 0.18);
 }
 
 .input-panel__secondary {
@@ -346,11 +374,11 @@
   0%,
   100% {
     filter: saturate(1);
-    transform: translateY(0);
+    transform: none;
   }
   50% {
     filter: saturate(1.15);
-    transform: translateY(-2px);
+    transform: none;
   }
 }
 
@@ -381,5 +409,16 @@
   }
   100% {
     clip-path: inset(0 0 0 0);
+  }
+}
+
+@media (max-width: 720px) {
+  .input-panel__header,
+  .input-panel__tools {
+    flex-wrap: wrap;
+  }
+
+  .input-panel__tools {
+    justify-content: flex-start;
   }
 }
