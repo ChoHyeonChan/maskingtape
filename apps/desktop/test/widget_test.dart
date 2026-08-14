@@ -48,7 +48,12 @@ void main() {
     await tester.pumpWidget(const MaskingtapeApp());
 
     expect(find.text('파일을 여기로 끌어다 놓으세요'), findsOneWidget);
-    expect(find.text('여러 문서를 한 번에 비식별화합니다'), findsOneWidget);
+    expect(find.text('이름·주민등록번호·연락처를 찾아 가립니다'), findsOneWidget);
+    // 이 제품의 핵심 주장은 파일을 올리기 전에 보여야 한다.
+    expect(
+      find.text('처리는 이 PC에서만 이뤄집니다 · 파일이 밖으로 나가지 않습니다'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('드롭된 파일이 파일명·개수·시작 버튼과 함께 표시된다',
@@ -86,7 +91,7 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('또는 파일 찾아보기'));
+    await tester.tap(find.text('파일 찾아보기'));
     await tester.pump();
 
     expect(find.text('선택한파일.txt'), findsOneWidget);

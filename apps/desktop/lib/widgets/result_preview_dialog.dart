@@ -184,9 +184,10 @@ class _Comparison extends StatelessWidget {
       spans.add(
         TextSpan(
           text: text.substring(d.start, d.end),
+          // 탐지 구간은 "테이프가 붙을 자리"다 — 앱의 시그니처 색으로 표시한다.
           style: const TextStyle(
-            backgroundColor: AppTheme.runBg,
-            color: AppTheme.runFg,
+            backgroundColor: AppTheme.tapeSoft,
+            color: AppTheme.tapeDeep,
             fontWeight: FontWeight.w700,
           ),
         ),

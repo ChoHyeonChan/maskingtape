@@ -8,6 +8,7 @@ import '../services/default_backend.dart';
 import '../services/file_picker.dart';
 import '../services/llm_status.dart';
 import '../services/shell.dart';
+import '../theme.dart';
 import '../widgets/drop_zone.dart';
 import '../widgets/llm_status_pill.dart';
 import '../widgets/result_preview_dialog.dart';
@@ -114,13 +115,14 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: 72,
         title: Row(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.baseline,
           textBaseline: TextBaseline.alphabetic,
           children: [
-            const Text('마스킹테이프'),
-            const SizedBox(width: 12),
+            Text('마스킹테이프', style: Theme.of(context).textTheme.displaySmall),
+            const SizedBox(width: 14),
             Text(
               '문서 일괄 비식별화',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -130,31 +132,35 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         actions: [
+          // LLM 상태는 파일이 없을 때도 보여야 한다 — 파일을 올리기 전에 Ollama를
+          // 켜야 하는지 알 수 있어야 의미가 있다(#245 리뷰 메모).
+          LlmStatusPill(status: _llmStatus, onRefresh: _refreshLlmStatus),
           if (_tasks.isNotEmpty)
             Padding(
-              padding: const EdgeInsets.only(right: 16),
+              padding: const EdgeInsets.only(left: 8),
               child: TextButton.icon(
                 onPressed: _running ? null : () => setState(_tasks.clear),
                 icon: const Icon(Icons.delete_sweep_outlined),
                 label: const Text('목록 비우기'),
               ),
             ),
+          const SizedBox(width: 28),
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.fromLTRB(32, 4, 32, 32),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
               flex: _tasks.isEmpty ? 1 : 0,
               child: SizedBox(
-                height: _tasks.isEmpty ? null : 160,
+                height: _tasks.isEmpty ? null : 76,
                 child: DropZone(onFilesDropped: _addFiles, onBrowse: _browse),
               ),
             ),
             if (_tasks.isNotEmpty) ...[
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               // 창이 좁으면 파일 수와 조작부가 두 줄로 나뉜다.
               Wrap(
                 alignment: WrapAlignment.spaceBetween,
@@ -171,10 +177,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     crossAxisAlignment: WrapCrossAlignment.center,
                     alignment: WrapAlignment.end,
                     children: [
-                      LlmStatusPill(
-                        status: _llmStatus,
-                        onRefresh: _refreshLlmStatus,
-                      ),
                       Tooltip(
                         message: '이름을 규칙 대신 로컬 LLM으로 판단합니다.\n'
                             '이 PC에서 Ollama가 실행 중이어야 합니다.',
@@ -228,26 +230,32 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
               if (_running) ...[
-                const SizedBox(height: 12),
-                LinearProgressIndicator(
-                  value: _tasks.isEmpty ? null : _finished / _tasks.length,
+                const SizedBox(height: 14),
+                // 진행률은 테이프가 깔리는 것으로 읽힌다 — 색이 테이프 색이다(theme).
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(3),
+                  child: LinearProgressIndicator(
+                    value: _tasks.isEmpty ? null : _finished / _tasks.length,
+                  ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Text(
                   '$_finished / ${_tasks.length} 처리됨',
-                  style: Theme.of(context).textTheme.bodySmall,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                 ),
               ],
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
               Expanded(
                 child: Material(
                   color: Theme.of(context).colorScheme.surface,
                   clipBehavior: Clip.antiAlias,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius:
+                        BorderRadius.circular(AppTheme.panelRadius),
                     side: BorderSide(
                       color: Theme.of(context).colorScheme.outlineVariant,
-                      width: 1.5,
                     ),
                   ),
                   child: _FileList(tasks: _tasks),
