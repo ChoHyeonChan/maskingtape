@@ -90,10 +90,30 @@ export function InputPanel({ text, hasResult, resultVersion, onTextChange, onCle
   }
 
   return (
-    <div className="input-panel">
+    <div className={hasResult ? "input-panel input-panel--result" : "input-panel"}>
       <div className="input-panel__header">
-        <h2><span aria-hidden="true">▤</span> {hasResult ? "탐지 결과" : "문서 입력"}</h2>
-        <div className="input-panel__tools">
+        <h2><span aria-hidden="true">▤</span> {hasResult ? "마스킹 결과" : "문서 입력"}</h2>
+        {hasResult && (
+          <div className="input-panel__header-actions">
+            <button
+              type="button"
+              className="input-panel__copy-header"
+              onClick={handleCopy}
+              disabled={!text}
+              aria-label={copied ? "복사됨" : "마스킹 결과 복사"}
+              title={copied ? "복사됨" : "복사"}
+            >
+              <span className="copy-icon" aria-hidden="true" />
+              <span>마스킹 결과 복사</span>
+            </button>
+            {copied && (
+              <span className="input-panel__copy-toast input-panel__copy-toast--header" role="status">
+                복사되었습니다
+              </span>
+            )}
+          </div>
+        )}
+        <div className={hasResult ? "input-panel__tools input-panel__tools--hidden" : "input-panel__tools"}>
           <details
             className="input-panel__presets"
             data-coach="presets"
@@ -128,25 +148,6 @@ export function InputPanel({ text, hasResult, resultVersion, onTextChange, onCle
       </div>
 
       <div className={`input-panel__textarea-wrap${revealingResult ? " is-revealing" : ""}`}>
-        {hasResult && (
-          <>
-            <button
-              type="button"
-              className="input-panel__copy-inline"
-              onClick={handleCopy}
-              disabled={!text}
-              aria-label={copied ? "복사됨" : "마스킹 결과 복사"}
-              title={copied ? "복사됨" : "복사"}
-            >
-              <span className="copy-icon" aria-hidden="true" />
-            </button>
-            {copied && (
-              <span className="input-panel__copy-toast" role="status">
-                복사되었습니다
-              </span>
-            )}
-          </>
-        )}
         <textarea
           className={revealingResult ? "is-text-revealing" : undefined}
           value={text}
@@ -157,6 +158,7 @@ export function InputPanel({ text, hasResult, resultVersion, onTextChange, onCle
           }}
           placeholder={PLACEHOLDER}
           rows={8}
+          readOnly={hasResult}
           aria-label={hasResult ? "마스킹된 탐지 결과" : "탐지할 텍스트 입력"}
           aria-describedby="input-meta"
         />
@@ -167,16 +169,18 @@ export function InputPanel({ text, hasResult, resultVersion, onTextChange, onCle
         )}
       </div>
 
-      <div className="input-panel__meta" id="input-meta">
-        <span className={isTooLong ? "input-panel__count input-panel__count--over" : "input-panel__count"}>
-          {text.length.toLocaleString()} / {MAX_TEXT_LENGTH.toLocaleString()}자
-        </span>
-        {isTooLong && (
-          <span className="input-panel__limit" role="alert">
-            입력 길이가 상한을 초과했습니다. {(text.length - MAX_TEXT_LENGTH).toLocaleString()}자를 줄여주세요.
+      {!hasResult && (
+        <div className="input-panel__meta" id="input-meta">
+          <span className={isTooLong ? "input-panel__count input-panel__count--over" : "input-panel__count"}>
+            {text.length.toLocaleString()} / {MAX_TEXT_LENGTH.toLocaleString()}자
           </span>
-        )}
-      </div>
+          {isTooLong && (
+            <span className="input-panel__limit" role="alert">
+              입력 길이가 상한을 초과했습니다. {(text.length - MAX_TEXT_LENGTH).toLocaleString()}자를 줄여주세요.
+            </span>
+          )}
+        </div>
+      )}
 
       <div className="input-panel__actions">
         <button
