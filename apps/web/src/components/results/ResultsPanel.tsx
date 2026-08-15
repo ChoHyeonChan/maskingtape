@@ -10,20 +10,26 @@ interface Props {
   onFilterSelect: (kind: string | null) => void;
 }
 
-const CONFIDENCE_STEP = 5;
+const STRENGTH_STEP = 5;
+const MAX_STRENGTH = 100;
 
 export function ResultsPanel({ scanned, activeFilter, scanRun, onFilterSelect }: Props) {
-  // 새 탐지 결과가 나올 때마다 항상 안전한 기본값(0% = 전부 마스킹)으로 되돌아간다 —
-  // 이전 탐지에서 올려둔 임계값이 새 텍스트에도 그대로 적용되면 검토 없이 과소 마스킹될 수 있다(#237).
-  const [confidenceThreshold, setConfidenceThreshold] = useState(0);
+  // 슬라이더 오른쪽 끝(최댓값)이 "전부 마스킹"이 되도록 확신도가 아니라 마스킹 강도로 값을 다룬다 —
+  // "오른쪽=더 강하게 보호"라는 직관과 "덜 가리기=유출"이라는 보안 원칙이 둘 다 오른쪽=안전으로
+  // 일치해야 실수로 슬라이더를 조작해도 위험한 방향(노출)이 아니라 안전한 방향으로 치우친다(#264).
+  // 새 탐지 결과가 나올 때마다 항상 최댓값(전부 마스킹)으로 되돌아간다(#237 회귀 없음).
+  const [maskingStrength, setMaskingStrength] = useState(MAX_STRENGTH);
 
   useEffect(() => {
-    setConfidenceThreshold(0);
+    setMaskingStrength(MAX_STRENGTH);
   }, [scanRun]);
 
   function handleFilterSelect(kind: string | null) {
     onFilterSelect(kind);
   }
+
+  // 강도가 낮아질수록(왼쪽으로 갈수록) 더 높은 확신도인 항목만 마스킹 대상으로 남는다.
+  const confidenceThreshold = MAX_STRENGTH - maskingStrength;
 
   const allDetections = scanned?.detections ?? [];
   const visibleDetections = allDetections.filter(
@@ -62,16 +68,19 @@ export function ResultsPanel({ scanned, activeFilter, scanRun, onFilterSelect }:
           {allDetections.length > 0 && (
             <div className="confidence-filter">
               <label htmlFor="confidence-threshold">
-                확신도 <strong>{confidenceThreshold}%</strong> 이상만 마스킹
+                마스킹 강도 <strong>{maskingStrength}%</strong>
+                <span className="confidence-filter__sublabel">
+                  (확신도 {confidenceThreshold}% 이상만 가립니다)
+                </span>
               </label>
               <input
                 id="confidence-threshold"
                 type="range"
                 min={0}
-                max={100}
-                step={CONFIDENCE_STEP}
-                value={confidenceThreshold}
-                onChange={(event) => setConfidenceThreshold(Number(event.target.value))}
+                max={MAX_STRENGTH}
+                step={STRENGTH_STEP}
+                value={maskingStrength}
+                onChange={(event) => setMaskingStrength(Number(event.target.value))}
               />
               {hiddenCount > 0 && (
                 <p className="confidence-filter__warning" role="status">
