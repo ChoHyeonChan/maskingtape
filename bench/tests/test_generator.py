@@ -19,6 +19,7 @@ from maskingtape.detectors import NameDetector
 from maskingtape.detectors import PassportDetector
 from maskingtape.detectors import PhoneDetector
 from maskingtape.detectors import RRNDetector
+from maskingtape.detectors import default_detectors
 from bench.generator.distractors import (
     gen_account_number_like,
     gen_business_reg_number,
@@ -47,6 +48,17 @@ def test_labels_match_text_spans_exactly():
         for label in doc.labels:
             assert doc.text[label.start : label.end] != ""
             assert label.kind in ALL_KINDS
+
+
+def test_core_kinds_are_all_covered_by_bench():
+    """#276: core `default_detectors()`가 내보내는 kind가 bench `ALL_KINDS`에 전부 있는지
+    강제한다 — 반대 방향(`label.kind in ALL_KINDS`)은 이미 위에서 검사하지만, "core에 새
+    kind가 생겼는데 bench가 못 따라가는" 사각지대는 이 방향의 테스트가 없어서 6번이나
+    반복됐다(#187). core가 kind를 하나 추가할 때마다 이 테스트가 실패해 CI에서 바로
+    드러나야 한다 — 사람이 알아채길 기다리지 않는다."""
+    core_kinds = {d.kind for d in default_detectors()}
+    missing = core_kinds - set(ALL_KINDS)
+    assert not missing, f"core가 지원하는데 bench가 못 따라간 kind: {missing}"
 
 
 def test_every_template_is_reachable():
