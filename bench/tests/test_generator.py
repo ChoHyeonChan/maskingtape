@@ -7,9 +7,11 @@
 from __future__ import annotations
 
 import random
+import re
 
 from maskingtape.detectors import AccountDetector
 from maskingtape.detectors import AddressDetector
+from maskingtape.detectors import BirthDateDetector
 from maskingtape.detectors import BusinessRegistrationDetector
 from maskingtape.detectors import CreditCardDetector
 from maskingtape.detectors import EmailDetector
@@ -20,6 +22,7 @@ from maskingtape.detectors import RRNDetector
 from bench.generator.distractors import (
     gen_account_number_like,
     gen_business_reg_number,
+    gen_date,
     gen_invalid_phone_like,
     gen_invalid_rrn_like,
     gen_passport_like_code,
@@ -534,6 +537,56 @@ def test_distractors_are_never_detected_as_account():
     for _ in range(300):
         text = generate_distractor(rng)
         assert detector.detect(text) == [], f"distractor가 account로 오탐됨: {text!r}"
+
+
+def test_generated_birth_date_passes_core_detector_with_anchor():
+    """#266/#271: 생년월일은 "생년월일/생일/출생일" 앵커가 바로 앞에 있어야만 탐지되는
+    문맥 앵커 방식이다 — 앵커를 붙인 문장에서는 날짜 부분만 정확히 한 건으로 잡혀야 한다
+    (앵커 라벨 자체는 스팬에 포함되지 않는다)."""
+    rng = random.Random(42)
+    detector = BirthDateDetector()
+    for _ in range(100):
+        entity = generate_entity("birth_date", rng)
+        text = f"생년월일은 {entity.text}입니다."
+        found = detector.detect(text)
+        assert len(found) == 1, f"탐지 실패: {entity.text!r}"
+        assert found[0].text == entity.text
+        assert found[0].kind == "birth_date"
+        assert found[0].confidence == 0.9
+
+
+def test_generated_birth_date_without_anchor_is_not_detected():
+    """#266/#271: 같은 날짜라도 생년월일 앵커가 없으면(일반 날짜) core가 탐지하면 안 된다
+    — 문맥 앵커 게이트 검증."""
+    rng = random.Random(43)
+    detector = BirthDateDetector()
+    for _ in range(100):
+        entity = generate_entity("birth_date", rng)
+        text = f"등록일은 {entity.text}입니다."
+        assert detector.detect(text) == [], f"앵커 없이도 탐지됨: {text!r}"
+
+
+def test_birth_date_generator_covers_korean_and_numeric_styles():
+    """생년월일 표기 다양성("1999년 7월 21일" 류와 "1999-07-21" 류)이 실제로 섞여
+    나오는지 확인한다."""
+    rng = random.Random(44)
+    samples = [generate_entity("birth_date", rng).text for _ in range(200)]
+    has_korean = any("년" in s and "월" in s and "일" in s for s in samples)
+    has_numeric = any(re.fullmatch(r"\d{4}[-./]\d{1,2}[-./]\d{1,2}", s) for s in samples)
+    assert has_korean
+    assert has_numeric
+
+
+def test_plain_date_distractor_is_never_detected_as_birth_date():
+    """#266/#271: gen_date(주문일·결제일 등 negative 템플릿에 쓰이는 일반 날짜 distractor)가
+    만드는 형식(YYYY.MM.DD)은 core BirthDateDetector의 날짜 정규식과 정확히 겹친다 — 앵커
+    없이 등장하면(실제 negative 템플릿이 그렇게 쓴다) 절대 생년월일로 오탐되면 안 된다."""
+    rng = random.Random(45)
+    detector = BirthDateDetector()
+    for _ in range(300):
+        text = gen_date(rng)
+        wrapped = f"결제일은 {text}입니다."
+        assert detector.detect(wrapped) == [], f"앵커 없는 일반 날짜가 오탐됨: {wrapped!r}"
 
 
 def test_account_number_like_distractor_is_never_detected_as_card():
