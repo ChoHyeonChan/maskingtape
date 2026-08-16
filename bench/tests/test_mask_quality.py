@@ -11,6 +11,7 @@ from maskingtape.anonymizers.base import Anonymizer
 from maskingtape.anonymizers.label import DEFAULT_LABELS
 from maskingtape.detectors import (
     AccountDetector,
+    BirthDateDetector,
     BusinessRegistrationDetector,
     CreditCardDetector,
     NameDetector,
@@ -220,6 +221,25 @@ def test_pseudonym_falls_back_to_label_for_kinds_without_a_fake_value_generator(
         result = PseudonymAnonymizer(seed=1).apply(text, detections)
         assert entity.text not in result, f"{kind} 원본이 그대로 남음: {result!r}"
         assert f"[{DEFAULT_LABELS[kind]}]" in result, f"{kind} 라벨 폴백 형식이 아님: {result!r}"
+
+
+def test_birth_date_label_fallback_leaks_no_original_but_uses_raw_kind_string():
+    """#282 (신규 발견, core 미해결) — #230과 같은 라벨 폴백 경로인데, birth_date는
+    `DEFAULT_LABELS`에 아예 등록이 안 돼 있어(#266/#271에서 누락) `[생년월일]`이 아니라
+    `[birth_date]`(kind 원문 그대로)로 노출된다. 원본 유출은 아니라서(안전) 심각도는
+    낮지만, 다른 kind와의 일관성이 깨진다 — bench 소관이 아니라 core에 남겼다(코드는
+    안 고침). core가 DEFAULT_LABELS를 채우면 이 테스트가 깨져서 알 수 있다."""
+    entity = generate_entity("birth_date", random.Random(51), difficulty="easy")
+    text = f"생년월일은 {entity.text}입니다."
+    detections = BirthDateDetector().detect(text)
+    assert len(detections) == 1
+
+    label_result = LabelAnonymizer().apply(text, detections)
+    pseudonym_result = PseudonymAnonymizer(seed=1).apply(text, detections)
+    for name, result in (("label", label_result), ("pseudonym", pseudonym_result)):
+        assert entity.text not in result, f"{name} 전략에서 원본이 그대로 남음: {result!r}"
+        assert "[birth_date]" in result, f"{name} 전략이 raw kind로 폴백하지 않음(core가 고쳤을 수 있음): {result!r}"
+        assert "[생년월일]" not in result, f"{name}: 이미 한글 라벨로 고쳐진 것 같다 — core#282 대응 확인: {result!r}"
 
 
 def test_pseudonym_splits_identical_real_value_with_different_formatting():

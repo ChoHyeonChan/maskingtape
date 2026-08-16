@@ -38,7 +38,7 @@ python -m bench.generate_dataset --count 500 --seed 42 --out bench/datasets/synt
 python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl --report bench/reports/report_v1.md
 ```
 
-500건 기준 최신 실측(#255 재측정, seed=42):
+500건 기준 최신 실측(#275 재측정, seed=42):
 
 | kind | precision | recall | f1 | 비고 |
 |---|---|---|---|---|
@@ -48,7 +48,8 @@ python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl --report bench
 | account | 1.000 | 1.000 | 1.000 | 문맥어 하드 게이트라 confidence가 항상 정확히 0.6으로 고정 — 아래 confidence 절 참고 |
 | passport | 1.000 | 1.000 | 1.000 | 변동 없음 |
 | address | 1.000 | 1.000 | 1.000 | core [#252](https://github.com/ChoHyeonChan/maskingtape/pull/252)가 [#248](https://github.com/ChoHyeonChan/maskingtape/issues/248)(계사 어미 미탐)을 고쳐 recall 1.000 완전 복구 — 재현 코드로 직접 재확인. 아래 참고 |
-| name | 0.832 | 0.679 | 0.748 | core #252가 [#247](https://github.com/ChoHyeonChan/maskingtape/issues/247)(조사 삼킴으로 3글자 가드 우회)을 **부분적으로만** 고쳤다 — 하드코딩 5개 부서어만 막고 그 밖은 여전히 뚫림. 잔여 위험을 negative 데이터로 처음 실측했더니 precision이 오히려 더 떨어짐(0.937→0.832, FP 16건→47건, 이 중 33건이 negative-difficulty 문서). [#255](https://github.com/ChoHyeonChan/maskingtape/issues/255)로 남김, 아래 참고 |
+| **birth_date** | **1.000** | **1.000** | **1.000** | [#266](https://github.com/ChoHyeonChan/maskingtape/issues/266)/[#271](https://github.com/ChoHyeonChan/maskingtape/pull/271)에서 core가 새로 추가한 10번째 kind — 처음으로 bench 데이터를 붙였다. confidence가 항상 정확히 0.9로 고정 — 아래 confidence 절 참고 |
+| name | 0.857 | 0.662 | 0.747 | #255 대비 대체로 유지(재현 시드 재배치로 소폭 변동) — 상세는 아래 참고 |
 
 card는 `gen_account_number_like`가 구분자 없이 13자리 이상을 만들 때 core `CreditCardDetector`의
 "구분자 없는 13~19자리" 분기와 우연히 겹칠 수 있다는 걸 이번 재측정 중 실제로 재현했다
@@ -100,6 +101,27 @@ card는 `gen_card`(Visa/Mastercard/Amex 계열 IIN + Luhn 체크섬)로 데이�
 통과하면 card로도 잡혀 겹침 병합이 얽힘 — `gen_business_reg_number`가 겪은 것과 같은 종류의
 우연) `gen_account`가 생성 시점에 직접 Luhn을 확인해 우연히 통과하면 마지막 자리를 일부러
 바꿔 항상 무효로 만든다.
+
+`birth_date`(생년월일)는 core `BirthDateDetector`가 새로 추가되면서([#266](https://github.com/ChoHyeonChan/maskingtape/issues/266)/[#271](https://github.com/ChoHyeonChan/maskingtape/pull/271))
+생긴 10번째 kind다(#275). `account`(#180)와 같은 **문맥 앵커 하드 게이트** 설계다 —
+"생년월일"/"생일"/"출생일" 같은 앵커가 날짜 바로 앞에 있어야만 잡히고, 앵커 없는 일반
+날짜(계약일·근무 개시일 등)는 애초에 candidate조차 아니다. `gen_birth_date`로 "1999년
+7월 21일" 류(한국어)와 "1999-07-21" 류(구분자 -/./ 세 종류) 표기 다양성을 만들고, 모든
+positive 템플릿에 앵커를 반드시 포함시켰다. distractor 쪽은 기존 `gen_date`(주문일·결제일
+등에 쓰이던 일반 날짜 생성기)가 마침 core의 날짜 정규식과 정확히 같은 형식을 만들고
+있어서 — 즉 core 입장에선 "생년월일이든 결제일이든 형식만 보면 똑같다" — 새 코드 없이
+그대로 앵커-없음 negative 세트로 재활용했다(#180의 "체크섬 있고 없고" 패턴과 유사하게,
+여기선 "앵커 있고 없고"가 유일한 차이).
+
+**직접 잡아낸 자기 회귀**: positive 템플릿 하나("신청자 {name}의 서류가...")가 이름과
+조사 "의"를 공백 없이 바로 붙이는 바람에, 2음절 이름 뒤에 조사가 통째로 이름 스팬에
+삼켜지는 걸 재측정 중 직접 재현으로 발견했다(`정수의`처럼 잡혀 정답 `정수`와 어긋남) —
+[#247](https://github.com/ChoHyeonChan/maskingtape/issues/247)/[#255](https://github.com/ChoHyeonChan/maskingtape/issues/255)에서
+이미 문서화된 "조사가 이름 글자와 겹치면 span이 밀린다"는 한계의 또 다른 사례다. 존칭
+"님"을 사이에 끼워("신청자 {name}님의") 조사가 이름에 안 붙게 고쳤다 — #180 세션의 "정산
+담당자" 사고와 같은 종류로, **AI가 새로 짠 템플릿도 예외 없이 재측정으로 검증해야 한다**는
+원칙이 이번에도 실전에서 값어치를 증명했다(수정 후 오히려 confidence 0.5→0.75로 더 좋아짐
+— "님"이 suffix 단서까지 추가로 제공했기 때문).
 
 `address`(주소)는 지금까지 지번·도로명·시/도 없는 시/군 표기까지 늘 동/번지(또는 도로명)를
 포함한 "완전한" 주소만 만들었다(#195). `gen_address`에 12% 확률로 시/도만(confidence 0.5)
@@ -329,16 +351,16 @@ python -m bench.evaluators.evaluate_masking bench/datasets/synth_v1.jsonl --stra
 분리했다. 마스킹 후 텍스트 길이가 원본과 같은지(구조 보존)도 확인하는데, 이건 `mask`에서만
 불일치가 core 회귀 버그 신호이고 `label`/`pseudonym`은 길이가 달라지는 게 정상이라 참고용이다.
 
-500건 기준 실측 결과(#255 재측정) — mask 기준 유출률 10.9%(886건 중 97건, 전부 완전유출,
-전부 `name`). **`address` 유출은 0건이다** — #248이 core #252로 고쳐지면서 마스킹 결과에서도
-누락이 사라진 걸 재확인했다. `name`의 97건 유출은 전부 규칙판이 아예 못 잡은 진짜 미탐(문맥
-단서 없는 이름 등)이다 — #255에서 정량화한 "차량이"류 오탐(negative 문서 33건)은 애초에
-가릴 개인정보가 없는 문서라 여기 leak 집계에는 안 잡힌다(위 참고: 유출이 아니라 과다 마스킹
-문제). `phone`/`email`/`rrn`/`card`/`biz_reg`/`passport`/`account`는 유출 0건, 부분 유출도
-0건 — core 탐지기들이 새로 지원하게 된 표기에서도 경계까지 정확히 맞춘다는 뜻이다(체크섬 없는
-RRN도 confidence 0.85로, 문맥어 있는 계좌번호도 confidence 0.6으로 여전히 탐지되므로 여기엔
-안 걸린다 — 아래 confidence 절 참고). label/pseudonym도 같은 패턴(유출은 전부 `name`,
-길이 보존율만 전략별로 다르게 정상 표시)을 유지한다 — 자세한 비교 방법론은 위 참고.
+500건 기준 실측 결과(#275 재측정) — mask 기준 유출률 11.2%(1004건 중 112건, 전부 완전유출,
+전부 `name`). `name`의 112건 유출은 전부 규칙판이 아예 못 잡은 진짜 미탐(문맥 단서 없는
+이름 등)이다 — #255에서 정량화한 "차량이"류 오탐은 애초에 가릴 개인정보가 없는 negative
+문서라 여기 leak 집계에는 안 잡힌다(위 참고: 유출이 아니라 과다 마스킹 문제).
+`phone`/`email`/`rrn`/`address`/`card`/`biz_reg`/`passport`/`account`/`birth_date`는
+유출 0건, 부분 유출도 0건 — core 탐지기들이 새로 지원하게 된 표기에서도 경계까지 정확히
+맞춘다는 뜻이다(체크섬 없는 RRN도 confidence 0.85로, 문맥어 있는 계좌번호도 confidence
+0.6으로, 앵커 있는 생년월일도 confidence 0.9로 여전히 탐지되므로 여기엔 안 걸린다 — 아래
+confidence 절 참고). label/pseudonym도 같은 패턴(유출은 전부 `name`, 길이 보존율만
+전략별로 다르게 정상 표시)을 유지한다 — 자세한 비교 방법론은 위 참고.
 
 **pseudonym 보안 속성 검증**: `PseudonymAnonymizer`는 "가짜 주민번호/카드번호가 진짜 체크섬을
 통과하면 안 된다"는 설계를 코드에 명시하고 있다 — bench 테스트가 core의 실제 검증 함수
@@ -395,17 +417,17 @@ python -m bench.evaluators.confidence_analysis bench/datasets/synth_v1.jsonl
 후보 임계값마다 그보다 confidence가 낮은 예측을 버린 뒤 다시 채점해서, 임계값을 올릴수록
 precision이 오르고 recall이 내려가는 트레이드오프를 표로 보여준다.
 
-500건 기준 실측 결과(#255 재측정): 임계값 0.5 이하에서는 precision이 0.943(오탐 47건)이다 —
-전부 `name` kind, confidence 정확히 0.5. **33건**(70%)이 [#255](https://github.com/ChoHyeonChan/maskingtape/issues/255)에서
-새로 정량화한 잔여 위험이다 — core #252가 #247을 하드코딩 5개 부서어만 막게 고쳐서, 그 밖의
+500건 기준 실측 결과(#275 재측정): 임계값 0.5 이하에서는 precision이 0.953(오탐 43건)이다 —
+전부 `name` kind, confidence 정확히 0.5. 대다수가 [#255](https://github.com/ChoHyeonChan/maskingtape/issues/255)에서
+정량화한 잔여 위험이다 — core #252가 #247을 하드코딩 5개 부서어만 막게 고쳐서, 그 밖의
 흔한 업무어("차량"/"허가"/"성과"/"안내")는 negative 문서(개인정보 없음)에서도 여전히
-오탐된다. 나머지 14건은 기존에 이미 알려진 한계들이다 — 실명이 조사를 머금어 span이 한 글자
+오탐된다. 나머지는 기존에 이미 알려진 한계들이다 — 실명이 조사를 머금어 span이 한 글자
 늘어나는 안전한 방향의 경계 오차(#247 수정 이후에도 남는 정상 동작, 위 참고)와 #158 잔여
 패턴("민원인"/"지원자"류). 임계값 0.7부터 이 FP가 전부 걸러져 precision이 1.000이 되지만,
-**recall은 0.876(임계값 0.5 이하) → 0.586(0.7) → 0.554(0.8) → 0.540(0.85) → 0.532(0.9) →
-0.344(1.0)로 계속 떨어진다** — name의 규칙판 confidence 구간이 잘려나가는 게 대부분이다.
+**recall은 0.869(임계값 0.5 이하) → 0.585(0.7) → 0.551(0.8) → 0.539(0.85) → 0.529(0.9) →
+0.330(1.0)로 계속 떨어진다** — name의 규칙판 confidence 구간이 잘려나가는 게 대부분이다.
 
-**🚨 임계값을 0.6 초과로 올리면 안 되는 진짜 이유**: 0.5→0.7 구간에서 recall이 0.876→0.586로
+**🚨 임계값을 0.6 초과로 올리면 안 되는 진짜 이유**: 0.5→0.7 구간에서 recall이 0.869→0.585로
 유독 크게 떨어지는데, name 하나만으로는 이 폭을 설명 못 한다. `account`(계좌번호)는 core가
 체크섬이 없어 문맥어가 있어도 **confidence를 항상 정확히 0.6으로 고정**한다(직접 확인: 정답
 account 전건 confidence 0.6). 즉 **임계값을 0.7 이상으로만 올려도 계좌번호가 100% 통째로
@@ -415,11 +437,18 @@ name의 오탐 몇 건을 줄이려다 가장 민감한 금융정보가 전량 �
 그것도 100% 확정적으로) 훨씬 크므로**, 지금 core 기준으로는 기본값(필터 없음)을 유지하는 게
 낫다는 근거가 된다.
 
+**`birth_date`도 계좌번호와 같은 종류(확정적) 위험이다.** core `BirthDateDetector`는
+confidence를 **항상 정확히 0.9**로만 매긴다(직접 확인: 정답 42건 전부 confidence 0.9) —
+즉 **임계값을 0.91 이상으로만 올려도 생년월일이 100% 통째로 사라진다.** account(0.7
+초과)보다 문턱이 높아 "0.9 정도면 안전하지 않을까" 하는 직관을 정확히 배신한다 — 오히려
+"확신도가 꽤 높으니 0.9는 넘겨도 되겠지"라는 판단이 가장 위험한 지점이다.
+
 **address(주소)도 confidence 임계값에 취약하다**: #196·#248이 모두 머지돼 recall 자체는
 1.000으로 완전히 복구됐지만, 부분 주소(#195)가 만든 confidence 0.5(5건)/0.65(1건) 구간은
-여전히 남아있다 — 정답 address 72건 기준, 임계값 0.7에서 recall이 0.917로, 0.95 이상에서는
-0.792까지 떨어진다.
-RRN(확률적 15.6%)·계좌번호(확정적 100%)에 이어 confidence 필터를 쓰면 안 되는 세 번째 근거다.
+여전히 남아있다 — 정답 address 70건 기준, 임계값 0.7에서 recall이 0.900으로, 0.95 이상에서는
+0.814까지 떨어진다.
+RRN(확률적 15.6%)·계좌번호·생년월일(둘 다 확정적 100%)에 이어 confidence 필터를 쓰면 안
+되는 근거가 하나 더 늘었다.
 
 ## 이름 탐지 방식 비교 — 규칙판 vs 하이브리드(LLM)
 
@@ -434,12 +463,12 @@ python -m bench.evaluators.compare_name_detectors bench/datasets/synth_v1.jsonl
 로컬 Ollama가 안 떠 있으면 하이브리드 쪽은 "LLM 사용 불가"로 표시되고 규칙판 결과만 나온다 —
 CI 등 Ollama 없는 환경에서도 도구 자체는 안 죽는다.
 
-500건 기준 실측 결과(#255 재측정, 로컬 Ollama `qwen2.5:7b`):
+500건 기준 실측 결과(#275 재측정, 로컬 Ollama `qwen2.5:7b`):
 
 | 방식 | precision | recall | F1 |
 |---|---|---|---|
-| 규칙판 | 0.832 | 0.679 | 0.748 |
-| 하이브리드(LLM) | 0.915 | 0.907 | **0.911** |
+| 규칙판 | 0.857 | 0.662 | 0.747 |
+| 하이브리드(LLM) | 0.917 | 0.908 | **0.912** |
 
 **측정 환경 메모**: 로컬 Ollama 호출이 "localhost"를 IPv6(`::1`)로 먼저 시도하는데 Ollama는
 IPv4(`127.0.0.1`)에만 리스닝하고 있어 연결이 `SYN_SENT`에서 멈추는 환경 문제를 겪었다 —
@@ -448,14 +477,14 @@ IPv4(`127.0.0.1`)에만 리스닝하고 있어 연결이 `SYN_SENT`에서 멈추
 
 규칙판은 앞뒤에 역할어·존칭 같은 문맥 단서가 없으면 아예 탐지하지 않도록 설계돼 오탐은
 적지만(precision 高), 그만큼 단서 없는 이름은 다 놓친다(recall 低). 하이브리드는 LLM이 문맥을
-직접 판단해 단서 없는 이름까지 잡아내면서(recall 0.679→0.907) recall이 크게 오르고,
-precision도 규칙판보다 훨씬 높다(0.832→0.915, 오탐 47건→29건) — #255에서 정량화한 부서어
-오탐(negative 문서 33건) 중 상당수를 LLM은 애초에 정규식 가드에 의존하지 않아 다르게
-판단하기 때문으로 보인다(다만 LLM도 그 나름의 오탐이 있다 — 아래 참고).
+직접 판단해 단서 없는 이름까지 잡아내면서(recall 0.662→0.908) recall이 크게 오르고,
+precision도 규칙판보다 훨씬 높다(0.857→0.917, 오탐 43건→32건) — #255에서 정량화한 부서어
+오탐 중 상당수를 LLM은 애초에 정규식 가드에 의존하지 않아 다르게 판단하기 때문으로 보인다
+(다만 LLM도 그 나름의 오탐이 있다 — 아래 참고).
 
 **#150·#160 반영 효과**: 규칙판 F1이 **0.676 → 0.827**까지 올랐다가(존칭 삼킴 수정 + 단어
 중간 성씨 오탐 수정), #213/#239(직함-only 이름, 앞뒤 둘 다)와 #255(부서어 오탐 잔여 위험)
-데이터가 섞이며 0.748로 다시 내려갔다. 하이브리드는 규칙판을 `min_confidence=0.75` 안전망으로만
+데이터가 섞이며 0.747로 다시 내려갔다. 하이브리드는 규칙판을 `min_confidence=0.75` 안전망으로만
 쓰는데, #150·#160이 고친 버그들과 #247/#255 관련 케이스도 confidence가 0.5로 낮게 나와
 애초에 하이브리드 결과에 거의 반영되지 않는다 — 즉 규칙판 관련 수정·버그는 **규칙 전용 모드
 사용자에게 특히 의미 있다**.
@@ -508,7 +537,7 @@ JSONL — 한 줄에 문서 하나:
 ```
 
 - `start`/`end`는 파이썬 슬라이스 규약 (`text[start:end]` == 개인정보 원문)
-- `kind`는 core의 `Detection.kind`와 동일한 문자열: `rrn`, `phone`, `email`, `name`, `address`, `card`, `biz_reg`, `passport`, `account`
+- `kind`는 core의 `Detection.kind`와 동일한 문자열: `rrn`, `phone`, `email`, `name`, `address`, `card`, `biz_reg`, `passport`, `account`, `birth_date`
 - `difficulty`는 `easy`/`hard`/`negative` 중 하나 (없으면 evaluate.py가 `unknown`으로 취급 — 하위 호환)
 - 평가 기준: span 완전 일치(exact match)로 precision / recall / F1 산출
 - 포맷 변경은 팀장 승인 후 이 문서부터 갱신한다
