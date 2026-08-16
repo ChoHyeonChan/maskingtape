@@ -25,9 +25,17 @@ describe("applyMasking (#277)", () => {
   });
 
   it("falls back to the raw kind string when there is no Korean label mapping", () => {
-    const d = detection({ kind: "account", start: 3, end: 16 });
-    const result = applyMasking("계좌 110-1234-5678 입니다", [d], "label");
-    expect(result).toBe("계좌 [account] 입니다");
+    const d = detection({ kind: "driver_license", start: 3, end: 16 });
+    const result = applyMasking("면허 110-1234-5678 입니다", [d], "label");
+    expect(result).toBe("면허 [driver_license] 입니다");
+  });
+
+  it("labels account and birth_date in Korean, not the raw kind string (#282 web-side counterpart)", () => {
+    const account = detection({ kind: "account", start: 3, end: 16 });
+    expect(applyMasking("계좌 110-1234-5678 입니다", [account], "label")).toBe("계좌 [계좌번호] 입니다");
+
+    const birthDate = detection({ kind: "birth_date", start: 6, end: 16 });
+    expect(applyMasking("생년월일은 1999-07-21입니다", [birthDate], "label")).toBe("생년월일은 [생년월일]입니다");
   });
 
   it("handles multiple detections and skips overlapping ones the same way regardless of mode", () => {

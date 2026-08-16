@@ -34,10 +34,10 @@ describe("DetectionSummary", () => {
   });
 
   it("falls back to the raw kind string for a kind with no Korean label mapping, without crashing (#216)", () => {
-    render(<DetectionSummary detections={[d("account")]} activeFilter={null} onFilterSelect={() => {}} />);
+    render(<DetectionSummary detections={[d("driver_license")]} activeFilter={null} onFilterSelect={() => {}} />);
     expect(screen.getByText(/개인정보 1건 발견/)).toBeInTheDocument();
-    expect(screen.getByText(/account 1/)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "account 보기" })).toHaveClass("summary__filter--account");
+    expect(screen.getByText(/driver_license 1/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "driver_license 보기" })).toHaveClass("summary__filter--driver_license");
   });
 
   it("renders a confidence bar sized to the lowest confidence within a kind, not the average (#237)", () => {
