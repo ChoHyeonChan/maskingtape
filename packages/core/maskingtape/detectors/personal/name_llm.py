@@ -121,6 +121,9 @@ class LLMNameDetector(Detector):
                 "stream": False,
                 "format": "json",  # 유효한 JSON 응답을 강제한다
                 "options": {"temperature": 0},  # 같은 입력에 같은 결과 (재현성)
+                # 모델을 메모리에 30분 상주시켜 다음 호출의 콜드스타트(재로딩) 지연을 없앤다.
+                # 정확도·출력에는 영향이 없고, 유휴 시 자동으로 내려간다.
+                "keep_alive": "30m",
             }
         ).encode("utf-8")
         request = urllib.request.Request(
