@@ -3,7 +3,7 @@
 from enum import Enum
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 MAX_TEXT_LENGTH = 100_000
@@ -69,11 +69,26 @@ class DetectionResponse(BaseModel):
         }
     )
 
-    kind: DetectionKind = Field(..., description="개인정보 종류.")
+    kind: DetectionKind | str = Field(
+        ...,
+        description="개인정보 종류. 계약에 등록되지 않은 core kind는 문자열 그대로 전달한다.",
+    )
     start: int = Field(..., ge=0, description="원문 기준 시작 위치. Python 슬라이스 규약.")
     end: int = Field(..., ge=0, description="원문 기준 끝 위치. Python 슬라이스 규약.")
     confidence: float = Field(..., ge=0.0, le=1.0, description="탐지 확신도.")
     detector: str = Field(..., description="탐지를 수행한 core detector 이름.")
+
+    @field_validator("kind", mode="before")
+    @classmethod
+    def normalize_known_kind(cls, value: Any) -> Any:
+        if isinstance(value, DetectionKind):
+            return value
+        if isinstance(value, str):
+            try:
+                return DetectionKind(value)
+            except ValueError:
+                return value
+        return value
 
 
 class ScanResponse(BaseModel):

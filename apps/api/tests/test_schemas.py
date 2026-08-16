@@ -74,6 +74,19 @@ def test_detection_response_accepts_passport_kind() -> None:
     assert detection.model_dump(mode="json")["kind"] == "passport"
 
 
+def test_detection_response_passes_unknown_kind_through_as_string() -> None:
+    detection = DetectionResponse(
+        kind="future_kind",
+        start=0,
+        end=6,
+        confidence=0.8,
+        detector="FutureDetector",
+    )
+
+    assert detection.kind == "future_kind"
+    assert detection.model_dump(mode="json")["kind"] == "future_kind"
+
+
 def test_detection_kind_matches_core_default_detector_kinds() -> None:
     core_kinds = {detector.kind for detector in default_detectors()}
     api_kinds = {kind.value for kind in DetectionKind}
