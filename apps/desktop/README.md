@@ -6,21 +6,64 @@
 
 ## 실행·테스트
 
+### 1. 선행조건 — 먼저 확인한다
+
+이 두 가지를 건너뛰면 **빌드가 실패하거나, 앱은 떠도 모든 파일이 실패로 표시된다.**
+
+**① Windows 개발자 모드 (켜야 빌드된다)**
+
+`flutter run`이 플러그인을 빌드하며 심볼릭 링크를 만드는데, 개발자 모드가 꺼져 있으면 권한이 없어 죽는다.
+
+> 설정 → 개인 정보 보호 및 보안 → 개발자용 → **개발자 모드 켬**
+
+**② 처리 백엔드 (있어야 파일이 처리된다)**
+
+앱 자체는 탐지를 하지 않는다 — core에 맡긴다. 아래 **둘 중 하나**가 준비돼 있어야 한다.
+(두 블록 모두 **저장소 루트**에서 실행한다.)
+
+```powershell
+# (권장) core CLI를 PATH에 — 전 기능 사용 가능
+pip install -e packages/core
+$env:PATH = "<저장소>\.venv\Scripts;$env:PATH"   # venv를 썼다면
+maskingtape --help                                # 이게 나오면 준비 완료
+```
+
+```powershell
+# 또는 REST API 서버 — mask·label만 (가명처리·이름 정밀 탐지는 CLI 전용)
+pip install -e packages/core
+pip install -e "apps/api[dev]"
+python -m uvicorn maskingtape_api.main:app --host 127.0.0.1 --port 8000
+```
+
+둘 다 없으면 앱은 정상적으로 뜨지만 처리 시 *"비식별화 백엔드에 연결하지 못했습니다"*가
+파일마다 표시된다. 자세한 동작은 아래 [백엔드 절](#비식별화-백엔드--로컬-cli-먼저-없으면-rest-api) 참고.
+
+### 2. 실행
+
 ```bash
 cd apps/desktop
 flutter run -d windows      # 실행
-flutter test                # 위젯 테스트
+flutter test                # 테스트
 flutter build windows       # 릴리스 빌드
 ```
 
 Flutter 3.44.6 stable / Windows 기준. 새 패키지 추가 전 라이선스 확인 후 [SBOM.md](../../SBOM.md)에 기록.
+
+### 3. 막히면
+
+| 증상 | 원인과 조치 |
+|---|---|
+| 빌드가 symlink·권한 오류로 죽는다 | 개발자 모드가 꺼져 있다 (선행조건 ①) |
+| `flutter test`가 출력 없이 멈춘다 | **Windows 사용자명에 한글 등 비ASCII 문자**가 있으면 재현된다(실측: 7분간 무응답). 임시 폴더를 ASCII 경로로 바꾸고 다시 실행한다 — `$env:TEMP='D:\dev\tmp'; $env:TMP='D:\dev\tmp'` |
+| 빌드가 `LNK1104 ... .exe 파일을 열 수 없습니다` | 앱이 이미 실행 중이라 exe가 잠겨 있다. 창을 닫거나 `Get-Process maskingtape_desktop \| Stop-Process -Force` |
+| 모든 파일이 "백엔드에 연결하지 못했습니다" | 선행조건 ②가 안 돼 있다 |
 
 ## 구조
 
 ```
 lib/
   main.dart                    # 앱 루트 — 테마·첫 화면 연결만
-  theme.dart                   # 페리윙클 브랜드 테마 (색·라운딩·컴포넌트 스타일)
+  theme.dart                   # 브랜드 테마 — "책상 위의 테이프" (색·타이포·모서리)
   models/
     detection.dart             # core Detection과 1:1 (API 계약 v1 스키마) + 한국어 요약
     file_task.dart             # 파일 1개의 처리 상태 (대기/처리 중/완료/실패)
@@ -119,8 +162,8 @@ API 경로에서 지원하지 않는 옵션을 고르면 네트워크를 타기 
 
 - 이름 정밀 탐지는 **CLI 경로에서만** 동작한다 — API 백엔드로 넘어간 상태에서 켜면 안내와 함께 거절된다.
 
-- Windows에서 플러그인 빌드에는 **개발자 모드**가 필요하다 (설정 → 개발자용 → 개발자 모드 켬).
-- CLI를 쓰려면 PATH에 `maskingtape`가 있어야 한다 (`pip install -e packages/core` 후 venv Scripts를 PATH에). 없으면 REST로 넘어가므로 앱은 그대로 동작하지만, 가명처리·이름 정밀 탐지는 쓸 수 없다.
+> 개발자 모드·백엔드 준비는 위 [선행조건](#1-선행조건--먼저-확인한다)으로 옮겼다 — 여기 묻혀 있으면
+> 위에서부터 따라 하는 사람이 못 보고 설치에 실패한다.
 
 ## 규칙
 
