@@ -109,7 +109,7 @@
 
 ## 현재 정확도
 
-합성 평가 데이터셋 500건 기준 (`python -m bench.evaluators.evaluate`, **규칙 전용 모드**, 측정 기준 `3f8ef20` — #275(생년월일 신규 kind) 전부 반영, 해시는 이 PR 머지 후 갱신):
+합성 평가 데이터셋 500건 기준 (`python -m bench.evaluators.evaluate`, **규칙 전용 모드**, 측정 기준 `be5b26c` — #275(생년월일 신규 kind) 전부 반영):
 
 | 종류 | precision | recall | F1 |
 |---|---|---|---|
