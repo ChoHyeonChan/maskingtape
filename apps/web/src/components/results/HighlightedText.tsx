@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { buildSegments } from "../../lib/segments";
+import { applyMasking, type MaskMode } from "../../lib/masking";
 import { KIND_LABELS } from "../../types/detection";
 import type { Detection } from "../../types/detection";
 
@@ -7,6 +8,7 @@ interface Props {
   text: string;
   detections: Detection[];
   activeFilter: string | null;
+  maskMode?: MaskMode;
 }
 
 function classNames(...names: Array<string | false>) {
@@ -21,13 +23,9 @@ function detectionKey(detection: Detection) {
   return `${detection.kind}:${detection.start}:${detection.end}`;
 }
 
-function maskText(text: string) {
-  return "*".repeat(text.length);
-}
-
 const FILTER_REVEAL_MS = 6500;
 
-export function HighlightedText({ text, detections, activeFilter }: Props) {
+export function HighlightedText({ text, detections, activeFilter, maskMode = "mask" }: Props) {
   const [coveredKeys, setCoveredKeys] = useState<Set<string>>(() => new Set());
   const [temporarilyRevealedKind, setTemporarilyRevealedKind] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -51,7 +49,8 @@ export function HighlightedText({ text, detections, activeFilter }: Props) {
   const segments = buildSegments(text, detections);
   // 복사·다운로드는 항상 이 완전 마스킹본만 내보낸다 — 개별 "가리기" 토글은 화면 데모용일 뿐,
   // 아무것도 안 가린 기본 상태에서 내보내면 원문이 그대로 유출되므로 토글 상태를 절대 참조하지 않는다(#104).
-  const maskedText = segments.map((segment) => (segment.kind === "plain" ? segment.text : maskText(segment.text))).join("");
+  // 별표/라벨 중 어느 쪽으로 치환할지는 maskMode를 따른다(#277).
+  const maskedText = applyMasking(text, detections, maskMode);
 
   function toggleCovered(key: string) {
     setCoveredKeys((current) => {

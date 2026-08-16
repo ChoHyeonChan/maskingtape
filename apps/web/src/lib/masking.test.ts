@@ -1,0 +1,41 @@
+import { describe, expect, it } from "vitest";
+import { applyMasking } from "./masking";
+import type { Detection } from "../types/detection";
+
+function detection(overrides: Partial<Detection>): Detection {
+  return { kind: "phone", start: 0, end: 0, confidence: 1, detector: "T", ...overrides };
+}
+
+describe("applyMasking (#277)", () => {
+  it("returns the original text untouched when there are no detections", () => {
+    expect(applyMasking("안녕하세요", [], "mask")).toBe("안녕하세요");
+    expect(applyMasking("안녕하세요", [], "label")).toBe("안녕하세요");
+  });
+
+  it("replaces detected spans with asterisks in mask mode, preserving length", () => {
+    const d = detection({ kind: "phone", start: 4, end: 17 });
+    const result = applyMasking("연락처 010-1234-5678 입니다", [d], "mask");
+    expect(result).toBe("연락처 ************* 입니다");
+  });
+
+  it("replaces detected spans with a [종류] label in label mode", () => {
+    const d = detection({ kind: "phone", start: 4, end: 17 });
+    const result = applyMasking("연락처 010-1234-5678 입니다", [d], "label");
+    expect(result).toBe("연락처 [전화번호] 입니다");
+  });
+
+  it("falls back to the raw kind string when there is no Korean label mapping", () => {
+    const d = detection({ kind: "account", start: 3, end: 16 });
+    const result = applyMasking("계좌 110-1234-5678 입니다", [d], "label");
+    expect(result).toBe("계좌 [account] 입니다");
+  });
+
+  it("handles multiple detections and skips overlapping ones the same way regardless of mode", () => {
+    const phone = detection({ kind: "phone", start: 3, end: 16 });
+    const email = detection({ kind: "email", start: 19, end: 35 });
+    const text = "문의 010-1234-5678 / hong@example.com";
+
+    expect(applyMasking(text, [phone, email], "mask")).toBe("문의 ************* / ****************");
+    expect(applyMasking(text, [phone, email], "label")).toBe("문의 [전화번호] / [이메일]");
+  });
+});

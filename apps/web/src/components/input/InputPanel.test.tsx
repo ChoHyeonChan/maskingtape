@@ -35,6 +35,35 @@ describe("InputPanel input length safety (#154)", () => {
   });
 });
 
+describe("InputPanel mask mode toggle (#277)", () => {
+  it("does not show the toggle before there is a result", () => {
+    renderPanel("아직 스캔 전");
+    expect(screen.queryByRole("group", { name: "마스킹 방식 선택" })).not.toBeInTheDocument();
+  });
+
+  it("shows the toggle once a result exists and reports the chosen mode", () => {
+    const onMaskModeChange = vi.fn();
+    render(
+      <InputPanel
+        text="김철수 ***"
+        hasResult
+        resultVersion={1}
+        maskMode="mask"
+        onMaskModeChange={onMaskModeChange}
+        onTextChange={vi.fn()}
+        onClear={vi.fn()}
+        onResult={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "별표" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "라벨" })).toHaveAttribute("aria-pressed", "false");
+
+    fireEvent.click(screen.getByRole("button", { name: "라벨" }));
+    expect(onMaskModeChange).toHaveBeenCalledWith("label");
+  });
+});
+
 describe("InputPanel contract demo preset (#215)", () => {
   it("loads the contract example text in one click, without opening the presets dropdown", () => {
     const onTextChange = vi.fn();

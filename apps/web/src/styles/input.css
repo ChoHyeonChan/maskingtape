@@ -44,6 +44,36 @@
   display: inline-flex;
   align-items: center;
   justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.input-panel__mask-mode {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(24, 58, 139, 0.18);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.input-panel__mask-mode-btn {
+  min-height: 2.35rem;
+  padding: 0 0.7rem;
+  border: 0;
+  border-left: 1px solid rgba(24, 58, 139, 0.18);
+  background: #ffffff;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.input-panel__mask-mode-btn:first-child {
+  border-left: 0;
+}
+
+.input-panel__mask-mode-btn.is-active {
+  background: var(--brand-blue);
+  color: #ffffff;
 }
 
 .input-panel__copy-header {

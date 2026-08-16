@@ -1,18 +1,20 @@
 import { useEffect, useState } from "react";
 import { DetectionSummary } from "./DetectionSummary";
 import { HighlightedText } from "./HighlightedText";
+import type { MaskMode } from "../../lib/masking";
 import type { Detection } from "../../types/detection";
 
 interface Props {
   scanned: { text: string; detections: Detection[] } | null;
   activeFilter: string | null;
   scanRun: number;
+  maskMode?: MaskMode;
   onFilterSelect: (kind: string | null) => void;
 }
 
 const CONFIDENCE_STEP = 5;
 
-export function ResultsPanel({ scanned, activeFilter, scanRun, onFilterSelect }: Props) {
+export function ResultsPanel({ scanned, activeFilter, scanRun, maskMode = "mask", onFilterSelect }: Props) {
   // 새 탐지 결과가 나올 때마다 항상 안전한 기본값(0% = 전부 마스킹)으로 되돌아간다 —
   // 이전 탐지에서 올려둔 임계값이 새 텍스트에도 그대로 적용되면 검토 없이 과소 마스킹될 수 있다(#237).
   const [confidenceThreshold, setConfidenceThreshold] = useState(0);
@@ -91,6 +93,7 @@ export function ResultsPanel({ scanned, activeFilter, scanRun, onFilterSelect }:
             text={scanned.text}
             detections={visibleDetections}
             activeFilter={activeFilter}
+            maskMode={maskMode}
           />
         </>
       ) : (
