@@ -21,6 +21,8 @@ void main() {
       expect(_d('passport').kindLabel, '여권번호');
       // 코어에 추가된 계좌번호 탐지기 (#180) 대응
       expect(_d('account').kindLabel, '계좌번호');
+      // 코어에 추가된 생년월일 탐지기 (#266/#271) 대응
+      expect(_d('birth_date').kindLabel, '생년월일');
     });
 
     test('라벨 맵에 없는 kind는 기타(kind)로 표시한다', () {
