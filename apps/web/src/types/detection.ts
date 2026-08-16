@@ -11,7 +11,18 @@ export interface ScanResponse {
   detections: Detection[];
 }
 
-export const KIND_ORDER = ["rrn", "passport", "phone", "email", "card", "address", "name", "biz_reg"] as const;
+export const KIND_ORDER = [
+  "rrn",
+  "passport",
+  "phone",
+  "email",
+  "card",
+  "account",
+  "address",
+  "name",
+  "birth_date",
+  "biz_reg",
+] as const;
 
 export const KIND_LABELS: Record<string, string> = {
   rrn: "주민등록번호",
@@ -19,8 +30,10 @@ export const KIND_LABELS: Record<string, string> = {
   phone: "전화번호",
   email: "이메일",
   card: "카드번호",
+  account: "계좌번호",
   name: "이름",
   address: "주소",
+  birth_date: "생년월일",
   biz_reg: "사업자등록번호",
   business_registration: "사업자등록번호",
 };

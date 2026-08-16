@@ -1,19 +1,21 @@
 import { useEffect, useState } from "react";
 import { DetectionSummary } from "./DetectionSummary";
 import { HighlightedText } from "./HighlightedText";
+import type { MaskMode } from "../../lib/masking";
 import type { Detection } from "../../types/detection";
 
 interface Props {
   scanned: { text: string; detections: Detection[] } | null;
   activeFilter: string | null;
   scanRun: number;
+  maskMode?: MaskMode;
   onFilterSelect: (kind: string | null) => void;
 }
 
 const STRENGTH_STEP = 5;
 const MAX_STRENGTH = 100;
 
-export function ResultsPanel({ scanned, activeFilter, scanRun, onFilterSelect }: Props) {
+export function ResultsPanel({ scanned, activeFilter, scanRun, maskMode = "mask", onFilterSelect }: Props) {
   // 슬라이더 오른쪽 끝(최댓값)이 "전부 마스킹"이 되도록 확신도가 아니라 마스킹 강도로 값을 다룬다 —
   // "오른쪽=더 강하게 보호"라는 직관과 "덜 가리기=유출"이라는 보안 원칙이 둘 다 오른쪽=안전으로
   // 일치해야 실수로 슬라이더를 조작해도 위험한 방향(노출)이 아니라 안전한 방향으로 치우친다(#264).
@@ -100,6 +102,7 @@ export function ResultsPanel({ scanned, activeFilter, scanRun, onFilterSelect }:
             text={scanned.text}
             detections={visibleDetections}
             activeFilter={activeFilter}
+            maskMode={maskMode}
           />
         </>
       ) : (

@@ -49,13 +49,13 @@ describe("HighlightedText", () => {
   });
 
   it("falls back to the raw kind string for a kind with no Korean label mapping, without crashing (#216)", () => {
-    const d = detection({ kind: "account", start: 3, end: 16, confidence: 1 });
-    render(<HighlightedText text="계좌 110-1234-5678 입니다" detections={[d]} activeFilter={null} />);
+    const d = detection({ kind: "driver_license", start: 3, end: 16, confidence: 1 });
+    render(<HighlightedText text="면허 110-1234-5678 입니다" detections={[d]} activeFilter={null} />);
 
     const mark = screen.getByText("110-1234-5678");
-    expect(mark).toHaveClass("highlight--account");
-    expect(screen.getByText("account", { selector: ".highlight__tag" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "account · 신뢰도 100% · 가리기" })).toBeInTheDocument();
+    expect(mark).toHaveClass("highlight--driver_license");
+    expect(screen.getByText("driver_license", { selector: ".highlight__tag" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "driver_license · 신뢰도 100% · 가리기" })).toBeInTheDocument();
   });
 
   it("renders core business registration detections with the business color class", () => {
@@ -155,6 +155,35 @@ describe("HighlightedText", () => {
     expect(screen.getByTestId("masked-result")).toHaveTextContent("문의 ************* / ****************");
     expect(screen.getByTestId("masked-result")).not.toHaveTextContent("010-1234-5678");
     expect(screen.getByTestId("masked-result")).not.toHaveTextContent("hong@example.com");
+  });
+
+  it("shows [라벨] instead of asterisks in the masked result when maskMode is 'label' (#277)", () => {
+    const phone = detection({ kind: "phone", start: 3, end: 16, confidence: 1 });
+    const email = detection({ kind: "email", start: 19, end: 35, confidence: 1 });
+
+    render(
+      <HighlightedText
+        text="문의 010-1234-5678 / hong@example.com"
+        detections={[phone, email]}
+        activeFilter={null}
+        maskMode="label"
+      />,
+    );
+
+    expect(screen.getByTestId("masked-result")).toHaveTextContent("문의 [전화번호] / [이메일]");
+    expect(screen.getByTestId("masked-result")).not.toHaveTextContent("010-1234-5678");
+  });
+
+  it("copies the [라벨] result when maskMode is 'label' (#277)", async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, { clipboard: { writeText } });
+
+    const rrn = detection({ kind: "rrn", start: 3, end: 17, confidence: 1 });
+    render(<HighlightedText text="번호 800101-1234560 입니다" detections={[rrn]} activeFilter={null} maskMode="label" />);
+
+    fireEvent.click(screen.getByRole("button", { name: "마스킹 결과 복사" }));
+
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith("번호 [주민등록번호] 입니다"));
   });
 
   it("copies the fully masked result even when nothing has been manually covered on screen (#104)", async () => {

@@ -3,6 +3,7 @@ import { CoachMark } from "./components/help/CoachMark";
 import { InputPanel } from "./components/input/InputPanel";
 import { AppHeader } from "./components/layout/AppHeader";
 import { ResultsPanel } from "./components/results/ResultsPanel";
+import { applyMasking, type MaskMode } from "./lib/masking";
 import type { Detection } from "./types/detection";
 
 export function App() {
@@ -11,9 +12,13 @@ export function App() {
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [scanRun, setScanRun] = useState(0);
   const [showCoachMark, setShowCoachMark] = useState(true);
+  const [maskMode, setMaskMode] = useState<MaskMode>("mask");
+
+  // 결과 텍스트는 스캔 시점에 한 번만 만들어 저장하지 않고, 원문+탐지결과에서 매번 다시
+  // 계산한다 — 그래야 마스킹 방식(별표/라벨) 토글을 바꿔도 별도 재스캔 없이 즉시 반영된다(#277).
+  const displayText = scanned ? applyMasking(scanned.text, scanned.detections, maskMode) : inputText;
 
   function handleResult(text: string, detections: Detection[]) {
-    setInputText(maskText(text, detections));
     setScanned({ text, detections });
     setActiveFilter(null);
     setScanRun((run) => run + 1);
@@ -52,9 +57,11 @@ export function App() {
       <main className="app-grid">
         <section className="panel panel--main">
           <InputPanel
-            text={inputText}
+            text={displayText}
             hasResult={Boolean(scanned)}
             resultVersion={scanRun}
+            maskMode={maskMode}
+            onMaskModeChange={setMaskMode}
             onTextChange={handleTextChange}
             onClear={handleClear}
             onResult={handleResult}
@@ -65,6 +72,7 @@ export function App() {
           scanned={scanned}
           activeFilter={activeFilter}
           scanRun={scanRun}
+          maskMode={maskMode}
           onFilterSelect={setActiveFilter}
         />
       </main>
@@ -72,20 +80,4 @@ export function App() {
       {showCoachMark && <CoachMark onDismiss={dismissCoachMark} />}
     </div>
   );
-}
-
-function maskText(text: string, detections: Detection[]) {
-  if (detections.length === 0) return text;
-
-  let cursor = 0;
-  let masked = "";
-
-  for (const detection of [...detections].sort((a, b) => a.start - b.start || b.end - a.end)) {
-    if (detection.start < cursor) continue;
-    masked += text.slice(cursor, detection.start);
-    masked += "*".repeat(detection.end - detection.start);
-    cursor = detection.end;
-  }
-
-  return masked + text.slice(cursor);
 }

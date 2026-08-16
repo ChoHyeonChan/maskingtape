@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { scanText } from "../../api/scanClient";
+import type { MaskMode } from "../../lib/masking";
 import type { Detection } from "../../types/detection";
 
 const PLACEHOLDER = "예: 고객 홍길동님은 010-1234-5678 또는 hong@example.com으로 연락 가능합니다.";
@@ -28,12 +29,23 @@ interface Props {
   text: string;
   hasResult: boolean;
   resultVersion: number;
+  maskMode?: MaskMode;
+  onMaskModeChange?: (mode: MaskMode) => void;
   onTextChange: (text: string) => void;
   onClear: () => void;
   onResult: (text: string, detections: Detection[]) => void;
 }
 
-export function InputPanel({ text, hasResult, resultVersion, onTextChange, onClear, onResult }: Props) {
+export function InputPanel({
+  text,
+  hasResult,
+  resultVersion,
+  maskMode = "mask",
+  onMaskModeChange = () => {},
+  onTextChange,
+  onClear,
+  onResult,
+}: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -95,6 +107,24 @@ export function InputPanel({ text, hasResult, resultVersion, onTextChange, onCle
         <h2><span aria-hidden="true">▤</span> {hasResult ? "마스킹 결과" : "문서 입력"}</h2>
         {hasResult && (
           <div className="input-panel__header-actions">
+            <div className="input-panel__mask-mode" role="group" aria-label="마스킹 방식 선택">
+              <button
+                type="button"
+                className={`input-panel__mask-mode-btn${maskMode === "mask" ? " is-active" : ""}`}
+                aria-pressed={maskMode === "mask"}
+                onClick={() => onMaskModeChange("mask")}
+              >
+                별표
+              </button>
+              <button
+                type="button"
+                className={`input-panel__mask-mode-btn${maskMode === "label" ? " is-active" : ""}`}
+                aria-pressed={maskMode === "label"}
+                onClick={() => onMaskModeChange("label")}
+              >
+                라벨
+              </button>
+            </div>
             <button
               type="button"
               className="input-panel__copy-header"
