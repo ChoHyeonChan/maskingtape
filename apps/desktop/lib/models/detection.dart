@@ -36,6 +36,7 @@ class Detection {
     'biz_reg': '사업자등록번호',
     'passport': '여권번호',
     'account': '계좌번호',
+    'birth_date': '생년월일',
   };
 
   /// 라벨 맵에 이 kind가 있는지 — 코어에 새 탐지기가 추가됐는데 라벨을 안 넣은
