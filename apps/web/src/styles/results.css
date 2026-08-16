@@ -19,6 +19,14 @@
   color: var(--brand-blue);
 }
 
+.confidence-filter__sublabel {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
 .confidence-filter input[type="range"] {
   width: 100%;
   accent-color: var(--brand-blue);
@@ -267,7 +275,7 @@
 }
 
 .analysis-result__cover-all {
-  display: none;
+  margin-left: auto;
   min-height: 2.15rem;
   padding: 0.35rem 0.68rem;
   border-radius: 8px;

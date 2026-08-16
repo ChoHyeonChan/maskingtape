@@ -58,3 +58,26 @@ jobs:
         run: npm test
       - name: Build (타입 체크 포함)
         run: npm run build
+
+  # Windows 전용 앱이지만 테스트는 flutter_tester(Dart VM)에서 돌아 OS를 타지 않는다.
+  # 릴리스 빌드(flutter build windows)는 windows 러너가 필요하고 과금이 2배라
+  # 매 PR에서는 돌리지 않는다 — 로컬에서 확인한다.
+  desktop:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/desktop
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          # 공모전 기간에는 최신 stable 추종보다 고정이 안전하다 (apps/desktop/README 기준).
+          flutter-version: "3.44.6"
+          channel: stable
+          cache: true
+      - name: Install packages
+        run: flutter pub get
+      - name: Analyze
+        run: flutter analyze
+      - name: Test
+        run: flutter test

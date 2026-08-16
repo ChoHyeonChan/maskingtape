@@ -17,7 +17,9 @@ from bench.generator.distractors import generate_distractor
 from bench.generator.entities import ALL_KINDS, generate_entity
 
 # distractor는 개인정보가 아니므로 라벨을 붙이지 않는다 — _NON_LABEL_KINDS에서 분기 처리.
-_PLACEHOLDER_RE = re.compile(r"\{(name|phone|email|rrn|address|card|biz_reg|passport|account|distractor)\}")
+_PLACEHOLDER_RE = re.compile(
+    r"\{(name|phone|email|rrn|address|card|biz_reg|passport|account|birth_date|distractor)\}"
+)
 _NON_LABEL_KINDS = frozenset({"distractor"})
 
 # 개인정보가 실제로 포함된 템플릿 — 다양한 업무 맥락(고객센터/병원/학교/관공서/인사/배송/금융)을 커버한다.
@@ -98,6 +100,14 @@ _TEMPLATES = [
     "대표 {name}이 계약서에 서명했습니다.",
     "부장 {name}이 결재했습니다.",
     "팀장 {name}이 프로젝트를 보고했습니다.",
+    # 생년월일(birth_date) — core는 "생년월일/생일/출생일" 앵커 뒤의 날짜만 잡는 문맥
+    # 앵커 방식이라(#266/#271), 모든 positive 템플릿에 앵커를 반드시 포함한다(account #180과
+    # 동일한 패턴).
+    "신청자 {name}, 생년월일은 {birth_date}입니다.",
+    "환자 {name}의 생년월일은 {birth_date}이며, 보호자 연락처는 {phone}입니다.",
+    "이력서 접수: {name}, 생일 {birth_date}, 연락처 {phone}",
+    "{name}님의 생년월일은 {birth_date}이고, 주민등록번호는 {rrn}입니다.",
+    "출생일이 {birth_date}인 신청자 {name}님의 서류가 접수되었습니다.",
 ]
 
 # 개인정보가 전혀 없는(또는 distractor만 있는) 템플릿 — 정답 라벨이 0개인 문서를 만든다.
@@ -132,6 +142,12 @@ _NEGATIVE_TEMPLATES = [
     "대표 허가가 필요합니다.",
     "부장 성과가 좋았습니다.",
     "팀장 안내가 시작되었습니다.",
+    # 생년월일 앵커("생년월일"/"생일"/"출생일") 없는 순수 날짜는 core가 잡으면 안 된다 —
+    # 일반 날짜와 구분하기 위한 설계다(#266/#271). gen_date가 만드는 형식(YYYY.MM.DD)과
+    # core BirthDateDetector의 _DATE 정규식이 일치해서, 앵커 유무만이 유일한 차이다.
+    "계약일은 2026-03-01로 확정되었습니다.",
+    "근무 개시일은 2026년 3월 2일부터입니다.",
+    "다음 정기 점검일은 2026.04.10입니다.",
 ]
 
 

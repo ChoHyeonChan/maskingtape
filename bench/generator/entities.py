@@ -337,6 +337,35 @@ def gen_account(rng: random.Random, difficulty: str = "mixed") -> Entity:
     return Entity(kind="account", text=text)
 
 
+def gen_birth_date(rng: random.Random, difficulty: str = "mixed") -> Entity:
+    """생년월일. core는 "생년월일/생일/출생일" 같은 앵커 뒤의 날짜만 잡는 문맥 앵커
+    방식이라(#266/#271, birthdate.py), 표기 자체는 형식 다양성만 반영한다 — 앵커를
+    문서에 배치하는 건 documents.py 템플릿의 몫이다(account #180과 동일한 패턴).
+
+    day를 1~28로 제한해 월과 무관하게 항상 유효한 날짜가 되도록 한다(다른 kind들과 동일한
+    관례) — core는 실제 존재하는 날짜인지 검증하므로, 무효 날짜를 만들면 애초에 안 잡힌다.
+    """
+    year = rng.randint(1950, 2010)
+    month = rng.randint(1, 12)
+    day = rng.randint(1, 28)
+
+    if difficulty == "easy":
+        style = "numeric"
+    elif difficulty == "hard":
+        style = rng.choice(["korean_squished", "numeric"])
+    else:
+        style = rng.choice(["korean", "korean_squished", "numeric"])
+
+    if style == "korean":
+        text = f"{year}년 {month}월 {day}일"
+    elif style == "korean_squished":
+        text = f"{year}년{month}월{day}일"  # core 정규식은 "년/월/일" 앞뒤 공백을 선택으로 둔다
+    else:
+        sep = "-" if difficulty == "easy" else rng.choice(["-", ".", "/"])
+        text = f"{year}{sep}{month:02d}{sep}{day:02d}"
+    return Entity(kind="birth_date", text=text)
+
+
 _PARTIAL_ADDRESS_RATE = 0.12  # 명함·회사소개 등 동/번지 없는 부분 주소도 실제로 나오니 일부 섞는다(#195).
 
 
@@ -387,6 +416,7 @@ _GENERATORS = {
     "biz_reg": gen_biz_reg,
     "passport": gen_passport,
     "account": gen_account,
+    "birth_date": gen_birth_date,
 }
 
 ALL_KINDS = tuple(_GENERATORS.keys())

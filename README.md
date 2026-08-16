@@ -63,7 +63,7 @@ python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl
 
 합성 데이터셋(500건)도 시드로 고정돼 있어 바이트 단위로 똑같이 재생성된다 — `python -m bench.generate_dataset --count 500 --seed 42 --out bench/datasets/synth_v1.jsonl`
 
-**측정 기준: `3f8ef20` · 규칙 전용 모드(LLM 미사용)**
+**측정 기준: `be5b26c` · 규칙 전용 모드(LLM 미사용)**
 
 | 종류 | precision | recall | F1 |
 |---|---|---|---|
@@ -75,16 +75,20 @@ python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl
 | 사업자등록번호 | 1.000 | 1.000 | 1.000 |
 | 여권번호 | 1.000 | 1.000 | 1.000 |
 | 계좌번호 | 1.000 | 1.000 | 1.000 |
-| 이름 (규칙 전용) | 0.832 | 0.679 | 0.748 |
-| **전체** | **0.943** | **0.876** | **0.908** |
+| 생년월일 | 1.000 | 1.000 | 1.000 |
+| 이름 (규칙 전용) | 0.857 | 0.662 | 0.747 |
+| **전체** | **0.953** | **0.869** | **0.909** |
 
-번호·카드·사업자등록번호·여권번호·계좌번호는 형태(와 있는 경우 체크섬)로 완전히 잡힌다
-(유선전화·plus 이메일·서브도메인·여러 문장으로 구성된 복합 문서까지 섞어도 흔들리지 않음을
-확인했다) — 사업자등록번호는
+번호·카드·사업자등록번호·여권번호·계좌번호·생년월일은 형태(와 있는 경우 체크섬)로 완전히
+잡힌다(유선전화·plus 이메일·서브도메인·여러 문장으로 구성된 복합 문서까지 섞어도 흔들리지
+않음을 확인했다) — 사업자등록번호는
 [#123](https://github.com/ChoHyeonChan/maskingtape/issues/123), 여권번호는
 [#139](https://github.com/ChoHyeonChan/maskingtape/issues/139), 계좌번호는
-[#180](https://github.com/ChoHyeonChan/maskingtape/issues/180)에서 각각 새 kind를 추가해
-측정 사각지대를 없앴다. 주소는 [#195](https://github.com/ChoHyeonChan/maskingtape/issues/195)/[#196](https://github.com/ChoHyeonChan/maskingtape/issues/196)에서
+[#180](https://github.com/ChoHyeonChan/maskingtape/issues/180), **생년월일**은
+[#266](https://github.com/ChoHyeonChan/maskingtape/issues/266)/[#271](https://github.com/ChoHyeonChan/maskingtape/pull/271)에서
+각각 새 kind를 추가해 측정 사각지대를 없앴다 — 생년월일은 10번째 kind이자 계좌번호와 같은
+문맥 앵커 하드 게이트 설계라, confidence가 **항상 정확히 0.9로 고정**된다(임계값 0.91
+이상이면 100% 소실, 아래 참고). 주소는 [#195](https://github.com/ChoHyeonChan/maskingtape/issues/195)/[#196](https://github.com/ChoHyeonChan/maskingtape/issues/196)에서
 시/도명 뒤 **조사** 미탐 버그를, [#248](https://github.com/ChoHyeonChan/maskingtape/issues/248)에서
 **계사 어미**("입니다"/"예요") 미탐도 찾아 core [#252](https://github.com/ChoHyeonChan/maskingtape/pull/252)가
 전부 고쳐 recall이 1.000으로 완전히 복구됐다(직접 재확인함). 주민등록번호는 [#159](https://github.com/ChoHyeonChan/maskingtape/issues/159)에서
@@ -102,10 +106,10 @@ python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl
 core [#252](https://github.com/ChoHyeonChan/maskingtape/pull/252)가 고쳤지만 **완전히는 아니다**
 — 하드코딩 5개 부서어만 막는 방식이라, 그 밖의 흔한 업무어("차량"/"허가" 등)는
 [#255](https://github.com/ChoHyeonChan/maskingtape/issues/255)에서 여전히 뚫리는 걸 확인했다
-(negative 문서의 26%에서 재현) — 그 결과 precision이 오히려 더 떨어졌다(0.832) — 남은 과제는
-문맥 없는 이름뿐이다:
+(negative 문서의 상당수에서 재현) — 그 결과 precision이 규칙판 F1 개선 이전 수준으로 다시
+떨어졌다(0.857) — 남은 과제는 문맥 없는 이름뿐이다:
 
-- **이름** — 한국어 이름은 형태만으로 구분되지 않아 규칙만으로는 문맥 없는 이름을 놓친다. 이것이 **로컬 LLM 하이브리드**(`--llm`)가 필요한 이유이고, 그 효과는 [#46](https://github.com/ChoHyeonChan/maskingtape/issues/46)에서 같은 데이터셋으로 비교 측정한다 — 하이브리드로 켜면 recall이 **0.679 → 0.907**로 오르고, precision도 규칙판보다 훨씬 높다(0.832→0.915, F1 0.748→0.911) — 상세는 [bench/](bench/) 참고.
+- **이름** — 한국어 이름은 형태만으로 구분되지 않아 규칙만으로는 문맥 없는 이름을 놓친다. 이것이 **로컬 LLM 하이브리드**(`--llm`)가 필요한 이유이고, 그 효과는 [#46](https://github.com/ChoHyeonChan/maskingtape/issues/46)에서 같은 데이터셋으로 비교 측정한다 — 하이브리드로 켜면 recall이 **0.662 → 0.908**로 오르고, precision도 규칙판보다 높다(0.857→0.917, F1 0.747→0.912) — 상세는 [bench/](bench/) 참고.
 
 마스킹 결과에 개인정보가 실제로 남는지도 따로 측정한다 — `python -m bench.evaluators.evaluate_masking bench/datasets/synth_v1.jsonl`. 상세는 [bench/](bench/) 참고.
 
