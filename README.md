@@ -109,7 +109,7 @@ core [#252](https://github.com/ChoHyeonChan/maskingtape/pull/252)가 고쳤지�
 (negative 문서의 상당수에서 재현) — 그 결과 precision이 규칙판 F1 개선 이전 수준으로 다시
 떨어졌다(0.857) — 남은 과제는 문맥 없는 이름뿐이다:
 
-- **이름** — 한국어 이름은 형태만으로 구분되지 않아 규칙만으로는 문맥 없는 이름을 놓친다. 이것이 **로컬 LLM 하이브리드**(`--llm`)가 필요한 이유이고, 그 효과는 [#46](https://github.com/ChoHyeonChan/maskingtape/issues/46)에서 같은 데이터셋으로 비교 측정한다 — 상세는 [bench/](bench/) 참고(하이브리드 수치는 이 PR 머지 후 갱신).
+- **이름** — 한국어 이름은 형태만으로 구분되지 않아 규칙만으로는 문맥 없는 이름을 놓친다. 이것이 **로컬 LLM 하이브리드**(`--llm`)가 필요한 이유이고, 그 효과는 [#46](https://github.com/ChoHyeonChan/maskingtape/issues/46)에서 같은 데이터셋으로 비교 측정한다 — 하이브리드로 켜면 recall이 **0.662 → 0.908**로 오르고, precision도 규칙판보다 높다(0.857→0.917, F1 0.747→0.912) — 상세는 [bench/](bench/) 참고.
 
 마스킹 결과에 개인정보가 실제로 남는지도 따로 측정한다 — `python -m bench.evaluators.evaluate_masking bench/datasets/synth_v1.jsonl`. 상세는 [bench/](bench/) 참고.
 
