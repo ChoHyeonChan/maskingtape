@@ -37,7 +37,10 @@ def main() -> int:
     parser.add_argument(
         "--check-rate-limit",
         action="store_true",
-        help="Send repeated /api/scan requests until a 429 response is observed.",
+        help=(
+            "Probe the process-local app limiter until a 429 is observed. "
+            "This is not a global serverless rate-limit guarantee."
+        ),
     )
     parser.add_argument(
         "--rate-limit-attempts",
@@ -146,7 +149,9 @@ def _assert_rate_limit(base_url: str, attempts: int) -> None:
         if response.status >= 500:
             raise AssertionError(f"rate-limit probe hit server error: {response.status}")
 
-    raise AssertionError(f"rate limit was not observed within {attempts} attempts")
+    raise AssertionError(
+        f"process-local rate limit was not observed within {attempts} attempts"
+    )
 
 
 def _post_json(url: str, payload: dict[str, Any]) -> Response:

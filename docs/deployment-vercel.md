@@ -26,6 +26,18 @@ MASKINGTAPE_API_RATE_LIMIT_WINDOW_SECONDS=60
 
 `MASKINGTAPE_API_CORS_ORIGINS` is intentionally empty for the single-origin Vercel deployment. Same-origin browser calls do not need CORS, and this avoids accidentally allowing `*`. If the web and API are ever split across domains, set this to the exact HTTPS web origin, for example `https://maskingtape.example`.
 
+## Rate limit decision
+
+Decision on 2026-08-17: keep the current `InMemoryRateLimiter` for the public contest demo as best-effort abuse protection.
+
+The API remains stateless and does not store request bodies, so this is not a data-leak blocker for the demo. The risk is abuse, cost, and DoS. Vercel serverless deployments can run multiple isolated function instances, so the process-memory counter is not shared across every request path and must not be treated as a reliable global deployment limit.
+
+If traffic risk grows, pick one of these before treating rate limiting as production-grade:
+
+- enable Vercel platform-level protection such as Firewall/rate limiting,
+- replace the limiter with an external shared store, such as Redis, after checking license/SBOM requirements,
+- or explicitly keep the current best-effort limiter for a low-traffic demo and record that decision here.
+
 ## Deploy
 
 ```powershell
@@ -42,7 +54,7 @@ Do not use a plain HTTP URL for the public demo. Vercel preview and production U
 After deployment, run:
 
 ```powershell
-python scripts/verify_web_demo_deployment.py https://<deployment-url> --check-rate-limit --rate-limit-attempts 65
+python scripts/verify_web_demo_deployment.py https://<deployment-url>
 ```
 
 The verifier checks:
@@ -54,9 +66,11 @@ The verifier checks:
 - `/api/scan` detection metadata does not echo the raw PII value
 - `/api/anonymize` masks the synthetic PII value
 - hostile CORS origin is not allowed
-- optional rate-limit check reaches 429
+- optional process-local rate-limit probe reaches 429
 
 Also open the URL in a browser and confirm the visible privacy note warns users not to enter real personal information and says input is not stored.
+
+The optional `--check-rate-limit` flag is still useful for confirming that one warm function instance enforces the app-level limiter, but it is not a Vercel serverless acceptance gate because requests may be served by different instances.
 
 ## References
 
