@@ -2,10 +2,29 @@
 
 from fastapi.testclient import TestClient
 
+from maskingtape.pipeline import AnonymizeResult
+from maskingtape.types import Detection
 from maskingtape_api.main import create_app
 from maskingtape_api.routers.pii import anonymize, scan
 from maskingtape_api.schemas import AnonymizeRequest, AnonymizeStrategy, DetectionKind, ScanRequest
-from maskingtape_api.services.core_adapter import CoreEngineAdapter
+from maskingtape_api.services.core_adapter import CoreEngineAdapter, get_core_adapter
+
+
+class UnknownKindPipeline:
+    def scan(self, text: str) -> list[Detection]:
+        return [
+            Detection(
+                kind="future_kind",
+                start=0,
+                end=len(text),
+                text=text,
+                confidence=0.8,
+                detector="FutureDetector",
+            )
+        ]
+
+    def anonymize(self, text: str) -> AnonymizeResult:
+        return AnonymizeResult(text="*" * len(text), detections=self.scan(text))
 
 
 def test_core_adapter_returns_core_detections() -> None:
@@ -72,6 +91,41 @@ def test_anonymize_http_endpoint_accepts_passport_detection_kind() -> None:
     assert "text" not in payload["detections"][0]
     assert passport not in payload["text"]
     assert passport not in response.text
+
+
+def test_scan_http_endpoint_passes_unknown_detection_kind_without_500() -> None:
+    app = create_app()
+    app.dependency_overrides[get_core_adapter] = lambda: CoreEngineAdapter(
+        pipeline=UnknownKindPipeline()
+    )
+
+    try:
+        response = TestClient(app).post("/scan", json={"text": "future-token"})
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["detections"][0]["kind"] == "future_kind"
+    assert payload["detections"][0]["detector"] == "FutureDetector"
+
+
+def test_anonymize_http_endpoint_passes_unknown_detection_kind_without_500() -> None:
+    app = create_app()
+    app.dependency_overrides[get_core_adapter] = lambda: CoreEngineAdapter(
+        pipeline=UnknownKindPipeline()
+    )
+
+    try:
+        response = TestClient(app).post("/anonymize", json={"text": "future-token"})
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["text"] == "************"
+    assert payload["detections"][0]["kind"] == "future_kind"
+    assert payload["detections"][0]["detector"] == "FutureDetector"
 
 
 def test_anonymize_endpoint_supports_label_strategy() -> None:
