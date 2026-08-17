@@ -1,5 +1,7 @@
 """MCP 도구 함수 테스트 — MCP 런타임 없이 순수 함수만 검증한다. 합성 데이터만 사용."""
 
+import re
+
 import pytest
 
 from maskingtape_mcp import tools
@@ -35,6 +37,16 @@ def test_anonymize_text_label():
     out = tools.anonymize_text(SYNTHETIC, strategy="label")
     assert "[전화번호]" in out
     assert "[주민등록번호]" in out
+
+
+def test_anonymize_text_pseudonym():
+    out = tools.anonymize_text(SYNTHETIC, strategy="pseudonym")
+    # 원본 값은 사라지되, 별표·라벨이 아니라 형식이 살아있는 가짜 값으로 치환된다(구조 보존)
+    assert "010-1234-5678" not in out
+    assert "800101-1234560" not in out
+    assert "*" not in out and "[전화번호]" not in out
+    # 그럴듯한 전화번호 형식(01X-XXXX-XXXX)의 가짜 값이 남는다
+    assert re.search(r"01\d-\d{3,4}-\d{4}", out)
 
 
 def test_anonymize_text_rejects_unknown_strategy():
