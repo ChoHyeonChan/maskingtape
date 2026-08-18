@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { scanText } from "../../api/scanClient";
+import { EXTRACT_ERROR_MESSAGES, extractTextFromFile } from "../../lib/extractText";
 import type { MaskMode } from "../../lib/masking";
 import type { Detection } from "../../types/detection";
 
@@ -51,6 +52,9 @@ export function InputPanel({
   const [copied, setCopied] = useState(false);
   const [presetsOpen, setPresetsOpen] = useState(false);
   const [revealingResult, setRevealingResult] = useState(false);
+  const [extracting, setExtracting] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const trimmedLength = text.trim().length;
   const isTooLong = text.length > MAX_TEXT_LENGTH;
   const canScan = trimmedLength > 0 && !isTooLong;
@@ -79,6 +83,45 @@ export function InputPanel({
     } finally {
       setLoading(false);
     }
+  }
+
+  // 파일은 절대 서버로 올리지 않는다 — 브라우저에서 텍스트만 추출해 기존 입력창에 채워 넣고,
+  // 이후 흐름(검토 → 스캔)은 직접 입력한 텍스트와 완전히 동일하게 탄다(#263).
+  async function handleFiles(files: FileList | null) {
+    const file = files?.[0];
+    if (!file || hasResult) return;
+
+    setExtracting(true);
+    setError(null);
+    const result = await extractTextFromFile(file);
+    setExtracting(false);
+
+    if (result.ok) {
+      onTextChange(result.text);
+      setCopied(false);
+    } else {
+      setError(EXTRACT_ERROR_MESSAGES[result.reason]);
+    }
+  }
+
+  function handleFileInputChange(event: React.ChangeEvent<HTMLInputElement>) {
+    void handleFiles(event.target.files);
+    event.target.value = "";
+  }
+
+  function handleDrop(event: React.DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    setDragActive(false);
+    void handleFiles(event.dataTransfer.files);
+  }
+
+  function handleDragOver(event: React.DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    if (!hasResult) setDragActive(true);
+  }
+
+  function handleDragLeave() {
+    setDragActive(false);
   }
 
   function handlePreset(text: string) {
@@ -174,10 +217,31 @@ export function InputPanel({
           >
             계약서 예제
           </button>
+          <button
+            type="button"
+            className="input-panel__upload"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={extracting}
+          >
+            {extracting ? "추출 중..." : "파일 업로드"}
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".txt,.pdf,text/plain,application/pdf"
+            className="input-panel__file-input"
+            onChange={handleFileInputChange}
+            aria-label="txt 또는 텍스트 PDF 파일 업로드"
+          />
         </div>
       </div>
 
-      <div className={`input-panel__textarea-wrap${revealingResult ? " is-revealing" : ""}`}>
+      <div
+        className={`input-panel__textarea-wrap${revealingResult ? " is-revealing" : ""}${dragActive ? " is-drag-over" : ""}`}
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+      >
         <textarea
           className={revealingResult ? "is-text-revealing" : undefined}
           value={text}
@@ -196,6 +260,11 @@ export function InputPanel({
           <pre className="input-panel__result-reveal" aria-hidden="true">
             {text}
           </pre>
+        )}
+        {dragActive && (
+          <div className="input-panel__drop-hint" aria-hidden="true">
+            여기에 놓아 txt · PDF 파일에서 텍스트를 불러옵니다
+          </div>
         )}
       </div>
 
