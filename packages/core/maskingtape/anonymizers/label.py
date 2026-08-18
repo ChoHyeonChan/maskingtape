@@ -25,6 +25,7 @@ DEFAULT_LABELS = {
     "account": "계좌번호",
     "biz_reg": "사업자등록번호",
     "passport": "여권번호",
+    "birth_date": "생년월일",
 }
 
 
