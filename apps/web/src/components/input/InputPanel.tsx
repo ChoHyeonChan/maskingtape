@@ -147,7 +147,7 @@ export function InputPanel({
   return (
     <div className={hasResult ? "input-panel input-panel--result" : "input-panel"}>
       <div className="input-panel__header">
-        <h2><span aria-hidden="true">▤</span> {hasResult ? "마스킹 결과" : "문서 입력"}</h2>
+        <h2 data-coach="masked-result"><span aria-hidden="true">▤</span> {hasResult ? "마스킹 결과" : "문서 입력"}</h2>
         {hasResult && (
           <div className="input-panel__header-actions">
             <div className="input-panel__mask-mode" role="group" aria-label="마스킹 방식 선택">
@@ -254,7 +254,7 @@ export function InputPanel({
           rows={8}
           readOnly={hasResult}
           aria-label={hasResult ? "마스킹된 탐지 결과" : "탐지할 텍스트 입력"}
-          aria-describedby="input-meta"
+          aria-describedby={hasResult ? undefined : "input-meta"}
         />
         {revealingResult && (
           <pre className="input-panel__result-reveal" aria-hidden="true">

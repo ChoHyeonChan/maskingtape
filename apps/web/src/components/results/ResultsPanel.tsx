@@ -55,7 +55,7 @@ export function ResultsPanel({ scanned, activeFilter, scanRun, maskMode = "mask"
     <section className="panel panel--results" aria-label="분석 결과">
       <div className="panel__header">
         <div>
-          <h2>
+          <h2 data-coach="analysis-result">
             <span aria-hidden="true">▱</span>
             분석 결과
           </h2>
