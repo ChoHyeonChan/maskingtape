@@ -49,13 +49,13 @@ describe("HighlightedText", () => {
   });
 
   it("falls back to the raw kind string for a kind with no Korean label mapping, without crashing (#216)", () => {
-    const d = detection({ kind: "driver_license", start: 3, end: 16, confidence: 1 });
+    const d = detection({ kind: "unmapped_kind", start: 3, end: 16, confidence: 1 });
     render(<HighlightedText text="면허 110-1234-5678 입니다" detections={[d]} activeFilter={null} />);
 
     const mark = screen.getByText("110-1234-5678");
-    expect(mark).toHaveClass("highlight--driver_license");
-    expect(screen.getByText("driver_license", { selector: ".highlight__tag" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "driver_license · 신뢰도 100% · 가리기" })).toBeInTheDocument();
+    expect(mark).toHaveClass("highlight--unmapped_kind");
+    expect(screen.getByText("unmapped_kind", { selector: ".highlight__tag" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "unmapped_kind · 신뢰도 100% · 가리기" })).toBeInTheDocument();
   });
 
   it("renders core business registration detections with the business color class", () => {

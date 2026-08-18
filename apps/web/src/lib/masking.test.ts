@@ -25,17 +25,20 @@ describe("applyMasking (#277)", () => {
   });
 
   it("falls back to the raw kind string when there is no Korean label mapping", () => {
-    const d = detection({ kind: "driver_license", start: 3, end: 16 });
+    const d = detection({ kind: "unmapped_kind", start: 3, end: 16 });
     const result = applyMasking("면허 110-1234-5678 입니다", [d], "label");
-    expect(result).toBe("면허 [driver_license] 입니다");
+    expect(result).toBe("면허 [unmapped_kind] 입니다");
   });
 
-  it("labels account and birth_date in Korean, not the raw kind string (#282 web-side counterpart)", () => {
+  it("labels account, birth_date, and driver_license in Korean, not the raw kind string (#282 web-side counterpart, #267)", () => {
     const account = detection({ kind: "account", start: 3, end: 16 });
     expect(applyMasking("계좌 110-1234-5678 입니다", [account], "label")).toBe("계좌 [계좌번호] 입니다");
 
     const birthDate = detection({ kind: "birth_date", start: 6, end: 16 });
     expect(applyMasking("생년월일은 1999-07-21입니다", [birthDate], "label")).toBe("생년월일은 [생년월일]입니다");
+
+    const driverLicense = detection({ kind: "driver_license", start: 3, end: 15 });
+    expect(applyMasking("면허 111234567890 입니다", [driverLicense], "label")).toBe("면허 [운전면허] 입니다");
   });
 
   it("handles multiple detections and skips overlapping ones the same way regardless of mode", () => {
