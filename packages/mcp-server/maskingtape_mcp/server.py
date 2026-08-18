@@ -33,7 +33,8 @@ def scan_text(text: str) -> list[dict]:
 @mcp.tool()
 def anonymize_text(text: str, strategy: str = "mask", numbered: bool = False) -> str:
     """한국어 텍스트의 개인정보를 비식별화한다.
-    strategy="mask"는 *로 가리고, "label"은 [전화번호] 같은 라벨로 치환한다.
+    strategy="mask"는 *로 가리고, "label"은 [전화번호] 같은 라벨로, "pseudonym"은
+    그럴듯한 가짜 값으로 치환한다(문맥이 살아 LLM 처리·데이터셋 공유에 유리).
     numbered=True면 label에서 같은 값을 같은 번호로 유지한다([이름1] 등) —
     LLM에 넘길 때 같은 사람·번호를 문맥상 일관되게 추적할 수 있다."""
     return tools.anonymize_text(text, strategy, numbered)

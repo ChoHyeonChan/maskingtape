@@ -9,7 +9,7 @@ from collections import Counter
 from dataclasses import asdict
 
 from maskingtape import Pipeline
-from maskingtape.anonymizers import LabelAnonymizer, MaskAnonymizer
+from maskingtape.anonymizers import LabelAnonymizer, MaskAnonymizer, PseudonymAnonymizer
 from maskingtape.detectors import llm_detectors
 
 from maskingtape_mcp.safe_file import read_text_file, write_masked_copy
@@ -44,7 +44,11 @@ def _build_pipeline(strategy: str, numbered: bool) -> Pipeline:
         return Pipeline(detectors=detectors, anonymizer=MaskAnonymizer())
     if strategy == "label":
         return Pipeline(detectors=detectors, anonymizer=LabelAnonymizer(numbered=numbered))
-    raise ValueError(f"지원하지 않는 strategy: {strategy!r} (mask 또는 label)")
+    if strategy == "pseudonym":
+        # 그럴듯한 가짜 값으로 치환. numbered는 label 전용이라 여기선 쓰지 않는다 —
+        # pseudonym은 같은 값→같은 가짜값을 자체적으로 유지한다.
+        return Pipeline(detectors=detectors, anonymizer=PseudonymAnonymizer())
+    raise ValueError(f"지원하지 않는 strategy: {strategy!r} (mask, label, pseudonym)")
 
 
 def _report(detection) -> dict:
@@ -66,9 +70,11 @@ def scan_text(text: str) -> list[dict]:
 def anonymize_text(text: str, strategy: str = "mask", numbered: bool = False) -> str:
     """텍스트의 개인정보를 비식별화해 반환한다.
 
-    strategy: "mask"(*로 가림) 또는 "label"([전화번호] 식 라벨 치환)
+    strategy: "mask"(*로 가림) / "label"([전화번호] 식 라벨 치환) /
+              "pseudonym"(그럴듯한 가짜 값으로 치환 — 문맥이 살아 LLM 처리·데이터셋 공유에 유리)
     numbered: label 전략에서 같은 값을 같은 번호로 치환할지([이름1] 등).
               같은 사람·번호가 문서 안에서 일관되게 유지돼 LLM 문맥 보존에 유리하다.
+              (pseudonym은 자체적으로 같은 값→같은 가짜값을 유지하므로 이 옵션과 무관하다.)
     """
     return _build_pipeline(strategy, numbered).anonymize(text).text
 
