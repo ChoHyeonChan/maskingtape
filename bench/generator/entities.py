@@ -406,6 +406,22 @@ def gen_address(rng: random.Random, difficulty: str = "mixed") -> Entity:
     return Entity(kind="address", text=base)
 
 
+# 운전면허번호 지역코드 유효값(앞 2자리): 11~26, 28 — core DriverLicenseDetector와 동일.
+_DL_REGIONS = [*range(11, 27), 28]
+
+
+def gen_driver_license(rng, difficulty="mixed"):
+    """운전면허번호 합성값 — 지역코드·연도(2)·일련(6)·체크·회차(2). 전부 가짜(체크섬 비공개).
+
+    최소 등록판(#276 core⊆bench 가드 통과용). 난이도별 표기·distractor·정확도 측정은
+    후속으로 bench가 채운다(#267 bench 파트).
+    """
+    region = rng.choice(_DL_REGIONS)
+    sep = rng.choice(["-", " ", ""]) if difficulty == "hard" else "-"
+    body = f"{rng.randint(0, 99):02d}{sep}{rng.randint(0, 999999):06d}{sep}{rng.randint(0, 99):02d}"
+    return Entity(kind="driver_license", text=f"{region:02d}{sep}{body}")
+
+
 _GENERATORS = {
     "name": gen_name,
     "phone": gen_phone,
@@ -417,6 +433,7 @@ _GENERATORS = {
     "passport": gen_passport,
     "account": gen_account,
     "birth_date": gen_birth_date,
+    "driver_license": gen_driver_license,
 }
 
 ALL_KINDS = tuple(_GENERATORS.keys())
