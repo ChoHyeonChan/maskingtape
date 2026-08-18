@@ -39,12 +39,17 @@ function readTargets(): RawCoachTarget[] {
     const element = document.querySelector<HTMLElement>(`[data-coach="${key}"]`);
     if (!element) return [];
 
+    // 결과 화면에서는 예제 도구모음이 display:none으로 숨겨지지만 DOM에는 남아 있다.
+    // 숨겨진 대상은 크기가 0인 사각형을 반환하므로, 그런 대상은 코치마크에서 제외한다.
+    const bounds = element.getBoundingClientRect();
+    if (bounds.width === 0 && bounds.height === 0) return [];
+
     const padding = key === "scan" ? 8 : 7;
     return [
       {
         key,
         label: TARGET_COPY[key],
-        rect: expandRect(element.getBoundingClientRect(), padding),
+        rect: expandRect(bounds, padding),
       },
     ];
   });

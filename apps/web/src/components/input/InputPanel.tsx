@@ -254,7 +254,7 @@ export function InputPanel({
           rows={8}
           readOnly={hasResult}
           aria-label={hasResult ? "마스킹된 탐지 결과" : "탐지할 텍스트 입력"}
-          aria-describedby="input-meta"
+          aria-describedby={hasResult ? undefined : "input-meta"}
         />
         {revealingResult && (
           <pre className="input-panel__result-reveal" aria-hidden="true">

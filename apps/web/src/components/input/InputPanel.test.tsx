@@ -113,6 +113,27 @@ function renderPanelWithChange(onTextChange: (text: string) => void) {
   );
 }
 
+describe("InputPanel result view accessibility", () => {
+  it("does not leave aria-describedby pointing at an element that isn't rendered once a result is shown", () => {
+    render(
+      <InputPanel
+        text="마스킹된 텍스트"
+        hasResult
+        resultVersion={1}
+        onTextChange={vi.fn()}
+        onClear={vi.fn()}
+        onResult={vi.fn()}
+      />,
+    );
+
+    const textarea = screen.getByRole("textbox", { name: "마스킹된 탐지 결과" });
+    const describedBy = textarea.getAttribute("aria-describedby");
+    if (describedBy) {
+      expect(document.getElementById(describedBy)).not.toBeNull();
+    }
+  });
+});
+
 describe("InputPanel contract demo preset (#215)", () => {
   it("loads the contract example text in one click, without opening the presets dropdown", () => {
     const onTextChange = vi.fn();
