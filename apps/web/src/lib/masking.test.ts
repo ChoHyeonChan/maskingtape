@@ -25,9 +25,9 @@ describe("applyMasking (#277)", () => {
   });
 
   it("falls back to the raw kind string when there is no Korean label mapping", () => {
-    const d = detection({ kind: "driver_license", start: 3, end: 16 });
+    const d = detection({ kind: "unmapped_kind", start: 3, end: 16 });
     const result = applyMasking("면허 110-1234-5678 입니다", [d], "label");
-    expect(result).toBe("면허 [driver_license] 입니다");
+    expect(result).toBe("면허 [unmapped_kind] 입니다");
   });
 
   it("labels account and birth_date in Korean, not the raw kind string (#282 web-side counterpart)", () => {

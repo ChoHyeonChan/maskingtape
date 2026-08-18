@@ -18,6 +18,7 @@ import random
 from dataclasses import dataclass
 
 from maskingtape.detectors.financial.creditcard import _luhn_ok
+from maskingtape.detectors.identity.driver_license import _REGIONS as _DRIVER_LICENSE_REGIONS
 
 # 성씨 상위 30종(통계청 인구총조사 기준 다빈도 성씨) — 특정 인물이 아닌 통계적 분포만 참고.
 _SURNAMES = [
@@ -294,6 +295,35 @@ def gen_passport(rng: random.Random, difficulty: str = "mixed") -> Entity:
     return Entity(kind="passport", text=text)
 
 
+def gen_driver_license(rng: random.Random, difficulty: str = "mixed") -> Entity:
+    """운전면허번호. core는 체크섬이 없어(#267, driver_license.py) 지역명 + 형식만
+    맞추면 되는데, 지역명은 core가 실제로 인식하는 16개 목록을 그대로 가져와 쓴다
+    (목록을 따로 두면 core가 지역명을 늘리거나 줄일 때 여기서만 어긋날 수 있다).
+
+    구분자는 core와 동일하게 하이픈/공백을 허용한다 — easy는 하이픈으로 통일해
+    표준 표기를, hard는 세 구분자를 각각 무작위로 섞어 더 낯선 표기를 만든다.
+    """
+    region = rng.choice(_DRIVER_LICENSE_REGIONS)
+    parts = [
+        f"{rng.randint(0, 99):02d}",
+        f"{rng.randint(0, 999999):06d}",
+        f"{rng.randint(0, 99):02d}",
+    ]
+
+    if difficulty == "easy":
+        seps = ["-", "-", "-"]
+    elif difficulty == "hard":
+        seps = [rng.choice(["-", " "]) for _ in range(3)]
+    else:
+        sep = rng.choice(["-", " "])
+        seps = [sep, sep, sep]
+
+    text = region
+    for part, sep in zip(parts, seps):
+        text += sep + part
+    return Entity(kind="driver_license", text=text)
+
+
 # 계좌번호 그룹 자릿수 패턴(그룹 수, 각 그룹 자릿수) — 실제 은행별 표기를 본떴다.
 # core AccountDetector의 정규식(2~7자리 그룹 2~4개, 총 10~14자리)을 만족해야 한다(#180).
 _ACCOUNT_GROUP_PATTERNS = [
@@ -417,6 +447,7 @@ _GENERATORS = {
     "passport": gen_passport,
     "account": gen_account,
     "birth_date": gen_birth_date,
+    "driver_license": gen_driver_license,
 }
 
 ALL_KINDS = tuple(_GENERATORS.keys())
