@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { InputPanel } from "./InputPanel";
 
@@ -63,6 +63,55 @@ describe("InputPanel mask mode toggle (#277)", () => {
     expect(onMaskModeChange).toHaveBeenCalledWith("label");
   });
 });
+
+describe("InputPanel file upload (#263)", () => {
+  it("fills the textarea with a .txt file's content, never uploading the file itself to a server", async () => {
+    const onTextChange = vi.fn();
+    renderPanelWithChange(onTextChange);
+
+    const file = new File(["고객 홍길동님 연락처 010-1234-5678"], "메모.txt", { type: "text/plain" });
+    fireEvent.change(screen.getByLabelText("txt 또는 텍스트 PDF 파일 업로드"), { target: { files: [file] } });
+
+    await waitFor(() => expect(onTextChange).toHaveBeenCalledWith("고객 홍길동님 연락처 010-1234-5678"));
+  });
+
+  it("shows a clear error for an unsupported file type instead of silently failing", async () => {
+    renderPanel("");
+
+    const file = new File(["binary"], "photo.png", { type: "image/png" });
+    fireEvent.change(screen.getByLabelText("txt 또는 텍스트 PDF 파일 업로드"), { target: { files: [file] } });
+
+    await waitFor(() =>
+      expect(screen.getByRole("alert")).toHaveTextContent("지원하지 않는 파일 형식입니다"),
+    );
+  });
+
+  it("also accepts a file dropped onto the input area", async () => {
+    const onTextChange = vi.fn();
+    renderPanelWithChange(onTextChange);
+
+    const file = new File(["드래그로 넣은 텍스트"], "드래그.txt", { type: "text/plain" });
+    const dropZone = screen.getByLabelText("탐지할 텍스트 입력").closest(".input-panel__textarea-wrap");
+    if (!dropZone) throw new Error("drop zone not found");
+
+    fireEvent.drop(dropZone, { dataTransfer: { files: [file] } });
+
+    await waitFor(() => expect(onTextChange).toHaveBeenCalledWith("드래그로 넣은 텍스트"));
+  });
+});
+
+function renderPanelWithChange(onTextChange: (text: string) => void) {
+  return render(
+    <InputPanel
+      text=""
+      hasResult={false}
+      resultVersion={0}
+      onTextChange={onTextChange}
+      onClear={vi.fn()}
+      onResult={vi.fn()}
+    />,
+  );
+}
 
 describe("InputPanel contract demo preset (#215)", () => {
   it("loads the contract example text in one click, without opening the presets dropdown", () => {

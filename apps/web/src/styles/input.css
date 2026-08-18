@@ -210,7 +210,8 @@
 }
 
 .input-panel__presets-label,
-.input-panel__sample {
+.input-panel__sample,
+.input-panel__upload {
   min-height: 2.25rem;
   display: inline-flex;
   align-items: center;
@@ -230,8 +231,44 @@
   list-style: none;
 }
 
-.input-panel__sample {
+.input-panel__sample,
+.input-panel__upload {
   padding: 0 0.78rem;
+}
+
+.input-panel__upload:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 파일 선택은 숨긴 input을 버튼으로 대신 트리거한다 — 화면엔 항상 버튼만 보인다. */
+.input-panel__file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.input-panel__textarea-wrap.is-drag-over {
+  outline: 2px dashed var(--brand-blue);
+  outline-offset: -2px;
+  border-radius: 12px;
+}
+
+.input-panel__drop-hint {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  text-align: center;
+  background: color-mix(in srgb, var(--brand-blue-tint) 88%, transparent);
+  color: var(--brand-blue);
+  font-size: 0.92rem;
+  font-weight: 800;
+  pointer-events: none;
 }
 
 /* 시연 영상용 대표 시나리오라 다른 예제 버튼보다 살짝 눈에 띄게 브랜드 컬러로 강조한다(#215). */
