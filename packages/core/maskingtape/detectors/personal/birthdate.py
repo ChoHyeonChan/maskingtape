@@ -26,7 +26,10 @@ _ANCHOR = r"(?:출생년월일|생년월일|출생일|생일)"
 _DATE = r"(?:\d{4}\s?년\s?\d{1,2}\s?월\s?\d{1,2}\s?일|\d{4}[-./]\d{1,2}[-./]\d{1,2})"
 
 # 앵커와 날짜 사이엔 콜론·공백·조사(은/는/이/가)가 올 수 있다("생년월일은 ...", "생일: ...").
-_BIRTHDATE_RE = re.compile(_ANCHOR + r"[\s:]*(?:은|는|이|가)?\s*(?P<date>" + _DATE + r")")
+# 구분자엔 상한을 둔다({0,10}, {0,5}) — 무제한 `*` 두 개(`[\s:]*`+`\s*`)가 인접하면 같은 공백열을
+# 두고 분할 경우의 수를 전수 역추적해 ReDoS(catastrophic backtracking)가 난다. 실제 표기에서
+# 구분자는 짧으므로 상한으로 폭발을 막는다(rrn·email 등 다른 탐지기의 반복 상한 관례와 일치).
+_BIRTHDATE_RE = re.compile(_ANCHOR + r"[\s:]{0,10}(?:은|는|이|가)?\s{0,5}(?P<date>" + _DATE + r")")
 
 
 def _valid_date(date_str: str) -> bool:
