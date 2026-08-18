@@ -147,7 +147,7 @@ export function InputPanel({
   return (
     <div className={hasResult ? "input-panel input-panel--result" : "input-panel"}>
       <div className="input-panel__header">
-        <h2><span aria-hidden="true">▤</span> {hasResult ? "마스킹 결과" : "문서 입력"}</h2>
+        <h2 data-coach="masked-result"><span aria-hidden="true">▤</span> {hasResult ? "마스킹 결과" : "문서 입력"}</h2>
         {hasResult && (
           <div className="input-panel__header-actions">
             <div className="input-panel__mask-mode" role="group" aria-label="마스킹 방식 선택">
