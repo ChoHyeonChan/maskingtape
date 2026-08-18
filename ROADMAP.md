@@ -1,7 +1,7 @@
 # 개발 로드맵
 
 > 팀 마스킹테이프의 개발 계획입니다. 진행 상황은 [Issues](https://github.com/ChoHyeonChan/maskingtape/issues)와 [Milestones](https://github.com/ChoHyeonChan/maskingtape/milestones)에서 확인할 수 있습니다.
-> 최종 갱신: 2026-07-27
+> 최종 갱신: 2026-08-17
 
 ## 우리가 만드는 것
 
@@ -15,9 +15,9 @@
 |---|---|---|
 | `packages/core` | Python 라이브러리 + CLI (탐지·마스킹 엔진) | ✅ 동작 |
 | `packages/mcp-server` | MCP 서버 — AI 에이전트용 프라이버시 계층 | ✅ 동작 |
-| `apps/api` | REST API (웹·데스크톱 공용 백엔드) | 🚧 진행 중 |
-| `apps/web` | 웹 플레이그라운드 | 🚧 진행 중 |
-| `apps/desktop` | 데스크톱 앱 (드래그&드롭 일괄 처리) | 🚧 진행 중 |
+| `apps/api` | REST API (웹·데스크톱 공용 백엔드) | ✅ 동작 · 배포 |
+| `apps/web` | 웹 플레이그라운드 | ✅ [라이브 데모](https://maskingtape-lilac.vercel.app) |
+| `apps/desktop` | 데스크톱 앱 (드래그&드롭 일괄 처리) | ✅ 동작 |
 | `bench` | 합성 벤치마크 + 정확도 리포트 | ✅ 동작 |
 
 ## 마일스톤
@@ -31,13 +31,13 @@
 - 데스크톱: 안정성·UX 개선
 - 벤치: LLM 모드 평가 + 리포트 자동 생성
 
-### Phase 2 — 통합·배포 (~2026-08-17)
+### Phase 2 — 통합·배포 (~2026-08-24) ✅ 대부분 완료
 
-- API 통합 (웹·데스크톱을 REST로 전환)
-- **PyPI 배포** (`pip install maskingtape`)
-- 웹 데모 배포 — [보안 요구사항](apps/api/README.md) 준수 필수
-- README 정비 (아키텍처·퀵스타트·벤치마크 수치)
-- **8/17 기능 동결** — 이후 버그 수정만
+- ✅ API 통합 (웹·데스크톱을 REST로 전환)
+- ✅ **PyPI 배포** (`pip install maskingtape`)
+- ✅ 웹 데모 배포 (라이브) — [보안 요구사항](apps/api/README.md) 준수
+- ✅ README 정비 (아키텍처·퀵스타트·벤치마크 수치)
+- **8/24 기능 동결**(8/17→연기) — 이후 버그 수정만
 
 ### Phase 3 — 제출물 (~2026-08-27)
 
@@ -52,41 +52,39 @@
 
 ## 지금 각자 할 일 — 파트별
 
-엔진(`core`)은 성숙 단계입니다. 지금은 **두 트랙을 병행**합니다:
+엔진·API·웹·데스크톱 통합과 배포가 모두 완료됐습니다. 웹 데모가 [라이브](https://maskingtape-lilac.vercel.app)이고 `pip install maskingtape`로 설치됩니다. 지금은 **제출 준비와 완성도**에 집중합니다:
 
-- **엔진 고도화** (계속): 이름 정확도, 새 탐지기(계좌·여권 등)
-- **서비스로 붙이기** (지금 우선): API 연동 → 웹·데스크톱 통합 → 배포
-
-> **핵심 병목은 API 연동입니다.** 엔진은 됐지만 지금은 로컬에서만 돕니다.
-> API가 엔진에 연결되면(현재 `/scan`·`/anonymize`는 501) 웹·데스크톱이 진짜로 연결되고 배포까지 열립니다 — 한 단계가 전체를 푸는 구조라 여기가 1순위입니다.
+- **엔진 고도화** (계속): 이름 하이브리드 정확도, 새 탐지기(운전면허 등), 보안 하드닝(ReDoS 등)
+- **제출물** (지금 우선): 결과보고서 · 시연 영상 · 문서 정합성
 
 | 담당 | 파트 | 당장 할 것 (1순위) | 그다음 |
 |---|---|---|---|
-| 조현찬 (팀장) | `core` · `mcp` | 엔진 고도화(새 탐지기·이름 정확도) + **API 연동 지원** | 아키텍처 · 리뷰 |
-| 기태 | `api` | 🔴 **`/scan`·`/anonymize`를 엔진에 연결** (501 → 실제 응답) | Vercel 배포 |
-| 수연 | `web` | 접근성 개선 → **API 연동되면 임시 프록시 교체** | 결과 화면 확신도 표시 |
-| 준형 | `desktop` | 완성도(UX · 안정성) | 새 엔진 기능(가명처리 등) 반영 |
-| 서연 | `bench` | 데이터 확대 + **발표용 정확도 자료 정리** | 새 탐지기 벤치 추가 |
+| 조현찬 (팀장) | `core` · `mcp` | 새 탐지기(운전면허)·보안 하드닝 + **팀원 PR 리뷰** | 결과보고서 · 아키텍처 |
+| 기태 | `api` | ✅ 통합·배포 완료 → rate limit 강화·서버리스 안정화 | 문서 |
+| 수연 | `web` | 결과·배치 화면 완성 + 디자인 일관성 | 마스킹 토글 · PDF 업로드 |
+| 준형 | `desktop` | 배치 처리 완성 + 제출용 데모 | 새 kind 라벨 반영 |
+| 서연 | `bench` | 생년월일 벤치 · 발표용 정확도 자료 | 새 탐지기 벤치 추가 |
 
 > 승현(plana)은 8월 둘째 주 복귀 예정 — 그동안 웹 입력·하이라이트 뷰는 수연이 함께 봅니다.
 
 ### 파트별 상세 (위에서 아래로, 위가 먼저)
 
-**기태 — `api`** 🔴 지금 팀 전체의 1순위 (이게 되면 통합·배포가 열림)
-- [ ] 스키마 ↔ `core` 어댑터: 요청을 `Pipeline`에 넘기고 결과를 응답 스키마로 변환
-- [ ] `POST /scan` — 501을 실제 탐지 결과로 (core `scan()` 연결)
-- [ ] `POST /anonymize` — 실제 마스킹 결과로 ([#28](https://github.com/ChoHyeonChan/maskingtape/issues/28))
-- [ ] 입력 검증·공통 에러 처리 ([#29](https://github.com/ChoHyeonChan/maskingtape/issues/29)) — 원문을 로그·에러에 남기지 않기(보안)
-- [ ] CORS·개발 환경 설정 ([#30](https://github.com/ChoHyeonChan/maskingtape/issues/30))
-- [ ] API 테스트 자동화 ([#31](https://github.com/ChoHyeonChan/maskingtape/issues/31))
-- [ ] → Vercel 배포 ([apps/api 보안 요구사항](apps/api/README.md) 준수)
+**기태 — `api`** ✅ 통합·배포 완료
+- [x] 스키마 ↔ `core` 어댑터: 요청을 `Pipeline`에 넘기고 결과를 응답 스키마로 변환
+- [x] `POST /scan` — 실제 탐지 결과 (core `scan()` 연결)
+- [x] `POST /anonymize` — 실제 마스킹 결과 ([#28](https://github.com/ChoHyeonChan/maskingtape/issues/28))
+- [x] 입력 검증·공통 에러 처리 ([#29](https://github.com/ChoHyeonChan/maskingtape/issues/29)) — 원문을 로그·에러에 남기지 않기(보안)
+- [x] CORS·개발 환경 설정 ([#30](https://github.com/ChoHyeonChan/maskingtape/issues/30))
+- [x] API 테스트 자동화 ([#31](https://github.com/ChoHyeonChan/maskingtape/issues/31))
+- [x] → Vercel 배포 (라이브, [apps/api 보안 요구사항](apps/api/README.md) 준수)
+- [ ] rate limit 강화 — 서버리스 인스턴스별 한계 보완
 
 **조현찬(팀장) — `core` · `mcp`**
-- [ ] 기태 API 연동 지원 (core 어댑터 인터페이스 합의) ← 지금 우선
-- [ ] 이름 정확도: 하이브리드 안전망 튜닝
-- [ ] 새 탐지기: 계좌번호 (`financial/`), 여권·운전면허 (`identity/`)
-- [ ] 주소 개선: 광역단체명 없는 주소 ([#68](https://github.com/ChoHyeonChan/maskingtape/issues/68))
-- [ ] PyPI 배포 ([#48](https://github.com/ChoHyeonChan/maskingtape/issues/48))
+- [x] API 연동 지원 (core 어댑터 인터페이스)
+- [x] 새 탐지기: 계좌번호·사업자등록번호·여권·생년월일
+- [x] 주소 개선: 광역단체명 없는 주소 ([#68](https://github.com/ChoHyeonChan/maskingtape/issues/68)), 콤마 뒤 동/호 ([#265](https://github.com/ChoHyeonChan/maskingtape/issues/265))
+- [x] PyPI 배포 ([#48](https://github.com/ChoHyeonChan/maskingtape/issues/48))
+- [ ] 새 탐지기: 운전면허 ([#267](https://github.com/ChoHyeonChan/maskingtape/issues/267)) + 보안 하드닝 (ReDoS [#289](https://github.com/ChoHyeonChan/maskingtape/issues/289))
 - 상시: 팀원 PR 리뷰·아키텍처
 
 **수연 — `web`**
