@@ -14,6 +14,7 @@ export interface ScanResponse {
 export const KIND_ORDER = [
   "rrn",
   "passport",
+  "driver_license",
   "phone",
   "email",
   "card",
@@ -27,6 +28,7 @@ export const KIND_ORDER = [
 export const KIND_LABELS: Record<string, string> = {
   rrn: "주민등록번호",
   passport: "여권번호",
+  driver_license: "운전면허",
   phone: "전화번호",
   email: "이메일",
   card: "카드번호",
