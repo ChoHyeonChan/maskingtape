@@ -26,6 +26,7 @@ DEFAULT_LABELS = {
     "biz_reg": "사업자등록번호",
     "passport": "여권번호",
     "birth_date": "생년월일",
+    "driver_license": "운전면허번호",
 }
 
 
