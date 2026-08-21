@@ -38,7 +38,7 @@ python -m bench.generate_dataset --count 500 --seed 42 --out bench/datasets/synt
 python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl --report bench/reports/report_v1.md
 ```
 
-500건 기준 최신 실측(#275 재측정, seed=42):
+500건 기준 최신 실측(#315 재측정, seed=42):
 
 | kind | precision | recall | f1 | 비고 |
 |---|---|---|---|---|
@@ -48,8 +48,9 @@ python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl --report bench
 | account | 1.000 | 1.000 | 1.000 | 문맥어 하드 게이트라 confidence가 항상 정확히 0.6으로 고정 — 아래 confidence 절 참고 |
 | passport | 1.000 | 1.000 | 1.000 | 변동 없음 |
 | address | 1.000 | 1.000 | 1.000 | core [#252](https://github.com/ChoHyeonChan/maskingtape/pull/252)가 [#248](https://github.com/ChoHyeonChan/maskingtape/issues/248)(계사 어미 미탐)을 고쳐 recall 1.000 완전 복구 — 재현 코드로 직접 재확인. 아래 참고 |
-| **birth_date** | **1.000** | **1.000** | **1.000** | [#266](https://github.com/ChoHyeonChan/maskingtape/issues/266)/[#271](https://github.com/ChoHyeonChan/maskingtape/pull/271)에서 core가 새로 추가한 10번째 kind — 처음으로 bench 데이터를 붙였다. confidence가 항상 정확히 0.9로 고정 — 아래 confidence 절 참고 |
-| name | 0.857 | 0.662 | 0.747 | #255 대비 대체로 유지(재현 시드 재배치로 소폭 변동) — 상세는 아래 참고 |
+| birth_date | 1.000 | 1.000 | 1.000 | [#266](https://github.com/ChoHyeonChan/maskingtape/issues/266)/[#271](https://github.com/ChoHyeonChan/maskingtape/pull/271)에서 core가 추가한 10번째 kind. confidence가 항상 정확히 0.9로 고정 — 아래 confidence 절 참고 |
+| **driver_license** | **1.000** | **1.000** | **1.000** | [#267](https://github.com/ChoHyeonChan/maskingtape/issues/267)/[#305](https://github.com/ChoHyeonChan/maskingtape/pull/305)에서 core가 새로 추가한 11번째 kind — 처음으로 bench 데이터를 붙였다(#315). 문맥 앵커조차 없이 confidence가 항상 정확히 0.85로 고정 — 아래 참고 |
+| name | 0.875 | 0.658 | 0.751 | #255 대비 대체로 유지(재현 시드 재배치로 소폭 변동) — 상세는 아래 참고 |
 
 card는 `gen_account_number_like`가 구분자 없이 13자리 이상을 만들 때 core `CreditCardDetector`의
 "구분자 없는 13~19자리" 분기와 우연히 겹칠 수 있다는 걸 이번 재측정 중 실제로 재현했다
@@ -122,6 +123,26 @@ positive 템플릿에 앵커를 반드시 포함시켰다. distractor 쪽은 기
 담당자" 사고와 같은 종류로, **AI가 새로 짠 템플릿도 예외 없이 재측정으로 검증해야 한다**는
 원칙이 이번에도 실전에서 값어치를 증명했다(수정 후 오히려 confidence 0.5→0.75로 더 좋아짐
 — "님"이 suffix 단서까지 추가로 제공했기 때문).
+
+`driver_license`(운전면허번호)는 core `DriverLicenseDetector`가 새로 추가되면서([#267](https://github.com/ChoHyeonChan/maskingtape/issues/267)/[#305](https://github.com/ChoHyeonChan/maskingtape/pull/305))
+생긴 11번째 kind다(#315). `account`/`birth_date`와 달리 **문맥 앵커 게이트가 아예 없다** —
+체크섬이 공개돼 있지 않아 core는 형식(12자리)+지역코드 유효성(11~26·28)만으로 판단하고,
+confidence는 항상 정확히 0.85로 고정된다. `_PLACEHOLDER_RE`(documents.py)에 `driver_license`가
+빠져 있어서 `{driver_license}` 템플릿 자체가 애초에 불가능했던 걸 먼저 고치고, 렌터카·채용·면허
+갱신 등 현실적인 문맥의 positive 템플릿 5개를 추가했다. distractor는 지역코드를 일부러 유효값
+밖으로 만든 `gen_invalid_driver_license_like`로 경계를 검증한다.
+
+**문맥 게이트가 없다는 설계 자체가 실제 오탐 경로임을 재측정 중 두 번 실측으로 확인했다**:
+`gen_account_number_like`(계좌번호 distractor)와 `gen_account`(진짜 계좌번호)가 구분자 없이
+정확히 12자리를 만들 때(3-3-6·3-2-3-4 패턴), 앞 2자리가 우연히 운전면허 지역코드 유효값과
+겹치면 core가 문맥·체크섬 무관하게 무조건 운전면허번호로 잡는다(300회 중 1회 재현:
+"197492740715"). 같은 세션에서 `gen_account`의 출력이 우연히 "050"으로 시작할 때도 core
+`PhoneDetector`의 050 평생번호 정규식이 12자리를 통째로 삼켜 계좌번호가 FN, phone이 FP가
+되는 **별개의** 우연한 겹침도 실측 재현했다("050763498302"). 둘 다 `gen_account_number_like`/
+`gen_account`에 card의 Luhn 우연 통과 가드(#223)와 같은 패턴으로 회귀 가드를 추가해 항상
+피하도록 고쳤다 — 새 회귀 테스트 4개로 고정했다. **핵심 시사점**: 임의의 12자리 숫자(사원번호·
+일련번호 등)가 우연히 유효 지역코드로 시작하면 실제 서비스에서도 똑같이 오탐된다는 뜻이라,
+이건 bench 데이터의 우연이 아니라 core 설계 자체의 한계다 — 아래 confidence 절 참고.
 
 `address`(주소)는 지금까지 지번·도로명·시/도 없는 시/군 표기까지 늘 동/번지(또는 도로명)를
 포함한 "완전한" 주소만 만들었다(#195). `gen_address`에 12% 확률로 시/도만(confidence 0.5)
@@ -447,8 +468,16 @@ confidence를 **항상 정확히 0.9**로만 매긴다(직접 확인: 정답 42�
 1.000으로 완전히 복구됐지만, 부분 주소(#195)가 만든 confidence 0.5(5건)/0.65(1건) 구간은
 여전히 남아있다 — 정답 address 70건 기준, 임계값 0.7에서 recall이 0.900으로, 0.95 이상에서는
 0.814까지 떨어진다.
-RRN(확률적 15.6%)·계좌번호·생년월일(둘 다 확정적 100%)에 이어 confidence 필터를 쓰면 안
-되는 근거가 하나 더 늘었다.
+
+**`driver_license`는 계좌번호·생년월일과 같은 확정적(100%) 위험이면서, 더 나쁘다.** core
+`DriverLicenseDetector`도 confidence를 **항상 정확히 0.85**로만 매긴다(직접 확인: 정답
+43건 전부 confidence 0.85) — **임계값을 0.86 이상으로만 올려도 운전면허번호가 100% 통째로
+사라진다.** 게다가 계좌·생년월일과 달리 문맥 앵커 게이트조차 없어서(위 참고), 임계값을 아무리
+낮게 유지해도 임의의 12자리 숫자가 지역코드만 맞으면 오탐되는 반대 방향 위험까지 동시에
+안고 있다 — 임계값을 "안전한 쪽"으로 조정할 여지 자체가 다른 kind보다 좁다.
+
+RRN(확률적 15.6%)·계좌번호·생년월일·운전면허번호(셋 다 확정적 100%)에 이어 confidence
+필터를 쓰면 안 되는 근거가 하나 더 늘었다.
 
 ## 이름 탐지 방식 비교 — 규칙판 vs 하이브리드(LLM)
 
@@ -537,7 +566,7 @@ JSONL — 한 줄에 문서 하나:
 ```
 
 - `start`/`end`는 파이썬 슬라이스 규약 (`text[start:end]` == 개인정보 원문)
-- `kind`는 core의 `Detection.kind`와 동일한 문자열: `rrn`, `phone`, `email`, `name`, `address`, `card`, `biz_reg`, `passport`, `account`, `birth_date`
+- `kind`는 core의 `Detection.kind`와 동일한 문자열: `rrn`, `phone`, `email`, `name`, `address`, `card`, `biz_reg`, `passport`, `account`, `birth_date`, `driver_license`
 - `difficulty`는 `easy`/`hard`/`negative` 중 하나 (없으면 evaluate.py가 `unknown`으로 취급 — 하위 호환)
 - 평가 기준: span 완전 일치(exact match)로 precision / recall / F1 산출
 - 포맷 변경은 팀장 승인 후 이 문서부터 갱신한다
