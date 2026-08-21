@@ -112,7 +112,7 @@
 
 ## 현재 정확도
 
-합성 평가 데이터셋 500건 기준 (`python -m bench.evaluators.evaluate`, **규칙 전용 모드**, 측정 기준 `<커밋 해시는 PR에서 채움>` — #315(운전면허 신규 kind) 전부 반영):
+합성 평가 데이터셋 500건 기준 (`python -m bench.evaluators.evaluate`, **규칙 전용 모드**, 측정 기준 `25c9ea7` — #315(운전면허 신규 kind) 전부 반영):
 
 | 종류 | precision | recall | F1 |
 |---|---|---|---|
