@@ -23,7 +23,14 @@ describe("DetectionSummary", () => {
       />,
     );
     expect(screen.queryByText(/발견되지 않았습니다/)).not.toBeInTheDocument();
-    expect(screen.getByText(/확신도 임계값보다 낮아 전부 가려져 있습니다/)).toBeInTheDocument();
+    expect(screen.getByText(/확신도 임계값보다 낮아 목록에서 제외됐고/)).toBeInTheDocument();
+  });
+
+  it("does not describe the excluded detections as masked/covered — they are exposed as raw text, not '가려져'", () => {
+    render(
+      <DetectionSummary detections={[]} activeFilter={null} onFilterSelect={() => {}} hiddenByThreshold />,
+    );
+    expect(screen.queryByText(/가려져 있습니다/)).not.toBeInTheDocument();
   });
 
   it("shows the total count and per-kind breakdown with Korean labels", () => {
