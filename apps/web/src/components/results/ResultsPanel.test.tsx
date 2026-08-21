@@ -58,7 +58,7 @@ describe("ResultsPanel masking strength slider (#237, direction inverted by #264
     fireEvent.change(screen.getByLabelText(/마스킹 강도/), { target: { value: "0" } });
 
     expect(screen.queryByText(/개인정보가 발견되지 않았습니다/)).not.toBeInTheDocument();
-    expect(screen.getByText(/확신도 임계값보다 낮아 전부 가려져 있습니다/)).toBeInTheDocument();
+    expect(screen.getByText(/확신도 임계값보다 낮아 목록에서 제외됐고/)).toBeInTheDocument();
     expect(screen.getByText("2건은 마스킹되지 않고 원문 그대로 표시됩니다.", { exact: false })).toBeInTheDocument();
   });
 
