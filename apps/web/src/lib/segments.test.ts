@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildSegments } from "./segments";
+import { applyMasking } from "./masking";
 import type { Detection } from "../types/detection";
 
 function detection(overrides: Partial<Detection>): Detection {
@@ -51,5 +52,22 @@ describe("buildSegments", () => {
 
   it("returns no segments for empty input", () => {
     expect(buildSegments("", [])).toEqual([]);
+  });
+
+  it("agrees with applyMasking() on which detection wins when two share the same start (#264 follow-up)", () => {
+    // 시작 위치가 같은 두 탐지가 겹칠 때, 하이라이트 미리보기(buildSegments)와 실제 내보내는
+    // 마스킹 결과(applyMasking)가 서로 다른 탐지를 고르면 화면에서 검토한 내용과 복사·다운로드
+    // 되는 결과가 어긋난다. 둘 다 "더 긴 쪽"을 고르는지 확인한다.
+    const text = "0123456789012345";
+    const shorter = detection({ kind: "phone", start: 0, end: 5 });
+    const longer = detection({ kind: "driver_license", start: 0, end: 12 });
+
+    const segments = buildSegments(text, [shorter, longer]);
+    const highlighted = segments.filter((s) => s.kind === "detection");
+    expect(highlighted).toHaveLength(1);
+    expect(highlighted[0]).toMatchObject({ detection: longer });
+
+    const masked = applyMasking(text, [shorter, longer], "label");
+    expect(masked).toBe("[운전면허]2345");
   });
 });
