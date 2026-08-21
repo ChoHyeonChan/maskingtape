@@ -17,6 +17,7 @@ from __future__ import annotations
 import random
 from dataclasses import dataclass
 
+from maskingtape.detectors.contact.phone import _LANDLINE_RE
 from maskingtape.detectors.financial.creditcard import _luhn_ok
 
 # 성씨 상위 30종(통계청 인구총조사 기준 다빈도 성씨) — 특정 인물이 아닌 통계적 분포만 참고.
@@ -318,6 +319,12 @@ def gen_account(rng: random.Random, difficulty: str = "mixed") -> Entity:
     card로도 잡혀 겹침 병합이 얽힌다. `gen_business_reg_number` distractor가 겪은 것과
     같은 종류의 우연한 겹침이라, 붙여 쓴 자릿수가 13자리 이상이면 Luhn을 확인해 우연히
     통과하면 마지막 자리를 일부러 바꿔 항상 무효로 만든다.
+
+    #315 재측정 중 실측으로 새로 발견: 붙여 쓴 12자리가 우연히 "050"으로 시작하면(3-3-6·
+    3-2-3-4 패턴에서 가능) core `PhoneDetector`의 050 평생번호 정규식(`_LANDLINE_RE`)이
+    구분자 없는 전체 12자리를 통째로 전화번호로 먼저 삼켜버려, 진짜 계좌번호가 FN(미탐)이
+    되고 동시에 phone 쪽 FP가 하나 생긴다(재현: "050763498302"). card/Luhn과 같은 종류의
+    우연한 형식 겹침이라 동일한 방식으로 걸러낸다 — 겹치면 앞자리를 "050"이 아니게 밀어낸다.
     """
     pattern = rng.choice(_ACCOUNT_GROUP_PATTERNS)
     groups = [f"{rng.randint(0, 10**n - 1):0{n}d}" for n in pattern]
@@ -333,7 +340,18 @@ def gen_account(rng: random.Random, difficulty: str = "mixed") -> Entity:
         last_digit = (int(groups[-1][-1]) + 1) % 10
         groups[-1] = groups[-1][:-1] + str(last_digit)
 
-    text = sep.join(groups) if sep else "".join(groups)
+    combined = "".join(groups)
+    if not sep and _LANDLINE_RE.fullmatch(combined):
+        groups[0] = "9" + groups[0][1:]
+        combined = "".join(groups)
+
+    # 같은 이유로 붙여 쓴 12자리가 운전면허 지역코드(11~26·28) 유효값으로 시작하면
+    # DriverLicenseDetector가 통째로 삼킨다(#267/#315) — "00"은 항상 무효라 안전하다.
+    if not sep and len(combined) == 12 and int(combined[:2]) in _DL_REGIONS:
+        groups[0] = "00" + groups[0][2:]
+        combined = "".join(groups)
+
+    text = sep.join(groups) if sep else combined
     return Entity(kind="account", text=text)
 
 
@@ -413,8 +431,9 @@ _DL_REGIONS = [*range(11, 27), 28]
 def gen_driver_license(rng, difficulty="mixed"):
     """운전면허번호 합성값 — 지역코드·연도(2)·일련(6)·체크·회차(2). 전부 가짜(체크섬 비공개).
 
-    최소 등록판(#276 core⊆bench 가드 통과용). 난이도별 표기·distractor·정확도 측정은
-    후속으로 bench가 채운다(#267 bench 파트).
+    core는 문맥 앵커 없이 형식(지역코드 11~26·28 + 12자리)만으로 판별하므로(#267), 표기는
+    구분자 다양성만 반영한다 — birth_date(#266/#271)와 달리 앵커 배치를 신경 쓸 필요는 없다.
+    #315에서 documents.py 템플릿·distractor·정확도 측정을 채웠다.
     """
     region = rng.choice(_DL_REGIONS)
     sep = rng.choice(["-", " ", ""]) if difficulty == "hard" else "-"
