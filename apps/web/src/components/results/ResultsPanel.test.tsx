@@ -58,7 +58,7 @@ describe("ResultsPanel masking strength slider (#237, direction inverted by #264
     fireEvent.change(screen.getByLabelText(/마스킹 강도/), { target: { value: "0" } });
 
     expect(screen.queryByText(/개인정보가 발견되지 않았습니다/)).not.toBeInTheDocument();
-    expect(screen.getByText(/확신도 임계값보다 낮아 전부 가려져 있습니다/)).toBeInTheDocument();
+    expect(screen.getByText(/확신도 임계값보다 낮아 목록에서 제외됐고/)).toBeInTheDocument();
     expect(screen.getByText("2건은 마스킹되지 않고 원문 그대로 표시됩니다.", { exact: false })).toBeInTheDocument();
   });
 
@@ -72,5 +72,39 @@ describe("ResultsPanel masking strength slider (#237, direction inverted by #264
     rerender(<ResultsPanel scanned={scanned} activeFilter={null} scanRun={2} onFilterSelect={() => {}} />);
 
     expect(screen.getByLabelText(/마스킹 강도/)).toHaveValue("100");
+  });
+});
+
+describe("ResultsPanel scrolls to and focuses the results on scan completion (#308)", () => {
+  it("does not scroll or focus before anything has been scanned", () => {
+    const scrollIntoView = vi.fn();
+    HTMLElement.prototype.scrollIntoView = scrollIntoView;
+
+    render(<ResultsPanel scanned={null} activeFilter={null} scanRun={0} onFilterSelect={() => {}} />);
+
+    expect(scrollIntoView).not.toHaveBeenCalled();
+  });
+
+  it("scrolls the results into view and moves focus there once a scan completes", () => {
+    const scrollIntoView = vi.fn();
+    HTMLElement.prototype.scrollIntoView = scrollIntoView;
+
+    render(<ResultsPanel scanned={scanned} activeFilter={null} scanRun={1} onFilterSelect={() => {}} />);
+
+    expect(scrollIntoView).toHaveBeenCalledWith(expect.objectContaining({ block: "start" }));
+    expect(screen.getByRole("region", { name: "분석 결과" })).toHaveFocus();
+  });
+
+  it("scrolls and focuses again on every later scan, not just the first", () => {
+    const scrollIntoView = vi.fn();
+    HTMLElement.prototype.scrollIntoView = scrollIntoView;
+
+    const { rerender } = render(
+      <ResultsPanel scanned={scanned} activeFilter={null} scanRun={1} onFilterSelect={() => {}} />,
+    );
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+
+    rerender(<ResultsPanel scanned={scanned} activeFilter={null} scanRun={2} onFilterSelect={() => {}} />);
+    expect(scrollIntoView).toHaveBeenCalledTimes(2);
   });
 });

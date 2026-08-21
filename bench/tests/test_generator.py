@@ -14,6 +14,7 @@ from maskingtape.detectors import AddressDetector
 from maskingtape.detectors import BirthDateDetector
 from maskingtape.detectors import BusinessRegistrationDetector
 from maskingtape.detectors import CreditCardDetector
+from maskingtape.detectors import DriverLicenseDetector
 from maskingtape.detectors import EmailDetector
 from maskingtape.detectors import NameDetector
 from maskingtape.detectors import PassportDetector
@@ -24,6 +25,7 @@ from bench.generator.distractors import (
     gen_account_number_like,
     gen_business_reg_number,
     gen_date,
+    gen_invalid_driver_license_like,
     gen_invalid_phone_like,
     gen_invalid_rrn_like,
     gen_passport_like_code,
@@ -551,6 +553,33 @@ def test_distractors_are_never_detected_as_account():
         assert detector.detect(text) == [], f"distractor가 account로 오탐됨: {text!r}"
 
 
+def test_generated_account_bare_form_is_never_swallowed_by_phone_detector():
+    """#315 재측정 중 실측 재현 — 붙여 쓴 계좌번호 12자리가 우연히 "050"으로 시작하면
+    (3-3-6·3-2-3-4 패턴에서 가능) core PhoneDetector의 050 평생번호 정규식이 전체를 통째로
+    전화번호로 먼저 삼켜, 진짜 계좌번호가 phone으로 오탐되며 account 쪽은 그대로 미탐이
+    된다("050763498302"). gen_account의 방어 로직이 이 경우를 항상 피해가는지 확인한다."""
+    rng = random.Random(54)
+    phone_detector = PhoneDetector()
+    account_detector = AccountDetector()
+    for _ in range(500):
+        entity = generate_entity("account", rng, "hard")  # hard만 구분자 없는 표기를 만든다
+        found = phone_detector.detect(entity.text)
+        assert found == [], f"계좌번호가 phone으로 오탐됨: {entity.text!r}"
+        text = f"계좌번호는 {entity.text}이며 입금 확인 부탁드립니다."
+        assert account_detector.detect(text) != [], f"계좌번호 자체 탐지 실패: {entity.text!r}"
+
+
+def test_generated_account_bare_form_is_never_detected_as_driver_license():
+    """#315: 같은 이유로, 붙여 쓴 계좌번호 12자리가 운전면허 지역코드(11~26·28) 유효값으로
+    시작하면 DriverLicenseDetector가 통째로 삼킬 수 있다 — gen_account의 방어 로직이 이
+    경우도 항상 피해가는지 확인한다."""
+    rng = random.Random(55)
+    detector = DriverLicenseDetector()
+    for _ in range(500):
+        entity = generate_entity("account", rng, "hard")
+        assert detector.detect(entity.text) == [], f"계좌번호가 driver_license로 오탐됨: {entity.text!r}"
+
+
 def test_generated_birth_date_passes_core_detector_with_anchor():
     """#266/#271: 생년월일은 "생년월일/생일/출생일" 앵커가 바로 앞에 있어야만 탐지되는
     문맥 앵커 방식이다 — 앵커를 붙인 문장에서는 날짜 부분만 정확히 한 건으로 잡혀야 한다
@@ -599,6 +628,55 @@ def test_plain_date_distractor_is_never_detected_as_birth_date():
         text = gen_date(rng)
         wrapped = f"결제일은 {text}입니다."
         assert detector.detect(wrapped) == [], f"앵커 없는 일반 날짜가 오탐됨: {wrapped!r}"
+
+
+def test_generated_driver_license_passes_core_detector():
+    """#267/#315: 운전면허번호는 문맥 앵커 없이 형식(지역코드 11~26·28 + 12자리)만으로
+    탐지된다 — account/birth_date와 달리 앵커 문장을 만들 필요 없이 값 자체만으로도 정확히
+    한 건, confidence 0.85로 잡혀야 한다(체크섬 비공개라 형식+지역코드까지만 확정)."""
+    rng = random.Random(50)
+    detector = DriverLicenseDetector()
+    for _ in range(100):
+        entity = generate_entity("driver_license", rng)
+        found = detector.detect(entity.text)
+        assert len(found) == 1, f"탐지 실패: {entity.text!r}"
+        assert found[0].text == entity.text
+        assert found[0].kind == "driver_license"
+        assert found[0].confidence == 0.85
+
+
+def test_driver_license_generator_covers_separator_styles():
+    """구분자(하이픈/공백/없음) 표기 다양성이 실제로 섞여 나오는지 확인한다 — easy는 항상
+    하이픈, hard는 세 가지가 다 섞여야 정상이다."""
+    rng = random.Random(51)
+    easy_samples = [generate_entity("driver_license", rng, "easy").text for _ in range(100)]
+    assert all("-" in s for s in easy_samples)
+
+    hard_samples = [generate_entity("driver_license", rng, "hard").text for _ in range(200)]
+    assert any("-" in s for s in hard_samples)
+    assert any(" " in s for s in hard_samples)
+    assert any(s.isdigit() for s in hard_samples)
+
+
+def test_invalid_driver_license_like_distractor_is_rejected_by_core_detector():
+    """#267/#315: 지역코드가 유효값(11~26, 28) 밖이면 자릿수·구분자가 완전히 같아도 core가
+    거부해야 한다 — 지역코드 경계 검증."""
+    rng = random.Random(52)
+    detector = DriverLicenseDetector()
+    for _ in range(300):
+        text = gen_invalid_driver_license_like(rng)
+        assert detector.detect(text) == [], f"무효 지역코드인데 탐지됨: {text!r}"
+
+
+def test_distractors_are_never_detected_as_driver_license():
+    """#267/#315 회귀 방지 — generate_distractor 전체 풀이 실제 문서 템플릿에 문맥 없이도
+    쓰이므로, 운전면허번호로 오탐되면 안 된다. 운전면허번호는 문맥 게이트가 없어 형식만
+    우연히 겹쳐도 오탐되는 설계라(account #180과 달리), 이 회귀 테스트의 의미가 특히 크다."""
+    rng = random.Random(53)
+    detector = DriverLicenseDetector()
+    for _ in range(300):
+        text = generate_distractor(rng)
+        assert detector.detect(text) == [], f"distractor가 driver_license로 오탐됨: {text!r}"
 
 
 def test_account_number_like_distractor_is_never_detected_as_card():

@@ -17,7 +17,8 @@ export function DetectionSummary({ detections, activeFilter, onFilterSelect, hid
     if (hiddenByThreshold) {
       return (
         <p className="summary summary--filtered" role="status">
-          ⚠ 개인정보가 탐지됐지만 확신도 임계값보다 낮아 전부 가려져 있습니다. 슬라이더를 낮추면 다시 보입니다.
+          ⚠ 개인정보가 탐지됐지만 확신도 임계값보다 낮아 목록에서 제외됐고, 마스킹되지 않은 원문 그대로 노출돼
+          있습니다. 슬라이더를 낮추면 다시 마스킹됩니다.
         </p>
       );
     }
