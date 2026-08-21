@@ -14,7 +14,7 @@ import random
 
 from maskingtape.detectors.financial.creditcard import _luhn_ok
 
-from bench.generator.entities import _ACCOUNT_GROUP_PATTERNS, _biz_reg_check_digit, _PASSPORT_TYPE_CODES
+from bench.generator.entities import _ACCOUNT_GROUP_PATTERNS, _biz_reg_check_digit, _DL_REGIONS, _PASSPORT_TYPE_CODES
 
 # core RRNDetector가 허용하는 지역번호(rrn.py 참고)에 없는 국번 — 형식은 유선전화 같지만 매칭되면 안 됨.
 _INVALID_AREA_CODES = ["09", "07", "00", "08"]
@@ -110,16 +110,44 @@ def gen_account_number_like(rng: random.Random) -> str:
     우연히 통과하면(~10% 확률) 문맥어 하드 게이트와 무관하게 card로 오탐된다(#223에서 실측
     재현: "주문번호 7957621463516"). `gen_account`와 동일하게 우연히 통과하면 마지막 자리를
     일부러 바꿔 항상 무효로 만든다.
+
+    구분자 없이 정확히 12자리가 되는 패턴(3-3-6, 3-2-3-4)은 앞 2자리가 우연히 운전면허
+    지역코드 유효값(11~26, 28)과 겹치면 `DriverLicenseDetector`가 문맥·체크섬 없이 무조건
+    잡는다(#267/#315 — 실측 재현: 300회 중 1회, "197492740715"). card와 동일한 이유로
+    앞 2자리를 무효 지역코드로 밀어낸다.
     """
     pattern = rng.choice(_ACCOUNT_GROUP_PATTERNS)
     groups = [f"{rng.randint(0, 10**n - 1):0{n}d}" for n in pattern]
     sep = rng.choice(["-", ""])
+    combined = "".join(groups)
 
-    if not sep and sum(len(g) for g in groups) >= 13 and _luhn_ok("".join(groups)):
+    if not sep and len(combined) >= 13 and _luhn_ok(combined):
         last_digit = (int(groups[-1][-1]) + 1) % 10
         groups[-1] = groups[-1][:-1] + str(last_digit)
+        combined = "".join(groups)
 
-    return sep.join(groups) if sep else "".join(groups)
+    if not sep and len(combined) == 12 and int(combined[:2]) in _DL_REGIONS:
+        # "00"은 지역코드 유효값(11~26, 28) 밖이라 항상 안전하다 — Luhn처럼 "우연히 통과"를
+        # 피해가는 확률적 보정이 아니라, 애초에 겹칠 수 없는 값으로 고정한다.
+        groups[0] = "00" + groups[0][2:]
+        combined = "".join(groups)
+
+    return sep.join(groups) if sep else combined
+
+
+def gen_invalid_driver_license_like(rng: random.Random) -> str:
+    """운전면허번호와 자릿수·구분자는 같지만 지역코드가 유효값(11~26, 28) 밖인 12자리 숫자 —
+    DriverLicenseDetector의 지역코드 경계가 실제로 걸러내는지 확인하는 용도(#267/#315).
+
+    core는 체크섬이 비공개라(driver_license.py) 지역코드 유효성만으로 판별한다. 문맥 게이트도
+    없어서(account #180과 달리) 이 값은 지역코드만 무효화하면 어떤 문장에 심어도 안전하다 —
+    반대로 말하면 지역코드가 우연히 유효한 임의의 12자리 숫자(사원번호 등)는 core가 문맥과
+    무관하게 무조건 운전면허번호로 오탐한다는 뜻이라, 이 함수는 그 경계선만 검증한다.
+    """
+    invalid_region = rng.choice([r for r in range(0, 100) if r not in _DL_REGIONS])
+    sep = rng.choice(["-", ""])
+    body = f"{rng.randint(0, 99):02d}{sep}{rng.randint(0, 999999):06d}{sep}{rng.randint(0, 99):02d}"
+    return f"{invalid_region:02d}{sep}{body}"
 
 
 _DISTRACTOR_GENERATORS = [
@@ -134,6 +162,7 @@ _DISTRACTOR_GENERATORS = [
     gen_region_mention_like,
     gen_passport_like_code,
     gen_account_number_like,
+    gen_invalid_driver_license_like,
 ]
 
 
