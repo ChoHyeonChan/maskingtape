@@ -18,7 +18,7 @@ from bench.generator.entities import ALL_KINDS, generate_entity
 
 # distractor는 개인정보가 아니므로 라벨을 붙이지 않는다 — _NON_LABEL_KINDS에서 분기 처리.
 _PLACEHOLDER_RE = re.compile(
-    r"\{(name|phone|email|rrn|address|card|biz_reg|passport|account|birth_date|distractor)\}"
+    r"\{(name|phone|email|rrn|address|card|biz_reg|passport|account|birth_date|driver_license|distractor)\}"
 )
 _NON_LABEL_KINDS = frozenset({"distractor"})
 
@@ -108,6 +108,14 @@ _TEMPLATES = [
     "이력서 접수: {name}, 생일 {birth_date}, 연락처 {phone}",
     "{name}님의 생년월일은 {birth_date}이고, 주민등록번호는 {rrn}입니다.",
     "출생일이 {birth_date}인 신청자 {name}님의 서류가 접수되었습니다.",
+    # 운전면허번호(driver_license) — core는 문맥 앵커 없이 형식(지역코드 11~26·28 + 12자리)만
+    # 보고 잡는다(#267/#315). 앵커가 필수는 아니지만, 실제 문서에서는 자연스럽게 문맥과 함께
+    # 등장하므로 렌터카/채용/면허 갱신 등 현실적인 업무 맥락으로 작성한다.
+    "운전면허번호 {driver_license}로 본인 확인을 진행했습니다.",
+    "렌터카 대여 시 {name}님의 운전면허번호 {driver_license}를 등록했습니다.",
+    "신규 채용자 {name}, 운전면허번호는 {driver_license}이며 연락처는 {phone}입니다.",
+    "면허 갱신 신청: {name}, 면허번호 {driver_license}",
+    "택배 배송원 등록 - 운전면허번호 {driver_license}, 연락처 {phone}",
 ]
 
 # 개인정보가 전혀 없는(또는 distractor만 있는) 템플릿 — 정답 라벨이 0개인 문서를 만든다.

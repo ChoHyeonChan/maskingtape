@@ -63,7 +63,7 @@ python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl
 
 합성 데이터셋(500건)도 시드로 고정돼 있어 바이트 단위로 똑같이 재생성된다 — `python -m bench.generate_dataset --count 500 --seed 42 --out bench/datasets/synth_v1.jsonl`
 
-**측정 기준: `be5b26c` · 규칙 전용 모드(LLM 미사용)**
+**측정 기준: `25c9ea7` · 규칙 전용 모드(LLM 미사용)**
 
 | 종류 | precision | recall | F1 |
 |---|---|---|---|
@@ -76,8 +76,9 @@ python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl
 | 여권번호 | 1.000 | 1.000 | 1.000 |
 | 계좌번호 | 1.000 | 1.000 | 1.000 |
 | 생년월일 | 1.000 | 1.000 | 1.000 |
-| 이름 (규칙 전용) | 0.857 | 0.662 | 0.747 |
-| **전체** | **0.953** | **0.869** | **0.909** |
+| 운전면허번호 | 1.000 | 1.000 | 1.000 |
+| 이름 (규칙 전용) | 0.875 | 0.658 | 0.751 |
+| **전체** | **0.961** | **0.872** | **0.915** |
 
 번호·카드·사업자등록번호·여권번호·계좌번호·생년월일은 형태(와 있는 경우 체크섬)로 완전히
 잡힌다(유선전화·plus 이메일·서브도메인·여러 문장으로 구성된 복합 문서까지 섞어도 흔들리지
@@ -88,7 +89,15 @@ python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl
 [#266](https://github.com/ChoHyeonChan/maskingtape/issues/266)/[#271](https://github.com/ChoHyeonChan/maskingtape/pull/271)에서
 각각 새 kind를 추가해 측정 사각지대를 없앴다 — 생년월일은 10번째 kind이자 계좌번호와 같은
 문맥 앵커 하드 게이트 설계라, confidence가 **항상 정확히 0.9로 고정**된다(임계값 0.91
-이상이면 100% 소실, 아래 참고). 주소는 [#195](https://github.com/ChoHyeonChan/maskingtape/issues/195)/[#196](https://github.com/ChoHyeonChan/maskingtape/issues/196)에서
+이상이면 100% 소실, 아래 참고). **운전면허번호**는 [#267](https://github.com/ChoHyeonChan/maskingtape/issues/267)에서
+core가 추가한 11번째 kind로, 체크섬이 비공개라 형식+지역코드(11~26·28)만으로 판단해
+confidence가 **항상 정확히 0.85로 고정**되고 — 계좌·생년월일과 달리 **문맥 앵커 게이트조차
+없다.** 즉 우연히 유효 지역코드로 시작하는 임의의 12자리 숫자는 문맥과 무관하게 무조건
+운전면허번호로 오탐된다는 뜻이라, [#315](https://github.com/ChoHyeonChan/maskingtape/issues/315)에서
+벤치 데이터를 채우다가 계좌번호 생성기 자신의 출력(구분자 없는 12자리)이 정확히 이 경계에
+두 번 걸리는 걸 실측으로 찾았다 — 한 번은 이 운전면허 지역코드 자체와, 한 번은 우연히도
+core `PhoneDetector`의 050 평생번호 정규식과. 둘 다 생성기에 회귀 가드를 추가해 항상
+피하도록 고쳤다(카드 Luhn 우연 통과 가드와 같은 패턴). 주소는 [#195](https://github.com/ChoHyeonChan/maskingtape/issues/195)/[#196](https://github.com/ChoHyeonChan/maskingtape/issues/196)에서
 시/도명 뒤 **조사** 미탐 버그를, [#248](https://github.com/ChoHyeonChan/maskingtape/issues/248)에서
 **계사 어미**("입니다"/"예요") 미탐도 찾아 core [#252](https://github.com/ChoHyeonChan/maskingtape/pull/252)가
 전부 고쳐 recall이 1.000으로 완전히 복구됐다(직접 재확인함). 주민등록번호는 [#159](https://github.com/ChoHyeonChan/maskingtape/issues/159)에서
