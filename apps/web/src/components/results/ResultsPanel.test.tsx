@@ -74,3 +74,37 @@ describe("ResultsPanel masking strength slider (#237, direction inverted by #264
     expect(screen.getByLabelText(/마스킹 강도/)).toHaveValue("100");
   });
 });
+
+describe("ResultsPanel scrolls to and focuses the results on scan completion (#308)", () => {
+  it("does not scroll or focus before anything has been scanned", () => {
+    const scrollIntoView = vi.fn();
+    HTMLElement.prototype.scrollIntoView = scrollIntoView;
+
+    render(<ResultsPanel scanned={null} activeFilter={null} scanRun={0} onFilterSelect={() => {}} />);
+
+    expect(scrollIntoView).not.toHaveBeenCalled();
+  });
+
+  it("scrolls the results into view and moves focus there once a scan completes", () => {
+    const scrollIntoView = vi.fn();
+    HTMLElement.prototype.scrollIntoView = scrollIntoView;
+
+    render(<ResultsPanel scanned={scanned} activeFilter={null} scanRun={1} onFilterSelect={() => {}} />);
+
+    expect(scrollIntoView).toHaveBeenCalledWith(expect.objectContaining({ block: "start" }));
+    expect(screen.getByRole("region", { name: "분석 결과" })).toHaveFocus();
+  });
+
+  it("scrolls and focuses again on every later scan, not just the first", () => {
+    const scrollIntoView = vi.fn();
+    HTMLElement.prototype.scrollIntoView = scrollIntoView;
+
+    const { rerender } = render(
+      <ResultsPanel scanned={scanned} activeFilter={null} scanRun={1} onFilterSelect={() => {}} />,
+    );
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+
+    rerender(<ResultsPanel scanned={scanned} activeFilter={null} scanRun={2} onFilterSelect={() => {}} />);
+    expect(scrollIntoView).toHaveBeenCalledTimes(2);
+  });
+});

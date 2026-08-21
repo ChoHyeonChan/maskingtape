@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DetectionSummary } from "./DetectionSummary";
 import { HighlightedText } from "./HighlightedText";
 import type { MaskMode } from "../../lib/masking";
@@ -21,9 +21,20 @@ export function ResultsPanel({ scanned, activeFilter, scanRun, maskMode = "mask"
   // 일치해야 실수로 슬라이더를 조작해도 위험한 방향(노출)이 아니라 안전한 방향으로 치우친다(#264).
   // 새 탐지 결과가 나올 때마다 항상 최댓값(전부 마스킹)으로 되돌아간다(#237 회귀 없음).
   const [maskingStrength, setMaskingStrength] = useState(MAX_STRENGTH);
+  const resultsRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     setMaskingStrength(MAX_STRENGTH);
+  }, [scanRun]);
+
+  // 모바일 단일 컬럼 레이아웃에서는 결과가 뷰포트 아래에 생겨, 스캔 버튼을 눌러도 화면에
+  // 아무 변화가 안 보여 "반응이 없다"로 오해하기 쉽다 — 결과로 스크롤·포커스를 옮겨 확실히
+  // 알려준다(#308). scanRun이 0(아직 스캔 전)일 때는 건너뛴다.
+  useEffect(() => {
+    if (scanRun === 0) return;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    resultsRef.current?.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth", block: "start" });
+    resultsRef.current?.focus();
   }, [scanRun]);
 
   function handleFilterSelect(kind: string | null) {
@@ -52,7 +63,7 @@ export function ResultsPanel({ scanned, activeFilter, scanRun, maskMode = "mask"
   }, [activeFilterStillVisible, onFilterSelect]);
 
   return (
-    <section className="panel panel--results" aria-label="분석 결과">
+    <section className="panel panel--results" aria-label="분석 결과" ref={resultsRef} tabIndex={-1}>
       <div className="panel__header">
         <div>
           <h2 data-coach="analysis-result">
