@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from pathlib import Path
 
 from maskingtape.detectors import default_detectors, llm_detectors
@@ -63,6 +64,10 @@ def format_comparison(rule_counts: Counts, llm_counts: Counts | None) -> str:
 
 
 def main() -> None:
+    # #317: Windows 콘솔 기본 코드페이지(cp949)는 Ollama 미가용 폴백 문구의 em dash(—)를
+    # 인코딩 못 해 print에서 크래시한다(정적 확인) — 플랫폼 기본 설정과 무관하게 항상
+    # 성공하도록 stdout을 UTF-8로 강제한다.
+    sys.stdout.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(description="이름 탐지 방식(규칙판 vs 하이브리드) 정확도 비교")
     parser.add_argument("dataset", type=Path, help="평가할 JSONL 데이터셋 경로")
     parser.add_argument("--model", type=str, default="qwen2.5:7b", help="비교에 쓸 로컬 Ollama 모델")
