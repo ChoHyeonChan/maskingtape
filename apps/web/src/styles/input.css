@@ -134,6 +134,14 @@
   animation: textRevealSweep 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/* 스윕 오버레이는 결과 상태의 실제 textarea(.input-panel--result textarea, 위쪽의
+   더 좁은 padding)와 같은 자리에서 시작해야 한다 — 패딩이 다르면 스윕 도중엔 글자가
+   안쪽(가운데처럼)에 있다가 오버레이가 사라지는 순간 실제 textarea의 좁은 패딩으로
+   툭 튀어 코너에 붙는 것처럼 보인다. */
+.input-panel--result .input-panel__result-reveal {
+  padding: 0.35rem 0.25rem 0.6rem;
+}
+
 .input-panel textarea {
   width: 100%;
   padding: 1.45rem 1.55rem 3.45rem;
