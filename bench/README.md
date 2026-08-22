@@ -389,11 +389,13 @@ confidence 절 참고). label/pseudonym도 같은 패턴(유출은 전부 `name`
 
 **pseudonym 라벨 폴백 경로 검증**([#230](https://github.com/ChoHyeonChan/maskingtape/issues/230)):
 `PseudonymAnonymizer`의 `_GENERATORS`는 `name`/`phone`/`email`/`rrn`/`card`/`address` 6종에만
-가짜 값 생성기를 두고, 나머지 3종(`biz_reg`/`passport`/`account` — 전부 core에 나중에 추가된
-kind)은 docstring에 명시된 대로 `[라벨]` 형태로 폴백한다. 원본 유출은 없지만(직접 확인함),
-이 3종은 core에 새 kind가 추가될 때마다 pseudonym.py가 갱신되지 않은 채 지금까지 방치돼
-있었고 bench도 이 폴백 경로를 한 번도 검증한 적이 없었다 — 회귀 테스트로 원본 미유출과
-라벨 형식을 고정해뒀다.
+가짜 값 생성기를 두고, 나머지(`biz_reg`/`passport`/`account`/`birth_date`/`driver_license` —
+전부 core에 나중에 추가된 kind)는 docstring에 명시된 대로 `[라벨]` 형태로 폴백한다. 원본
+유출은 없지만(직접 확인함), 이 kind들은 core에 새로 추가될 때마다 pseudonym.py가 갱신되지
+않은 채 매번 방치돼 왔고, `DEFAULT_LABELS` 등록이 함께 빠지는 사고가 birth_date(#282)·
+driver_license(#311) 둘 다에서 실제로 터졌다 — 회귀 테스트로 원본 미유출과 한글 라벨 형식을
+고정해뒀다(biz_reg/passport/account는 공용 테스트로, birth_date/driver_license는 실제로
+DEFAULT_LABELS 누락을 겪은 이력이 있어 전용 테스트로 분리).
 
 **label(numbered=True) 동일 개체 연결 검증**: `LabelAnonymizer(numbered=True)`는 같은 값이
 반복되면 같은 번호(`[전화번호1]`)를 매겨 "동일 인물/번호"라는 문맥 정보를 보존한다고
