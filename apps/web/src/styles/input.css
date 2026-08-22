@@ -458,31 +458,35 @@
   border: 1px solid var(--border) !important;
 }
 
+/* 컨테이너 크기를 두 사각형이 만드는 대각선 번짐의 실제 경계 상자와 똑같이 맞춰서,
+   버튼이 이 아이콘을 가운데 정렬할 때 위아래·좌우 여백이 자동으로 똑같아지게 한다
+   (사각형 두 개가 컨테이너보다 작게 떠 있으면 남는 공간이 한쪽으로 쏠려 보인다). */
 .copy-icon {
   position: relative;
-  width: 1.35rem;
-  height: 1.35rem;
+  width: 0.82rem;
+  height: 0.96rem;
 }
 
 .copy-icon::before,
 .copy-icon::after {
   content: "";
   position: absolute;
-  width: 0.78rem;
-  height: 0.92rem;
-  border: 3px solid currentColor;
-  border-radius: 6px;
+  width: 0.64rem;
+  height: 0.78rem;
+  border: 2px solid currentColor;
+  border-radius: 4px;
+  box-sizing: border-box;
 }
 
 .copy-icon::before {
-  left: 0.03rem;
-  top: 0.34rem;
+  left: 0;
+  bottom: 0;
   opacity: 1;
 }
 
 .copy-icon::after {
-  right: 0.02rem;
-  top: 0.03rem;
+  right: 0;
+  top: 0;
   background: rgba(255, 255, 255, 0.9);
 }
 
