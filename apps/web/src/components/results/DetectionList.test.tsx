@@ -22,12 +22,28 @@ describe("DetectionList", () => {
         minStrength={0}
         maxStrength={100}
         strengthStep={5}
-        confidenceThreshold={0}
         onStrengthChange={() => {}}
         onToggle={() => {}}
       />,
     );
     expect(screen.getByText(/발견되지 않았습니다/)).toBeInTheDocument();
+  });
+
+  it("does not show a confidence-threshold percentage next to the bulk control's own value — showing two different-looking numbers together was confusing", () => {
+    render(
+      <DetectionList
+        rows={[row({ start: 0, end: 3 })]}
+        maskingStrength={60}
+        minStrength={0}
+        maxStrength={100}
+        strengthStep={5}
+        onStrengthChange={() => {}}
+        onToggle={() => {}}
+      />,
+    );
+
+    expect(screen.queryByText(/이상은 기본으로 가립니다/)).not.toBeInTheDocument();
+    expect(screen.getByText(/강도가 높을수록 확신도 낮은 항목까지 자동으로 가립니다/)).toBeInTheDocument();
   });
 
   it("renders one row per detection with kind, snippet, and confidence, and a live count summary", () => {
@@ -42,7 +58,6 @@ describe("DetectionList", () => {
         minStrength={0}
         maxStrength={100}
         strengthStep={5}
-        confidenceThreshold={50}
         onStrengthChange={() => {}}
         onToggle={() => {}}
       />,
@@ -67,7 +82,6 @@ describe("DetectionList", () => {
         minStrength={0}
         maxStrength={100}
         strengthStep={5}
-        confidenceThreshold={0}
         onStrengthChange={() => {}}
         onToggle={onToggle}
       />,
@@ -86,7 +100,6 @@ describe("DetectionList", () => {
         minStrength={0}
         maxStrength={100}
         strengthStep={5}
-        confidenceThreshold={100}
         onStrengthChange={() => {}}
         onToggle={() => {}}
       />,
@@ -106,7 +119,6 @@ describe("DetectionList", () => {
         minStrength={0}
         maxStrength={100}
         strengthStep={5}
-        confidenceThreshold={20}
         onStrengthChange={onStrengthChange}
         onToggle={() => {}}
       />,
@@ -125,7 +137,6 @@ describe("DetectionList", () => {
         minStrength={0}
         maxStrength={100}
         strengthStep={5}
-        confidenceThreshold={0}
         onStrengthChange={() => {}}
         onToggle={() => {}}
       />,

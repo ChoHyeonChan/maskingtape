@@ -100,7 +100,6 @@ export function ResultsPanel({ scanned, scanRun, maskMode = "mask", onMaskedText
           minStrength={0}
           maxStrength={MAX_STRENGTH}
           strengthStep={STRENGTH_STEP}
-          confidenceThreshold={confidenceThreshold}
           onStrengthChange={setMaskingStrength}
           onToggle={handleToggle}
         />
