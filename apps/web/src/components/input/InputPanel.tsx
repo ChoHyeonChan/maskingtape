@@ -59,13 +59,17 @@ export function InputPanel({
   const isTooLong = text.length > MAX_TEXT_LENGTH;
   const canScan = trimmedLength > 0 && !isTooLong;
 
+  // 오른쪽 "탐지 결과 조정" 패널에서 토글·일괄 조정을 바꿔도 이 텍스트가 바뀐다 — 두 패널이
+  // 화면에서 멀리 떨어져 있어 그냥 두면 왼쪽이 바뀐 걸 못 알아채기 쉽다. 처음 스캔 결과가
+  // 나올 때뿐 아니라 text 자체가 바뀔 때마다 같은 스윕을 다시 재생해 "여기 바뀌었다"를
+  // 알려준다(#237 계승 — 토글이 실제로 반영되는 걸 시각적으로도 확인시켜 준다).
   useEffect(() => {
     if (!hasResult || resultVersion === 0) return;
 
     setRevealingResult(true);
     const timeout = window.setTimeout(() => setRevealingResult(false), 950);
     return () => window.clearTimeout(timeout);
-  }, [hasResult, resultVersion]);
+  }, [hasResult, resultVersion, text]);
 
   async function handleScan() {
     if (hasResult) {

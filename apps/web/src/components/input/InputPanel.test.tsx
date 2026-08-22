@@ -139,6 +139,37 @@ describe("InputPanel result view accessibility", () => {
   });
 });
 
+describe("InputPanel replays the reveal sweep when the masked text itself changes (#237 follow-up)", () => {
+  it("replays the sweep when a toggle in the results panel changes the text, even though resultVersion (scanRun) stays the same", () => {
+    const { rerender } = render(
+      <InputPanel
+        text="김철수 010-****-5678"
+        hasResult
+        resultVersion={1}
+        onTextChange={vi.fn()}
+        onClear={vi.fn()}
+        onResult={vi.fn()}
+      />,
+    );
+
+    // 항목 하나를 노출시켜서 텍스트만 바뀐 상황(예: DetectionList의 토글) — scanRun은 그대로.
+    rerender(
+      <InputPanel
+        text="김철수 010-1234-5678"
+        hasResult
+        resultVersion={1}
+        onTextChange={vi.fn()}
+        onClear={vi.fn()}
+        onResult={vi.fn()}
+      />,
+    );
+
+    const textarea = screen.getByRole("textbox", { name: "마스킹된 탐지 결과" });
+    expect(textarea).toHaveClass("is-text-revealing");
+    expect(screen.getByText("김철수 010-1234-5678", { selector: ".input-panel__result-reveal" })).toBeInTheDocument();
+  });
+});
+
 describe("InputPanel export actions (복사·파일로 저장이 이 패널에 모임)", () => {
   it("copies the exact text shown in this panel, not something recomputed elsewhere", async () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
