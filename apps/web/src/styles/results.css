@@ -1,10 +1,10 @@
-.confidence-stepper {
+.confidence-dial {
   display: flex;
   align-items: center;
   gap: 0.6rem;
 }
 
-.confidence-stepper__btn {
+.confidence-dial__btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -19,23 +19,70 @@
   cursor: pointer;
 }
 
-.confidence-stepper__btn:disabled {
+.confidence-dial__btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
-.confidence-stepper__value {
-  min-width: 3.2rem;
-  text-align: center;
-  font-size: 0.98rem;
-  font-weight: 800;
-  color: var(--text-primary);
+/* 드래그로 조정 가능한 원형 링 — 감싼 값만큼(--dial-fill) 채워지고, 가장자리의
+   손잡이(핸들)를 마우스/터치로 끌면 그 각도에 맞는 값으로 즉시 바뀐다. */
+.confidence-dial__ring {
+  position: relative;
+  flex: 0 0 auto;
+  width: 3.6rem;
+  height: 3.6rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: conic-gradient(var(--brand-blue) var(--dial-fill, 0%), var(--brand-blue-soft) 0);
+  cursor: grab;
+  touch-action: none;
 }
 
-.confidence-stepper__value:focus-visible {
+.confidence-dial__ring.is-dragging {
+  cursor: grabbing;
+}
+
+.confidence-dial__ring::before {
+  content: "";
+  position: absolute;
+  inset: 0.36rem;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.confidence-dial__ring:focus-visible {
   outline: 2px solid var(--brand-blue);
   outline-offset: 2px;
-  border-radius: 4px;
+}
+
+.confidence-dial__handle-track {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.confidence-dial__handle {
+  position: absolute;
+  top: 0.08rem;
+  left: 50%;
+  width: 0.55rem;
+  height: 0.55rem;
+  margin-left: -0.275rem;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid var(--brand-blue);
+  box-shadow: 0 1px 3px rgba(16, 32, 61, 0.28);
+}
+
+.confidence-dial__value {
+  position: relative;
+  z-index: 1;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--text-primary);
 }
 
 .detect-empty {
