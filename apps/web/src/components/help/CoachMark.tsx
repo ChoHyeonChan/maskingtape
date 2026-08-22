@@ -207,13 +207,13 @@ export function CoachMark({ onDismiss, variant }: Props) {
         </div>
       ))}
 
+      <div className="coachmark__dismiss-hint" aria-hidden="true">
+        아무 데나 누르면 닫힙니다
+      </div>
+
       <div className="coachmark__mini">
         <strong>{mini.title}</strong>
         <span>{mini.body}</span>
-      </div>
-
-      <div className="coachmark__dismiss-hint" aria-hidden="true">
-        아무 데나 누르면 닫힙니다
       </div>
     </div>
   );
