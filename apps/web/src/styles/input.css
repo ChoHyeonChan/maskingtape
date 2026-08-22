@@ -134,6 +134,14 @@
   animation: textRevealSweep 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/* 스윕 오버레이는 결과 상태의 실제 textarea(.input-panel--result textarea, 위쪽의
+   더 좁은 padding)와 같은 자리에서 시작해야 한다 — 패딩이 다르면 스윕 도중엔 글자가
+   안쪽(가운데처럼)에 있다가 오버레이가 사라지는 순간 실제 textarea의 좁은 패딩으로
+   툭 튀어 코너에 붙는 것처럼 보인다. */
+.input-panel--result .input-panel__result-reveal {
+  padding: 0.35rem 0.25rem 0.6rem;
+}
+
 .input-panel textarea {
   width: 100%;
   padding: 1.45rem 1.55rem 3.45rem;
@@ -210,8 +218,7 @@
 }
 
 .input-panel__presets-label,
-.input-panel__sample,
-.input-panel__upload {
+.input-panel__sample {
   min-height: 2.25rem;
   display: inline-flex;
   align-items: center;
@@ -231,14 +238,76 @@
   list-style: none;
 }
 
-.input-panel__sample,
-.input-panel__upload {
+.input-panel__sample {
   padding: 0 0.78rem;
+}
+
+/* 예제 불러오기 자리와 달리, "내 파일을 올린다"는 다른 성격의 동작이라 텍스트 알약이
+   아니라 아이콘 버튼으로 구분해 둔다 — 대신 툴바 맨 앞으로 옮겨 우선순위를 살렸다. */
+.input-panel__upload {
+  flex: 0 0 auto;
+  width: 2.25rem;
+  height: 2.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.input-panel__upload:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--brand-blue) 32%, var(--border));
+  color: var(--brand-blue);
 }
 
 .input-panel__upload:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* 화살표(줄기+삼각 머리)가 위로 향한, 이 앱의 다른 유니코드 아이콘(⬇ 다운로드 등)과
+   같은 계열의 순수 CSS 도형 — 외부 아이콘 자산·라이선스 문제 없이 직접 그린다. */
+.upload-icon {
+  position: relative;
+  width: 1.1rem;
+  height: 1.15rem;
+}
+
+/* 화살표(줄기+삼각머리를 한 다각형으로) — 일반적인 "업로드" 픽토그램 실루엣을
+   직접 그린 것으로, 특정 아이콘 세트의 자산을 가져오거나 베낀 게 아니다. */
+.upload-icon::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 0.64rem;
+  height: 0.62rem;
+  background: currentColor;
+  clip-path: polygon(50% 0%, 100% 46%, 68% 46%, 68% 100%, 32% 100%, 32% 46%, 0% 46%);
+  transform: translateX(-50%);
+}
+
+.upload-icon::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 0.98rem;
+  height: 0.34rem;
+  box-sizing: border-box;
+  border: 0.15rem solid currentColor;
+  border-top: 0;
+  border-radius: 0 0 0.14rem 0.14rem;
+  transform: translateX(-50%);
+}
+
+/* "파일로 저장"용 — 같은 화살표+트레이 도형에서 화살표만 아래로 뒤집는다(같은 다각형의
+   세로 대칭). 트레이는 그대로 둬 "내려받아 담는다"는 뜻이 유지되게 한다. */
+.upload-icon--save::before {
+  clip-path: polygon(50% 100%, 100% 54%, 68% 54%, 68% 0%, 32% 0%, 32% 54%, 0% 54%);
 }
 
 /* 파일 선택은 숨긴 input을 버튼으로 대신 트리거한다 — 화면엔 항상 버튼만 보인다. */
@@ -397,31 +466,35 @@
   border: 1px solid var(--border) !important;
 }
 
+/* 컨테이너 크기를 두 사각형이 만드는 대각선 번짐의 실제 경계 상자와 똑같이 맞춰서,
+   버튼이 이 아이콘을 가운데 정렬할 때 위아래·좌우 여백이 자동으로 똑같아지게 한다
+   (사각형 두 개가 컨테이너보다 작게 떠 있으면 남는 공간이 한쪽으로 쏠려 보인다). */
 .copy-icon {
   position: relative;
-  width: 1.35rem;
-  height: 1.35rem;
+  width: 0.82rem;
+  height: 0.96rem;
 }
 
 .copy-icon::before,
 .copy-icon::after {
   content: "";
   position: absolute;
-  width: 0.78rem;
-  height: 0.92rem;
-  border: 3px solid currentColor;
-  border-radius: 6px;
+  width: 0.64rem;
+  height: 0.78rem;
+  border: 2px solid currentColor;
+  border-radius: 4px;
+  box-sizing: border-box;
 }
 
 .copy-icon::before {
-  left: 0.03rem;
-  top: 0.34rem;
+  left: 0;
+  bottom: 0;
   opacity: 1;
 }
 
 .copy-icon::after {
-  right: 0.02rem;
-  top: 0.03rem;
+  right: 0;
+  top: 0;
   background: rgba(255, 255, 255, 0.9);
 }
 

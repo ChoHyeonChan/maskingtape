@@ -35,7 +35,7 @@ const TARGET_COPY: Record<TargetKey, string> = {
   presets: "입력할 문장이 없다면 예제로 먼저 확인해 보세요.",
   scan: "텍스트를 입력한 뒤 탐지를 실행하면 결과가 오른쪽에 표시됩니다.",
   "masked-result": "마스킹된 결과가 여기 표시돼요. 복사 버튼으로 바로 가져갈 수 있어요.",
-  "analysis-result": "탐지된 개인정보 종류와 확신도를 여기서 확인하고, 카드를 눌러 필터링할 수 있어요.",
+  "analysis-result": "탐지된 개인정보를 항목별로 확인하고, 토글로 가릴지 보일지 직접 정할 수 있어요.",
 };
 
 // 노트가 대상 위/아래 중 어느 쪽에 뜨는지 — scan 버튼은 패널 아래쪽에 있어 노트를 아래에 두면
@@ -56,7 +56,7 @@ const TARGET_PADDING: Record<TargetKey, number> = {
 
 const MINI_COPY: Record<Variant, { title: string; body: string }> = {
   intro: { title: "처음이라면", body: "예제 선택, 개인정보 탐지, 결과에서 값 가리기 순서로 살펴보세요." },
-  result: { title: "완료!", body: "카드를 눌러 필터링하고, 하이라이트된 값을 눌러 직접 가려볼 수 있어요." },
+  result: { title: "완료!", body: "항목별 토글로 가릴지 보일지 직접 정할 수 있어요." },
 };
 
 function expandRect(rect: DOMRect, padding: number): Rect {
@@ -206,6 +206,10 @@ export function CoachMark({ onDismiss, variant }: Props) {
           {target.label}
         </div>
       ))}
+
+      <div className="coachmark__dismiss-hint" aria-hidden="true">
+        아무 데나 누르면 닫힙니다
+      </div>
 
       <div className="coachmark__mini">
         <strong>{mini.title}</strong>
