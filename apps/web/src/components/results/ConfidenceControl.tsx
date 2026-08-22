@@ -65,6 +65,9 @@ export function ConfidenceControl({ value, min, max, step, onChange }: Props) {
   }
 
   function handleMouseDown(event: ReactMouseEvent<HTMLDivElement>) {
+    // 드래그 중 안의 "N%" 텍스트가 브라우저 기본 텍스트 선택(파란 하이라이트)으로
+    // 잡히는 걸 막는다 — 클릭 몇 번만 빠르게 해도 쉽게 발생한다.
+    event.preventDefault();
     startDrag(event.clientX, event.clientY);
   }
 
