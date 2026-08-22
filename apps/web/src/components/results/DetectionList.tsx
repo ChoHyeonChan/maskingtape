@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { ConfidenceControl } from "./ConfidenceControl";
 import { KIND_COLORS, KIND_LABELS } from "../../types/detection";
 import type { Detection } from "../../types/detection";
@@ -19,12 +18,13 @@ interface Props {
   confidenceThreshold: number;
   onStrengthChange: (next: number) => void;
   onToggle: (detection: Detection) => void;
-  maskedText: string;
 }
 
 /**
  * 탐지된 개인정보를 항목 하나하나로 나열하고, 각 항목의 가림/보임을 실제로 제어한다.
  * (예전 카드 그리드는 필터 UI였을 뿐 실제 마스킹 결과에 영향이 없었다 — 이제 토글이 진짜로 반영된다.)
+ * 복사·다운로드는 "마스킹 결과" 패널(InputPanel) 쪽에 있다 — 최종 텍스트가 이미 거기
+ * 표시되므로 내보내기 동작도 그쪽에 모아 중복을 없앴다.
  */
 export function DetectionList({
   rows,
@@ -35,27 +35,9 @@ export function DetectionList({
   confidenceThreshold,
   onStrengthChange,
   onToggle,
-  maskedText,
 }: Props) {
-  const [copied, setCopied] = useState(false);
   const maskedCount = rows.filter((row) => row.masked).length;
   const exposedCount = rows.length - maskedCount;
-
-  async function copyMaskedResult() {
-    await navigator.clipboard.writeText(maskedText);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1400);
-  }
-
-  function downloadMaskedResult() {
-    const blob = new Blob([maskedText], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "masked-result.txt";
-    link.click();
-    URL.revokeObjectURL(url);
-  }
 
   if (rows.length === 0) {
     return (
@@ -116,27 +98,6 @@ export function DetectionList({
           );
         })}
       </ul>
-
-      <div className="detect__export">
-        <button
-          type="button"
-          className="detect__export-btn"
-          onClick={copyMaskedResult}
-          aria-label={copied ? "마스킹 결과 복사됨" : "마스킹 결과 복사"}
-        >
-          <span className="copy-icon" aria-hidden="true" />
-          <span>마스킹 결과 복사</span>
-        </button>
-        <button type="button" className="detect__export-btn" onClick={downloadMaskedResult}>
-          <span aria-hidden="true">⬇</span>
-          <span>다운로드</span>
-        </button>
-        {copied && (
-          <span className="detect__copy-toast" role="status">
-            복사되었습니다
-          </span>
-        )}
-      </div>
     </div>
   );
 }

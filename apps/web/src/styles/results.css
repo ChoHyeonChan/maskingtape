@@ -214,56 +214,6 @@
   transform: translateX(2.9rem);
 }
 
-.detect__export {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-}
-
-.detect__export-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.52rem;
-  min-height: 2.35rem;
-  padding: 0 0.85rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.9);
-  color: var(--text-primary);
-  font-size: 0.82rem;
-  font-weight: 900;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(24, 58, 139, 0.07);
-}
-
-.detect__export-btn:hover {
-  background: #ffffff;
-}
-
-.detect__export-btn .copy-icon {
-  width: 1.1rem;
-  height: 1.1rem;
-}
-
-.detect__export-btn .copy-icon::before,
-.detect__export-btn .copy-icon::after {
-  width: 0.62rem;
-  height: 0.74rem;
-  border-width: 2px;
-}
-
-.detect__copy-toast {
-  padding: 0.42rem 0.68rem;
-  border: 1px solid rgba(24, 58, 139, 0.14);
-  border-radius: 8px;
-  background: rgba(16, 32, 61, 0.92);
-  color: #ffffff;
-  font-size: 0.82rem;
-  font-weight: 800;
-  animation: copyToastIn 160ms ease-out both;
-}
-
 @media (max-width: 640px) {
   .detect__bulk {
     flex-direction: column;
