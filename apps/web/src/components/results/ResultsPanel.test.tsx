@@ -35,12 +35,22 @@ describe("ResultsPanel confidence threshold control (#237, no longer inverted pe
     expect(screen.queryByRole("spinbutton", { name: "확신도 임계값" })).not.toBeInTheDocument();
   });
 
-  it("defaults to 50%, masking mid/high-confidence detections but leaving lower-confidence ones exposed", () => {
+  it("defaults to this scan's lowest confidence, so every detection starts out masked", () => {
     const onMaskedTextChange = vi.fn();
     render(<ResultsPanel scanned={scanned} scanRun={1} onMaskedTextChange={onMaskedTextChange} />);
-    expect(screen.getByRole("spinbutton", { name: "확신도 임계값" })).toHaveAttribute("aria-valuenow", "50");
 
-    // name(90%) >= 50 이라 가려지고, phone(40%) < 50 이라 그대로 노출된다.
+    // phone(40%)이 이 스캔에서 가장 낮은 확신도라 임계값은 40에서 시작한다 -- 40 이상인
+    // 둘 다(phone 40%, name 90%) 기본으로 가려진다.
+    expect(screen.getByRole("spinbutton", { name: "확신도 임계값" })).toHaveAttribute("aria-valuenow", "40");
+    expect(onMaskedTextChange).toHaveBeenLastCalledWith(`${"*".repeat(3)} ${"*".repeat(13)}`);
+  });
+
+  it("raising the threshold one step above the default excludes the weakest item first", () => {
+    const onMaskedTextChange = vi.fn();
+    render(<ResultsPanel scanned={scanned} scanRun={1} onMaskedTextChange={onMaskedTextChange} />);
+
+    // 기본값(40%)에서 한 단계만 올려도(45%) 가장 확신도 낮은 phone(40%)부터 바로 제외된다.
+    setThresholdTo(45);
     expect(onMaskedTextChange).toHaveBeenLastCalledWith(`${"*".repeat(3)} 010-1234-5678`);
   });
 
@@ -64,23 +74,14 @@ describe("ResultsPanel confidence threshold control (#237, no longer inverted pe
     expect(onMaskedTextChange).toHaveBeenLastCalledWith(`${"*".repeat(3)} 010-1234-5678`);
   });
 
-  it("lowering the threshold masks lower-confidence items too", () => {
-    const onMaskedTextChange = vi.fn();
-    render(<ResultsPanel scanned={scanned} scanRun={1} onMaskedTextChange={onMaskedTextChange} />);
-
-    // 임계값을 0으로 낮추면 phone(40%)도 가려진다.
-    setThresholdTo(0);
-    expect(onMaskedTextChange).toHaveBeenLastCalledWith(`${"*".repeat(3)} ${"*".repeat(13)}`);
-  });
-
-  it("resets the threshold to 50% and clears per-item overrides whenever a new scan (scanRun) comes in", () => {
+  it("resets the threshold to this scan's lowest confidence and clears per-item overrides whenever a new scan (scanRun) comes in", () => {
     const { rerender } = render(<ResultsPanel scanned={scanned} scanRun={1} onMaskedTextChange={() => {}} />);
-    setThresholdTo(0);
-    expect(screen.getByRole("spinbutton", { name: "확신도 임계값" })).toHaveAttribute("aria-valuenow", "0");
+    setThresholdTo(80);
+    expect(screen.getByRole("spinbutton", { name: "확신도 임계값" })).toHaveAttribute("aria-valuenow", "80");
 
     rerender(<ResultsPanel scanned={scanned} scanRun={2} onMaskedTextChange={() => {}} />);
 
-    expect(screen.getByRole("spinbutton", { name: "확신도 임계값" })).toHaveAttribute("aria-valuenow", "50");
+    expect(screen.getByRole("spinbutton", { name: "확신도 임계값" })).toHaveAttribute("aria-valuenow", "40");
   });
 });
 
@@ -89,17 +90,18 @@ describe("ResultsPanel per-item toggle actually changes the masked result (not j
     const onMaskedTextChange = vi.fn();
     render(<ResultsPanel scanned={scanned} scanRun={1} onMaskedTextChange={onMaskedTextChange} />);
 
-    // 기본값(50%)에서 name(90%)은 가려져 있다 -- 수동으로 노출시킨다.
+    // 기본값(이번 스캔 최저 확신도 40%)에서는 둘 다 가려져 있다 -- name만 수동으로 노출시킨다.
     toggleRow("김철수");
 
-    expect(onMaskedTextChange).toHaveBeenLastCalledWith(`김철수 010-1234-5678`);
+    expect(onMaskedTextChange).toHaveBeenLastCalledWith(`김철수 ${"*".repeat(13)}`);
   });
 
   it("forces a below-threshold item to stay masked when its toggle is switched on", () => {
     const onMaskedTextChange = vi.fn();
     render(<ResultsPanel scanned={scanned} scanRun={1} onMaskedTextChange={onMaskedTextChange} />);
 
-    // phone(40%)은 기본값(50%)에서 이미 노출 상태 -- 수동으로 가린다.
+    // 임계값을 올려 phone(40%)이 기본으로 노출되게 한 뒤, 수동으로 다시 가린다.
+    setThresholdTo(45);
     toggleRow("010-1234-5678");
 
     expect(onMaskedTextChange).toHaveBeenLastCalledWith(`${"*".repeat(3)} ${"*".repeat(13)}`);
