@@ -15,7 +15,6 @@ interface Props {
   minStrength: number;
   maxStrength: number;
   strengthStep: number;
-  confidenceThreshold: number;
   onStrengthChange: (next: number) => void;
   onToggle: (detection: Detection) => void;
 }
@@ -32,7 +31,6 @@ export function DetectionList({
   minStrength,
   maxStrength,
   strengthStep,
-  confidenceThreshold,
   onStrengthChange,
   onToggle,
 }: Props) {
@@ -52,7 +50,7 @@ export function DetectionList({
       <div className="detect__bulk">
         <div className="detect__bulk-head">
           <span className="detect__bulk-title">일괄 조정</span>
-          <span className="detect__bulk-sublabel">확신도 {confidenceThreshold}% 이상은 기본으로 가립니다</span>
+          <span className="detect__bulk-sublabel">강도가 높을수록 확신도 낮은 항목까지 자동으로 가립니다</span>
         </div>
         <ConfidenceControl
           value={maskingStrength}
