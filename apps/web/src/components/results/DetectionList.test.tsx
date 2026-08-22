@@ -18,11 +18,11 @@ describe("DetectionList", () => {
     render(
       <DetectionList
         rows={[]}
-        maskingStrength={100}
-        minStrength={0}
-        maxStrength={100}
-        strengthStep={5}
-        onStrengthChange={() => {}}
+        confidenceThreshold={50}
+        minThreshold={0}
+        maxThreshold={100}
+        thresholdStep={5}
+        onThresholdChange={() => {}}
         onToggle={() => {}}
       />,
     );
@@ -33,17 +33,17 @@ describe("DetectionList", () => {
     render(
       <DetectionList
         rows={[row({ start: 0, end: 3 })]}
-        maskingStrength={60}
-        minStrength={0}
-        maxStrength={100}
-        strengthStep={5}
-        onStrengthChange={() => {}}
+        confidenceThreshold={60}
+        minThreshold={0}
+        maxThreshold={100}
+        thresholdStep={5}
+        onThresholdChange={() => {}}
         onToggle={() => {}}
       />,
     );
 
     expect(screen.queryByText(/이상은 기본으로 가립니다/)).not.toBeInTheDocument();
-    expect(screen.getByText(/강도가 높을수록 확신도 낮은 항목까지 자동으로 가립니다/)).toBeInTheDocument();
+    expect(screen.getByText(/확신도가 이 값 이상인 항목만 기본으로 가려집니다/)).toBeInTheDocument();
   });
 
   it("renders one row per detection with kind, snippet, and confidence, and a live count summary", () => {
@@ -54,11 +54,11 @@ describe("DetectionList", () => {
     render(
       <DetectionList
         rows={rows}
-        maskingStrength={65}
-        minStrength={0}
-        maxStrength={100}
-        strengthStep={5}
-        onStrengthChange={() => {}}
+        confidenceThreshold={65}
+        minThreshold={0}
+        maxThreshold={100}
+        thresholdStep={5}
+        onThresholdChange={() => {}}
         onToggle={() => {}}
       />,
     );
@@ -78,11 +78,11 @@ describe("DetectionList", () => {
     render(
       <DetectionList
         rows={[{ detection: d, key: "name:0:3", snippet: "김소연", masked: true }]}
-        maskingStrength={100}
-        minStrength={0}
-        maxStrength={100}
-        strengthStep={5}
-        onStrengthChange={() => {}}
+        confidenceThreshold={0}
+        minThreshold={0}
+        maxThreshold={100}
+        thresholdStep={5}
+        onThresholdChange={() => {}}
         onToggle={onToggle}
       />,
     );
@@ -96,11 +96,11 @@ describe("DetectionList", () => {
     render(
       <DetectionList
         rows={[{ detection: d, key: "name:0:3", snippet: "김소연", masked: false }]}
-        maskingStrength={0}
-        minStrength={0}
-        maxStrength={100}
-        strengthStep={5}
-        onStrengthChange={() => {}}
+        confidenceThreshold={100}
+        minThreshold={0}
+        maxThreshold={100}
+        thresholdStep={5}
+        onThresholdChange={() => {}}
         onToggle={() => {}}
       />,
     );
@@ -111,33 +111,33 @@ describe("DetectionList", () => {
   });
 
   it("forwards the bulk confidence control's value and reacts to arrow clicks", () => {
-    const onStrengthChange = vi.fn();
+    const onThresholdChange = vi.fn();
     render(
       <DetectionList
         rows={[row({ start: 0, end: 3 })]}
-        maskingStrength={80}
-        minStrength={0}
-        maxStrength={100}
-        strengthStep={5}
-        onStrengthChange={onStrengthChange}
+        confidenceThreshold={80}
+        minThreshold={0}
+        maxThreshold={100}
+        thresholdStep={5}
+        onThresholdChange={onThresholdChange}
         onToggle={() => {}}
       />,
     );
 
-    expect(screen.getByRole("spinbutton", { name: "마스킹 강도" })).toHaveAttribute("aria-valuenow", "80");
-    fireEvent.click(screen.getByRole("button", { name: "마스킹 강도 올리기" }));
-    expect(onStrengthChange).toHaveBeenCalledWith(85);
+    expect(screen.getByRole("spinbutton", { name: "확신도 임계값" })).toHaveAttribute("aria-valuenow", "80");
+    fireEvent.click(screen.getByRole("button", { name: "확신도 임계값 올리기" }));
+    expect(onThresholdChange).toHaveBeenCalledWith(85);
   });
 
   it("does not render its own copy/download actions — those live in the masking-result panel instead", () => {
     render(
       <DetectionList
         rows={[row({ start: 0, end: 3 })]}
-        maskingStrength={100}
-        minStrength={0}
-        maxStrength={100}
-        strengthStep={5}
-        onStrengthChange={() => {}}
+        confidenceThreshold={50}
+        minThreshold={0}
+        maxThreshold={100}
+        thresholdStep={5}
+        onThresholdChange={() => {}}
         onToggle={() => {}}
       />,
     );

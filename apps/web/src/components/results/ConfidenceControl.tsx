@@ -9,7 +9,7 @@ interface Props {
 }
 
 /**
- * 마스킹 강도 조정 컨트롤 — 안1: 원형 게이지 + 위/아래 화살표.
+ * 확신도 임계값 조정 컨트롤 — 안1: 원형 게이지 + 위/아래 화살표.
  * 드래그가 필요한 가로 슬라이더 대신, 링이 강도만큼 채워지고 화살표로 step씩 오르내린다.
  */
 export function ConfidenceControl({ value, min, max, step, onChange }: Props) {
@@ -42,14 +42,14 @@ export function ConfidenceControl({ value, min, max, step, onChange }: Props) {
         className="confidence-dial__btn"
         onClick={increase}
         disabled={atMax}
-        aria-label="마스킹 강도 올리기"
+        aria-label="확신도 임계값 올리기"
       >
         ▲
       </button>
       <div
         className="confidence-dial__ring"
         role="spinbutton"
-        aria-label="마스킹 강도"
+        aria-label="확신도 임계값"
         aria-valuenow={value}
         aria-valuemin={min}
         aria-valuemax={max}
@@ -65,7 +65,7 @@ export function ConfidenceControl({ value, min, max, step, onChange }: Props) {
         className="confidence-dial__btn"
         onClick={decrease}
         disabled={atMin}
-        aria-label="마스킹 강도 내리기"
+        aria-label="확신도 임계값 내리기"
       >
         ▼
       </button>

@@ -11,11 +11,11 @@ export interface DetectionRow {
 
 interface Props {
   rows: DetectionRow[];
-  maskingStrength: number;
-  minStrength: number;
-  maxStrength: number;
-  strengthStep: number;
-  onStrengthChange: (next: number) => void;
+  confidenceThreshold: number;
+  minThreshold: number;
+  maxThreshold: number;
+  thresholdStep: number;
+  onThresholdChange: (next: number) => void;
   onToggle: (detection: Detection) => void;
 }
 
@@ -27,11 +27,11 @@ interface Props {
  */
 export function DetectionList({
   rows,
-  maskingStrength,
-  minStrength,
-  maxStrength,
-  strengthStep,
-  onStrengthChange,
+  confidenceThreshold,
+  minThreshold,
+  maxThreshold,
+  thresholdStep,
+  onThresholdChange,
   onToggle,
 }: Props) {
   const maskedCount = rows.filter((row) => row.masked).length;
@@ -50,14 +50,14 @@ export function DetectionList({
       <div className="detect__bulk">
         <div className="detect__bulk-head">
           <span className="detect__bulk-title">일괄 조정</span>
-          <span className="detect__bulk-sublabel">강도가 높을수록 확신도 낮은 항목까지 자동으로 가립니다</span>
+          <span className="detect__bulk-sublabel">확신도가 이 값 이상인 항목만 기본으로 가려집니다</span>
         </div>
         <ConfidenceControl
-          value={maskingStrength}
-          min={minStrength}
-          max={maxStrength}
-          step={strengthStep}
-          onChange={onStrengthChange}
+          value={confidenceThreshold}
+          min={minThreshold}
+          max={maxThreshold}
+          step={thresholdStep}
+          onChange={onThresholdChange}
         />
       </div>
 
