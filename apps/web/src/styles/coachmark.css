@@ -100,10 +100,10 @@
   right: max(1.25rem, calc((100vw - 1200px) / 2 + 1.25rem));
   bottom: 1.25rem;
   padding: 0.5rem 0.85rem;
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  border: 1px solid #dc2626;
   border-radius: 999px;
-  background: rgba(15, 23, 42, 0.55);
-  color: #ffffff;
+  background: #fde3e7;
+  color: #dc2626;
   font-size: 0.78rem;
   font-weight: 700;
 }
