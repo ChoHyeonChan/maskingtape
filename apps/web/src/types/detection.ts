@@ -11,20 +11,6 @@ export interface ScanResponse {
   detections: Detection[];
 }
 
-export const KIND_ORDER = [
-  "rrn",
-  "passport",
-  "driver_license",
-  "phone",
-  "email",
-  "card",
-  "account",
-  "address",
-  "name",
-  "birth_date",
-  "biz_reg",
-] as const;
-
 export const KIND_LABELS: Record<string, string> = {
   rrn: "주민등록번호",
   passport: "여권번호",

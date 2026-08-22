@@ -3,7 +3,7 @@ import { CoachMark } from "./components/help/CoachMark";
 import { InputPanel } from "./components/input/InputPanel";
 import { AppHeader } from "./components/layout/AppHeader";
 import { ResultsPanel } from "./components/results/ResultsPanel";
-import { applyMasking, type MaskMode } from "./lib/masking";
+import type { MaskMode } from "./lib/masking";
 import type { Detection } from "./types/detection";
 
 type CoachMarkVariant = "intro" | "result";
@@ -11,20 +11,19 @@ type CoachMarkVariant = "intro" | "result";
 export function App() {
   const [inputText, setInputText] = useState("");
   const [scanned, setScanned] = useState<{ text: string; detections: Detection[] } | null>(null);
-  const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [scanRun, setScanRun] = useState(0);
   const [coachMarkVariant, setCoachMarkVariant] = useState<CoachMarkVariant | null>("intro");
   const [maskMode, setMaskMode] = useState<MaskMode>("mask");
+  // "탐지 결과 조정" 패널이 항목별 가림/보임 조정을 반영한 최종본을 계산해 여기로 보고한다 —
+  // 그래야 왼쪽 결과 박스·복사 버튼이 항상 오른쪽 패널의 조정 상태와 같은 텍스트를 본다.
+  const [maskedResultText, setMaskedResultText] = useState("");
   // 결과 코치마크는 첫 스캔 직후 딱 한 번만 자동으로 뜬다 — 재스캔마다 다시 뜨면 방해가 된다(#299).
   const hasAutoShownResultCoachMark = useRef(false);
 
-  // 결과 텍스트는 스캔 시점에 한 번만 만들어 저장하지 않고, 원문+탐지결과에서 매번 다시
-  // 계산한다 — 그래야 마스킹 방식(별표/라벨) 토글을 바꿔도 별도 재스캔 없이 즉시 반영된다(#277).
-  const displayText = scanned ? applyMasking(scanned.text, scanned.detections, maskMode) : inputText;
+  const displayText = scanned ? maskedResultText : inputText;
 
   function handleResult(text: string, detections: Detection[]) {
     setScanned({ text, detections });
-    setActiveFilter(null);
     setScanRun((run) => run + 1);
     if (!hasAutoShownResultCoachMark.current) {
       hasAutoShownResultCoachMark.current = true;
@@ -35,14 +34,14 @@ export function App() {
   function handleClear() {
     setInputText("");
     setScanned(null);
-    setActiveFilter(null);
+    setMaskedResultText("");
   }
 
   function handleTextChange(text: string) {
     setInputText(text);
     if (scanned) {
       setScanned(null);
-      setActiveFilter(null);
+      setMaskedResultText("");
     }
   }
 
@@ -82,10 +81,9 @@ export function App() {
 
         <ResultsPanel
           scanned={scanned}
-          activeFilter={activeFilter}
           scanRun={scanRun}
           maskMode={maskMode}
-          onFilterSelect={setActiveFilter}
+          onMaskedTextChange={setMaskedResultText}
         />
       </main>
 

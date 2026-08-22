@@ -25,6 +25,12 @@ describe("CoachMark keyboard accessibility (#190)", () => {
 
     expect(onDismiss).not.toHaveBeenCalled();
   });
+
+  it("shows a hint that clicking anywhere dismisses it", () => {
+    const { container } = render(<CoachMark onDismiss={vi.fn()} variant="intro" />);
+
+    expect(container.querySelector(".coachmark__dismiss-hint")?.textContent).toBe("아무 데나 누르면 닫힙니다");
+  });
 });
 
 describe("CoachMark target visibility", () => {
@@ -78,7 +84,7 @@ describe("CoachMark result variant (#299)", () => {
     expect(container.querySelectorAll(".coachmark__focus")).toHaveLength(2);
     const noteText = Array.from(container.querySelectorAll(".coachmark__note")).map((note) => note.textContent);
     expect(noteText).toContainEqual(expect.stringContaining("마스킹된 결과가 여기 표시돼요"));
-    expect(noteText).toContainEqual(expect.stringContaining("탐지된 개인정보 종류와 확신도"));
+    expect(noteText).toContainEqual(expect.stringContaining("탐지된 개인정보를 항목별로"));
     expect(container.querySelector(".coachmark__mini strong")?.textContent).toBe("완료!");
   });
 

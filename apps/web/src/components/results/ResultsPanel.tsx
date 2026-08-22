@@ -1,30 +1,48 @@
 import { useEffect, useRef, useState } from "react";
-import { DetectionSummary } from "./DetectionSummary";
-import { HighlightedText } from "./HighlightedText";
-import type { MaskMode } from "../../lib/masking";
+import { DetectionList } from "./DetectionList";
+import type { DetectionRow } from "./DetectionList";
+import { applyMasking, type MaskMode } from "../../lib/masking";
 import type { Detection } from "../../types/detection";
 
 interface Props {
   scanned: { text: string; detections: Detection[] } | null;
-  activeFilter: string | null;
   scanRun: number;
   maskMode?: MaskMode;
-  onFilterSelect: (kind: string | null) => void;
+  onMaskedTextChange: (text: string) => void;
 }
 
-const STRENGTH_STEP = 5;
-const MAX_STRENGTH = 100;
+const THRESHOLD_STEP = 5;
+const MIN_THRESHOLD = 0;
+const MAX_THRESHOLD = 100;
+// 탐지 결과가 없을 때(이론상 도달 안 함 — 있으면 리스트 자체를 안 그린다)를 위한 안전값.
+const FALLBACK_THRESHOLD = 50;
 
-export function ResultsPanel({ scanned, activeFilter, scanRun, maskMode = "mask", onFilterSelect }: Props) {
-  // 슬라이더 오른쪽 끝(최댓값)이 "전부 마스킹"이 되도록 확신도가 아니라 마스킹 강도로 값을 다룬다 —
-  // "오른쪽=더 강하게 보호"라는 직관과 "덜 가리기=유출"이라는 보안 원칙이 둘 다 오른쪽=안전으로
-  // 일치해야 실수로 슬라이더를 조작해도 위험한 방향(노출)이 아니라 안전한 방향으로 치우친다(#264).
-  // 새 탐지 결과가 나올 때마다 항상 최댓값(전부 마스킹)으로 되돌아간다(#237 회귀 없음).
-  const [maskingStrength, setMaskingStrength] = useState(MAX_STRENGTH);
+function detectionKey(detection: Detection) {
+  return `${detection.kind}:${detection.start}:${detection.end}`;
+}
+
+/** 화면에 보이는 "N%"와 항상 같은 기준으로 비교하도록, 확신도도 표시와 동일하게 반올림한다. */
+function confidencePercent(detection: Detection): number {
+  return Math.round(detection.confidence * 100);
+}
+
+export function ResultsPanel({ scanned, scanRun, maskMode = "mask", onMaskedTextChange }: Props) {
+  // 컨트롤에 보이는 숫자가 곧 확신도 임계값이다(더 이상 반전 없음) — 이 값 이상인 항목만
+  // 기본으로 가려진다. 고정값(예: 50%) 대신 이번 스캔에서 가장 낮은 확신도로 시작하면,
+  // 처음부터 "전부 가려짐" 상태에서 슬라이더를 올릴 때마다 확신도 낮은 항목부터 바로바로
+  // 반응이 보여 조절 범위가 낭비되지 않는다.
+  const [confidenceThreshold, setConfidenceThreshold] = useState(FALLBACK_THRESHOLD);
+  // 항목별 수동 override — 일괄 조정(확신도 임계값)보다 우선한다. 스캔이 바뀌면 초기화된다.
+  const [overrides, setOverrides] = useState<Map<string, boolean>>(() => new Map());
   const resultsRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    setMaskingStrength(MAX_STRENGTH);
+    const confidences = (scanned?.detections ?? []).map(confidencePercent);
+    setConfidenceThreshold(confidences.length > 0 ? Math.min(...confidences) : FALLBACK_THRESHOLD);
+    setOverrides(new Map());
+    // scanned는 scanRun과 함께(같은 이벤트 안에서) 갱신되므로, scanRun만으로 "새 스캔마다"를
+    // 판단해도 이 시점엔 이미 최신 scanned를 읽는다 — 아래 스크롤 이펙트와 동일한 전제.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scanRun]);
 
   // 모바일 단일 컬럼 레이아웃에서는 결과가 뷰포트 아래에 생겨, 스캔 버튼을 눌러도 화면에
@@ -37,38 +55,46 @@ export function ResultsPanel({ scanned, activeFilter, scanRun, maskMode = "mask"
     resultsRef.current?.focus();
   }, [scanRun]);
 
-  function handleFilterSelect(kind: string | null) {
-    onFilterSelect(kind);
+  const allDetections = scanned?.detections ?? [];
+  const sorted = [...allDetections].sort((a, b) => a.start - b.start);
+
+  function isMasked(detection: Detection): boolean {
+    const key = detectionKey(detection);
+    const override = overrides.get(key);
+    if (override !== undefined) return override;
+    return confidencePercent(detection) >= confidenceThreshold;
   }
 
-  // 강도가 낮아질수록(왼쪽으로 갈수록) 더 높은 확신도인 항목만 마스킹 대상으로 남는다.
-  const confidenceThreshold = MAX_STRENGTH - maskingStrength;
+  const rows: DetectionRow[] = sorted.map((detection) => ({
+    detection,
+    key: detectionKey(detection),
+    snippet: scanned ? scanned.text.slice(detection.start, detection.end) : "",
+    masked: isMasked(detection),
+  }));
 
-  const allDetections = scanned?.detections ?? [];
-  const visibleDetections = allDetections.filter(
-    (detection) => detection.confidence * 100 >= confidenceThreshold,
-  );
-  const hiddenCount = allDetections.length - visibleDetections.length;
-
-  // 필터 중인 종류가 확신도 임계값 때문에 화면에서 완전히 사라지면, 그 카드를 다시 눌러
-  // 끌 방법이 없어 필터가 고정돼 버린다 — 남은 결과가 전부 흐려진 채로 갇히지 않도록
-  // 자동으로 필터를 해제한다(#250).
-  const activeFilterStillVisible =
-    !activeFilter || visibleDetections.some((detection) => detection.kind === activeFilter);
+  const maskedDetections = rows.filter((row) => row.masked).map((row) => row.detection);
+  const maskedText = scanned ? applyMasking(scanned.text, maskedDetections, maskMode) : "";
 
   useEffect(() => {
-    if (!activeFilterStillVisible) {
-      onFilterSelect(null);
-    }
-  }, [activeFilterStillVisible, onFilterSelect]);
+    onMaskedTextChange(maskedText);
+  }, [maskedText, onMaskedTextChange]);
+
+  function handleToggle(detection: Detection) {
+    const key = detectionKey(detection);
+    setOverrides((current) => {
+      const next = new Map(current);
+      next.set(key, !isMasked(detection));
+      return next;
+    });
+  }
 
   return (
-    <section className="panel panel--results" aria-label="분석 결과" ref={resultsRef} tabIndex={-1}>
+    <section className="panel panel--results" aria-label="탐지 결과 조정" ref={resultsRef} tabIndex={-1}>
       <div className="panel__header">
         <div>
           <h2 data-coach="analysis-result">
             <span aria-hidden="true">▱</span>
-            분석 결과
+            탐지 결과 조정
           </h2>
         </div>
         {scanned && scanned.detections.length > 0 && (
@@ -77,45 +103,15 @@ export function ResultsPanel({ scanned, activeFilter, scanRun, maskMode = "mask"
       </div>
 
       {scanned ? (
-        <>
-          {allDetections.length > 0 && (
-            <div className="confidence-filter">
-              <label htmlFor="confidence-threshold">
-                마스킹 강도 <strong>{maskingStrength}%</strong>
-                <span className="confidence-filter__sublabel">
-                  (확신도 {confidenceThreshold}% 이상만 가립니다)
-                </span>
-              </label>
-              <input
-                id="confidence-threshold"
-                type="range"
-                min={0}
-                max={MAX_STRENGTH}
-                step={STRENGTH_STEP}
-                value={maskingStrength}
-                onChange={(event) => setMaskingStrength(Number(event.target.value))}
-              />
-              {hiddenCount > 0 && (
-                <p className="confidence-filter__warning" role="status">
-                  ⚠ {hiddenCount}건은 마스킹되지 않고 원문 그대로 표시됩니다.
-                </p>
-              )}
-            </div>
-          )}
-          <DetectionSummary
-            detections={visibleDetections}
-            activeFilter={activeFilter}
-            onFilterSelect={handleFilterSelect}
-            hiddenByThreshold={allDetections.length > 0 && visibleDetections.length === 0}
-          />
-          <HighlightedText
-            key={scanRun}
-            text={scanned.text}
-            detections={visibleDetections}
-            activeFilter={activeFilter}
-            maskMode={maskMode}
-          />
-        </>
+        <DetectionList
+          rows={rows}
+          confidenceThreshold={confidenceThreshold}
+          minThreshold={MIN_THRESHOLD}
+          maxThreshold={MAX_THRESHOLD}
+          thresholdStep={THRESHOLD_STEP}
+          onThresholdChange={setConfidenceThreshold}
+          onToggle={handleToggle}
+        />
       ) : (
         <div className="empty-state">
           <p>왼쪽에 텍스트를 입력하고 개인정보 탐지 및 마스킹을 실행하면 결과가 여기에 표시됩니다.</p>
