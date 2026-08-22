@@ -11,25 +11,25 @@ describe("ConfidenceControl (안2: 숫자 + 화살표, 게이지 없음)", () =>
   it("calls onChange with the next step up when the up arrow is clicked", () => {
     const onChange = vi.fn();
     render(<ConfidenceControl value={80} min={0} max={100} step={5} onChange={onChange} />);
-    fireEvent.click(screen.getByRole("button", { name: "마스킹 강도 올리기" }));
+    fireEvent.click(screen.getByRole("button", { name: "확신도 임계값 올리기" }));
     expect(onChange).toHaveBeenCalledWith(85);
   });
 
   it("calls onChange with the next step down when the down arrow is clicked", () => {
     const onChange = vi.fn();
     render(<ConfidenceControl value={80} min={0} max={100} step={5} onChange={onChange} />);
-    fireEvent.click(screen.getByRole("button", { name: "마스킹 강도 내리기" }));
+    fireEvent.click(screen.getByRole("button", { name: "확신도 임계값 내리기" }));
     expect(onChange).toHaveBeenCalledWith(75);
   });
 
   it("clamps at max and disables the up arrow there", () => {
     render(<ConfidenceControl value={100} min={0} max={100} step={5} onChange={() => {}} />);
-    expect(screen.getByRole("button", { name: "마스킹 강도 올리기" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "확신도 임계값 올리기" })).toBeDisabled();
   });
 
   it("clamps at min and disables the down arrow there", () => {
     render(<ConfidenceControl value={0} min={0} max={100} step={5} onChange={() => {}} />);
-    expect(screen.getByRole("button", { name: "마스킹 강도 내리기" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "확신도 임계값 내리기" })).toBeDisabled();
   });
 
   it("supports arrow-key adjustment on the value itself", () => {

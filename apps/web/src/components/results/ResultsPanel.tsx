@@ -11,25 +11,27 @@ interface Props {
   onMaskedTextChange: (text: string) => void;
 }
 
-const STRENGTH_STEP = 5;
-const MAX_STRENGTH = 100;
+const THRESHOLD_STEP = 5;
+const MIN_THRESHOLD = 0;
+const MAX_THRESHOLD = 100;
+// 절반 정도만 기본으로 가려 두면, 확신도가 애매한 항목까지 전부 가려서 "다 가려졌네"로
+// 지나치기보다 사용자가 직접 항목을 살펴보고 강도를 조정하도록 유도한다.
+const DEFAULT_THRESHOLD = 50;
 
 function detectionKey(detection: Detection) {
   return `${detection.kind}:${detection.start}:${detection.end}`;
 }
 
 export function ResultsPanel({ scanned, scanRun, maskMode = "mask", onMaskedTextChange }: Props) {
-  // 슬라이더 오른쪽 끝(최댓값)이 "전부 마스킹"이 되도록 확신도가 아니라 마스킹 강도로 값을 다룬다 —
-  // "오른쪽=더 강하게 보호"라는 직관과 "덜 가리기=유출"이라는 보안 원칙이 둘 다 오른쪽=안전으로
-  // 일치해야 실수로 조작해도 위험한 방향(노출)이 아니라 안전한 방향으로 치우친다(#264).
-  // 새 탐지 결과가 나올 때마다 항상 최댓값(전부 마스킹)으로 되돌아간다(#237 회귀 없음).
-  const [maskingStrength, setMaskingStrength] = useState(MAX_STRENGTH);
+  // 컨트롤에 보이는 숫자가 곧 확신도 임계값이다(더 이상 반전 없음) — 이 값 이상인 항목만
+  // 기본으로 가려진다. 새 탐지 결과가 나올 때마다 기본값으로 되돌아간다(#237 회귀 없음).
+  const [confidenceThreshold, setConfidenceThreshold] = useState(DEFAULT_THRESHOLD);
   // 항목별 수동 override — 일괄 조정(확신도 임계값)보다 우선한다. 스캔이 바뀌면 초기화된다.
   const [overrides, setOverrides] = useState<Map<string, boolean>>(() => new Map());
   const resultsRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    setMaskingStrength(MAX_STRENGTH);
+    setConfidenceThreshold(DEFAULT_THRESHOLD);
     setOverrides(new Map());
   }, [scanRun]);
 
@@ -42,9 +44,6 @@ export function ResultsPanel({ scanned, scanRun, maskMode = "mask", onMaskedText
     resultsRef.current?.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth", block: "start" });
     resultsRef.current?.focus();
   }, [scanRun]);
-
-  // 강도가 낮아질수록 더 높은 확신도인 항목만 기본으로 가려진다.
-  const confidenceThreshold = MAX_STRENGTH - maskingStrength;
 
   const allDetections = scanned?.detections ?? [];
   const sorted = [...allDetections].sort((a, b) => a.start - b.start);
@@ -96,11 +95,11 @@ export function ResultsPanel({ scanned, scanRun, maskMode = "mask", onMaskedText
       {scanned ? (
         <DetectionList
           rows={rows}
-          maskingStrength={maskingStrength}
-          minStrength={0}
-          maxStrength={MAX_STRENGTH}
-          strengthStep={STRENGTH_STEP}
-          onStrengthChange={setMaskingStrength}
+          confidenceThreshold={confidenceThreshold}
+          minThreshold={MIN_THRESHOLD}
+          maxThreshold={MAX_THRESHOLD}
+          thresholdStep={THRESHOLD_STEP}
+          onThresholdChange={setConfidenceThreshold}
           onToggle={handleToggle}
         />
       ) : (
