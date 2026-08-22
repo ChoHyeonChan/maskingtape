@@ -217,7 +217,7 @@
 .detect-row__toggle-label {
   position: absolute;
   top: 50%;
-  right: 0.55rem;
+  right: calc(0.55rem + 3px);
   transform: translateY(-50%);
   font-size: 0.68rem;
   font-weight: 800;
@@ -227,7 +227,7 @@
 
 .detect-row__toggle.is-masked .detect-row__toggle-label {
   right: auto;
-  left: 0.6rem;
+  left: calc(0.6rem + 3px);
   color: #ffffff;
 }
 
