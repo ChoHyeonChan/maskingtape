@@ -4,7 +4,11 @@ from functools import lru_cache
 from typing import Protocol
 
 from maskingtape import Pipeline
-from maskingtape.anonymizers import LabelAnonymizer, MaskAnonymizer
+from maskingtape.anonymizers import (
+    LabelAnonymizer,
+    MaskAnonymizer,
+    PseudonymAnonymizer,
+)
 from maskingtape.pipeline import AnonymizeResult
 from maskingtape.types import Detection
 
@@ -72,6 +76,8 @@ def get_core_adapter() -> CoreEngineAdapter:
 def _pipeline_for_strategy(strategy: AnonymizeStrategy) -> Pipeline:
     if strategy == AnonymizeStrategy.LABEL:
         return Pipeline(anonymizer=LabelAnonymizer())
+    if strategy == AnonymizeStrategy.PSEUDONYM:
+        return Pipeline(anonymizer=PseudonymAnonymizer())
     return Pipeline(anonymizer=MaskAnonymizer())
 
 
