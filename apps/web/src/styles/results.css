@@ -145,22 +145,54 @@
 }
 
 .detect-row__toggle {
+  position: relative;
   flex: 0 0 auto;
-  min-width: 3.4rem;
-  padding: 0.28rem 0.6rem;
+  width: 4.6rem;
+  height: 1.7rem;
+  padding: 0;
   border-radius: 999px;
   border: 1px solid rgba(24, 58, 139, 0.16);
-  background: #ffffff;
-  color: var(--text-secondary);
-  font-size: 0.76rem;
-  font-weight: 800;
+  background: #eef1f6;
   cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease;
 }
 
 .detect-row__toggle.is-masked {
-  border-color: color-mix(in srgb, var(--brand-blue) 40%, var(--border));
-  background: var(--brand-blue-soft);
-  color: var(--brand-blue);
+  border-color: var(--brand-blue);
+  background: var(--brand-blue);
+}
+
+.detect-row__toggle-label {
+  position: absolute;
+  top: 50%;
+  right: 0.55rem;
+  transform: translateY(-50%);
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--text-secondary);
+  transition: color 160ms ease, right 160ms ease, left 160ms ease;
+}
+
+.detect-row__toggle.is-masked .detect-row__toggle-label {
+  right: auto;
+  left: 0.6rem;
+  color: #ffffff;
+}
+
+.detect-row__toggle-knob {
+  position: absolute;
+  top: 0.18rem;
+  left: 0.18rem;
+  width: 1.3rem;
+  height: 1.3rem;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.28);
+  transition: transform 160ms ease;
+}
+
+.detect-row__toggle.is-masked .detect-row__toggle-knob {
+  transform: translateX(2.9rem);
 }
 
 .detect__export {

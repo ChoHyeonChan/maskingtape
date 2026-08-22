@@ -107,7 +107,10 @@ export function DetectionList({
                 className={`detect-row__toggle${masked ? " is-masked" : ""}`}
                 onClick={() => onToggle(detection)}
               >
-                {masked ? "가림" : "보임"}
+                <span className="detect-row__toggle-label" aria-hidden="true">
+                  {masked ? "가림" : "보임"}
+                </span>
+                <span className="detect-row__toggle-knob" aria-hidden="true" />
               </button>
             </li>
           );
