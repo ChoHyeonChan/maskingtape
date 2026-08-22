@@ -38,6 +38,8 @@
   background: conic-gradient(var(--brand-blue) var(--dial-fill, 0%), var(--brand-blue-soft) 0);
   cursor: grab;
   touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .confidence-dial__ring.is-dragging {
