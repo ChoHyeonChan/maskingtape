@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -186,6 +187,10 @@ def write_markdown_report(
 
 
 def main() -> None:
+    # #317: Windows 콘솔 기본 코드페이지(cp949)는 리포트 문구에 쓰일 수 있는 em dash(—) 등
+    # 일부 구두점을 인코딩 못 해 print에서 크래시한다 — 플랫폼 기본 설정과 무관하게 항상
+    # 성공하도록 stdout을 UTF-8로 강제한다.
+    sys.stdout.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(description="합성 데이터셋으로 탐지 정확도(F1) 평가")
     parser.add_argument("dataset", type=Path, help="평가할 JSONL 데이터셋 경로")
     parser.add_argument("--report", type=Path, default=None, help="마크다운 리포트를 저장할 경로 (선택)")
