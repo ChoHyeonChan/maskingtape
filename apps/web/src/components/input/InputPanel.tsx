@@ -196,7 +196,7 @@ export function InputPanel({
               onClick={handleSaveFile}
               disabled={!text}
               aria-label="파일로 저장"
-              title="파일로 저장"
+              data-tooltip="파일로 저장"
             >
               <span className="upload-icon upload-icon--save" aria-hidden="true" />
               <span>파일로 저장</span>
@@ -214,8 +214,8 @@ export function InputPanel({
             className="input-panel__upload"
             onClick={() => fileInputRef.current?.click()}
             disabled={extracting}
-            title={extracting ? "추출 중..." : "파일 업로드"}
             aria-label={extracting ? "추출 중..." : "파일 업로드"}
+            data-tooltip={extracting ? "추출 중..." : "업로드"}
           >
             <span className="upload-icon" aria-hidden="true" />
           </button>

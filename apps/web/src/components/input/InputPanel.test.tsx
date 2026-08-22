@@ -98,6 +98,11 @@ describe("InputPanel file upload (#263)", () => {
 
     await waitFor(() => expect(onTextChange).toHaveBeenCalledWith("드래그로 넣은 텍스트"));
   });
+
+  it("shows an instant tooltip on the icon-only upload button, and switches it while extracting", () => {
+    renderPanel("");
+    expect(screen.getByRole("button", { name: "파일 업로드" })).toHaveAttribute("data-tooltip", "업로드");
+  });
 });
 
 function renderPanelWithChange(onTextChange: (text: string) => void) {
@@ -153,6 +158,21 @@ describe("InputPanel export actions (복사·파일로 저장이 이 패널에 �
     fireEvent.click(screen.getByRole("button", { name: "마스킹 결과 복사" }));
 
     await waitFor(() => expect(writeText).toHaveBeenCalledWith("근로자 *** 010-****-5678"));
+  });
+
+  it("shows an instant tooltip (not the browser's delayed title) on the icon-only save button", () => {
+    render(
+      <InputPanel
+        text="근로자 *** 010-****-5678"
+        hasResult
+        resultVersion={1}
+        onTextChange={vi.fn()}
+        onClear={vi.fn()}
+        onResult={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "파일로 저장" })).toHaveAttribute("data-tooltip", "파일로 저장");
   });
 
   it("saves the shown text as a .txt file when '파일로 저장' is clicked", () => {
