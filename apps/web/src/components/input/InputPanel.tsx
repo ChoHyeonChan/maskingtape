@@ -209,24 +209,6 @@ export function InputPanel({
           </div>
         )}
         <div className={hasResult ? "input-panel__tools input-panel__tools--hidden" : "input-panel__tools"}>
-          <button
-            type="button"
-            className="input-panel__upload"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={extracting}
-            aria-label={extracting ? "추출 중..." : "파일 업로드"}
-            data-tooltip={extracting ? "추출 중..." : "업로드"}
-          >
-            <span className="upload-icon" aria-hidden="true" />
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".txt,.pdf,text/plain,application/pdf"
-            className="input-panel__file-input"
-            onChange={handleFileInputChange}
-            aria-label="txt 또는 텍스트 PDF 파일 업로드"
-          />
           <button type="button" className="input-panel__sample" onClick={() => handlePreset(PRESETS[1].text)}>
             신청서 샘플
           </button>
@@ -257,6 +239,24 @@ export function InputPanel({
               ))}
             </div>
           </details>
+          <button
+            type="button"
+            className="input-panel__upload"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={extracting}
+            aria-label={extracting ? "추출 중..." : "파일 업로드"}
+            data-tooltip={extracting ? "추출 중..." : "업로드"}
+          >
+            <span className="upload-icon" aria-hidden="true" />
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".txt,.pdf,text/plain,application/pdf"
+            className="input-panel__file-input"
+            onChange={handleFileInputChange}
+            aria-label="txt 또는 텍스트 PDF 파일 업로드"
+          />
         </div>
       </div>
 
