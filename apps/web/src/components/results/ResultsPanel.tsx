@@ -103,7 +103,6 @@ export function ResultsPanel({ scanned, scanRun, maskMode = "mask", onMaskedText
           confidenceThreshold={confidenceThreshold}
           onStrengthChange={setMaskingStrength}
           onToggle={handleToggle}
-          maskedText={maskedText}
         />
       ) : (
         <div className="empty-state">

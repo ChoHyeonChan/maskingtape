@@ -25,7 +25,6 @@ describe("DetectionList", () => {
         confidenceThreshold={0}
         onStrengthChange={() => {}}
         onToggle={() => {}}
-        maskedText=""
       />,
     );
     expect(screen.getByText(/발견되지 않았습니다/)).toBeInTheDocument();
@@ -46,7 +45,6 @@ describe("DetectionList", () => {
         confidenceThreshold={50}
         onStrengthChange={() => {}}
         onToggle={() => {}}
-        maskedText="김소연 010-1234-5678"
       />,
     );
 
@@ -72,7 +70,6 @@ describe("DetectionList", () => {
         confidenceThreshold={0}
         onStrengthChange={() => {}}
         onToggle={onToggle}
-        maskedText="***"
       />,
     );
 
@@ -92,7 +89,6 @@ describe("DetectionList", () => {
         confidenceThreshold={100}
         onStrengthChange={() => {}}
         onToggle={() => {}}
-        maskedText="김소연"
       />,
     );
 
@@ -113,7 +109,6 @@ describe("DetectionList", () => {
         confidenceThreshold={20}
         onStrengthChange={onStrengthChange}
         onToggle={() => {}}
-        maskedText="***"
       />,
     );
 
@@ -122,10 +117,7 @@ describe("DetectionList", () => {
     expect(onStrengthChange).toHaveBeenCalledWith(85);
   });
 
-  it("copies the given masked text (not something recomputed locally) when the copy button is clicked", async () => {
-    const writeText = vi.fn().mockResolvedValue(undefined);
-    Object.assign(navigator, { clipboard: { writeText } });
-
+  it("does not render its own copy/download actions — those live in the masking-result panel instead", () => {
     render(
       <DetectionList
         rows={[row({ start: 0, end: 3 })]}
@@ -136,11 +128,10 @@ describe("DetectionList", () => {
         confidenceThreshold={0}
         onStrengthChange={() => {}}
         onToggle={() => {}}
-        maskedText="완전한 마스킹 결과"
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "마스킹 결과 복사" }));
-    expect(writeText).toHaveBeenCalledWith("완전한 마스킹 결과");
+    expect(screen.queryByRole("button", { name: "마스킹 결과 복사" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "다운로드" })).not.toBeInTheDocument();
   });
 });

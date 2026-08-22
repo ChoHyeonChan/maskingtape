@@ -144,6 +144,17 @@ export function InputPanel({
     window.setTimeout(() => setCopied(false), 1400);
   }
 
+  function handleSaveFile() {
+    if (!text) return;
+    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "masked-result.txt";
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div className={hasResult ? "input-panel input-panel--result" : "input-panel"}>
       <div className="input-panel__header">
@@ -178,6 +189,17 @@ export function InputPanel({
             >
               <span className="copy-icon" aria-hidden="true" />
               <span>마스킹 결과 복사</span>
+            </button>
+            <button
+              type="button"
+              className="input-panel__copy-header"
+              onClick={handleSaveFile}
+              disabled={!text}
+              aria-label="파일로 저장"
+              title="파일로 저장"
+            >
+              <span className="upload-icon upload-icon--save" aria-hidden="true" />
+              <span>파일로 저장</span>
             </button>
             {copied && (
               <span className="input-panel__copy-toast input-panel__copy-toast--header" role="status">

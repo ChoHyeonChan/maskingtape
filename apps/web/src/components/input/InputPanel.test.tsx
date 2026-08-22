@@ -134,6 +134,57 @@ describe("InputPanel result view accessibility", () => {
   });
 });
 
+describe("InputPanel export actions (복사·파일로 저장이 이 패널에 모임)", () => {
+  it("copies the exact text shown in this panel, not something recomputed elsewhere", async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, { clipboard: { writeText } });
+
+    render(
+      <InputPanel
+        text="근로자 *** 010-****-5678"
+        hasResult
+        resultVersion={1}
+        onTextChange={vi.fn()}
+        onClear={vi.fn()}
+        onResult={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "마스킹 결과 복사" }));
+
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith("근로자 *** 010-****-5678"));
+  });
+
+  it("saves the shown text as a .txt file when '파일로 저장' is clicked", () => {
+    const createObjectURL = vi.fn().mockReturnValue("blob:mock-url");
+    const revokeObjectURL = vi.fn();
+    vi.stubGlobal("URL", { ...URL, createObjectURL, revokeObjectURL });
+    const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+
+    render(
+      <InputPanel
+        text="근로자 *** 010-****-5678"
+        hasResult
+        resultVersion={1}
+        onTextChange={vi.fn()}
+        onClear={vi.fn()}
+        onResult={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "파일로 저장" }));
+
+    expect(createObjectURL).toHaveBeenCalledTimes(1);
+    const blob = createObjectURL.mock.calls[0][0] as Blob;
+    expect(blob.type).toContain("text/plain");
+    expect(clickSpy).toHaveBeenCalledTimes(1);
+    expect(revokeObjectURL).toHaveBeenCalledWith("blob:mock-url");
+
+    clickSpy.mockRestore();
+    vi.unstubAllGlobals();
+  });
+});
+
 describe("InputPanel contract demo preset (#215)", () => {
   it("loads the contract example text in one click, without opening the presets dropdown", () => {
     const onTextChange = vi.fn();
