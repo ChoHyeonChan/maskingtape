@@ -21,3 +21,11 @@ describe("AppHeader logo (layout-shift regression)", () => {
     expect(width / height).toBeCloseTo(1501 / 276, 2);
   });
 });
+
+describe("AppHeader help button tooltip", () => {
+  it("carries a data-tooltip so its label shows immediately on hover, not the browser's delayed title tooltip", () => {
+    render(<AppHeader onHelpClick={() => {}} />);
+    const helpButton = screen.getByRole("button", { name: "사용 안내 다시 보기" });
+    expect(helpButton).toHaveAttribute("data-tooltip", "도움말");
+  });
+});
