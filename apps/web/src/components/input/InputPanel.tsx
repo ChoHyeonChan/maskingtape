@@ -187,13 +187,41 @@ export function InputPanel({
           </div>
         )}
         <div className={hasResult ? "input-panel__tools input-panel__tools--hidden" : "input-panel__tools"}>
+          <button
+            type="button"
+            className="input-panel__upload"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={extracting}
+            title={extracting ? "추출 중..." : "파일 업로드"}
+            aria-label={extracting ? "추출 중..." : "파일 업로드"}
+          >
+            <span className="upload-icon" aria-hidden="true" />
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".txt,.pdf,text/plain,application/pdf"
+            className="input-panel__file-input"
+            onChange={handleFileInputChange}
+            aria-label="txt 또는 텍스트 PDF 파일 업로드"
+          />
+          <button type="button" className="input-panel__sample" onClick={() => handlePreset(PRESETS[1].text)}>
+            신청서 샘플
+          </button>
+          <button
+            type="button"
+            className="input-panel__sample input-panel__sample--contract"
+            onClick={() => handlePreset(PRESETS[2].text)}
+          >
+            계약서 예제
+          </button>
           <details
             className="input-panel__presets"
             data-coach="presets"
             open={presetsOpen}
             onToggle={(event) => setPresetsOpen(event.currentTarget.open)}
           >
-            <summary className="input-panel__presets-label">예제 불러오기</summary>
+            <summary className="input-panel__presets-label">샘플 더 불러오기...</summary>
             <div className="input-panel__preset-list">
               {PRESETS.map((preset) => (
                 <button
@@ -207,32 +235,6 @@ export function InputPanel({
               ))}
             </div>
           </details>
-          <button type="button" className="input-panel__sample" onClick={() => handlePreset(PRESETS[1].text)}>
-            신청서 샘플
-          </button>
-          <button
-            type="button"
-            className="input-panel__sample input-panel__sample--contract"
-            onClick={() => handlePreset(PRESETS[2].text)}
-          >
-            계약서 예제
-          </button>
-          <button
-            type="button"
-            className="input-panel__upload"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={extracting}
-          >
-            {extracting ? "추출 중..." : "파일 업로드"}
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".txt,.pdf,text/plain,application/pdf"
-            className="input-panel__file-input"
-            onChange={handleFileInputChange}
-            aria-label="txt 또는 텍스트 PDF 파일 업로드"
-          />
         </div>
       </div>
 
