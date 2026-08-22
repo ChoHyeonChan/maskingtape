@@ -7,71 +7,75 @@ const name: Detection = { kind: "name", start: 0, end: 3, confidence: 0.9, detec
 const phone: Detection = { kind: "phone", start: 4, end: 17, confidence: 0.4, detector: "T" };
 const scanned = { text: "김철수 010-1234-5678", detections: [name, phone] };
 
-describe("ResultsPanel masking strength slider (#237, direction inverted by #264)", () => {
-  it("does not render a slider before anything has been scanned", () => {
-    render(<ResultsPanel scanned={null} activeFilter={null} scanRun={0} onFilterSelect={() => {}} />);
-    expect(screen.queryByLabelText(/마스킹 강도/)).not.toBeInTheDocument();
+const STEP = 5;
+
+/** 마스킹 강도를 목표값까지 화살표 버튼으로 내린다(위/아래 화살표 컨트롤, #237/#264 계승). */
+function lowerStrengthTo(target: number) {
+  const decrease = screen.getByRole("button", { name: "마스킹 강도 내리기" });
+  const clicks = (100 - target) / STEP;
+  for (let i = 0; i < clicks; i += 1) {
+    fireEvent.click(decrease);
+  }
+}
+
+function toggleRow(text: string) {
+  fireEvent.click(screen.getByRole("switch", { name: new RegExp(text) }));
+}
+
+describe("ResultsPanel masking strength control (#237, direction inverted by #264)", () => {
+  it("does not render the control before anything has been scanned", () => {
+    render(<ResultsPanel scanned={null} scanRun={0} onMaskedTextChange={() => {}} />);
+    expect(screen.queryByRole("spinbutton", { name: "마스킹 강도" })).not.toBeInTheDocument();
   });
 
-  it("defaults to 100% (rightmost = strongest) so every detection stays masked, matching prior behavior", () => {
-    render(<ResultsPanel scanned={scanned} activeFilter={null} scanRun={1} onFilterSelect={() => {}} />);
-    expect(screen.getByLabelText(/마스킹 강도/)).toHaveValue("100");
-    expect(screen.queryByText(/원문 그대로 표시됩니다/)).not.toBeInTheDocument();
-    expect(screen.getByTestId("masked-result")).toHaveTextContent(`${"*".repeat(3)} ${"*".repeat(13)}`);
+  it("defaults to 100% (strongest) so every detection stays masked, matching prior behavior", () => {
+    const onMaskedTextChange = vi.fn();
+    render(<ResultsPanel scanned={scanned} scanRun={1} onMaskedTextChange={onMaskedTextChange} />);
+    expect(screen.getByRole("spinbutton", { name: "마스킹 강도" })).toHaveAttribute("aria-valuenow", "100");
+    expect(onMaskedTextChange).toHaveBeenLastCalledWith(`${"*".repeat(3)} ${"*".repeat(13)}`);
   });
 
-  it("lowering the strength (moving left) exposes low-confidence detections and warns how many", () => {
-    render(<ResultsPanel scanned={scanned} activeFilter={null} scanRun={1} onFilterSelect={() => {}} />);
+  it("lowering the strength auto-exposes low-confidence detections", () => {
+    const onMaskedTextChange = vi.fn();
+    render(<ResultsPanel scanned={scanned} scanRun={1} onMaskedTextChange={onMaskedTextChange} />);
 
-    // 강도를 50으로 낮추면 확신도 50% 이상만 마스킹 대상이 된다
-    fireEvent.change(screen.getByLabelText(/마스킹 강도/), { target: { value: "50" } });
+    // 강도를 50으로 낮추면 확신도 50% 이상만 기본으로 가려진다 -- phone(40%)만 제외
+    lowerStrengthTo(50);
 
-    // phone(40%)만 제외되고 name(90%)은 그대로 마스킹된다
-    expect(screen.getByText("1건은 마스킹되지 않고 원문 그대로 표시됩니다.", { exact: false })).toBeInTheDocument();
-    expect(screen.getByTestId("masked-result")).toHaveTextContent(`${"*".repeat(3)} 010-1234-5678`);
+    expect(onMaskedTextChange).toHaveBeenLastCalledWith(`${"*".repeat(3)} 010-1234-5678`);
   });
 
-  it("automatically clears the filter once its target kind is hidden by the threshold, instead of leaving results stuck dimmed (#250)", () => {
-    const onFilterSelect = vi.fn();
-    render(<ResultsPanel scanned={scanned} activeFilter="phone" scanRun={1} onFilterSelect={onFilterSelect} />);
+  it("resets the strength and any per-item overrides whenever a new scan (scanRun) comes in", () => {
+    const { rerender } = render(<ResultsPanel scanned={scanned} scanRun={1} onMaskedTextChange={() => {}} />);
+    lowerStrengthTo(50);
+    expect(screen.getByRole("spinbutton", { name: "마스킹 강도" })).toHaveAttribute("aria-valuenow", "50");
 
-    // phone(40%)이 걸러지도록 임계값을 올린다 -- 필터 대상 카드 자체가 사라진다
-    fireEvent.change(screen.getByLabelText(/마스킹 강도/), { target: { value: "50" } });
+    rerender(<ResultsPanel scanned={scanned} scanRun={2} onMaskedTextChange={() => {}} />);
 
-    expect(onFilterSelect).toHaveBeenCalledWith(null);
+    expect(screen.getByRole("spinbutton", { name: "마스킹 강도" })).toHaveAttribute("aria-valuenow", "100");
+  });
+});
+
+describe("ResultsPanel per-item toggle actually changes the masked result (not just a demo)", () => {
+  it("reveals an above-threshold item when its toggle is switched off", () => {
+    const onMaskedTextChange = vi.fn();
+    render(<ResultsPanel scanned={scanned} scanRun={1} onMaskedTextChange={onMaskedTextChange} />);
+
+    // 강도 100%라 둘 다 기본으로 가려짐 -- name만 수동으로 노출
+    toggleRow("김철수");
+
+    expect(onMaskedTextChange).toHaveBeenLastCalledWith(`김철수 ${"*".repeat(13)}`);
   });
 
-  it("leaves the filter alone while its target kind is still visible", () => {
-    const onFilterSelect = vi.fn();
-    render(<ResultsPanel scanned={scanned} activeFilter="name" scanRun={1} onFilterSelect={onFilterSelect} />);
+  it("forces a below-threshold item to stay masked when its toggle is switched on", () => {
+    const onMaskedTextChange = vi.fn();
+    render(<ResultsPanel scanned={scanned} scanRun={1} onMaskedTextChange={onMaskedTextChange} />);
 
-    fireEvent.change(screen.getByLabelText(/마스킹 강도/), { target: { value: "50" } });
+    // phone(40%)이 자동 노출되도록 강도를 낮춘 뒤, 수동으로 다시 가린다
+    lowerStrengthTo(50);
+    toggleRow("010-1234-5678");
 
-    // name(90%)은 여전히 보이므로 필터를 건드리지 않는다
-    expect(onFilterSelect).not.toHaveBeenCalled();
-  });
-
-  it("does not show the 'nothing found' reassurance when the threshold filters out every detection (#243)", () => {
-    render(<ResultsPanel scanned={scanned} activeFilter={null} scanRun={1} onFilterSelect={() => {}} />);
-
-    // name(90%)·phone(40%) 둘 다 100% 미만이라 강도를 0(=확신도 임계값 100)으로 낮추면 전부 걸러진다
-    fireEvent.change(screen.getByLabelText(/마스킹 강도/), { target: { value: "0" } });
-
-    expect(screen.queryByText(/개인정보가 발견되지 않았습니다/)).not.toBeInTheDocument();
-    expect(screen.getByText(/확신도 임계값보다 낮아 목록에서 제외됐고/)).toBeInTheDocument();
-    expect(screen.getByText("2건은 마스킹되지 않고 원문 그대로 표시됩니다.", { exact: false })).toBeInTheDocument();
-  });
-
-  it("resets the strength to 100 (mask everything) whenever a new scan (scanRun) comes in", () => {
-    const { rerender } = render(
-      <ResultsPanel scanned={scanned} activeFilter={null} scanRun={1} onFilterSelect={() => {}} />,
-    );
-    fireEvent.change(screen.getByLabelText(/마스킹 강도/), { target: { value: "50" } });
-    expect(screen.getByLabelText(/마스킹 강도/)).toHaveValue("50");
-
-    rerender(<ResultsPanel scanned={scanned} activeFilter={null} scanRun={2} onFilterSelect={() => {}} />);
-
-    expect(screen.getByLabelText(/마스킹 강도/)).toHaveValue("100");
+    expect(onMaskedTextChange).toHaveBeenLastCalledWith(`${"*".repeat(3)} ${"*".repeat(13)}`);
   });
 });
 
@@ -80,7 +84,7 @@ describe("ResultsPanel scrolls to and focuses the results on scan completion (#3
     const scrollIntoView = vi.fn();
     HTMLElement.prototype.scrollIntoView = scrollIntoView;
 
-    render(<ResultsPanel scanned={null} activeFilter={null} scanRun={0} onFilterSelect={() => {}} />);
+    render(<ResultsPanel scanned={null} scanRun={0} onMaskedTextChange={() => {}} />);
 
     expect(scrollIntoView).not.toHaveBeenCalled();
   });
@@ -89,22 +93,20 @@ describe("ResultsPanel scrolls to and focuses the results on scan completion (#3
     const scrollIntoView = vi.fn();
     HTMLElement.prototype.scrollIntoView = scrollIntoView;
 
-    render(<ResultsPanel scanned={scanned} activeFilter={null} scanRun={1} onFilterSelect={() => {}} />);
+    render(<ResultsPanel scanned={scanned} scanRun={1} onMaskedTextChange={() => {}} />);
 
     expect(scrollIntoView).toHaveBeenCalledWith(expect.objectContaining({ block: "start" }));
-    expect(screen.getByRole("region", { name: "분석 결과" })).toHaveFocus();
+    expect(screen.getByRole("region", { name: "탐지 결과 조정" })).toHaveFocus();
   });
 
   it("scrolls and focuses again on every later scan, not just the first", () => {
     const scrollIntoView = vi.fn();
     HTMLElement.prototype.scrollIntoView = scrollIntoView;
 
-    const { rerender } = render(
-      <ResultsPanel scanned={scanned} activeFilter={null} scanRun={1} onFilterSelect={() => {}} />,
-    );
+    const { rerender } = render(<ResultsPanel scanned={scanned} scanRun={1} onMaskedTextChange={() => {}} />);
     expect(scrollIntoView).toHaveBeenCalledTimes(1);
 
-    rerender(<ResultsPanel scanned={scanned} activeFilter={null} scanRun={2} onFilterSelect={() => {}} />);
+    rerender(<ResultsPanel scanned={scanned} scanRun={2} onMaskedTextChange={() => {}} />);
     expect(scrollIntoView).toHaveBeenCalledTimes(2);
   });
 });
