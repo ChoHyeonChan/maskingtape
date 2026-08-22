@@ -264,19 +264,21 @@
    같은 계열의 순수 CSS 도형 — 외부 아이콘 자산·라이선스 문제 없이 직접 그린다. */
 .upload-icon {
   position: relative;
-  width: 1rem;
-  height: 1rem;
+  width: 1.1rem;
+  height: 1.15rem;
 }
 
+/* 화살표(줄기+삼각머리를 한 다각형으로) — 일반적인 "업로드" 픽토그램 실루엣을
+   직접 그린 것으로, 특정 아이콘 세트의 자산을 가져오거나 베낀 게 아니다. */
 .upload-icon::before {
   content: "";
   position: absolute;
   left: 50%;
-  top: 0.32rem;
-  width: 0.2rem;
+  top: 0;
+  width: 0.64rem;
   height: 0.62rem;
   background: currentColor;
-  border-radius: 999px;
+  clip-path: polygon(50% 0%, 100% 46%, 68% 46%, 68% 100%, 32% 100%, 32% 46%, 0% 46%);
   transform: translateX(-50%);
 }
 
@@ -284,12 +286,13 @@
   content: "";
   position: absolute;
   left: 50%;
-  top: 0;
-  width: 0;
-  height: 0;
-  border-left: 0.34rem solid transparent;
-  border-right: 0.34rem solid transparent;
-  border-bottom: 0.42rem solid currentColor;
+  bottom: 0;
+  width: 0.98rem;
+  height: 0.34rem;
+  box-sizing: border-box;
+  border: 0.15rem solid currentColor;
+  border-top: 0;
+  border-radius: 0 0 0.14rem 0.14rem;
   transform: translateX(-50%);
 }
 
