@@ -2,6 +2,14 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { AppHeader } from "./AppHeader";
 
+describe("AppHeader help button tooltip", () => {
+  it("carries a data-tooltip so its label shows immediately on hover, not the browser's delayed title tooltip", () => {
+    render(<AppHeader onHelpClick={() => {}} />);
+    const helpButton = screen.getByRole("button", { name: "사용 안내 다시 보기" });
+    expect(helpButton).toHaveAttribute("data-tooltip", "도움말");
+  });
+});
+
 describe("AppHeader logo (layout-shift regression)", () => {
   it("declares explicit width/height so the browser reserves space before the image loads", () => {
     // 로고에 width/height(또는 CSS aspect-ratio)가 없으면, 이미지가 로드되기 전엔 높이가
@@ -19,13 +27,5 @@ describe("AppHeader logo (layout-shift regression)", () => {
     const height = Number(logo.getAttribute("height"));
     // 실제 파일(1501x276)과 다른 비율이면 지정해도 무의미하다 — 원본 비율과 일치하는지 확인.
     expect(width / height).toBeCloseTo(1501 / 276, 2);
-  });
-});
-
-describe("AppHeader help button tooltip", () => {
-  it("carries a data-tooltip so its label shows immediately on hover, not the browser's delayed title tooltip", () => {
-    render(<AppHeader onHelpClick={() => {}} />);
-    const helpButton = screen.getByRole("button", { name: "사용 안내 다시 보기" });
-    expect(helpButton).toHaveAttribute("data-tooltip", "도움말");
   });
 });

@@ -30,6 +30,7 @@ class AnonymizeStrategy(str, Enum):
 
     MASK = "mask"
     LABEL = "label"
+    PSEUDONYM = "pseudonym"
 
 
 class TextRequest(BaseModel):
@@ -103,7 +104,8 @@ class AnonymizeRequest(TextRequest):
 
     strategy: AnonymizeStrategy = Field(
         default=AnonymizeStrategy.MASK,
-        description="비식별화 전략. mask는 별표 치환, label은 종류 라벨 치환.",
+        description="비식별화 전략. mask는 별표 치환, label은 종류 라벨 치환, "
+        "pseudonym은 같은 값을 같은 가짜 값으로 치환(문서 쓸모 유지).",
     )
 
 
