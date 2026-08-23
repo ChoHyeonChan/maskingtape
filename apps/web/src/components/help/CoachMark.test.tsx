@@ -25,6 +25,12 @@ describe("CoachMark keyboard accessibility (#190)", () => {
 
     expect(onDismiss).not.toHaveBeenCalled();
   });
+
+  it("shows a hint that clicking anywhere dismisses it", () => {
+    const { container } = render(<CoachMark onDismiss={vi.fn()} variant="intro" />);
+
+    expect(container.querySelector(".coachmark__dismiss-hint")?.textContent).toBe("아무 데나 누르면 닫힙니다");
+  });
 });
 
 describe("CoachMark target visibility", () => {
