@@ -17,7 +17,8 @@
 .coachmark__focus,
 .coachmark__lines,
 .coachmark__note,
-.coachmark__mini {
+.coachmark__mini,
+.coachmark__dismiss-hint {
   position: absolute;
   pointer-events: none;
 }
@@ -92,10 +93,27 @@
   color: var(--kind-rrn);
 }
 
+/* "아무 데나 누르면 닫힌다"는 걸 진입하자마자 바로 보이도록 상단에 둔다 — 안내 카드는
+   하단으로. */
+.coachmark__dismiss-hint {
+  z-index: 2;
+  right: max(1.25rem, calc((100vw - 1200px) / 2 + 1.25rem));
+  top: 1.25rem;
+  padding: 0.5rem 0.85rem;
+  border: 1px solid #dc2626;
+  border-radius: 999px;
+  background: #fde3e7;
+  color: #dc2626;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
 @media (max-width: 900px) {
   .coachmark {
-    display: grid;
-    align-items: end;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: stretch;
     padding: 1rem;
   }
 
@@ -110,5 +128,10 @@
     flex-direction: column;
     align-items: flex-start;
     max-width: none;
+  }
+
+  .coachmark__dismiss-hint {
+    position: static;
+    align-self: center;
   }
 }

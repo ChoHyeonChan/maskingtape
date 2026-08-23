@@ -16,7 +16,13 @@ export function AppHeader({ onHelpClick }: Props) {
         <p>한국어 문서 속 개인정보를 탐지하고, 안전하게 마스킹해 공유할 수 있게 돕습니다.</p>
       </div>
 
-      <button type="button" className="help-button" aria-label="사용 안내 다시 보기" onClick={onHelpClick}>
+      <button
+        type="button"
+        className="help-button"
+        aria-label="사용 안내 다시 보기"
+        data-tooltip="도움말"
+        onClick={onHelpClick}
+      >
         i
       </button>
     </header>
