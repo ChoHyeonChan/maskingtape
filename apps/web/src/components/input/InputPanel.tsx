@@ -249,7 +249,7 @@ export function InputPanel({
             onClick={() => fileInputRef.current?.click()}
             disabled={extracting}
             aria-label={extracting ? "추출 중..." : "파일 업로드"}
-            data-tooltip={extracting ? "추출 중..." : "업로드"}
+            data-tooltip={extracting ? "추출 중..." : "파일 업로드"}
           >
             <span className="upload-icon" aria-hidden="true" />
           </button>
