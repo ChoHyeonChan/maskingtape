@@ -101,7 +101,7 @@ describe("InputPanel file upload (#263)", () => {
 
   it("shows an instant tooltip on the icon-only upload button, and switches it while extracting", () => {
     renderPanel("");
-    expect(screen.getByRole("button", { name: "파일 업로드" })).toHaveAttribute("data-tooltip", "업로드");
+    expect(screen.getByRole("button", { name: "파일 업로드" })).toHaveAttribute("data-tooltip", "파일 업로드");
   });
 });
 
