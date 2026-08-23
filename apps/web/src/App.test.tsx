@@ -18,6 +18,15 @@ describe("App privacy banner (#154)", () => {
     expect(note).toHaveTextContent("저장되지 않으며");
     expect(note).toHaveTextContent("로컬");
   });
+
+  it("bolds the local-install recommendation, not the personal-data warning", () => {
+    render(<App />);
+
+    const note = screen.getByRole("note", { name: "개인정보 입력 주의 안내" });
+    const strong = note.querySelector("strong");
+    expect(strong).toHaveTextContent("실사용은 로컬 설치를 권장합니다");
+    expect(strong).not.toHaveTextContent("개인정보");
+  });
 });
 
 describe("App accuracy notice (#236)", () => {

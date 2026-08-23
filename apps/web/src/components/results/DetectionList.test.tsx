@@ -179,3 +179,54 @@ describe("DetectionList", () => {
     expect(onRowHover).toHaveBeenLastCalledWith(null);
   });
 });
+
+describe("DetectionList sort control (순서대로/카테고리별)", () => {
+  const rows = [
+    row({ kind: "phone", start: 20, end: 33, snippet: "010-1234-5678" }),
+    row({ kind: "name", start: 0, end: 3, snippet: "김소연" }),
+    row({ kind: "address", start: 6, end: 18, snippet: "서울특별시" }),
+  ];
+
+  function renderList() {
+    render(
+      <DetectionList
+        rows={rows}
+        confidenceThreshold={50}
+        minThreshold={0}
+        maxThreshold={100}
+        thresholdStep={5}
+        onThresholdChange={() => {}}
+        onToggle={() => {}}
+        onRowHover={() => {}}
+      />,
+    );
+  }
+
+  function displayedKinds() {
+    return screen.getAllByRole("listitem").map((li) => li.querySelector(".detect-row__kind")?.textContent);
+  }
+
+  it("defaults to showing rows in text order (순서대로 활성)", () => {
+    renderList();
+    expect(screen.getByRole("button", { name: "순서대로" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "카테고리별" })).toHaveAttribute("aria-pressed", "false");
+    expect(displayedKinds()).toEqual(["전화번호", "이름", "주소"]);
+  });
+
+  it("regroups rows by kind (alphabetical by label) when 카테고리별 is selected, without changing the underlying rows prop", () => {
+    renderList();
+
+    fireEvent.click(screen.getByRole("button", { name: "카테고리별" }));
+
+    expect(screen.getByRole("button", { name: "카테고리별" })).toHaveAttribute("aria-pressed", "true");
+    expect(displayedKinds()).toEqual(["이름", "전화번호", "주소"]);
+  });
+
+  it("switches back to position order when 순서대로 is clicked again", () => {
+    renderList();
+    fireEvent.click(screen.getByRole("button", { name: "카테고리별" }));
+    fireEvent.click(screen.getByRole("button", { name: "순서대로" }));
+
+    expect(displayedKinds()).toEqual(["전화번호", "이름", "주소"]);
+  });
+});
