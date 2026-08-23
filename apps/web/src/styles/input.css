@@ -210,8 +210,7 @@
 }
 
 .input-panel__presets-label,
-.input-panel__sample,
-.input-panel__upload {
+.input-panel__sample {
   min-height: 2.25rem;
   display: inline-flex;
   align-items: center;
@@ -231,14 +230,70 @@
   list-style: none;
 }
 
-.input-panel__sample,
-.input-panel__upload {
+.input-panel__sample {
   padding: 0 0.78rem;
+}
+
+/* 예제 불러오기 자리와 달리, "내 파일을 올린다"는 다른 성격의 동작이라 텍스트 알약이
+   아니라 아이콘 버튼으로 구분해 둔다 — 대신 툴바 맨 앞으로 옮겨 우선순위를 살렸다. */
+.input-panel__upload {
+  flex: 0 0 auto;
+  width: 2.25rem;
+  height: 2.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.input-panel__upload:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--brand-blue) 32%, var(--border));
+  color: var(--brand-blue);
 }
 
 .input-panel__upload:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* 화살표(줄기+삼각 머리)가 위로 향한, 이 앱의 다른 유니코드 아이콘(⬇ 다운로드 등)과
+   같은 계열의 순수 CSS 도형 — 외부 아이콘 자산·라이선스 문제 없이 직접 그린다. */
+.upload-icon {
+  position: relative;
+  width: 1.1rem;
+  height: 1.15rem;
+}
+
+/* 화살표(줄기+삼각머리를 한 다각형으로) — 일반적인 "업로드" 픽토그램 실루엣을
+   직접 그린 것으로, 특정 아이콘 세트의 자산을 가져오거나 베낀 게 아니다. */
+.upload-icon::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 0.64rem;
+  height: 0.62rem;
+  background: currentColor;
+  clip-path: polygon(50% 0%, 100% 46%, 68% 46%, 68% 100%, 32% 100%, 32% 46%, 0% 46%);
+  transform: translateX(-50%);
+}
+
+.upload-icon::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 0.98rem;
+  height: 0.34rem;
+  box-sizing: border-box;
+  border: 0.15rem solid currentColor;
+  border-top: 0;
+  border-radius: 0 0 0.14rem 0.14rem;
+  transform: translateX(-50%);
 }
 
 /* 파일 선택은 숨긴 input을 버튼으로 대신 트리거한다 — 화면엔 항상 버튼만 보인다. */
