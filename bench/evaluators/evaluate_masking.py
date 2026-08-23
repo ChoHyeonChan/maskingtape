@@ -14,6 +14,7 @@ core에는 비식별화 전략이 세 가지 있다 — mask(***, 기본), label
 from __future__ import annotations
 
 import argparse
+import sys
 from pathlib import Path
 
 from maskingtape.anonymizers import LabelAnonymizer, MaskAnonymizer, PseudonymAnonymizer
@@ -30,6 +31,10 @@ _STRATEGIES = {
 
 
 def main() -> None:
+    # Windows 콘솔 기본 코드페이지(cp949)는 리포트에 쓰는 em dash(—) 등을 인코딩 못 해 print에서
+    # 그대로 크래시한다(#317 재현: mask_quality.format_mask_quality_report 출력). 플랫폼 기본
+    # 콘솔 설정과 무관하게 항상 성공하도록 stdout을 UTF-8로 강제한다.
+    sys.stdout.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(description="합성 데이터셋으로 마스킹 결과물의 개인정보 유출 여부 평가")
     parser.add_argument("dataset", type=Path, help="평가할 JSONL 데이터셋 경로")
     parser.add_argument("--strategy", choices=sorted(_STRATEGIES), default="mask", help="검증할 비식별화 전략")

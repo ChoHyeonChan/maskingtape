@@ -14,6 +14,7 @@ from maskingtape.detectors import (
     BirthDateDetector,
     BusinessRegistrationDetector,
     CreditCardDetector,
+    DriverLicenseDetector,
     NameDetector,
     PassportDetector,
     PhoneDetector,
@@ -202,9 +203,12 @@ def test_pseudonym_gives_same_fake_value_to_identical_repeated_value():
 
 def test_pseudonym_falls_back_to_label_for_kinds_without_a_fake_value_generator():
     """#230: pseudonym.py의 `_GENERATORS`는 name/phone/email/rrn/card/address 6종만 두고,
-    나머지(biz_reg/passport/account)는 docstring에 명시된 대로 `[라벨]` 형태로 폴백한다.
-    core에 나중에 추가된 이 3개 kind에 대해 이 폴백 경로가 지금까지 회귀 테스트로 한 번도
-    고정된 적이 없었다 — 원본이 새지 않는지, 라벨 형식이 맞는지 직접 확인한다."""
+    나머지는 docstring에 명시된 대로 `[라벨]` 형태로 폴백한다. core에 나중에 추가된 이 kind들에
+    대해 이 폴백 경로가 지금까지 회귀 테스트로 한 번도 고정된 적이 없었다 — 원본이 새지 않는지,
+    라벨 형식이 맞는지 직접 확인한다. biz_reg/passport/account 3종은 여기서, birth_date/
+    driver_license 2종은 각각 `test_birth_date_label_fallback_uses_korean_label`/
+    `test_driver_license_label_fallback_uses_korean_label`에서 검증한다(DEFAULT_LABELS 등록
+    누락이라는 별도 회귀가 각각 core#282/core#311로 있었던 kind라 전용 테스트로 분리했다)."""
     rng = random.Random(50)
     cases = [
         ("biz_reg", BusinessRegistrationDetector(), "사업자등록번호는 {}입니다."),
@@ -242,6 +246,29 @@ def test_birth_date_label_fallback_uses_korean_label():
         )
         assert "[birth_date]" not in result, (
             f"{name}: kind 원문이 그대로 노출됨 — core#282가 되돌아갔는지 확인: {result!r}"
+        )
+
+
+def test_driver_license_label_fallback_uses_korean_label():
+    """#230과 같은 라벨 폴백 경로 — birth_date(#282)가 core#311로 고쳐진 뒤에도, 그 뒤에 core가
+    추가한 driver_license(#267/#305)는 이 회귀 테스트로 한 번도 고정된 적이 없었다. pseudonym
+    생성기가 없어 라벨로 폴백하는데, `DEFAULT_LABELS`에 `driver_license` 등록이 없으면 birth_date
+    가 겪었던 것과 똑같이 `[운전면허]` 대신 `[driver_license]`(kind 원문)가 그대로 노출된다 —
+    이미 core#311이 고쳤지만(main에 머지됨), 재발 방지를 위해 직접 고정해둔다."""
+    entity = generate_entity("driver_license", random.Random(56), difficulty="easy")
+    text = f"운전면허번호는 {entity.text}입니다."
+    detections = DriverLicenseDetector().detect(text)
+    assert len(detections) == 1
+
+    label_result = LabelAnonymizer().apply(text, detections)
+    pseudonym_result = PseudonymAnonymizer(seed=1).apply(text, detections)
+    for name, result in (("label", label_result), ("pseudonym", pseudonym_result)):
+        assert entity.text not in result, f"{name} 전략에서 원본이 그대로 남음: {result!r}"
+        assert f"[{DEFAULT_LABELS['driver_license']}]" in result, (
+            f"{name} 전략이 한글 라벨로 폴백하지 않음: {result!r}"
+        )
+        assert "[driver_license]" not in result, (
+            f"{name}: kind 원문이 그대로 노출됨 — core#311이 되돌아갔는지 확인: {result!r}"
         )
 
 
