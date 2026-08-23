@@ -30,6 +30,12 @@ def test_anonymize_request_defaults_to_mask_strategy() -> None:
     assert request.strategy == AnonymizeStrategy.MASK
 
 
+def test_anonymize_request_accepts_pseudonym_strategy() -> None:
+    request = AnonymizeRequest(text="테스트 문서입니다.", strategy="pseudonym")
+
+    assert request.strategy == AnonymizeStrategy.PSEUDONYM
+
+
 def test_detection_response_excludes_original_text() -> None:
     detection = DetectionResponse(
         kind=DetectionKind.RRN,

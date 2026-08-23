@@ -93,6 +93,22 @@ def test_anonymize_http_endpoint_accepts_passport_detection_kind() -> None:
     assert passport not in response.text
 
 
+def test_anonymize_http_endpoint_supports_pseudonym_strategy() -> None:
+    rrn = "800101-1234560"
+
+    response = TestClient(create_app()).post(
+        "/anonymize",
+        json={"text": f"주민번호 {rrn} 확인", "strategy": "pseudonym"},
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert rrn not in payload["text"]
+    assert "*" not in payload["text"]
+    assert "[주민등록번호]" not in payload["text"]
+    assert payload["detections"][0]["kind"] == DetectionKind.RRN
+
+
 def test_scan_http_endpoint_passes_unknown_detection_kind_without_500() -> None:
     app = create_app()
     app.dependency_overrides[get_core_adapter] = lambda: CoreEngineAdapter(

@@ -30,3 +30,19 @@ def test_anonymize_endpoint_supports_label_strategy() -> None:
     assert "]" in response.text
     assert len(response.detections) == 1
     assert response.detections[0].kind == DetectionKind.PHONE
+
+
+def test_anonymize_endpoint_supports_pseudonym_strategy() -> None:
+    rrn = "800101-1234560"
+    text = f"주민번호 {rrn} 확인"
+
+    response = anonymize(
+        AnonymizeRequest(text=text, strategy=AnonymizeStrategy.PSEUDONYM),
+        core=CoreEngineAdapter(),
+    )
+
+    assert rrn not in response.text
+    assert "*" not in response.text
+    assert "[주민등록번호]" not in response.text
+    assert len(response.detections) == 1
+    assert response.detections[0].kind == DetectionKind.RRN
