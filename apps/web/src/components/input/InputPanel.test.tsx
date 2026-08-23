@@ -98,6 +98,11 @@ describe("InputPanel file upload (#263)", () => {
 
     await waitFor(() => expect(onTextChange).toHaveBeenCalledWith("드래그로 넣은 텍스트"));
   });
+
+  it("shows an instant tooltip on the icon-only upload button, and switches it while extracting", () => {
+    renderPanel("");
+    expect(screen.getByRole("button", { name: "파일 업로드" })).toHaveAttribute("data-tooltip", "파일 업로드");
+  });
 });
 
 function renderPanelWithChange(onTextChange: (text: string) => void) {
@@ -131,6 +136,140 @@ describe("InputPanel result view accessibility", () => {
     if (describedBy) {
       expect(document.getElementById(describedBy)).not.toBeNull();
     }
+  });
+});
+
+describe("InputPanel replays the reveal sweep when the masked text itself changes (#237 follow-up)", () => {
+  it("replays the sweep when a toggle in the results panel changes the text, even though resultVersion (scanRun) stays the same", () => {
+    const { rerender } = render(
+      <InputPanel
+        text="김철수 010-****-5678"
+        hasResult
+        resultVersion={1}
+        onTextChange={vi.fn()}
+        onClear={vi.fn()}
+        onResult={vi.fn()}
+      />,
+    );
+
+    // 항목 하나를 노출시켜서 텍스트만 바뀐 상황(예: DetectionList의 토글) — scanRun은 그대로.
+    rerender(
+      <InputPanel
+        text="김철수 010-1234-5678"
+        hasResult
+        resultVersion={1}
+        onTextChange={vi.fn()}
+        onClear={vi.fn()}
+        onResult={vi.fn()}
+      />,
+    );
+
+    const textarea = screen.getByRole("textbox", { name: "마스킹된 탐지 결과" });
+    expect(textarea).toHaveClass("is-text-revealing");
+    expect(screen.getByText("김철수 010-1234-5678", { selector: ".input-panel__result-reveal" })).toBeInTheDocument();
+  });
+});
+
+describe("InputPanel highlights the hovered detection's own text (오른쪽 목록 호버 연동)", () => {
+  it("wraps only the highlighted range in a <mark>, tinted with the given color", () => {
+    render(
+      <InputPanel
+        text="근로자 010-1234-5678 입니다"
+        hasResult
+        resultVersion={1}
+        onTextChange={vi.fn()}
+        onClear={vi.fn()}
+        onResult={vi.fn()}
+        highlight={{ start: 4, end: 17, color: "var(--kind-phone)" }}
+      />,
+    );
+
+    const mark = document.querySelector(".input-panel__highlight-overlay mark");
+    expect(mark).not.toBeNull();
+    expect(mark).toHaveTextContent("010-1234-5678");
+    expect(mark).toHaveStyle({ "--highlight-color": "var(--kind-phone)" });
+  });
+
+  it("renders no <mark> when there is nothing to highlight", () => {
+    render(
+      <InputPanel
+        text="근로자 010-1234-5678 입니다"
+        hasResult
+        resultVersion={1}
+        onTextChange={vi.fn()}
+        onClear={vi.fn()}
+        onResult={vi.fn()}
+        highlight={null}
+      />,
+    );
+
+    expect(document.querySelector(".input-panel__highlight-overlay mark")).toBeNull();
+  });
+});
+
+describe("InputPanel export actions (복사·파일로 저장이 이 패널에 모임)", () => {
+  it("copies the exact text shown in this panel, not something recomputed elsewhere", async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, { clipboard: { writeText } });
+
+    render(
+      <InputPanel
+        text="근로자 *** 010-****-5678"
+        hasResult
+        resultVersion={1}
+        onTextChange={vi.fn()}
+        onClear={vi.fn()}
+        onResult={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "마스킹 결과 복사" }));
+
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith("근로자 *** 010-****-5678"));
+  });
+
+  it("shows an instant tooltip (not the browser's delayed title) on the icon-only save button", () => {
+    render(
+      <InputPanel
+        text="근로자 *** 010-****-5678"
+        hasResult
+        resultVersion={1}
+        onTextChange={vi.fn()}
+        onClear={vi.fn()}
+        onResult={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "파일로 저장" })).toHaveAttribute("data-tooltip", "파일로 저장");
+  });
+
+  it("saves the shown text as a .txt file when '파일로 저장' is clicked", () => {
+    const createObjectURL = vi.fn().mockReturnValue("blob:mock-url");
+    const revokeObjectURL = vi.fn();
+    vi.stubGlobal("URL", { ...URL, createObjectURL, revokeObjectURL });
+    const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+
+    render(
+      <InputPanel
+        text="근로자 *** 010-****-5678"
+        hasResult
+        resultVersion={1}
+        onTextChange={vi.fn()}
+        onClear={vi.fn()}
+        onResult={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "파일로 저장" }));
+
+    expect(createObjectURL).toHaveBeenCalledTimes(1);
+    const blob = createObjectURL.mock.calls[0][0] as Blob;
+    expect(blob.type).toContain("text/plain");
+    expect(clickSpy).toHaveBeenCalledTimes(1);
+    expect(revokeObjectURL).toHaveBeenCalledWith("blob:mock-url");
+
+    clickSpy.mockRestore();
+    vi.unstubAllGlobals();
   });
 });
 

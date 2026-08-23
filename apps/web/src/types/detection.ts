@@ -11,20 +11,6 @@ export interface ScanResponse {
   detections: Detection[];
 }
 
-export const KIND_ORDER = [
-  "rrn",
-  "passport",
-  "driver_license",
-  "phone",
-  "email",
-  "card",
-  "account",
-  "address",
-  "name",
-  "birth_date",
-  "biz_reg",
-] as const;
-
 export const KIND_LABELS: Record<string, string> = {
   rrn: "주민등록번호",
   passport: "여권번호",
@@ -39,6 +25,13 @@ export const KIND_LABELS: Record<string, string> = {
   biz_reg: "사업자등록번호",
   business_registration: "사업자등록번호",
 };
+
+/** 오른쪽 목록의 항목에 마우스를 올렸을 때 왼쪽 "마스킹 결과" 텍스트에서 강조할 범위. */
+export interface HighlightRange {
+  start: number;
+  end: number;
+  color: string;
+}
 
 export const KIND_COLORS: Record<string, string> = {
   rrn: "var(--kind-rrn)",

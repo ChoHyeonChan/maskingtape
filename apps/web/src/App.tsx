@@ -3,28 +3,31 @@ import { CoachMark } from "./components/help/CoachMark";
 import { InputPanel } from "./components/input/InputPanel";
 import { AppHeader } from "./components/layout/AppHeader";
 import { ResultsPanel } from "./components/results/ResultsPanel";
-import { applyMasking, type MaskMode } from "./lib/masking";
-import type { Detection } from "./types/detection";
+import type { MaskMode } from "./lib/masking";
+import type { Detection, HighlightRange } from "./types/detection";
 
 type CoachMarkVariant = "intro" | "result";
 
 export function App() {
   const [inputText, setInputText] = useState("");
   const [scanned, setScanned] = useState<{ text: string; detections: Detection[] } | null>(null);
-  const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [scanRun, setScanRun] = useState(0);
   const [coachMarkVariant, setCoachMarkVariant] = useState<CoachMarkVariant | null>("intro");
   const [maskMode, setMaskMode] = useState<MaskMode>("mask");
+  // "탐지 결과 조정" 패널이 항목별 가림/보임 조정을 반영한 최종본을 계산해 여기로 보고한다 —
+  // 그래야 왼쪽 결과 박스·복사 버튼이 항상 오른쪽 패널의 조정 상태와 같은 텍스트를 본다.
+  const [maskedResultText, setMaskedResultText] = useState("");
+  // 오른쪽 목록에서 항목에 마우스를 올렸을 때 왼쪽 "마스킹 결과" 텍스트의 해당 부분을
+  // 강조하기 위한 범위 — 두 패널이 서로 멀리 떨어져 있어도 항목별 조정이 어디에
+  // 해당하는지 바로 이어 보이게 한다.
+  const [highlight, setHighlight] = useState<HighlightRange | null>(null);
   // 결과 코치마크는 첫 스캔 직후 딱 한 번만 자동으로 뜬다 — 재스캔마다 다시 뜨면 방해가 된다(#299).
   const hasAutoShownResultCoachMark = useRef(false);
 
-  // 결과 텍스트는 스캔 시점에 한 번만 만들어 저장하지 않고, 원문+탐지결과에서 매번 다시
-  // 계산한다 — 그래야 마스킹 방식(별표/라벨) 토글을 바꿔도 별도 재스캔 없이 즉시 반영된다(#277).
-  const displayText = scanned ? applyMasking(scanned.text, scanned.detections, maskMode) : inputText;
+  const displayText = scanned ? maskedResultText : inputText;
 
   function handleResult(text: string, detections: Detection[]) {
     setScanned({ text, detections });
-    setActiveFilter(null);
     setScanRun((run) => run + 1);
     if (!hasAutoShownResultCoachMark.current) {
       hasAutoShownResultCoachMark.current = true;
@@ -35,14 +38,16 @@ export function App() {
   function handleClear() {
     setInputText("");
     setScanned(null);
-    setActiveFilter(null);
+    setMaskedResultText("");
+    setHighlight(null);
   }
 
   function handleTextChange(text: string) {
     setInputText(text);
     if (scanned) {
       setScanned(null);
-      setActiveFilter(null);
+      setMaskedResultText("");
+      setHighlight(null);
     }
   }
 
@@ -77,15 +82,16 @@ export function App() {
             onTextChange={handleTextChange}
             onClear={handleClear}
             onResult={handleResult}
+            highlight={highlight}
           />
         </section>
 
         <ResultsPanel
           scanned={scanned}
-          activeFilter={activeFilter}
           scanRun={scanRun}
           maskMode={maskMode}
-          onFilterSelect={setActiveFilter}
+          onMaskedTextChange={setMaskedResultText}
+          onHighlightChange={setHighlight}
         />
       </main>
 

@@ -1,650 +1,284 @@
-.confidence-filter {
+.confidence-dial {
   display: flex;
-  flex-direction: column;
-  gap: 0.48rem;
-  margin-bottom: 0.75rem;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.confidence-dial__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(24, 58, 139, 0.16);
+  background: #ffffff;
+  color: var(--brand-blue);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.confidence-dial__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.confidence-dial__ring {
+  position: relative;
+  flex: 0 0 auto;
+  width: 3.6rem;
+  height: 3.6rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: conic-gradient(var(--brand-blue) var(--dial-fill, 0%), var(--brand-blue-soft) 0);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.confidence-dial__ring.is-dragging {
+  cursor: grabbing;
+}
+
+.confidence-dial__ring::before {
+  content: "";
+  position: absolute;
+  inset: 0.36rem;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.confidence-dial__ring:focus-visible {
+  outline: 2px solid var(--brand-blue);
+  outline-offset: 2px;
+}
+
+.confidence-dial__handle-track {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* 링(3.6rem)의 색 밴드는 ::before의 inset(0.36rem)만큼 안쪽에서 시작하는 얇은 띠다 —
+   핸들의 중심이 그 띠의 한가운데(중심에서 반지름 1.62rem)에 오도록 top을 계산해서
+   손잡이가 밴드 위에 걸쳐 있는 것처럼 보이게 한다(안쪽 흰 원 쪽으로 치우쳐 보이던 문제 수정). */
+.confidence-dial__handle {
+  position: absolute;
+  top: -0.07rem;
+  left: 50%;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-left: -0.25rem;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid var(--brand-blue);
+  box-shadow: 0 1px 3px rgba(16, 32, 61, 0.28);
+}
+
+.confidence-dial__value {
+  position: relative;
+  z-index: 1;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.detect-empty {
+  color: var(--text-secondary);
+  padding: 0.75rem 0;
+}
+
+.detect__bulk {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-bottom: 0.85rem;
   padding: 0.68rem 0.8rem;
   border: 1px solid rgba(24, 58, 139, 0.16);
   border-radius: 8px;
   background: #f8faff;
 }
 
-.confidence-filter label {
+.detect__bulk-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.detect__bulk-title {
   font-size: 0.88rem;
   font-weight: 700;
   color: var(--text-secondary);
 }
 
-.confidence-filter label strong {
-  color: var(--brand-blue);
-}
-
-.confidence-filter__sublabel {
-  display: block;
-  margin-top: 0.15rem;
+.detect__bulk-sublabel {
   font-size: 0.78rem;
   font-weight: 400;
   color: var(--text-secondary);
 }
 
-.confidence-filter input[type="range"] {
-  width: 100%;
-  accent-color: var(--brand-blue);
-}
-
-.confidence-filter__warning {
-  margin: 0;
-  color: var(--kind-card);
+.detect__summary {
+  margin: 0 0 0.6rem;
+  color: var(--text-secondary);
   font-size: 0.82rem;
-  font-weight: 800;
-}
-
-.summary {
-  display: block;
-  margin-bottom: 0.85rem;
-  padding: 0;
-  border-bottom: 0;
-}
-
-.summary--clean {
-  color: var(--text-secondary);
-}
-
-.summary--filtered {
-  color: var(--kind-card);
-  font-weight: 800;
-}
-
-.summary__total {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-}
-
-.summary__cards {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.36rem;
-  overflow-x: visible;
-  padding-bottom: 0;
-}
-
-.summary__cards:has(.summary-card:nth-child(1):last-child) {
-  grid-template-columns: 1fr;
-}
-
-.summary__cards:has(.summary-card:nth-child(2):last-child) {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.summary__cards:has(.summary-card:nth-child(3):last-child) {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.summary__cards:has(.summary-card:nth-child(n + 5)) {
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(6.8rem, calc((100% - 1.08rem) / 4));
-  grid-template-columns: none;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  padding-bottom: 0.35rem;
-  scrollbar-width: none;
-}
-
-.summary__cards:has(.summary-card:nth-child(n + 5))::-webkit-scrollbar {
-  display: none;
-  width: 0;
-  height: 0;
-}
-
-.summary-card {
-  /* 매칭되는 .summary-card--<kind>가 없는(알 수 없는) kind를 위한 기본값(#216). */
-  --summary-color: var(--kind-fallback);
-  display: flex;
-  align-items: center;
-  gap: 0.28rem;
-  min-height: 3rem;
-  padding: 0.42rem 0.36rem;
-  border: 1px solid rgba(24, 58, 139, 0.14);
-  border-radius: 8px;
-  background: #ffffff;
-  color: var(--text-primary);
-  cursor: pointer;
-  text-align: left;
-  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
-  min-width: 0;
-}
-
-.summary-card:hover,
-.summary-card.is-active {
-  transform: none;
-  border-color: color-mix(in srgb, var(--summary-color) 32%, var(--border));
-  background: color-mix(in srgb, var(--summary-color) 8%, white);
-}
-
-.summary-card__icon {
-  flex: 0 0 auto;
-  width: 1.15rem;
-  height: 1.15rem;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at center, var(--summary-color) 0 22%, transparent 23%),
-    color-mix(in srgb, var(--summary-color) 12%, white);
-}
-
-.summary-card__body {
-  display: grid;
-  grid-template-columns: 1fr;
-  align-items: center;
-  gap: 0.08rem;
-  min-width: 0;
-}
-
-.summary-card__sr {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-}
-
-.summary-card__body span {
-  color: var(--text-secondary);
-  font-size: clamp(0.58rem, 0.7vw, 0.68rem);
-  font-weight: 800;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.summary-card__body strong {
-  font-size: clamp(0.72rem, 0.82vw, 0.84rem);
-  color: var(--text-primary);
-  white-space: nowrap;
-}
-
-.summary-card__bar {
-  display: block;
-  grid-column: 1 / -1;
-  width: min(100%, 2.5rem);
-  height: 0.22rem;
-  margin-top: 0.08rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--summary-color) 18%, var(--border));
-  overflow: hidden;
-}
-
-.summary-card__bar-fill {
-  display: block;
-  height: 100%;
-  background: var(--summary-color);
-  border-radius: inherit;
-  transition: width 200ms ease;
-}
-
-.summary-card--rrn { --summary-color: var(--kind-rrn); }
-.summary-card--passport { --summary-color: var(--kind-passport); }
-.summary-card--phone { --summary-color: var(--kind-phone); }
-.summary-card--email { --summary-color: var(--kind-email); }
-.summary-card--card { --summary-color: var(--kind-card); }
-.summary-card--address { --summary-color: var(--kind-address); }
-.summary-card--name { --summary-color: var(--kind-name); }
-.summary-card--biz_reg,
-.summary-card--business_registration { --summary-color: var(--kind-business); }
-
-.summary__details {
-  display: none;
-}
-
-.summary__filters {
-  display: flex;
-  gap: 0.38rem;
-  flex-wrap: wrap;
-  margin-top: 0.5rem;
-  max-width: 100%;
-}
-
-.summary__filter {
-  /* 매칭되는 .summary__filter--<kind>가 없는(알 수 없는) kind를 위한 기본값(#216). */
-  --summary-color: var(--kind-fallback);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  font-size: 0.82em;
   font-weight: 700;
-  color: var(--text-secondary);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: transparent;
-  padding: 0.24rem 0.5rem;
-  cursor: pointer;
 }
 
-.summary__dot {
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 50%;
-  display: inline-block;
-  /* 매칭되는 .summary__dot--<kind>가 없는(알 수 없는) kind를 위한 기본값(#216). */
-  background: var(--kind-fallback);
-}
-
-.summary__dot--rrn { background: var(--kind-rrn); }
-.summary__dot--passport { background: var(--kind-passport); }
-.summary__dot--phone { background: var(--kind-phone); }
-.summary__dot--email { background: var(--kind-email); }
-.summary__dot--card { background: var(--kind-card); }
-.summary__dot--address { background: var(--kind-address); }
-.summary__dot--name { background: var(--kind-name); }
-.summary__dot--biz_reg { background: var(--kind-business); }
-.summary__dot--business_registration { background: var(--kind-business); }
-
-.summary__filter--rrn { --summary-color: var(--kind-rrn); }
-.summary__filter--passport { --summary-color: var(--kind-passport); }
-.summary__filter--phone { --summary-color: var(--kind-phone); }
-.summary__filter--email { --summary-color: var(--kind-email); }
-.summary__filter--card { --summary-color: var(--kind-card); }
-.summary__filter--address { --summary-color: var(--kind-address); }
-.summary__filter--name { --summary-color: var(--kind-name); }
-.summary__filter--biz_reg { --summary-color: var(--kind-business); }
-.summary__filter--business_registration { --summary-color: var(--kind-business); }
-
-.analysis-result {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-}
-
-.analysis-result__toolbar {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  justify-content: flex-start;
-  margin: 1rem 0 0.45rem;
-}
-
-.analysis-result__hint {
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: 0.84rem;
-  font-weight: 800;
-}
-
-.analysis-result__cover-all {
-  margin-left: auto;
-  min-height: 2.15rem;
-  padding: 0.35rem 0.68rem;
-  border-radius: 8px;
-  border: 1px solid rgba(24, 58, 139, 0.16);
-  background: #ffffff;
-  color: var(--brand-blue);
-  font-size: 0.82rem;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.analysis-result__cover-all:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.highlighted-text {
-  line-height: 1.85;
-  white-space: pre-wrap;
-  word-break: break-word;
-  margin: 0;
-  padding: 0;
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-}
-
-.analysis-result__body {
-  position: relative;
-  min-height: 18rem;
-  max-height: clamp(18rem, 46vh, 30rem);
+.detect__list {
   display: flex;
   flex-direction: column;
-  padding: 0.85rem 0.85rem 4.2rem;
-  border: 1px solid rgba(24, 58, 139, 0.14);
-  border-radius: 8px;
-  background: #fbfcff;
+  gap: 0.4rem;
+  margin: 0 0 0.9rem;
+  padding: 0;
+  list-style: none;
+  max-height: clamp(16rem, 40vh, 26rem);
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--brand-blue) transparent;
 }
 
-.analysis-result__body::-webkit-scrollbar {
+.detect__list::-webkit-scrollbar {
   width: 8px;
 }
 
-.analysis-result__body::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.analysis-result__body::-webkit-scrollbar-thumb {
+.detect__list::-webkit-scrollbar-thumb {
   border-radius: 999px;
   background: var(--brand-blue);
 }
 
-.analysis-result__export {
-  position: sticky;
-  right: 0;
-  bottom: 0.2rem;
-  align-self: flex-end;
-  z-index: 4;
-  display: flex;
-  gap: 0.55rem;
-  margin-top: 1rem;
-  margin-right: 0.1rem;
-}
-
-.analysis-result__copy {
-  display: inline-flex;
+.detect-row {
+  display: grid;
+  grid-template-columns: auto minmax(4.5rem, auto) 1fr auto auto;
   align-items: center;
-  justify-content: center;
-  gap: 0.52rem;
-  min-height: 2.35rem;
-  padding: 0 0.85rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.9);
-  color: var(--text-primary);
-  font-size: 0.82rem;
-  font-weight: 900;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(24, 58, 139, 0.07);
-}
-
-.analysis-result__copy:hover {
-  background: #ffffff;
-}
-
-.analysis-result__copy .copy-icon {
-  width: 1.1rem;
-  height: 1.1rem;
-}
-
-.analysis-result__copy .copy-icon::before,
-.analysis-result__copy .copy-icon::after {
-  width: 0.62rem;
-  height: 0.74rem;
-  border-width: 2px;
-}
-
-.analysis-result__copy-toast {
-  position: sticky;
-  right: 0.15rem;
-  bottom: 3.35rem;
-  align-self: flex-end;
-  z-index: 5;
-  padding: 0.42rem 0.68rem;
+  gap: 0.55rem;
+  padding: 0.5rem 0.65rem;
   border: 1px solid rgba(24, 58, 139, 0.14);
   border-radius: 8px;
-  background: rgba(16, 32, 61, 0.92);
-  color: #ffffff;
-  font-size: 0.82rem;
+  background: #ffffff;
+  transition: background-color 150ms ease;
+}
+
+/* 항목에 마우스를 올리면 그 종류의 색(--row-color, 왼쪽 점과 같은 색)을 옅게 깔아
+   보여준다 — 토글 버튼도 같은 색으로 살짝 물들여서 "이 행 전체가 하나"라는 걸 강조한다. */
+.detect-row:hover {
+  background-color: color-mix(in srgb, var(--row-color) 16%, #ffffff);
+}
+
+.detect-row:hover .detect-row__toggle {
+  background: color-mix(in srgb, var(--row-color) 35%, #eef1f6);
+  border-color: color-mix(in srgb, var(--row-color) 45%, rgba(24, 58, 139, 0.16));
+}
+
+.detect-row:hover .detect-row__toggle.is-masked {
+  background: color-mix(in srgb, var(--row-color) 35%, var(--brand-blue));
+  border-color: color-mix(in srgb, var(--row-color) 45%, var(--brand-blue));
+}
+
+.detect-row__dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+
+.detect-row__kind {
+  font-size: 0.78rem;
   font-weight: 800;
-  box-shadow: 0 10px 24px rgba(16, 32, 61, 0.16);
-  animation: copyToastIn 160ms ease-out both;
-}
-
-.highlighted-text__plain {
-  transition: opacity 180ms ease;
-}
-
-.highlighted-text__plain--dimmed {
-  opacity: 0.35;
-}
-
-.highlighted-text--empty {
-  color: var(--text-secondary);
-  padding: 0.75rem 0;
-}
-
-.highlight {
-  position: relative;
-  isolation: isolate;
-  --highlight-strength: 48%;
-  --highlight-edge-strength: 34%;
-  --highlight-tag-strength: 20%;
-  /* 아래 .highlight--<kind> 규칙이 없는(core가 새로 추가했는데 웹이 아직 모르는) kind를
-     위한 기본값 — 매칭되는 규칙이 있으면 소스 순서상 이 기본값을 덮어쓴다(#216). */
-  --highlight-color: var(--kind-fallback);
-  background: transparent;
-  border-radius: 0;
-  margin-right: 0.28rem;
-  padding: 0.08rem 0.38rem;
   color: var(--text-primary);
-  cursor: pointer;
   white-space: nowrap;
+}
+
+.detect-row__snippet {
+  min-width: 0;
   overflow: hidden;
-  box-decoration-break: clone;
-  -webkit-box-decoration-break: clone;
-  transition: opacity 180ms ease, filter 180ms ease, transform 180ms ease;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
 }
 
-.highlight--animated {
-  animation: tapeAppear 650ms cubic-bezier(0.22, 1, 0.36, 1) both;
+.detect-row__confidence {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  white-space: nowrap;
 }
 
-.highlight::before {
-  content: "";
-  position: absolute;
-  inset: -0.08rem -0.18rem;
-  z-index: -1;
-  background:
-    linear-gradient(
-      105deg,
-      rgba(255, 255, 255, 0.44) 0%,
-      rgba(255, 255, 255, 0.08) 22%,
-      transparent 48%,
-      rgba(255, 255, 255, 0.24) 70%,
-      transparent 100%
-    ),
-    repeating-linear-gradient(
-      -7deg,
-      color-mix(in srgb, var(--highlight-color) 16%, transparent) 0 5px,
-      color-mix(in srgb, var(--highlight-color) 5%, transparent) 5px 10px
-    ),
-    linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--highlight-color) var(--highlight-edge-strength), transparent) 0%,
-      color-mix(in srgb, var(--highlight-color) var(--highlight-strength), transparent) 18%,
-      color-mix(in srgb, var(--highlight-color) var(--highlight-strength), transparent) 86%,
-      color-mix(in srgb, var(--highlight-color) var(--highlight-edge-strength), transparent) 100%
-    );
-  clip-path: polygon(0 0, calc(100% - 0.18rem) 0, 100% 12%, calc(100% - 0.12rem) 24%, 100% 36%, calc(100% - 0.13rem) 48%, 100% 60%, calc(100% - 0.11rem) 73%, 100% 86%, calc(100% - 0.18rem) 100%, 0 100%, 0.13rem 88%, 0 76%, 0.12rem 64%, 0 52%, 0.13rem 40%, 0 28%, 0.12rem 16%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.4),
-    inset 0 -1px 0 color-mix(in srgb, var(--highlight-color) 18%, transparent),
-    0 5px 12px color-mix(in srgb, var(--highlight-color) 14%, transparent);
-  transform: scaleX(0);
-  transform-origin: left center;
-  animation: highlighterStroke 780ms cubic-bezier(0.22, 1, 0.36, 1) both;
-  pointer-events: none;
-}
-
-.highlight::after {
-  content: "";
-  position: absolute;
-  inset: -0.08rem -0.18rem;
-  z-index: 2;
-  background:
-    linear-gradient(105deg, rgba(255, 255, 255, 0.36), transparent 36%, rgba(255, 255, 255, 0.18) 70%, transparent),
-    linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--highlight-color) 90%, var(--surface-strong)) 0%,
-      color-mix(in srgb, var(--highlight-color) 98%, var(--surface-strong)) 18%,
-      color-mix(in srgb, var(--highlight-color) 98%, var(--surface-strong)) 86%,
-      color-mix(in srgb, var(--highlight-color) 90%, var(--surface-strong)) 100%
-    ),
-    repeating-linear-gradient(-7deg, rgba(255, 255, 255, 0.16) 0 7px, transparent 7px 14px);
-  clip-path: polygon(0 0, calc(100% - 0.18rem) 0, 100% 12%, calc(100% - 0.12rem) 24%, 100% 36%, calc(100% - 0.13rem) 48%, 100% 60%, calc(100% - 0.11rem) 73%, 100% 86%, calc(100% - 0.18rem) 100%, 0 100%, 0.13rem 88%, 0 76%, 0.12rem 64%, 0 52%, 0.13rem 40%, 0 28%, 0.12rem 16%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.48),
-    0 6px 14px color-mix(in srgb, var(--highlight-color) 18%, transparent);
-  opacity: 0;
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition: opacity 180ms ease, transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
-  pointer-events: none;
-}
-
-.highlight:hover {
-  filter: saturate(1.12);
-}
-
-.highlight--dimmed {
-  opacity: 1;
-  filter: grayscale(1) saturate(0.1);
-  --highlight-color: #aab3c2;
-  color: #8a94a5;
-}
-
-.highlight--dimmed::before {
-  inset: 0 0.02rem;
-  background:
-    linear-gradient(105deg, rgba(255, 255, 255, 0.24), transparent 48%, rgba(255, 255, 255, 0.1) 70%, transparent),
-    repeating-linear-gradient(-7deg, rgba(148, 163, 184, 0.1) 0 5px, rgba(148, 163, 184, 0.04) 5px 10px),
-    linear-gradient(90deg, rgba(148, 163, 184, 0.18), rgba(148, 163, 184, 0.28), rgba(148, 163, 184, 0.18));
-  box-shadow: none;
-  clip-path: polygon(0 0, calc(100% - 0.12rem) 0, 100% 16%, calc(100% - 0.08rem) 32%, 100% 50%, calc(100% - 0.08rem) 68%, 100% 84%, calc(100% - 0.12rem) 100%, 0 100%, 0.08rem 84%, 0 68%, 0.08rem 50%, 0 32%, 0.08rem 16%);
-}
-
-.highlight--dimmed::after {
-  inset: 0 0.02rem;
-  box-shadow: none;
-  clip-path: polygon(0 0, calc(100% - 0.12rem) 0, 100% 16%, calc(100% - 0.08rem) 32%, 100% 50%, calc(100% - 0.08rem) 68%, 100% 84%, calc(100% - 0.12rem) 100%, 0 100%, 0.08rem 84%, 0 68%, 0.08rem 50%, 0 32%, 0.08rem 16%);
-}
-
-.highlight--dimmed .highlight__tag {
-  color: #7b8494;
-  background: rgba(148, 163, 184, 0.22);
-}
-
-.highlight--focused {
-  transform: translateY(-1px);
-  filter: saturate(1.2);
-  box-shadow:
-    0 0 0 3px color-mix(in srgb, var(--highlight-color) 14%, transparent),
-    0 8px 16px rgba(15, 23, 42, 0.12);
-}
-
-.highlight--covered::after {
-  opacity: 1;
-  transform: scaleX(1);
-}
-
-.highlight--revealed::after {
-  opacity: 0;
-  transform: scaleX(0);
-}
-
-.highlight--rrn { --highlight-color: var(--kind-rrn); }
-.highlight--passport { --highlight-color: var(--kind-passport); }
-.highlight--phone { --highlight-color: var(--kind-phone); }
-.highlight--email { --highlight-color: var(--kind-email); }
-.highlight--card { --highlight-color: var(--kind-card); }
-.highlight--address { --highlight-color: var(--kind-address); }
-.highlight--name { --highlight-color: var(--kind-name); }
-.highlight--biz_reg { --highlight-color: var(--kind-business); }
-.highlight--business_registration { --highlight-color: var(--kind-business); }
-
-.highlight--uncertain {
-  --highlight-strength: 14%;
-  --highlight-edge-strength: 8%;
-  --highlight-tag-strength: 8%;
-  border-bottom: 2px dashed color-mix(in srgb, var(--highlight-color) 58%, transparent);
-}
-
-.highlight__tag {
+.detect-row__toggle {
   position: relative;
-  z-index: 1;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 0.44em;
-  font-weight: 700;
-  line-height: 1;
-  margin-left: 0.48em;
-  padding: 0.16em 0.44em;
-  border-radius: 0;
-  color: color-mix(in srgb, var(--highlight-color) 84%, var(--text-primary));
-  background: color-mix(in srgb, var(--highlight-color) 12%, white);
-  transform: translateY(-0.08em);
-}
-
-.result-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.8rem;
-  margin: 0 0 1.1rem;
-}
-
-.result-actions h3 {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.72rem;
-  margin: 0;
-  color: var(--text-primary);
-  font-size: 1.18rem;
-}
-
-.result-actions h3 span {
-  color: #2fb779;
-}
-
-.result-actions__button {
-  min-height: 2.8rem;
-  padding: 0.52rem 1rem;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.85);
-  color: var(--text-primary);
-  font-weight: 700;
+  flex: 0 0 auto;
+  width: 4.6rem;
+  height: 1.7rem;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(24, 58, 139, 0.16);
+  background: #eef1f6;
   cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease;
 }
 
-.result-actions__button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.detect-row__toggle.is-masked {
+  border-color: var(--brand-blue);
+  background: var(--brand-blue);
 }
 
-.masked-result__text {
+.detect-row__toggle-label {
   position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
+  top: 50%;
+  right: calc(0.55rem + 3px);
+  transform: translateY(-50%);
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--text-secondary);
+  transition: color 160ms ease, right 160ms ease, left 160ms ease;
 }
 
-@keyframes tapeAppear {
-  0% {
-    opacity: 0;
-    transform: translateX(-10px) scale(0.98);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-  }
+.detect-row__toggle.is-masked .detect-row__toggle-label {
+  right: auto;
+  left: calc(0.6rem + 3px);
+  color: #ffffff;
 }
 
-@keyframes highlighterStroke {
-  0% {
-    transform: scaleX(0);
-  }
-  100% {
-    transform: scaleX(1);
-  }
+.detect-row__toggle-knob {
+  position: absolute;
+  top: 0.18rem;
+  left: 0.18rem;
+  width: 1.3rem;
+  height: 1.3rem;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.28);
+  transition: transform 160ms ease;
 }
 
-@media (max-width: 1100px) {
-  .summary__cards {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+.detect-row__toggle.is-masked .detect-row__toggle-knob {
+  transform: translateX(2.9rem);
+}
+
+@media (max-width: 640px) {
+  .detect__bulk {
+    flex-direction: column;
+    align-items: flex-start;
   }
+
+  .detect-row {
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas:
+      "dot kind confidence"
+      "snippet snippet toggle";
+    row-gap: 0.3rem;
+  }
+
+  .detect-row__dot { grid-area: dot; }
+  .detect-row__kind { grid-area: kind; }
+  .detect-row__confidence { grid-area: confidence; }
+  .detect-row__snippet { grid-area: snippet; white-space: normal; }
+  .detect-row__toggle { grid-area: toggle; justify-self: end; }
 }

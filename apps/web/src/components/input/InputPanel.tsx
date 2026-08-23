@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { scanText } from "../../api/scanClient";
 import { EXTRACT_ERROR_MESSAGES, extractTextFromFile } from "../../lib/extractText";
 import type { MaskMode } from "../../lib/masking";
-import type { Detection } from "../../types/detection";
+import type { Detection, HighlightRange } from "../../types/detection";
 
 const PLACEHOLDER = "예: 고객 홍길동님은 010-1234-5678 또는 hong@example.com으로 연락 가능합니다.";
 const MAX_TEXT_LENGTH = 100_000;
@@ -35,6 +35,7 @@ interface Props {
   onTextChange: (text: string) => void;
   onClear: () => void;
   onResult: (text: string, detections: Detection[]) => void;
+  highlight?: HighlightRange | null;
 }
 
 export function InputPanel({
@@ -46,6 +47,7 @@ export function InputPanel({
   onTextChange,
   onClear,
   onResult,
+  highlight = null,
 }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,17 +57,44 @@ export function InputPanel({
   const [extracting, setExtracting] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const highlightOverlayRef = useRef<HTMLPreElement>(null);
   const trimmedLength = text.trim().length;
   const isTooLong = text.length > MAX_TEXT_LENGTH;
   const canScan = trimmedLength > 0 && !isTooLong;
 
+  // 오른쪽 "탐지 결과 조정" 패널에서 토글·일괄 조정을 바꿔도 이 텍스트가 바뀐다 — 두 패널이
+  // 화면에서 멀리 떨어져 있어 그냥 두면 왼쪽이 바뀐 걸 못 알아채기 쉽다. 처음 스캔 결과가
+  // 나올 때뿐 아니라 text 자체가 바뀔 때마다 같은 스윕을 다시 재생해 "여기 바뀌었다"를
+  // 알려준다(#237 계승 — 토글이 실제로 반영되는 걸 시각적으로도 확인시켜 준다).
   useEffect(() => {
     if (!hasResult || resultVersion === 0) return;
 
     setRevealingResult(true);
     const timeout = window.setTimeout(() => setRevealingResult(false), 950);
     return () => window.clearTimeout(timeout);
-  }, [hasResult, resultVersion]);
+  }, [hasResult, resultVersion, text]);
+
+  // 강조 범위가 새로 생기면(항목에 마우스를 올리면), 그 부분이 지금 스크롤 밖에 있을 때만
+  // 가운데로 스크롤해서 보여준다 — 이미 보이는데도 매번 움직이면 오히려 산만하다.
+  useEffect(() => {
+    if (!highlight || !hasResult) return;
+    const textarea = textareaRef.current;
+    const overlay = highlightOverlayRef.current;
+    const mark = overlay?.querySelector("mark");
+    if (!textarea || !overlay || !mark) return;
+
+    const overlayRect = overlay.getBoundingClientRect();
+    const markRect = mark.getBoundingClientRect();
+    const isVisible = markRect.top >= overlayRect.top && markRect.bottom <= overlayRect.bottom;
+    if (isVisible) return;
+
+    const markTopWithinContent = markRect.top - overlayRect.top + overlay.scrollTop;
+    const target = markTopWithinContent - textarea.clientHeight / 2 + markRect.height / 2;
+    const max = textarea.scrollHeight - textarea.clientHeight;
+    const clamped = Math.max(0, Math.min(target, max));
+    textarea.scrollTo({ top: clamped, behavior: "smooth" });
+  }, [highlight, hasResult]);
 
   async function handleScan() {
     if (hasResult) {
@@ -144,6 +173,17 @@ export function InputPanel({
     window.setTimeout(() => setCopied(false), 1400);
   }
 
+  function handleSaveFile() {
+    if (!text) return;
+    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "masked-result.txt";
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div className={hasResult ? "input-panel input-panel--result" : "input-panel"}>
       <div className="input-panel__header">
@@ -178,6 +218,17 @@ export function InputPanel({
             >
               <span className="copy-icon" aria-hidden="true" />
               <span>마스킹 결과 복사</span>
+            </button>
+            <button
+              type="button"
+              className="input-panel__copy-header"
+              onClick={handleSaveFile}
+              disabled={!text}
+              aria-label="파일로 저장"
+              data-tooltip="파일로 저장"
+            >
+              <span className="upload-icon upload-icon--save" aria-hidden="true" />
+              <span>파일로 저장</span>
             </button>
             {copied && (
               <span className="input-panel__copy-toast input-panel__copy-toast--header" role="status">
@@ -222,8 +273,8 @@ export function InputPanel({
             className="input-panel__upload"
             onClick={() => fileInputRef.current?.click()}
             disabled={extracting}
-            title={extracting ? "추출 중..." : "파일 업로드"}
             aria-label={extracting ? "추출 중..." : "파일 업로드"}
+            data-tooltip={extracting ? "추출 중..." : "파일 업로드"}
           >
             <span className="upload-icon" aria-hidden="true" />
           </button>
@@ -244,13 +295,34 @@ export function InputPanel({
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
       >
+        {hasResult && (
+          <pre className="input-panel__highlight-overlay" ref={highlightOverlayRef} aria-hidden="true">
+            {highlight ? (
+              <>
+                {text.slice(0, highlight.start)}
+                <mark style={{ "--highlight-color": highlight.color } as React.CSSProperties}>
+                  {text.slice(highlight.start, highlight.end)}
+                </mark>
+                {text.slice(highlight.end)}
+              </>
+            ) : (
+              text
+            )}
+          </pre>
+        )}
         <textarea
+          ref={textareaRef}
           className={revealingResult ? "is-text-revealing" : undefined}
           value={text}
           onChange={(event) => {
             onTextChange(event.target.value);
             if (error) setError(null);
             if (copied) setCopied(false);
+          }}
+          onScroll={(event) => {
+            if (highlightOverlayRef.current) {
+              highlightOverlayRef.current.scrollTop = event.currentTarget.scrollTop;
+            }
           }}
           placeholder={PLACEHOLDER}
           rows={8}
