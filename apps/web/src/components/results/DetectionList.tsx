@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { ConfidenceControl } from "./ConfidenceControl";
 import { KIND_COLORS, KIND_LABELS } from "../../types/detection";
 import type { Detection } from "../../types/detection";
@@ -17,6 +18,7 @@ interface Props {
   thresholdStep: number;
   onThresholdChange: (next: number) => void;
   onToggle: (detection: Detection) => void;
+  onRowHover: (key: string | null) => void;
 }
 
 /**
@@ -33,6 +35,7 @@ export function DetectionList({
   thresholdStep,
   onThresholdChange,
   onToggle,
+  onRowHover,
 }: Props) {
   const maskedCount = rows.filter((row) => row.masked).length;
   const exposedCount = rows.length - maskedCount;
@@ -69,13 +72,16 @@ export function DetectionList({
         {rows.map(({ detection, key, snippet, masked }) => {
           const label = KIND_LABELS[detection.kind] ?? detection.kind;
           const confidencePct = Math.round(detection.confidence * 100);
+          const kindColor = KIND_COLORS[detection.kind] ?? "var(--kind-fallback)";
           return (
-            <li key={key} className="detect-row">
-              <span
-                className="detect-row__dot"
-                aria-hidden="true"
-                style={{ background: KIND_COLORS[detection.kind] ?? "var(--kind-fallback)" }}
-              />
+            <li
+              key={key}
+              className="detect-row"
+              style={{ "--row-color": kindColor } as CSSProperties}
+              onMouseEnter={() => onRowHover(key)}
+              onMouseLeave={() => onRowHover(null)}
+            >
+              <span className="detect-row__dot" aria-hidden="true" style={{ background: kindColor }} />
               <span className="detect-row__kind">{label}</span>
               <span className="detect-row__snippet">{snippet}</span>
               <span className="detect-row__confidence">{confidencePct}%</span>

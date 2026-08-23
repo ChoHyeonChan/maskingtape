@@ -24,6 +24,7 @@ describe("DetectionList", () => {
         thresholdStep={5}
         onThresholdChange={() => {}}
         onToggle={() => {}}
+        onRowHover={() => {}}
       />,
     );
     expect(screen.getByText(/발견되지 않았습니다/)).toBeInTheDocument();
@@ -39,6 +40,7 @@ describe("DetectionList", () => {
         thresholdStep={5}
         onThresholdChange={() => {}}
         onToggle={() => {}}
+        onRowHover={() => {}}
       />,
     );
 
@@ -60,6 +62,7 @@ describe("DetectionList", () => {
         thresholdStep={5}
         onThresholdChange={() => {}}
         onToggle={() => {}}
+        onRowHover={() => {}}
       />,
     );
 
@@ -84,6 +87,7 @@ describe("DetectionList", () => {
         thresholdStep={5}
         onThresholdChange={() => {}}
         onToggle={onToggle}
+        onRowHover={() => {}}
       />,
     );
 
@@ -102,6 +106,7 @@ describe("DetectionList", () => {
         thresholdStep={5}
         onThresholdChange={() => {}}
         onToggle={() => {}}
+        onRowHover={() => {}}
       />,
     );
 
@@ -121,6 +126,7 @@ describe("DetectionList", () => {
         thresholdStep={5}
         onThresholdChange={onThresholdChange}
         onToggle={() => {}}
+        onRowHover={() => {}}
       />,
     );
 
@@ -139,10 +145,37 @@ describe("DetectionList", () => {
         thresholdStep={5}
         onThresholdChange={() => {}}
         onToggle={() => {}}
+        onRowHover={() => {}}
       />,
     );
 
     expect(screen.queryByRole("button", { name: "마스킹 결과 복사" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "다운로드" })).not.toBeInTheDocument();
+  });
+
+  it("reports the hovered row's key on mouse enter and null on mouse leave", () => {
+    const onRowHover = vi.fn();
+    const d = detection({ kind: "name", start: 0, end: 3 });
+    render(
+      <DetectionList
+        rows={[{ detection: d, key: "name:0:3", snippet: "김소연", masked: true }]}
+        confidenceThreshold={50}
+        minThreshold={0}
+        maxThreshold={100}
+        thresholdStep={5}
+        onThresholdChange={() => {}}
+        onToggle={() => {}}
+        onRowHover={onRowHover}
+      />,
+    );
+
+    const listItem = screen.getByRole("switch", { name: /김소연/ }).closest("li");
+    if (!listItem) throw new Error("row not found");
+
+    fireEvent.mouseEnter(listItem);
+    expect(onRowHover).toHaveBeenLastCalledWith("name:0:3");
+
+    fireEvent.mouseLeave(listItem);
+    expect(onRowHover).toHaveBeenLastCalledWith(null);
   });
 });

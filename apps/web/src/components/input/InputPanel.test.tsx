@@ -170,6 +170,43 @@ describe("InputPanel replays the reveal sweep when the masked text itself change
   });
 });
 
+describe("InputPanel highlights the hovered detection's own text (오른쪽 목록 호버 연동)", () => {
+  it("wraps only the highlighted range in a <mark>, tinted with the given color", () => {
+    render(
+      <InputPanel
+        text="근로자 010-1234-5678 입니다"
+        hasResult
+        resultVersion={1}
+        onTextChange={vi.fn()}
+        onClear={vi.fn()}
+        onResult={vi.fn()}
+        highlight={{ start: 4, end: 17, color: "var(--kind-phone)" }}
+      />,
+    );
+
+    const mark = document.querySelector(".input-panel__highlight-overlay mark");
+    expect(mark).not.toBeNull();
+    expect(mark).toHaveTextContent("010-1234-5678");
+    expect(mark).toHaveStyle({ "--highlight-color": "var(--kind-phone)" });
+  });
+
+  it("renders no <mark> when there is nothing to highlight", () => {
+    render(
+      <InputPanel
+        text="근로자 010-1234-5678 입니다"
+        hasResult
+        resultVersion={1}
+        onTextChange={vi.fn()}
+        onClear={vi.fn()}
+        onResult={vi.fn()}
+        highlight={null}
+      />,
+    );
+
+    expect(document.querySelector(".input-panel__highlight-overlay mark")).toBeNull();
+  });
+});
+
 describe("InputPanel export actions (복사·파일로 저장이 이 패널에 모임)", () => {
   it("copies the exact text shown in this panel, not something recomputed elsewhere", async () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
