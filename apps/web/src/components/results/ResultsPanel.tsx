@@ -1,14 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { DetectionList } from "./DetectionList";
 import type { DetectionRow } from "./DetectionList";
-import { applyMasking, type MaskMode } from "../../lib/masking";
-import type { Detection } from "../../types/detection";
+import { locateDetections, type MaskMode } from "../../lib/masking";
+import { KIND_COLORS } from "../../types/detection";
+import type { Detection, HighlightRange } from "../../types/detection";
 
 interface Props {
   scanned: { text: string; detections: Detection[] } | null;
   scanRun: number;
   maskMode?: MaskMode;
   onMaskedTextChange: (text: string) => void;
+  onHighlightChange?: (highlight: HighlightRange | null) => void;
 }
 
 const THRESHOLD_STEP = 5;
@@ -26,7 +28,13 @@ function confidencePercent(detection: Detection): number {
   return Math.round(detection.confidence * 100);
 }
 
-export function ResultsPanel({ scanned, scanRun, maskMode = "mask", onMaskedTextChange }: Props) {
+export function ResultsPanel({
+  scanned,
+  scanRun,
+  maskMode = "mask",
+  onMaskedTextChange,
+  onHighlightChange = () => {},
+}: Props) {
   // 컨트롤에 보이는 숫자가 곧 확신도 임계값이다(더 이상 반전 없음) — 이 값 이상인 항목만
   // 기본으로 가려진다. 고정값(예: 50%) 대신 이번 스캔에서 가장 낮은 확신도로 시작하면,
   // 처음부터 "전부 가려짐" 상태에서 슬라이더를 올릴 때마다 확신도 낮은 항목부터 바로바로
@@ -40,6 +48,7 @@ export function ResultsPanel({ scanned, scanRun, maskMode = "mask", onMaskedText
     const confidences = (scanned?.detections ?? []).map(confidencePercent);
     setConfidenceThreshold(confidences.length > 0 ? Math.min(...confidences) : FALLBACK_THRESHOLD);
     setOverrides(new Map());
+    onHighlightChange(null);
     // scanned는 scanRun과 함께(같은 이벤트 안에서) 갱신되므로, scanRun만으로 "새 스캔마다"를
     // 판단해도 이 시점엔 이미 최신 scanned를 읽는다 — 아래 스크롤 이펙트와 동일한 전제.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -72,8 +81,9 @@ export function ResultsPanel({ scanned, scanRun, maskMode = "mask", onMaskedText
     masked: isMasked(detection),
   }));
 
-  const maskedDetections = rows.filter((row) => row.masked).map((row) => row.detection);
-  const maskedText = scanned ? applyMasking(scanned.text, maskedDetections, maskMode) : "";
+  const { text: maskedText, ranges } = scanned
+    ? locateDetections(scanned.text, rows, maskMode)
+    : { text: "", ranges: new Map<string, [number, number]>() };
 
   useEffect(() => {
     onMaskedTextChange(maskedText);
@@ -85,6 +95,27 @@ export function ResultsPanel({ scanned, scanRun, maskMode = "mask", onMaskedText
       const next = new Map(current);
       next.set(key, !isMasked(detection));
       return next;
+    });
+  }
+
+  // 항목에 마우스를 올리면 왼쪽 "마스킹 결과" 텍스트에서 그 항목이 실제로 자리한 부분을
+  // 강조한다 — 두 패널이 화면에서 멀리 떨어져 있어, 항목별 조정이 왼쪽 어디에 해당하는지
+  // 한눈에 잇기 어렵다는 피드백에 대응한다.
+  function handleRowHover(key: string | null) {
+    if (key === null) {
+      onHighlightChange(null);
+      return;
+    }
+    const range = ranges.get(key);
+    const row = rows.find((candidate) => candidate.key === key);
+    if (!range || !row) {
+      onHighlightChange(null);
+      return;
+    }
+    onHighlightChange({
+      start: range[0],
+      end: range[1],
+      color: KIND_COLORS[row.detection.kind] ?? "var(--kind-fallback)",
     });
   }
 
@@ -111,6 +142,7 @@ export function ResultsPanel({ scanned, scanRun, maskMode = "mask", onMaskedText
           thresholdStep={THRESHOLD_STEP}
           onThresholdChange={setConfidenceThreshold}
           onToggle={handleToggle}
+          onRowHover={handleRowHover}
         />
       ) : (
         <div className="empty-state">

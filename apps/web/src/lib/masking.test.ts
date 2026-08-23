@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyMasking } from "./masking";
+import { applyMasking, locateDetections } from "./masking";
 import type { Detection } from "../types/detection";
 
 function detection(overrides: Partial<Detection>): Detection {
@@ -48,5 +48,56 @@ describe("applyMasking (#277)", () => {
 
     expect(applyMasking(text, [phone, email], "mask")).toBe("문의 ************* / ****************");
     expect(applyMasking(text, [phone, email], "label")).toBe("문의 [전화번호] / [이메일]");
+  });
+});
+
+describe("locateDetections (호버 하이라이트용 위치 매핑)", () => {
+  it("produces the same text as applyMasking would, for the masked rows", () => {
+    const phone = detection({ kind: "phone", start: 3, end: 16 });
+    const text = "문의 010-1234-5678 입니다";
+
+    const { text: located } = locateDetections(
+      text,
+      [{ detection: phone, key: "phone", masked: true }],
+      "mask",
+    );
+
+    expect(located).toBe(applyMasking(text, [phone], "mask"));
+  });
+
+  it("reports the masked segment's own range, not the original text's range, for a masked item", () => {
+    const phone = detection({ kind: "phone", start: 3, end: 16 });
+    const text = "문의 010-1234-5678 입니다";
+
+    const { text: located, ranges } = locateDetections(
+      text,
+      [{ detection: phone, key: "phone", masked: true }],
+      "mask",
+    );
+
+    // "문의 " 다음(인덱스 3)부터 별표 13개가 이어진다 — 원문과 길이는 같지만 내용이 다르다.
+    expect(ranges.get("phone")).toEqual([3, 16]);
+    expect(located.slice(3, 16)).toBe("*".repeat(13));
+  });
+
+  it("reports the verbatim original range for an exposed (노출) item, even after an earlier masked item shifted the text", () => {
+    const name = detection({ kind: "name", start: 0, end: 3 });
+    const phone = detection({ kind: "phone", start: 4, end: 17 });
+    const text = "김소연 010-1234-5678 입니다";
+
+    // name은 라벨로("이름"보다 긴 "[이름]"), phone은 노출(원문 그대로) — phone의 위치는
+    // name이 라벨로 바뀌며 텍스트 길이가 변한 만큼 밀려야 한다.
+    const { text: located, ranges } = locateDetections(
+      text,
+      [
+        { detection: name, key: "name", masked: true },
+        { detection: phone, key: "phone", masked: false },
+      ],
+      "label",
+    );
+
+    const [phoneStart, phoneEnd] = ranges.get("phone")!;
+    expect(located.slice(phoneStart, phoneEnd)).toBe("010-1234-5678");
+    expect(located).toContain("[이름] 010-1234-5678 입니다");
   });
 });

@@ -112,6 +112,23 @@
   border: 1px solid rgba(24, 58, 139, 0.14);
   border-radius: 8px;
   background: #ffffff;
+  transition: background-color 150ms ease;
+}
+
+/* 항목에 마우스를 올리면 그 종류의 색(--row-color, 왼쪽 점과 같은 색)을 옅게 깔아
+   보여준다 — 토글 버튼도 같은 색으로 살짝 물들여서 "이 행 전체가 하나"라는 걸 강조한다. */
+.detect-row:hover {
+  background-color: color-mix(in srgb, var(--row-color) 16%, #ffffff);
+}
+
+.detect-row:hover .detect-row__toggle {
+  background: color-mix(in srgb, var(--row-color) 35%, #eef1f6);
+  border-color: color-mix(in srgb, var(--row-color) 45%, rgba(24, 58, 139, 0.16));
+}
+
+.detect-row:hover .detect-row__toggle.is-masked {
+  background: color-mix(in srgb, var(--row-color) 35%, var(--brand-blue));
+  border-color: color-mix(in srgb, var(--row-color) 45%, var(--brand-blue));
 }
 
 .detect-row__dot {

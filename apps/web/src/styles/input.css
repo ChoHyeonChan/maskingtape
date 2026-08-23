@@ -142,6 +142,41 @@
   padding: 0.35rem 0.25rem 0.6rem;
 }
 
+/* 오른쪽 목록에서 항목에 마우스를 올렸을 때 그 부분을 형광펜처럼 칠해 보여주는 오버레이.
+   결과 textarea는 배경이 투명하므로(.input-panel--result textarea), 이 오버레이를 그
+   "뒤"에 깔아 두면 하이라이트 색이 실제 글자 뒤로 비쳐 보인다 — 글자 자체는 여전히
+   textarea가 그린다(진짜 텍스트라 선택·접근성도 그대로 유지된다). z-index로 뒤에 두되
+   스크롤 위치는 textarea와 항상 같게 맞춰야(#onScroll로 동기화) 하이라이트가 어긋나지
+   않는다. */
+.input-panel__highlight-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  margin: 0;
+  padding: 0.35rem 0.25rem 0.6rem;
+  border: 1px solid transparent;
+  color: transparent;
+  font: inherit;
+  line-height: normal;
+  white-space: pre-wrap;
+  word-break: break-word;
+  pointer-events: none;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+}
+
+.input-panel__highlight-overlay::-webkit-scrollbar {
+  display: none;
+}
+
+.input-panel__highlight-overlay mark {
+  background: color-mix(in srgb, var(--highlight-color, #ffe58a) 35%, transparent);
+  color: transparent;
+  border-radius: 3px;
+  transition: background-color 150ms ease;
+}
+
 .input-panel textarea {
   width: 100%;
   padding: 1.45rem 1.55rem 3.45rem;
@@ -158,6 +193,8 @@
 }
 
 .input-panel--result textarea {
+  position: relative;
+  z-index: 1;
   padding: 0.35rem 0.25rem 0.6rem;
   border-color: transparent;
   background: transparent;

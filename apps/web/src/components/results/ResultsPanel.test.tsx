@@ -29,6 +29,12 @@ function toggleRow(text: string) {
   fireEvent.click(screen.getByRole("switch", { name: new RegExp(text) }));
 }
 
+function rowFor(text: string) {
+  const row = screen.getByRole("switch", { name: new RegExp(text) }).closest("li");
+  if (!row) throw new Error(`row not found for ${text}`);
+  return row;
+}
+
 describe("ResultsPanel confidence threshold control (#237, no longer inverted per user feedback)", () => {
   it("does not render the control before anything has been scanned", () => {
     render(<ResultsPanel scanned={null} scanRun={0} onMaskedTextChange={() => {}} />);
@@ -137,5 +143,52 @@ describe("ResultsPanel scrolls to and focuses the results on scan completion (#3
 
     rerender(<ResultsPanel scanned={scanned} scanRun={2} onMaskedTextChange={() => {}} />);
     expect(scrollIntoView).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("ResultsPanel reports a highlight range for the left panel on row hover", () => {
+  it("reports the item's own range and kind color on hover, and clears it on mouse leave", () => {
+    const onHighlightChange = vi.fn();
+    render(
+      <ResultsPanel
+        scanned={scanned}
+        scanRun={1}
+        onMaskedTextChange={() => {}}
+        onHighlightChange={onHighlightChange}
+      />,
+    );
+
+    // 기본값(40%)에서는 phone(40%)도 masked라 별표로 치환된 자리(4~17)를 가리켜야 한다.
+    fireEvent.mouseEnter(rowFor("010-1234-5678"));
+    expect(onHighlightChange).toHaveBeenLastCalledWith({ start: 4, end: 17, color: expect.any(String) });
+
+    fireEvent.mouseLeave(rowFor("010-1234-5678"));
+    expect(onHighlightChange).toHaveBeenLastCalledWith(null);
+  });
+
+  it("clears the highlight when a new scan comes in", () => {
+    const onHighlightChange = vi.fn();
+    const { rerender } = render(
+      <ResultsPanel
+        scanned={scanned}
+        scanRun={1}
+        onMaskedTextChange={() => {}}
+        onHighlightChange={onHighlightChange}
+      />,
+    );
+
+    fireEvent.mouseEnter(rowFor("김철수"));
+    onHighlightChange.mockClear();
+
+    rerender(
+      <ResultsPanel
+        scanned={scanned}
+        scanRun={2}
+        onMaskedTextChange={() => {}}
+        onHighlightChange={onHighlightChange}
+      />,
+    );
+
+    expect(onHighlightChange).toHaveBeenCalledWith(null);
   });
 });
