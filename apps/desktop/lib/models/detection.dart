@@ -37,6 +37,7 @@ class Detection {
     'passport': '여권번호',
     'account': '계좌번호',
     'birth_date': '생년월일',
+    'driver_license': '운전면허',
   };
 
   /// 라벨 맵에 이 kind가 있는지 — 코어에 새 탐지기가 추가됐는데 라벨을 안 넣은
