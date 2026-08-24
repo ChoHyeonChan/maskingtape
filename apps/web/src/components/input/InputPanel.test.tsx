@@ -62,6 +62,28 @@ describe("InputPanel mask mode toggle (#277)", () => {
     fireEvent.click(screen.getByRole("button", { name: "라벨" }));
     expect(onMaskModeChange).toHaveBeenCalledWith("label");
   });
+
+  it("offers a third 가명처리 option and reports it when picked (#346)", () => {
+    const onMaskModeChange = vi.fn();
+    render(
+      <InputPanel
+        text="김철수 ***"
+        hasResult
+        resultVersion={1}
+        maskMode="label"
+        onMaskModeChange={onMaskModeChange}
+        onTextChange={vi.fn()}
+        onClear={vi.fn()}
+        onResult={vi.fn()}
+      />,
+    );
+
+    const pseudonymBtn = screen.getByRole("button", { name: "가명처리" });
+    expect(pseudonymBtn).toHaveAttribute("aria-pressed", "false");
+
+    fireEvent.click(pseudonymBtn);
+    expect(onMaskModeChange).toHaveBeenCalledWith("pseudonym");
+  });
 });
 
 describe("InputPanel file upload (#263)", () => {
