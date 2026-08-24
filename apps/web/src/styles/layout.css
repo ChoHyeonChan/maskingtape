@@ -9,6 +9,7 @@
 }
 
 .app-header {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -71,6 +72,83 @@
   background: #ffffff;
 }
 
+/* 코치마크의 "아무 데나 누르면 닫힙니다" 힌트와 같은 배색(#dc2626/#fde3e7)을 재사용해서
+   같은 종류의 "잠깐 떴다 사라지는 안내"라는 걸 시각적으로도 연결한다. */
+@keyframes accuracyBubbleFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.accuracy-bubble {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 0.6rem);
+  right: 0;
+  width: min(19rem, 80vw);
+  padding: 0.75rem 0.9rem;
+  border: 1px solid #dc2626;
+  border-radius: 12px;
+  background: #fde3e7;
+  color: #7f1d1d;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  box-shadow: 0 10px 24px rgba(220, 38, 38, 0.16);
+  animation: accuracyBubbleFloat 3.2s ease-in-out infinite;
+}
+
+.accuracy-bubble::before {
+  content: "";
+  position: absolute;
+  top: -0.4rem;
+  right: 0.85rem;
+  width: 0.8rem;
+  height: 0.8rem;
+  background: #fde3e7;
+  border: 1px solid #dc2626;
+  border-right: 0;
+  border-bottom: 0;
+  transform: rotate(45deg);
+}
+
+.accuracy-bubble p {
+  margin: 0;
+  max-width: none;
+  color: inherit;
+  font-size: inherit;
+}
+
+.accuracy-bubble strong {
+  color: #dc2626;
+}
+
+.accuracy-bubble code {
+  padding: 0.05rem 0.32rem;
+  border-radius: 4px;
+  background: rgba(220, 38, 38, 0.12);
+  font-size: 0.78rem;
+}
+
+.accuracy-bubble__dismiss-hint {
+  display: block;
+  margin-top: 0.45rem;
+  color: #dc2626;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .accuracy-bubble {
+    right: 0;
+    left: auto;
+    width: min(17rem, 74vw);
+  }
+}
+
 .app-grid {
   display: grid;
   grid-template-columns: minmax(0, 3fr) minmax(24rem, 2fr);
@@ -96,6 +174,12 @@
   height: 100%;
   overflow: hidden;
   padding: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel--results > .panel__header {
+  flex: none;
 }
 
 .panel--main {

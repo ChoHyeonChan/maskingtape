@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 """사업자등록번호 탐지기 — 정규식 + 체크섬 검증.
 
 동작 원리:

@@ -1,7 +1,9 @@
-import type { CSSProperties } from "react";
+import { useState, type CSSProperties } from "react";
 import { ConfidenceControl } from "./ConfidenceControl";
 import { KIND_COLORS, KIND_LABELS } from "../../types/detection";
 import type { Detection } from "../../types/detection";
+
+type SortMode = "position" | "kind";
 
 export interface DetectionRow {
   detection: Detection;
@@ -37,6 +39,7 @@ export function DetectionList({
   onToggle,
   onRowHover,
 }: Props) {
+  const [sortMode, setSortMode] = useState<SortMode>("position");
   const maskedCount = rows.filter((row) => row.masked).length;
   const exposedCount = rows.length - maskedCount;
 
@@ -47,6 +50,16 @@ export function DetectionList({
       </p>
     );
   }
+
+  // 정렬은 화면에 "보여주는 순서"만 바꾼다 — 실제 마스킹 계산(위치 기준)에는 영향 없다.
+  const displayRows =
+    sortMode === "kind"
+      ? [...rows].sort((a, b) => {
+          const labelA = KIND_LABELS[a.detection.kind] ?? a.detection.kind;
+          const labelB = KIND_LABELS[b.detection.kind] ?? b.detection.kind;
+          return labelA.localeCompare(labelB, "ko") || a.detection.start - b.detection.start;
+        })
+      : rows;
 
   return (
     <div className="detect">
@@ -64,12 +77,32 @@ export function DetectionList({
         />
       </div>
 
-      <p className="detect__summary" role="status">
-        개인정보 {rows.length}건 발견 · {maskedCount}건 가림 · {exposedCount}건 노출
-      </p>
+      <div className="detect__list-head">
+        <p className="detect__summary" role="status">
+          개인정보 {rows.length}건 발견 · {maskedCount}건 가림 · {exposedCount}건 노출
+        </p>
+        <div className="detect__sort" role="group" aria-label="목록 정렬 기준">
+          <button
+            type="button"
+            className={`detect__sort-btn${sortMode === "position" ? " is-active" : ""}`}
+            aria-pressed={sortMode === "position"}
+            onClick={() => setSortMode("position")}
+          >
+            순서대로
+          </button>
+          <button
+            type="button"
+            className={`detect__sort-btn${sortMode === "kind" ? " is-active" : ""}`}
+            aria-pressed={sortMode === "kind"}
+            onClick={() => setSortMode("kind")}
+          >
+            카테고리별
+          </button>
+        </div>
+      </div>
 
       <ul className="detect__list" aria-label="탐지된 개인정보 목록">
-        {rows.map(({ detection, key, snippet, masked }) => {
+        {displayRows.map(({ detection, key, snippet, masked }) => {
           const label = KIND_LABELS[detection.kind] ?? detection.kind;
           const confidencePct = Math.round(detection.confidence * 100);
           const kindColor = KIND_COLORS[detection.kind] ?? "var(--kind-fallback)";

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 """이름 탐지기 — 로컬 LLM(Ollama) 문맥 판단판.
 
 규칙판(name.py)은 성씨 사전 + 앞뒤 문맥 단서에 의존해서, 단서 단어가 성씨와 무관하게
