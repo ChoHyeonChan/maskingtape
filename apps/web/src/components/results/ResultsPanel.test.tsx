@@ -91,6 +91,34 @@ describe("ResultsPanel confidence threshold control (#237, no longer inverted pe
   });
 });
 
+describe("ResultsPanel bulk threshold control resets manual overrides (#일괄 조정이 안 먹히던 문제)", () => {
+  it("makes a non-overridden item follow a raised threshold normally", () => {
+    const onMaskedTextChange = vi.fn();
+    render(<ResultsPanel scanned={scanned} scanRun={1} onMaskedTextChange={onMaskedTextChange} />);
+
+    // 아무 것도 건드리지 않은 상태에서 임계값만 올려도 정상적으로 반영된다(회귀 확인용).
+    // 50%에서는 name(90%)이 가려지고 phone(40%)은 노출된다.
+    setThresholdTo(50);
+    expect(onMaskedTextChange).toHaveBeenLastCalledWith(`${"*".repeat(3)} 010-1234-5678`);
+  });
+
+  it("clears a manual override once the bulk threshold is touched, so the number the user just set actually takes effect", () => {
+    const onMaskedTextChange = vi.fn();
+    render(<ResultsPanel scanned={scanned} scanRun={1} onMaskedTextChange={onMaskedTextChange} />);
+
+    // name(90%)을 수동으로 노출시킨다 — 임계값(40%)과 무관하게 override가 우선한다.
+    toggleRow("김철수");
+    expect(onMaskedTextChange).toHaveBeenLastCalledWith(`김철수 ${"*".repeat(13)}`);
+
+    // 그 뒤 "일괄 조정"을 45%로 옮기면, override가 그대로 살아있을 경우 name은 계속
+    // 노출(김철수 그대로)돼야 하지만 — override가 사라지고 새 임계값이 다시 적용돼야
+    // 옳다. 45%에서는 name(90%)이 다시 가려지고 phone(40%)은 노출된다: "*** 010-1234-5678".
+    // (override가 안 사라졌다면 "김철수 010-1234-5678"이 나와 이 기대값과 달라진다.)
+    setThresholdTo(45);
+    expect(onMaskedTextChange).toHaveBeenLastCalledWith(`${"*".repeat(3)} 010-1234-5678`);
+  });
+});
+
 describe("ResultsPanel per-item toggle actually changes the masked result (not just a demo)", () => {
   it("reveals an above-threshold item when its toggle is switched off", () => {
     const onMaskedTextChange = vi.fn();

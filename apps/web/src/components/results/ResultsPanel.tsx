@@ -89,6 +89,15 @@ export function ResultsPanel({
     onMaskedTextChange(maskedText);
   }, [maskedText, onMaskedTextChange]);
 
+  // "일괄 조정"은 이름 그대로 전체를 다시 정하는 컨트롤이다 — 이전에 항목 몇 개를 수동으로
+  // 뒤집어(override) 둔 상태에서 이 슬라이더/링을 만지면, override가 남아있는 항목은 새
+  // 값을 무시하고 그대로 있어서 "숫자를 바꿔도 안 먹힌다"는 인상을 줬다. 일괄 조정을
+  // 만지는 순간 그 의도(전체 재적용)를 살려 개별 override를 전부 지운다.
+  function handleThresholdChange(next: number) {
+    setConfidenceThreshold(next);
+    setOverrides(new Map());
+  }
+
   function handleToggle(detection: Detection) {
     const key = detectionKey(detection);
     setOverrides((current) => {
@@ -140,7 +149,7 @@ export function ResultsPanel({
           minThreshold={MIN_THRESHOLD}
           maxThreshold={MAX_THRESHOLD}
           thresholdStep={THRESHOLD_STEP}
-          onThresholdChange={setConfidenceThreshold}
+          onThresholdChange={handleThresholdChange}
           onToggle={handleToggle}
           onRowHover={handleRowHover}
         />
