@@ -163,11 +163,23 @@
   pointer-events: none;
   overflow-y: auto;
   overflow-x: hidden;
-  scrollbar-width: none;
+  /* 실제 textarea는 스크롤이 생기면 네이티브 스크롤바만큼 안쪽 너비가 줄어드는데,
+     스크롤바를 그냥 안 보이게만(display:none 등) 하면 이 오버레이는 그 너비를 안
+     뺏겨서 둘의 줄바꿈 폭이 달라지고, 스크롤할수록 하이라이트가 점점 어긋났다
+     (scrollbar-gutter로 자리만 예약해도 스크롤바 자체를 숨기면 반영되지 않았다).
+     그래서 두 요소 모두에 같은 값(10px)의 스크롤바 폭을 명시해 항상 똑같은 너비를
+     갖게 하고, 이쪽 것만 색을 투명하게 지워서 안 보이게 한다. */
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
 }
 
 .input-panel__highlight-overlay::-webkit-scrollbar {
-  display: none;
+  width: 10px;
+}
+
+.input-panel__highlight-overlay::-webkit-scrollbar-thumb,
+.input-panel__highlight-overlay::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .input-panel__highlight-overlay mark {
@@ -199,7 +211,22 @@
   border-color: transparent;
   background: transparent;
   box-shadow: none;
-  cursor: default;
+  /* readOnly라 실제로 타이핑은 안 되지만, 클릭하면 편집 가능한 입력 상태로 되돌아가므로
+     (onRequestEdit) "여기 눌러서 고칠 수 있다"는 걸 암시하는 텍스트 커서로 둔다. */
+  cursor: text;
+  /* 하이라이트 오버레이(.input-panel__highlight-overlay)와 스크롤바 폭을 정확히
+     맞춰야(10px) 줄바꿈이 어긋나지 않는다 — 위 오버레이 규칙 참고. */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(24, 58, 139, 0.32) transparent;
+}
+
+.input-panel--result textarea::-webkit-scrollbar {
+  width: 10px;
+}
+
+.input-panel--result textarea::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(24, 58, 139, 0.32);
 }
 
 .input-panel__copy-toast {
