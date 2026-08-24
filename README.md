@@ -39,7 +39,7 @@ pytest packages/core
 
 로컬 LLM 기능은 선택 사항이며 설치 방법은 [packages/core](packages/core)에 있다. 웹 데모는 Node.js 20+, 데스크톱 앱은 Flutter가 추가로 필요하며 각 폴더 README를 참고한다.
 
-현재 탐지: **주민등록번호**(체크섬 검증), **전화번호**(휴대폰·유선·070, +82 표기), **이메일**, **주소**(행정구역), **이름**(규칙 + 로컬 LLM 문맥 판단)
+현재 탐지(11종): **주민등록번호**(체크섬 검증), **전화번호**(휴대폰·유선·070·050X, +82 표기), **이메일**, **주소**(행정구역·도로명), **신용카드**(Luhn 검증), **계좌번호**, **사업자등록번호**, **여권번호**, **생년월일**, **운전면허번호**, **이름**(규칙 + 로컬 LLM 문맥 판단)
 
 라이브러리로 쓰기:
 
@@ -116,9 +116,9 @@ core [#252](https://github.com/ChoHyeonChan/maskingtape/pull/252)가 고쳤지�
 — 하드코딩 5개 부서어만 막는 방식이라, 그 밖의 흔한 업무어("차량"/"허가" 등)는
 [#255](https://github.com/ChoHyeonChan/maskingtape/issues/255)에서 여전히 뚫리는 걸 확인했다
 (negative 문서의 상당수에서 재현) — 그 결과 precision이 규칙판 F1 개선 이전 수준으로 다시
-떨어졌다(0.857) — 남은 과제는 문맥 없는 이름뿐이다:
+떨어졌다(precision 0.875) — 남은 과제는 문맥 없는 이름뿐이다:
 
-- **이름** — 한국어 이름은 형태만으로 구분되지 않아 규칙만으로는 문맥 없는 이름을 놓친다. 이것이 **로컬 LLM 하이브리드**(`--llm`)가 필요한 이유이고, 그 효과는 [#46](https://github.com/ChoHyeonChan/maskingtape/issues/46)에서 같은 데이터셋으로 비교 측정한다 — 하이브리드로 켜면 recall이 **0.662 → 0.908**로 오르고, precision도 규칙판보다 높다(0.857→0.917, F1 0.747→0.912) — 상세는 [bench/](bench/) 참고.
+- **이름** — 한국어 이름은 형태만으로 구분되지 않아 규칙만으로는 문맥 없는 이름을 놓친다. 이것이 **로컬 LLM 하이브리드**(`--llm`)가 필요한 이유이고, 그 효과는 [#46](https://github.com/ChoHyeonChan/maskingtape/issues/46)에서 같은 데이터셋으로 비교 측정한다 — 하이브리드로 켜면 recall이 **0.658 → 0.903**으로 오르고, precision도 규칙판보다 높다(0.875 → 0.944, F1 0.751 → 0.923) — 로컬 Ollama(qwen2.5:7b)로 현재 데이터셋(#315) 재측정, 상세는 [bench/](bench/) 참고.
 
 마스킹 결과에 개인정보가 실제로 남는지도 따로 측정한다 — `python -m bench.evaluators.evaluate_masking bench/datasets/synth_v1.jsonl`. 상세는 [bench/](bench/) 참고.
 
