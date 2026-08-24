@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 """탐지기 모음. 새 탐지기를 만들면 default_detectors()에 등록한다.
 
 탐지기 파일은 다루는 개인정보 종류(개인정보보호법 분류)에 따라 도메인 폴더로 묶는다:

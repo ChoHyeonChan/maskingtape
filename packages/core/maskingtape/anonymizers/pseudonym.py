@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 """가명처리 전략 — 탐지 구간을 그럴듯한 가짜 값으로 치환한다.
 
 mask(****)·label([전화번호])와 달리 문장 구조가 살아 있어, LLM에 넘기기 전 전처리나

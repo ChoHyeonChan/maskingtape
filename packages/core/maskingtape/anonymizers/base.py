@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 """마스킹 전략 공통 인터페이스.
 
 새 전략 만드는 법:

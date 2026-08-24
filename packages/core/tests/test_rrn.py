@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 """RRN 탐지기 테스트. 모든 번호는 합성(가짜)이다 — 진짜 개인정보 커밋 금지."""
 
 from maskingtape.detectors import RRNDetector

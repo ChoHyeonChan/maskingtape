@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 """CLI 진입점 — `maskingtape "텍스트"` 또는 파이프 입력을 마스킹해 출력한다.
 
 사용 예:

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 """탐지 결과를 표현하는 공용 타입.
 
 모든 탐지기(detectors)와 마스킹 전략(anonymizers)이 이 타입으로 대화한다.

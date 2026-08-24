@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 """마스킹 익명화기(MaskAnonymizer) 테스트 — 합성 데이터만 사용."""
 
 from maskingtape.anonymizers import MaskAnonymizer
