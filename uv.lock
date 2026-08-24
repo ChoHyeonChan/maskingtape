@@ -119,6 +119,7 @@ version = "0.1.0"
 source = { editable = "apps/api" }
 dependencies = [
     { name = "fastapi" },
+    { name = "maskingtape" },
     { name = "pydantic" },
     { name = "uvicorn" },
 ]
@@ -127,6 +128,7 @@ dependencies = [
 requires-dist = [
     { name = "fastapi", specifier = ">=0.116,<1" },
     { name = "httpx2", marker = "extra == 'dev'", specifier = ">=2,<3" },
+    { name = "maskingtape" },
     { name = "pydantic", specifier = ">=2.9,<3" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8" },
     { name = "uvicorn", specifier = ">=0.35,<1" },
