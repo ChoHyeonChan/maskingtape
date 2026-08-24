@@ -35,6 +35,7 @@ interface Props {
   onTextChange: (text: string) => void;
   onClear: () => void;
   onResult: (text: string, detections: Detection[]) => void;
+  onRequestEdit?: () => void;
   highlight?: HighlightRange | null;
 }
 
@@ -47,6 +48,7 @@ export function InputPanel({
   onTextChange,
   onClear,
   onResult,
+  onRequestEdit = () => {},
   highlight = null,
 }: Props) {
   const [loading, setLoading] = useState(false);
@@ -323,6 +325,12 @@ export function InputPanel({
             if (highlightOverlayRef.current) {
               highlightOverlayRef.current.scrollTop = event.currentTarget.scrollTop;
             }
+          }}
+          onClick={() => {
+            // 결과 상태에서 이 박스를 클릭하면 다시 고쳐서 재탐지하고 싶다는 뜻으로
+            // 보고, 원문(수정 가능한 입력 상태)으로 되돌린다 — "초기화 하기"와 달리
+            // 입력했던 텍스트 자체는 지우지 않는다.
+            if (hasResult) onRequestEdit();
           }}
           placeholder={PLACEHOLDER}
           rows={8}
