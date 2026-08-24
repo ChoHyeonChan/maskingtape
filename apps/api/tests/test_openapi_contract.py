@@ -40,3 +40,6 @@ def test_openapi_contains_scan_and_anonymize_contracts() -> None:
 
     detection_properties = schema["components"]["schemas"]["DetectionResponse"]["properties"]
     assert "text" not in detection_properties
+
+    strategy_schema = schema["components"]["schemas"]["AnonymizeStrategy"]
+    assert "pseudonym" in strategy_schema["enum"]

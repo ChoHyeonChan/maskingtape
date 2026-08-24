@@ -88,6 +88,19 @@ def test_core_adapter_anonymize_supports_label_strategy() -> None:
     assert result.text.endswith("]")
 
 
+def test_core_adapter_anonymize_supports_pseudonym_strategy() -> None:
+    rrn = "800101-1234560"
+    text = f"주민번호 {rrn} 확인"
+
+    result = CoreEngineAdapter().anonymize(text, AnonymizeStrategy.PSEUDONYM)
+
+    assert rrn not in result.text
+    assert "*" not in result.text
+    assert "[주민등록번호]" not in result.text
+    assert len(result.detections) == 1
+    assert result.detections[0].kind == DetectionKind.RRN
+
+
 def test_core_adapter_wraps_pipeline_errors() -> None:
     try:
         CoreEngineAdapter(pipeline=FailingPipeline()).scan("합성 텍스트")

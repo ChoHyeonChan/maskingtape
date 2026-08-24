@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 """LLM 이름 탐지기 테스트 — 합성 데이터만 사용.
 
 CI에는 Ollama가 없으므로 가짜 client를 주입해 순수 로직(위치 변환·환각 방어)만 검증한다.

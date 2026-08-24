@@ -1,5 +1,5 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { act, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AppHeader } from "./AppHeader";
 
 describe("AppHeader help button tooltip", () => {
@@ -27,5 +27,40 @@ describe("AppHeader logo (layout-shift regression)", () => {
     const height = Number(logo.getAttribute("height"));
     // 실제 파일(1501x276)과 다른 비율이면 지정해도 무의미하다 — 원본 비율과 일치하는지 확인.
     expect(width / height).toBeCloseTo(1501 / 276, 2);
+  });
+});
+
+describe("AppHeader accuracy bubble (도움말 옆에 잠깐 뜨는 정확도 안내)", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("shows the rule-based-detection caveat next to the help button on mount", () => {
+    render(<AppHeader onHelpClick={() => {}} />);
+    expect(screen.getByRole("status")).toHaveTextContent("규칙 기반 탐지만");
+  });
+
+  it("dismisses on any click anywhere on the page", () => {
+    render(<AppHeader onHelpClick={() => {}} />);
+    expect(screen.getByRole("status")).toBeInTheDocument();
+
+    fireEvent.click(document.body);
+
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
+  it("auto-dismisses after 30 seconds even without a click", () => {
+    render(<AppHeader onHelpClick={() => {}} />);
+    expect(screen.getByRole("status")).toBeInTheDocument();
+
+    act(() => {
+      vi.advanceTimersByTime(30_000);
+    });
+
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
 });

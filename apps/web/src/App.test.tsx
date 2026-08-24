@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { App } from "./App";
 import { scanText } from "./api/scanClient";
 
@@ -9,6 +9,13 @@ vi.mock("./api/scanClient", () => ({
 
 const mockScanText = vi.mocked(scanText);
 
+// mockScanText는 파일 전체에서 같은 인스턴스를 공유한다 — 매 테스트 전에 호출 이력을
+// 지우지 않으면, 어떤 테스트가 먼저 스캔을 몇 번 했는지에 따라 뒤에 오는 다른 테스트의
+// "toHaveBeenCalledTimes(N)" 같은 절대 횟수 검증이 테스트 실행 순서에 우연히 좌우된다.
+beforeEach(() => {
+  mockScanText.mockClear();
+});
+
 describe("App privacy banner (#154)", () => {
   it("always shows a privacy note warning against real personal data and describing local, unsaved processing", () => {
     render(<App />);
@@ -17,6 +24,15 @@ describe("App privacy banner (#154)", () => {
     expect(note).toHaveTextContent("실제 개인정보를 입력하지 마세요");
     expect(note).toHaveTextContent("저장되지 않으며");
     expect(note).toHaveTextContent("로컬");
+  });
+
+  it("bolds the local-install recommendation, not the personal-data warning", () => {
+    render(<App />);
+
+    const note = screen.getByRole("note", { name: "개인정보 입력 주의 안내" });
+    const strong = note.querySelector("strong");
+    expect(strong).toHaveTextContent("실사용은 로컬 설치를 권장합니다");
+    expect(strong).not.toHaveTextContent("개인정보");
   });
 });
 
@@ -32,6 +48,36 @@ describe("App accuracy notice (#236)", () => {
     expect(link).toHaveAttribute("href", "https://github.com/ChoHyeonChan/maskingtape");
     expect(link).toHaveAttribute("target", "_blank");
     expect(link).toHaveAttribute("rel", expect.stringContaining("noopener"));
+  });
+});
+
+describe("App lets you click the masked-result box to edit and re-scan", () => {
+  it("returns to the editable original text (not the masked text) when the result box is clicked, and can be re-scanned", async () => {
+    mockScanText.mockResolvedValue({
+      detections: [{ kind: "phone", start: 4, end: 17, confidence: 1, detector: "test" }],
+    });
+    render(<App />);
+
+    fireEvent.keyDown(window, { key: "Escape" });
+    fireEvent.change(screen.getByLabelText("탐지할 텍스트 입력"), { target: { value: "연락처 010-1234-5678" } });
+    fireEvent.click(screen.getByRole("button", { name: "개인정보 탐지 및 마스킹 하기" }));
+
+    const resultBox = await screen.findByRole("textbox", { name: "마스킹된 탐지 결과" });
+    await waitFor(() => expect(resultBox).toHaveValue("연락처 *************"));
+
+    fireEvent.click(resultBox);
+
+    // 클릭 한 번으로 "문서 입력" 상태로 돌아가되, 마스킹된 텍스트가 아니라 원래
+    // 입력했던 원문이 그대로(수정 가능하게) 남아 있어야 한다.
+    const editableBox = screen.getByRole("textbox", { name: "탐지할 텍스트 입력" });
+    expect(editableBox).toHaveValue("연락처 010-1234-5678");
+    expect(editableBox).not.toHaveAttribute("readonly");
+
+    // 이어서 수정하고 다시 탐지할 수 있다.
+    fireEvent.change(editableBox, { target: { value: "연락처 010-9999-0000" } });
+    fireEvent.click(screen.getByRole("button", { name: "개인정보 탐지 및 마스킹 하기" }));
+
+    await waitFor(() => expect(mockScanText).toHaveBeenLastCalledWith("연락처 010-9999-0000"));
   });
 });
 
