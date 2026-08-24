@@ -804,30 +804,28 @@ def test_phone_separator_variants_partially_fixed_by_339():
     )
 
 
-def test_name_honorific_tail_yang_or_gun_leaks_last_syllable():
-    """#340 (신규 발견, core 미해결·심각도 M) — 존칭 양보 규칙(#147, `_HONORIFIC_TAIL="님씨군양"`)이
-    실명의 마지막 글자가 마침 "양"·"군"이면 그 글자를 존칭으로 오인해 이름에서 떼어내
-    마스킹 대상에서 빠뜨린다 — "김하양"의 "양"이 실제 성씨 계열 이름 끝음절인데도 노출된다.
-    "애매하면 더 가리기(안전측 기본값)" 원칙과 반대 방향으로 실패하는 사례다. bench 소관이
-    아니라 core 이슈로 남겼다. core#340이 고치면 이 canary가 깨져서 알 수 있다(그때 기대값을
-    "김하양"/"박도군" 전체로 갱신)."""
+def test_name_honorific_tail_yang_or_gun_no_longer_leaks_last_syllable():
+    """#340(core 대응 완료) — 존칭 양보 규칙(#147, `_HONORIFIC_TAIL="님씨군양"`)이 실명의
+    마지막 글자가 마침 "양"·"군"이면 그 글자를 존칭으로 오인해 이름에서 떼어내 마스킹
+    대상에서 빠뜨리던 버그("김하양"의 "양"이 실제 성씨 계열 이름 끝음절인데도 노출)가
+    고쳐졌다 — 이제 이름 전체가 잘리지 않고 탐지된다(회귀 방지)."""
     detector = NameDetector()
     yang_found = detector.detect("고객 김하양님께")
-    assert len(yang_found) == 1 and yang_found[0].text == "김하", (
-        f"기대: '양'이 이름에서 잘려나가는 현재(버그) 동작 — core#340이 고쳤다면 갱신할 것: {yang_found!r}"
-    )
+    assert len(yang_found) == 1
+    assert yang_found[0].text == "김하양"
+    assert yang_found[0].confidence == 0.75
+
     goon_found = detector.detect("환자 박도군 내원")
-    assert len(goon_found) == 1 and goon_found[0].text == "박도", (
-        f"기대: '군'이 이름에서 잘려나가는 현재(버그) 동작 — core#340이 고쳤다면 갱신할 것: {goon_found!r}"
-    )
+    assert len(goon_found) == 1
+    assert goon_found[0].text == "박도군"
+    assert goon_found[0].confidence == 0.5
 
 
-def test_address_bunji_literal_breaks_detection_chain():
-    """#340 (신규 발견, core 미해결·심각도 S) — AddressDetector는 번지 숫자 뒤에 "번지"라는
-    리터럴 글자가 실제로 풀어써지면(예: "123번지") 그 다음 건물명·동/호수로 이어지는 체인을
-    못 잇는다 — "번지" 앞까지만 잘려서 마스킹되고, 건물명·호수(세대 특정 정보)는 그대로
-    노출된다. bench 소관이 아니라 core 이슈로 남겼다. core#340이 고치면 이 canary가 깨져서
-    알 수 있다.
+def test_address_bunji_literal_chain_now_detected():
+    """#340(core 대응 완료) — AddressDetector가 번지 숫자 뒤에 "번지"라는 리터럴 글자가
+    실제로 풀어써지면(예: "123번지") 그 다음 건물명·동/호수로 이어지는 체인을 못 이어
+    "번지" 앞까지만 마스킹되고 건물명·호수(세대 특정 정보)가 노출되던 버그가 고쳐졌다 —
+    이제 전체가 하나의 구간으로 정상 탐지된다(회귀 방지).
 
     이슈 원문 예시는 "서울"(축약형)을 썼는데, 직접 확인해보니 AddressDetector는 축약형
     시/도명 자체를 인식하지 못해(번지 유무와 무관하게 항상 빈 리스트) 별개의 변수가 섞여
@@ -839,8 +837,8 @@ def test_address_bunji_literal_breaks_detection_chain():
     control = detector.detect(full)
     assert len(control) == 1 and control[0].text == full
 
-    bunji_found = detector.detect("서울특별시 강남구 역삼동 123번지 삼성빌라 502호")
-    assert len(bunji_found) == 1 and bunji_found[0].text == "서울특별시 강남구 역삼동 123", (
-        f"기대: '번지' 뒤 건물명·호수가 체인에서 끊겨 노출되는 현재(버그) 동작 — "
-        f"core#340이 고쳤다면 이 테스트를 갱신할 것: {bunji_found!r}"
-    )
+    bunji_full = "서울특별시 강남구 역삼동 123번지 삼성빌라 502호"
+    bunji_found = detector.detect(bunji_full)
+    assert len(bunji_found) == 1
+    assert bunji_found[0].text == bunji_full
+    assert bunji_found[0].confidence == 1.0
