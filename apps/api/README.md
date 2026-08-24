@@ -36,6 +36,8 @@ $env:MASKINGTAPE_API_ENV="development"
 $env:MASKINGTAPE_API_CORS_ORIGINS="http://localhost:5173,http://127.0.0.1:5173"
 $env:MASKINGTAPE_API_RATE_LIMIT_REQUESTS="60"
 $env:MASKINGTAPE_API_RATE_LIMIT_WINDOW_SECONDS="60"
+$env:MASKINGTAPE_API_RATE_LIMIT_MAX_BUCKETS="10000"
+$env:MASKINGTAPE_API_MAX_BODY_BYTES="1000000"
 ```
 
 `MASKINGTAPE_API_CORS_ORIGINS` is a comma-separated allowlist. Do not use `*`;
@@ -44,7 +46,11 @@ set the deployed web origin explicitly when the frontend domain is decided.
 control the in-memory per-client limit for `/scan` and `/anonymize`. Requests over
 the window return 429 with `Retry-After`. This limiter is process-local: it is useful
 for local/dev and low-traffic demo protection, but it is not shared across serverless
-or horizontally scaled instances.
+or horizontally scaled instances. `MASKINGTAPE_API_RATE_LIMIT_MAX_BUCKETS` caps the
+number of tracked client buckets to avoid unbounded memory growth when many distinct
+client keys are presented.
+`MASKINGTAPE_API_MAX_BODY_BYTES` rejects oversized requests from `Content-Length`
+before JSON parsing.
 
 헬스체크:
 
@@ -129,6 +135,12 @@ FastAPI 라우터는 core를 직접 호출하지 않고 `maskingtape_api.service
 5. **호출 빈도 제한(rate limit)**을 둔다. 공개 URL은 남용된다. 현재 API는 `/scan`·`/anonymize`에 IP별 인메모리 제한을 적용하며 초과 시 429로 거절한다. 단, Vercel serverless처럼 여러 인스턴스가 생길 수 있는 환경에서는 카운터가 공유되지 않아 배포 등급의 강한 제한으로 보지 않는다. **결정(2026-08-17): 공모전 데모는 현행 인메모리 제한을 best-effort 보호로 유지하고 배포를 진행한다.** 남용/비용/DoS 위험이 커지면 Vercel 플랫폼 보호 또는 외부 공유 스토어 기반 limiter로 전환한다.
 6. **CORS를 우리 프론트 도메인으로 제한**한다. `*` 금지.
 7. **HTTPS만 허용**한다.
+
+### 자기호스팅 하드닝
+
+- API는 `x-forwarded-for`를 클라이언트 키로 신뢰하지 않는다. Vercel 배포에서는 `x-vercel-forwarded-for`, 일반 리버스 프록시에서는 프록시가 덮어쓴 `x-real-ip`만 사용하고, 둘 다 없으면 ASGI `request.client.host`를 쓴다.
+- nginx 같은 리버스 프록시를 앞에 둘 때는 외부에서 온 `X-Forwarded-For`/`X-Real-IP`를 그대로 전달하지 말고, 프록시가 검증한 값으로 덮어쓴다.
+- 요청 바디는 앱의 `MASKINGTAPE_API_MAX_BODY_BYTES`와 프록시의 `client_max_body_size`를 함께 둔다. 예: `client_max_body_size 1m;`
 
 ### UI 쪽 요구사항 (프론트와 함께)
 
