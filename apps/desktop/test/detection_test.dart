@@ -23,6 +23,8 @@ void main() {
       expect(_d('account').kindLabel, '계좌번호');
       // 코어에 추가된 생년월일 탐지기 (#266/#271) 대응
       expect(_d('birth_date').kindLabel, '생년월일');
+      // 코어에 추가된 운전면허번호 탐지기 (#267/#305) 대응 — core·web과 "운전면허"로 통일
+      expect(_d('driver_license').kindLabel, '운전면허');
     });
 
     test('라벨 맵에 없는 kind는 기타(kind)로 표시한다', () {
