@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 """탐지기 공통 인터페이스.
 
 새 탐지기 만드는 법:

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 """여권번호 탐지기 — 정규식 + 문맥어.
 
 동작 원리:

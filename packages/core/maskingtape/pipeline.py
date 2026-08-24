@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 """탐지기 → 마스킹 전략을 조립하는 파이프라인. 조립만 담당하고 탐지 로직은 갖지 않는다."""
 
 from __future__ import annotations

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 """운전면허번호 탐지기 테스트 — 모든 번호는 합성(가짜)이다."""
 
 from maskingtape.detectors import DriverLicenseDetector

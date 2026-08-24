@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 """파일 입출력 안전장치 — MCP 도구 전용.
 
 MCP 도구는 **AI 에이전트가 호출**한다. 에이전트는 사용자가 준 문서나 웹 내용에 영향을
