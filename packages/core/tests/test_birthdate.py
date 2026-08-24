@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 """생년월일 탐지기 테스트 — 모든 날짜는 합성(가짜)이다."""
 
 from maskingtape.detectors import BirthDateDetector

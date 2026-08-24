@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 """주소 탐지기 테스트 — 모든 주소는 합성(가짜)이다."""
 
 from maskingtape.detectors import AddressDetector
@@ -59,6 +61,13 @@ def test_bunji_does_not_swallow_part_of_a_longer_number():
 
     found = detect("부산광역시 해운대구 우동 010-9876-5432")
     assert found[0].text == "부산광역시 해운대구 우동"
+
+
+def test_bunji_written_out_with_beonji_does_not_break_chain():
+    # #340: "123번지"처럼 풀어쓰면 뒤 건물명·호수 체인이 끊겨 세대정보가 새던 문제.
+    found = detect("서울특별시 강남구 역삼동 123번지 삼성빌라 502호")
+    assert len(found) == 1
+    assert found[0].text == "서울특별시 강남구 역삼동 123번지 삼성빌라 502호"
 
 
 def test_bunji_with_ho_still_matches():

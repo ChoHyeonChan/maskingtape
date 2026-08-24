@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 """이름 탐지기 테스트 — 모든 이름은 합성(가짜)이다."""
 
 from maskingtape.detectors import NameDetector
@@ -46,6 +48,13 @@ def test_ignores_domain_label_words_that_start_with_a_surname():
     assert detect("고객 주민번호 800101-1234560 확인 부탁드립니다") == []
     assert detect("고객 전화번호는 010-1234-5678입니다") == []
     assert detect("신청자: 이메일로 회신 부탁드립니다") == []
+
+
+def test_name_ending_in_yang_or_gun_is_not_leaked():
+    # #340: 끝음절이 양/군인 실명("김하양"·"박도군")에서 그 글자를 존칭으로 오인해 이름에서
+    # 떼어내면 그 글자가 원문 노출된다(미탐=유출). 이름에 포함해 통째로 가린다(더 가리기=안전).
+    assert detect("고객 김하양님께 안내")[0].text == "김하양"
+    assert detect("환자 박도군 내원 예정")[0].text == "박도군"
 
 
 def test_does_not_swallow_honorific_into_two_char_name():
