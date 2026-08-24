@@ -51,6 +51,15 @@ export function App() {
     }
   }
 
+  // "마스킹 결과" 박스를 클릭해서 직접 고쳐 다시 탐지하고 싶을 때 — "초기화 하기"와
+  // 달리 입력했던 원문(inputText)은 그대로 두고 결과만 지워서 편집 가능한 입력 상태로
+  // 돌아간다. displayText는 scanned가 null이 되는 순간 원문을 다시 보여준다.
+  function handleRequestEdit() {
+    setScanned(null);
+    setMaskedResultText("");
+    setHighlight(null);
+  }
+
   function dismissCoachMark() {
     setCoachMarkVariant(null);
   }
@@ -66,8 +75,8 @@ export function App() {
       <div className="privacy-note" role="note" aria-label="개인정보 입력 주의 안내">
         <span className="privacy-note__icon" aria-hidden="true">▣</span>
         <span>
-          이 데모는 시연·학습용입니다. <strong>실제 개인정보를 입력하지 마세요.</strong> 입력 내용은
-          저장되지 않으며, 로컬(브라우저 ↔ 로컬 API)에서만 처리됩니다. 실사용은 로컬 설치를 권장합니다.
+          이 데모는 시연·학습용입니다. 실제 개인정보를 입력하지 마세요. 입력 내용은
+          저장되지 않으며, 로컬(브라우저 ↔ 로컬 API)에서만 처리됩니다. <strong>실사용은 로컬 설치를 권장합니다.</strong>
         </span>
       </div>
 
@@ -82,6 +91,7 @@ export function App() {
             onTextChange={handleTextChange}
             onClear={handleClear}
             onResult={handleResult}
+            onRequestEdit={handleRequestEdit}
             highlight={highlight}
           />
         </section>

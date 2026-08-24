@@ -139,6 +139,44 @@ describe("InputPanel result view accessibility", () => {
   });
 });
 
+describe("InputPanel click-to-edit on the result box (다시 고쳐서 재탐지)", () => {
+  it("calls onRequestEdit when the read-only result box is clicked", () => {
+    const onRequestEdit = vi.fn();
+    render(
+      <InputPanel
+        text="김철수 010-****-5678"
+        hasResult
+        resultVersion={1}
+        onTextChange={vi.fn()}
+        onClear={vi.fn()}
+        onResult={vi.fn()}
+        onRequestEdit={onRequestEdit}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("textbox", { name: "마스킹된 탐지 결과" }));
+    expect(onRequestEdit).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not call onRequestEdit when clicking the editable (pre-scan) textarea", () => {
+    const onRequestEdit = vi.fn();
+    render(
+      <InputPanel
+        text="아직 입력 중"
+        hasResult={false}
+        resultVersion={0}
+        onTextChange={vi.fn()}
+        onClear={vi.fn()}
+        onResult={vi.fn()}
+        onRequestEdit={onRequestEdit}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("textbox", { name: "탐지할 텍스트 입력" }));
+    expect(onRequestEdit).not.toHaveBeenCalled();
+  });
+});
+
 describe("InputPanel replays the reveal sweep when the masked text itself changes (#237 follow-up)", () => {
   it("replays the sweep when a toggle in the results panel changes the text, even though resultVersion (scanRun) stays the same", () => {
     const { rerender } = render(
