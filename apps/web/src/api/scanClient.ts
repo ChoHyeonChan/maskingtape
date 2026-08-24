@@ -1,4 +1,4 @@
-import type { ScanResponse } from "../types/detection";
+import type { AnonymizeResponse, ScanResponse } from "../types/detection";
 
 interface ApiErrorBody {
   code?: string;
@@ -12,26 +12,40 @@ const ERROR_MESSAGES: Record<number, string> = {
   502: "API 서버에 연결하지 못했습니다. 백엔드가 실행 중인지 확인해 주세요.",
 };
 
-/**
- * During development, Vite proxies /api/scan to the FastAPI backend's /scan route.
- */
-export async function scanText(text: string): Promise<ScanResponse> {
+async function postJson<T>(path: string, body: unknown): Promise<T> {
   let res: Response;
 
   try {
-    res = await fetch("/api/scan", {
+    res = await fetch(path, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text }),
+      body: JSON.stringify(body),
     });
   } catch {
     throw new Error("API 서버에 연결하지 못했습니다. 백엔드가 실행 중인지 확인해 주세요.");
   }
 
   if (!res.ok) {
-    const body = (await res.json().catch(() => null)) as ApiErrorBody | null;
-    throw new Error(body?.message ?? body?.code ?? ERROR_MESSAGES[res.status] ?? `요청 실패 (HTTP ${res.status})`);
+    const errorBody = (await res.json().catch(() => null)) as ApiErrorBody | null;
+    throw new Error(
+      errorBody?.message ?? errorBody?.code ?? ERROR_MESSAGES[res.status] ?? `요청 실패 (HTTP ${res.status})`,
+    );
   }
 
   return res.json();
+}
+
+/**
+ * During development, Vite proxies /api/scan to the FastAPI backend's /scan route.
+ */
+export function scanText(text: string): Promise<ScanResponse> {
+  return postJson<ScanResponse>("/api/scan", { text });
+}
+
+/**
+ * pseudonym(가명처리)처럼 core의 값 생성 로직이 필요해 클라이언트에서 계산할 수 없는
+ * 전략은 /anonymize를 직접 호출해 이미 치환된 text를 받는다(#346).
+ */
+export function anonymizeText(text: string, strategy: "mask" | "label" | "pseudonym"): Promise<AnonymizeResponse> {
+  return postJson<AnonymizeResponse>("/api/anonymize", { text, strategy });
 }
