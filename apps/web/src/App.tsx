@@ -51,6 +51,15 @@ export function App() {
     }
   }
 
+  // "마스킹 결과" 박스를 클릭해서 직접 고쳐 다시 탐지하고 싶을 때 — "초기화 하기"와
+  // 달리 입력했던 원문(inputText)은 그대로 두고 결과만 지워서 편집 가능한 입력 상태로
+  // 돌아간다. displayText는 scanned가 null이 되는 순간 원문을 다시 보여준다.
+  function handleRequestEdit() {
+    setScanned(null);
+    setMaskedResultText("");
+    setHighlight(null);
+  }
+
   function dismissCoachMark() {
     setCoachMarkVariant(null);
   }
@@ -82,6 +91,7 @@ export function App() {
             onTextChange={handleTextChange}
             onClear={handleClear}
             onResult={handleResult}
+            onRequestEdit={handleRequestEdit}
             highlight={highlight}
           />
         </section>

@@ -211,7 +211,9 @@
   border-color: transparent;
   background: transparent;
   box-shadow: none;
-  cursor: default;
+  /* readOnly라 실제로 타이핑은 안 되지만, 클릭하면 편집 가능한 입력 상태로 되돌아가므로
+     (onRequestEdit) "여기 눌러서 고칠 수 있다"는 걸 암시하는 텍스트 커서로 둔다. */
+  cursor: text;
   /* 하이라이트 오버레이(.input-panel__highlight-overlay)와 스크롤바 폭을 정확히
      맞춰야(10px) 줄바꿈이 어긋나지 않는다 — 위 오버레이 규칙 참고. */
   scrollbar-width: thin;
