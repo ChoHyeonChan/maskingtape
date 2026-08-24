@@ -766,3 +766,76 @@ def test_title_prefix_dept_word_guard_only_covers_hardcoded_stems():
     ):
         found = detector.detect(text)
         assert len(found) == 1 and found[0].confidence == 0.5, f"예상과 다른 동작: {text!r} -> {found!r}"
+
+
+def test_rrn_separator_variants_are_known_unfixed_leaks():
+    """#339 (신규 발견, core 미해결·심각도 M) — RRNDetector가 분리자를 `[-.\\s]?`(0개 또는
+    딱 1글자)만 허용해서, 하이픈 표준 표기 하나만 잡고 실문서에서 흔한 변형(공백-하이픈-공백,
+    en-dash, 점+공백)은 전부 통째로 미탐된다 — 마스킹을 거쳐도 주민등록번호가 평문 그대로
+    남는다. bench 소관이 아니라 core 이슈로 남겼다(코드는 안 고침). 이 canary는 "지금 안전하지
+    않다"를 고정해두는 용도라, core가 고치면(#339) 아래 assert들이 깨져야 정상이고, 그때
+    빈 리스트를 실제 탐지 결과로 바꿔주면 된다."""
+    detector = RRNDetector()
+    # 대조군: 표준 하이픈 표기는 정상 탐지된다 — 문제는 변형 표기에서만 난다.
+    assert len(detector.detect("주민 800101-1234560")) == 1
+    for text in (
+        "주민 800101 - 1234560",  # 공백-하이픈-공백
+        "주민 800101–1234560",  # en-dash(U+2013)
+        "주민 800101. 1234560",  # 점+공백
+    ):
+        assert detector.detect(text) == [], f"기대: 여전히 미탐(유출) — core#339가 고쳤다면 이 테스트를 갱신할 것: {text!r}"
+
+
+def test_phone_separator_variants_are_known_unfixed_leaks():
+    """#339 (신규 발견, core 미해결·심각도 M) — PhoneDetector도 RRN과 같은 원인으로 분리자
+    변형(각 자리 사이 공백-하이픈-공백, 지역번호 괄호 표기)에서 전화번호를 통째로 놓친다.
+    bench 소관이 아니라 core 이슈로 남겼다. core#339가 고치면 이 canary가 깨져서 알 수 있다."""
+    detector = PhoneDetector()
+    assert len(detector.detect("연락 010-1234-5678")) == 1  # 대조군: 표준 표기는 정상 탐지
+    for text in (
+        "연락 010 - 1234 - 5678",  # 공백-하이픈-공백
+        "연락 (010) 1234-5678",  # 지역번호 괄호 표기
+    ):
+        assert detector.detect(text) == [], f"기대: 여전히 미탐(유출) — core#339가 고쳤다면 이 테스트를 갱신할 것: {text!r}"
+
+
+def test_name_honorific_tail_yang_or_gun_leaks_last_syllable():
+    """#340 (신규 발견, core 미해결·심각도 M) — 존칭 양보 규칙(#147, `_HONORIFIC_TAIL="님씨군양"`)이
+    실명의 마지막 글자가 마침 "양"·"군"이면 그 글자를 존칭으로 오인해 이름에서 떼어내
+    마스킹 대상에서 빠뜨린다 — "김하양"의 "양"이 실제 성씨 계열 이름 끝음절인데도 노출된다.
+    "애매하면 더 가리기(안전측 기본값)" 원칙과 반대 방향으로 실패하는 사례다. bench 소관이
+    아니라 core 이슈로 남겼다. core#340이 고치면 이 canary가 깨져서 알 수 있다(그때 기대값을
+    "김하양"/"박도군" 전체로 갱신)."""
+    detector = NameDetector()
+    yang_found = detector.detect("고객 김하양님께")
+    assert len(yang_found) == 1 and yang_found[0].text == "김하", (
+        f"기대: '양'이 이름에서 잘려나가는 현재(버그) 동작 — core#340이 고쳤다면 갱신할 것: {yang_found!r}"
+    )
+    goon_found = detector.detect("환자 박도군 내원")
+    assert len(goon_found) == 1 and goon_found[0].text == "박도", (
+        f"기대: '군'이 이름에서 잘려나가는 현재(버그) 동작 — core#340이 고쳤다면 갱신할 것: {goon_found!r}"
+    )
+
+
+def test_address_bunji_literal_breaks_detection_chain():
+    """#340 (신규 발견, core 미해결·심각도 S) — AddressDetector는 번지 숫자 뒤에 "번지"라는
+    리터럴 글자가 실제로 풀어써지면(예: "123번지") 그 다음 건물명·동/호수로 이어지는 체인을
+    못 잇는다 — "번지" 앞까지만 잘려서 마스킹되고, 건물명·호수(세대 특정 정보)는 그대로
+    노출된다. bench 소관이 아니라 core 이슈로 남겼다. core#340이 고치면 이 canary가 깨져서
+    알 수 있다.
+
+    이슈 원문 예시는 "서울"(축약형)을 썼는데, 직접 확인해보니 AddressDetector는 축약형
+    시/도명 자체를 인식하지 못해(번지 유무와 무관하게 항상 빈 리스트) 별개의 변수가 섞여
+    있었다 — 이 테스트는 정식 명칭("서울특별시")으로 변수를 하나만 남겨 "번지" 리터럴의
+    영향만 정확히 격리한다."""
+    detector = AddressDetector()
+    # 대조군: "번지" 리터럴 없이 하이픈 표기면 건물명·호수까지 전체가 정상 탐지된다.
+    full = "서울특별시 강남구 역삼동 123-45 삼성빌라 502호"
+    control = detector.detect(full)
+    assert len(control) == 1 and control[0].text == full
+
+    bunji_found = detector.detect("서울특별시 강남구 역삼동 123번지 삼성빌라 502호")
+    assert len(bunji_found) == 1 and bunji_found[0].text == "서울특별시 강남구 역삼동 123", (
+        f"기대: '번지' 뒤 건물명·호수가 체인에서 끊겨 노출되는 현재(버그) 동작 — "
+        f"core#340이 고쳤다면 이 테스트를 갱신할 것: {bunji_found!r}"
+    )

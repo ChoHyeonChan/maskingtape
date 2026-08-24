@@ -1,7 +1,7 @@
 # maskingtape 합성 벤치마크 정확도 리포트
 
 - 데이터셋: `bench\datasets\synth_v1.jsonl` (500건)
-- 생성 시각: 2026-08-21 08:15 UTC
+- 생성 시각: 2026-08-23 18:00 UTC
 - 평가 방식: span 완전 일치(exact match) 기준 precision/recall/F1
 
 ## 종류(kind)별 결과
