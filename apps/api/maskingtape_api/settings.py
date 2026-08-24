@@ -10,6 +10,8 @@ DEFAULT_CORS_ALLOWED_ORIGINS = (
 DEFAULT_PRODUCTION_CORS_ALLOWED_ORIGINS: tuple[str, ...] = ()
 DEFAULT_RATE_LIMIT_REQUESTS = 60
 DEFAULT_RATE_LIMIT_WINDOW_SECONDS = 60
+DEFAULT_RATE_LIMIT_MAX_BUCKETS = 10_000
+DEFAULT_MAX_BODY_BYTES = 1_000_000
 
 
 @dataclass(frozen=True)
@@ -20,6 +22,8 @@ class ApiSettings:
     cors_allowed_origins: tuple[str, ...] = DEFAULT_CORS_ALLOWED_ORIGINS
     rate_limit_requests: int = DEFAULT_RATE_LIMIT_REQUESTS
     rate_limit_window_seconds: int = DEFAULT_RATE_LIMIT_WINDOW_SECONDS
+    rate_limit_max_buckets: int = DEFAULT_RATE_LIMIT_MAX_BUCKETS
+    max_body_bytes: int = DEFAULT_MAX_BODY_BYTES
 
 
 def get_api_settings() -> ApiSettings:
@@ -42,6 +46,14 @@ def get_api_settings() -> ApiSettings:
         rate_limit_window_seconds=_env_int(
             "MASKINGTAPE_API_RATE_LIMIT_WINDOW_SECONDS",
             DEFAULT_RATE_LIMIT_WINDOW_SECONDS,
+        ),
+        rate_limit_max_buckets=_env_int(
+            "MASKINGTAPE_API_RATE_LIMIT_MAX_BUCKETS",
+            DEFAULT_RATE_LIMIT_MAX_BUCKETS,
+        ),
+        max_body_bytes=_env_int(
+            "MASKINGTAPE_API_MAX_BODY_BYTES",
+            DEFAULT_MAX_BODY_BYTES,
         ),
     )
 

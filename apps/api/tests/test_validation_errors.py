@@ -4,6 +4,7 @@ from fastapi.testclient import TestClient
 
 from maskingtape_api.main import create_app
 from maskingtape_api.schemas import MAX_TEXT_LENGTH
+from maskingtape_api.settings import ApiSettings
 
 
 def test_empty_text_validation_uses_shared_error_shape() -> None:
@@ -37,6 +38,23 @@ def test_too_long_text_validation_returns_413_without_echoing_input() -> None:
         "details": {"field": "text", "max_length": MAX_TEXT_LENGTH},
     }
     assert long_text not in response.text
+
+
+def test_content_length_limit_rejects_body_before_schema_validation() -> None:
+    response = TestClient(
+        create_app(settings=ApiSettings(cors_allowed_origins=(), max_body_bytes=10))
+    ).post(
+        "/scan",
+        content=b'{"text":"ok"}',
+        headers={"content-type": "application/json"},
+    )
+
+    assert response.status_code == 413
+    assert response.json() == {
+        "code": "request_body_too_large",
+        "message": "request body must be at most 10 bytes.",
+        "details": {"max_bytes": 10},
+    }
 
 
 def test_invalid_strategy_validation_does_not_echo_text() -> None:
