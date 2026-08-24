@@ -4,18 +4,25 @@
   gap: 0.6rem;
 }
 
+/* 엘리베이터 버튼처럼 위/아래 화살표를 세로로 붙여 링 오른쪽 한쪽에 모아둔다. */
+.confidence-dial__btns {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
 .confidence-dial__btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
-  width: 2.1rem;
-  height: 2.1rem;
-  border-radius: 999px;
+  width: 1.7rem;
+  height: 1.35rem;
+  border-radius: 6px;
   border: 1px solid rgba(24, 58, 139, 0.16);
   background: #ffffff;
   color: var(--brand-blue);
-  font-size: 0.85rem;
+  font-size: 0.72rem;
   cursor: pointer;
 }
 
@@ -124,13 +131,59 @@
   color: var(--text-secondary);
 }
 
+.detect__list-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
 .detect__summary {
-  margin: 0 0 0.6rem;
+  margin: 0;
   color: var(--text-secondary);
   font-size: 0.82rem;
   font-weight: 700;
 }
 
+.detect__sort {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  border: 1px solid rgba(24, 58, 139, 0.16);
+  border-radius: 999px;
+  padding: 0.15rem;
+  background: #f8faff;
+}
+
+.detect__sort-btn {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.3rem 0.68rem;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.74rem;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.detect__sort-btn.is-active {
+  background: var(--brand-blue);
+  color: #ffffff;
+}
+
+.detect {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* 목록이 패널 바닥까지 꽉 채우도록(#4) flex로 남는 공간을 전부 가져간다 — 예전엔
+   고정된 max-height 때문에 패널 안쪽에 빈 공간이 항상 남았다. 모바일(패널이
+   height:auto로 쌓이는 폭)에서는 아래 미디어쿼리에서 다시 상한을 둔다. */
 .detect__list {
   display: flex;
   flex-direction: column;
@@ -138,7 +191,8 @@
   margin: 0 0 0.9rem;
   padding: 0;
   list-style: none;
-  max-height: clamp(16rem, 40vh, 26rem);
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--brand-blue) transparent;
@@ -166,19 +220,10 @@
 }
 
 /* 항목에 마우스를 올리면 그 종류의 색(--row-color, 왼쪽 점과 같은 색)을 옅게 깔아
-   보여준다 — 토글 버튼도 같은 색으로 살짝 물들여서 "이 행 전체가 하나"라는 걸 강조한다. */
+   보여준다. 토글 버튼까지 같이 물들이면 토글 자체의 가림/보임 색이 묻혀 보여서
+   (버튼이 배경색에 "먹혀버리는" 문제) 토글은 손대지 않고 행 배경만 바꾼다. */
 .detect-row:hover {
   background-color: color-mix(in srgb, var(--row-color) 16%, #ffffff);
-}
-
-.detect-row:hover .detect-row__toggle {
-  background: color-mix(in srgb, var(--row-color) 35%, #eef1f6);
-  border-color: color-mix(in srgb, var(--row-color) 45%, rgba(24, 58, 139, 0.16));
-}
-
-.detect-row:hover .detect-row__toggle.is-masked {
-  background: color-mix(in srgb, var(--row-color) 35%, var(--brand-blue));
-  border-color: color-mix(in srgb, var(--row-color) 45%, var(--brand-blue));
 }
 
 .detect-row__dot {
@@ -260,6 +305,14 @@
 
 .detect-row__toggle.is-masked .detect-row__toggle-knob {
   transform: translateX(2.9rem);
+}
+
+/* .panel--results가 이 폭부터 height:auto로 바뀌므로(layout.css) flex:1로는 채울 남는
+   공간이 없다 — 예전처럼 다시 상한을 둬서 목록 자체가 무한정 길어지지 않게 한다. */
+@media (max-width: 900px) {
+  .detect__list {
+    max-height: clamp(16rem, 40vh, 26rem);
+  }
 }
 
 @media (max-width: 640px) {
