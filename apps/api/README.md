@@ -104,10 +104,10 @@ FastAPI 라우터는 core를 직접 호출하지 않고 `maskingtape_api.service
 
 `POST /anonymize` — 비식별화 결과
 
-현재 `/anonymize`는 `packages/core`의 규칙 기반 `Pipeline.anonymize()`를 호출한다. `strategy`는 별표 마스킹(`mask`)과 종류 라벨 치환(`label`)을 지원한다.
+현재 `/anonymize`는 `packages/core`의 규칙 기반 `Pipeline.anonymize()`를 호출한다. `strategy`는 별표 마스킹(`mask`), 종류 라벨 치환(`label`), 가명 치환(`pseudonym`)을 지원한다.
 
 ```json
-// 요청 — strategy: "mask"(기본) 또는 "label"
+// 요청 — strategy: "mask"(기본), "label", "pseudonym"
 { "text": "주민번호 800101-1234560 문의주세요", "strategy": "mask" }
 // 응답
 { "text": "주민번호 ************** 문의주세요", "detections": [ /* 위와 동일 */ ] }

@@ -103,15 +103,6 @@ export function ConfidenceControl({ value, min, max, step, onChange }: Props) {
 
   return (
     <div className="confidence-dial">
-      <button
-        type="button"
-        className="confidence-dial__btn"
-        onClick={increase}
-        disabled={atMax}
-        aria-label="확신도 임계값 올리기"
-      >
-        ▲
-      </button>
       <div
         ref={ringRef}
         className={`confidence-dial__ring${dragging ? " is-dragging" : ""}`}
@@ -135,15 +126,27 @@ export function ConfidenceControl({ value, min, max, step, onChange }: Props) {
         </div>
         <span className="confidence-dial__value">{value}%</span>
       </div>
-      <button
-        type="button"
-        className="confidence-dial__btn"
-        onClick={decrease}
-        disabled={atMin}
-        aria-label="확신도 임계값 내리기"
-      >
-        ▼
-      </button>
+      {/* 링 양옆에 화살표가 나뉘어 있던 걸 엘리베이터 버튼처럼 오른쪽 한쪽에 세로로 모았다. */}
+      <div className="confidence-dial__btns">
+        <button
+          type="button"
+          className="confidence-dial__btn"
+          onClick={increase}
+          disabled={atMax}
+          aria-label="확신도 임계값 올리기"
+        >
+          ▲
+        </button>
+        <button
+          type="button"
+          className="confidence-dial__btn"
+          onClick={decrease}
+          disabled={atMin}
+          aria-label="확신도 임계값 내리기"
+        >
+          ▼
+        </button>
+      </div>
     </div>
   );
 }

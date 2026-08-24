@@ -766,3 +766,79 @@ def test_title_prefix_dept_word_guard_only_covers_hardcoded_stems():
     ):
         found = detector.detect(text)
         assert len(found) == 1 and found[0].confidence == 0.5, f"예상과 다른 동작: {text!r} -> {found!r}"
+
+
+def test_rrn_separator_variants_are_detected():
+    """#339(core 대응 완료) — RRNDetector가 분리자를 `[-.\\s]?`(0개 또는 딱 1글자)만 허용해서
+    실문서에서 흔한 변형(공백-하이픈-공백, en-dash, 점+공백)을 통째로 놓치던 유출 버그가
+    고쳐졌다. 예전엔 하이픈 표준 표기만 잡았는데, 이제 아래 변형도 전부 정상 탐지된다
+    (회귀 방지 — 다시 놓치게 되면 여기서 잡힌다)."""
+    detector = RRNDetector()
+    # 대조군: 표준 하이픈 표기 — 예전에도 지금도 정상 탐지.
+    assert len(detector.detect("주민 800101-1234560")) == 1
+    for text, expected_text in (
+        ("주민 800101 - 1234560", "800101 - 1234560"),  # 공백-하이픈-공백
+        ("주민 800101–1234560", "800101–1234560"),  # en-dash(U+2013)
+        ("주민 800101. 1234560", "800101. 1234560"),  # 점+공백
+    ):
+        found = detector.detect(text)
+        assert len(found) == 1, f"{text!r} 탐지 실패"
+        assert found[0].text == expected_text
+        assert found[0].confidence == 1.0
+
+
+def test_phone_separator_variants_partially_fixed_by_339():
+    """#339(core 부분 대응) — PhoneDetector의 분리자 변형 중 공백-하이픈-공백("010 - 1234 -
+    5678")은 이번 수정으로 고쳐졌지만, 지역번호 괄호 표기("(010) 1234-5678")는 원인이 달라
+    (괄호 자체를 파싱하지 않음) 아직 놓친다 — 마스킹 후에도 평문으로 남는 유출이 여전하다.
+    이 괄호 케이스가 마저 고쳐지면 아래 마지막 assert가 깨져서 알 수 있다."""
+    detector = PhoneDetector()
+    # 대조군: 표준 하이픈 표기 — 예전에도 지금도 정상 탐지.
+    assert len(detector.detect("연락 010-1234-5678")) == 1
+
+    fixed = detector.detect("연락 010 - 1234 - 5678")
+    assert len(fixed) == 1 and fixed[0].text == "010 - 1234 - 5678" and fixed[0].confidence == 1.0
+
+    assert detector.detect("연락 (010) 1234-5678") == [], (
+        "기대: 아직 미탐(유출) — 지역번호 괄호 표기까지 고쳤다면 이 테스트를 갱신할 것"
+    )
+
+
+def test_name_honorific_tail_yang_or_gun_no_longer_leaks_last_syllable():
+    """#340(core 대응 완료) — 존칭 양보 규칙(#147, `_HONORIFIC_TAIL="님씨군양"`)이 실명의
+    마지막 글자가 마침 "양"·"군"이면 그 글자를 존칭으로 오인해 이름에서 떼어내 마스킹
+    대상에서 빠뜨리던 버그("김하양"의 "양"이 실제 성씨 계열 이름 끝음절인데도 노출)가
+    고쳐졌다 — 이제 이름 전체가 잘리지 않고 탐지된다(회귀 방지)."""
+    detector = NameDetector()
+    yang_found = detector.detect("고객 김하양님께")
+    assert len(yang_found) == 1
+    assert yang_found[0].text == "김하양"
+    assert yang_found[0].confidence == 0.75
+
+    goon_found = detector.detect("환자 박도군 내원")
+    assert len(goon_found) == 1
+    assert goon_found[0].text == "박도군"
+    assert goon_found[0].confidence == 0.5
+
+
+def test_address_bunji_literal_chain_now_detected():
+    """#340(core 대응 완료) — AddressDetector가 번지 숫자 뒤에 "번지"라는 리터럴 글자가
+    실제로 풀어써지면(예: "123번지") 그 다음 건물명·동/호수로 이어지는 체인을 못 이어
+    "번지" 앞까지만 마스킹되고 건물명·호수(세대 특정 정보)가 노출되던 버그가 고쳐졌다 —
+    이제 전체가 하나의 구간으로 정상 탐지된다(회귀 방지).
+
+    이슈 원문 예시는 "서울"(축약형)을 썼는데, 직접 확인해보니 AddressDetector는 축약형
+    시/도명 자체를 인식하지 못해(번지 유무와 무관하게 항상 빈 리스트) 별개의 변수가 섞여
+    있었다 — 이 테스트는 정식 명칭("서울특별시")으로 변수를 하나만 남겨 "번지" 리터럴의
+    영향만 정확히 격리한다."""
+    detector = AddressDetector()
+    # 대조군: "번지" 리터럴 없이 하이픈 표기면 건물명·호수까지 전체가 정상 탐지된다.
+    full = "서울특별시 강남구 역삼동 123-45 삼성빌라 502호"
+    control = detector.detect(full)
+    assert len(control) == 1 and control[0].text == full
+
+    bunji_full = "서울특별시 강남구 역삼동 123번지 삼성빌라 502호"
+    bunji_found = detector.detect(bunji_full)
+    assert len(bunji_found) == 1
+    assert bunji_found[0].text == bunji_full
+    assert bunji_found[0].confidence == 1.0
