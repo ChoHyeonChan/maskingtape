@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 """MCP 도구의 실제 동작 — 순수 함수로 분리해 MCP 런타임 없이도 테스트한다.
 
 server.py는 이 함수들을 MCP 도구로 등록만 한다 (구조 원칙: 노출과 로직 분리).

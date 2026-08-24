@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 """생년월일 탐지기 — 문맥 앵커 + 날짜 유효성 검사.
 
 동작 원리:

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 """단순 마스킹 전략 — 탐지 구간을 마스킹 문자로 치환한다."""
 
 from __future__ import annotations
