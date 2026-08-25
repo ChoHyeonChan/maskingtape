@@ -30,6 +30,10 @@ _GIVEN_SYLLABLES = [
     "민", "서", "지", "하", "은", "도", "현", "우", "준", "아",
     "윤", "율", "찬", "빈", "재", "연", "수", "진", "영", "호",
     "규", "성", "훈", "경", "원", "석", "인", "혜", "정", "예",
+    # #340(core 대응 완료): 이름 끝음절이 "양"·"군"이면 존칭 양보 규칙(_HONORIFIC_TAIL)이
+    # 그 글자를 존칭으로 오인해 이름에서 떼어내던 버그가 있었다 — 그 경계를 실제로
+    # 재측정에서 계속 지키려면 이 두 음절이 이름 끝에 실제로 나와야 한다.
+    "양", "군",
 ]
 
 _ROAD_ADDRESSES = ["테헤란로", "월드컵로", "판교역로", "센텀중앙로", "동성로"]
@@ -79,8 +83,13 @@ _FOREIGN_CENTURY_CODES = {1900: ("5", "6"), 2000: ("7", "8")}
 # 틀리게 만들어, "이 케이스가 존재한다"는 사실 자체를 데이터셋에 반영한다.
 _INVALID_CHECKSUM_RATE = 0.15
 
-_PHONE_SEPARATORS_MIXED = ["-", "-", "-", " ", ".", ""]  # 하이픈이 가장 흔한 표기라 가중치를 둔다.
-_PHONE_SEPARATORS_HARD = ["", ".", " "]  # 하이픈 없는(탐지가 상대적으로 더 까다로운) 표기만.
+# #339(core 대응 완료): rrn.py/phone.py의 구분자 정규식이 `[-.\s–—]{0,3}`로 넓어져 en-dash·
+# em-dash(Word·HWP 자동서식이 하이픈을 바꿔치기)와 "공백-하이픈-공백"·점+공백 조합도 잡는다 —
+# 이 표기들을 실제로 생성해야 재측정에 반영되고, 이후 core가 좁혀지는 회귀도 bench가 잡는다.
+_PHONE_SEPARATORS_MIXED = ["-", "-", "-", " ", ".", "", "–", "—", " - ", ". "]  # 하이픈이 가장 흔한 표기라 가중치를 둔다.
+# " - "(공백-하이픈-공백)는 하이픈을 포함해 "하이픈 없는 표기만"이라는 hard의 불변식과
+# 어긋나므로 MIXED에만 둔다 — en-dash·em-dash·점+공백은 하이픈 문자가 없어 그대로 둔다.
+_PHONE_SEPARATORS_HARD = ["", ".", " ", "–", "—", ". "]  # 하이픈 없는(탐지가 상대적으로 더 까다로운) 표기만.
 # phone.py의 _LANDLINE_RE가 허용하는 지역번호만 나열한다(그 외는 core가 아예 안 잡음).
 _LANDLINE_AREA_CODES = [
     "02",
@@ -90,8 +99,9 @@ _LANDLINE_AREA_CODES = [
     "061", "062", "063", "064",
     "070",
 ]
-_RRN_SEPARATORS_MIXED = ["-", "-", "-", " ", ".", ""]  # '.'도 허용 표기다(#209, rrn.py 참고).
-_RRN_SEPARATORS_HARD = ["", " ", "."]
+_RRN_SEPARATORS_MIXED = ["-", "-", "-", " ", ".", "", "–", "—", " - ", ". "]  # '.'도 허용 표기다(#209, rrn.py 참고).
+# " - "는 하이픈을 포함해 hard의 "하이픈 없는 표기만" 불변식과 어긋나므로 MIXED에만 둔다.
+_RRN_SEPARATORS_HARD = ["", " ", ".", "–", "—", ". "]
 
 # (접두사, 전체 자릿수) — 업계 표준 IIN/BIN 대역만 쓰고 나머지는 난수로 채운다(실제 발급 번호 아님).
 # Visa=4로 시작 16자리, Mastercard=51~55로 시작 16자리, Amex=34/37로 시작 15자리.
@@ -126,21 +136,30 @@ def gen_name(rng: random.Random, difficulty: str = "mixed") -> Entity:
     return Entity(kind="name", text=surname + given)
 
 
+_PHONE_INTL_PREFIX_SEPARATORS = ["", ".", " "]  # hard: 하이픈 없는 표기만(아래 참고).
+
 def gen_phone(rng: random.Random, difficulty: str = "mixed") -> Entity:
     if difficulty == "easy":
         sep = "-"
+        intl_prefix_seps = ["-"]
         variant = rng.choices(["mobile", "landline", "safe050"], weights=[3, 1, 1])[0]
     elif difficulty == "hard":
         sep = rng.choice(_PHONE_SEPARATORS_HARD)
+        intl_prefix_seps = _PHONE_INTL_PREFIX_SEPARATORS  # 하이픈 없는 hard 불변식 유지
         variant = rng.choices(["mobile", "landline", "intl", "safe050"], weights=[4, 2, 3, 2])[0]
     else:
         sep = rng.choice(_PHONE_SEPARATORS_MIXED)
+        intl_prefix_seps = ["-", ".", " ", ""]
         variant = rng.choices(["mobile", "landline", "intl", "safe050"], weights=[6, 2, 1, 1])[0]
 
     mid_len = 4
     if variant == "intl":
-        # 국가번호 표기 (앞자리 0 생략) — PhoneDetector의 +82 분기 커버.
-        prefix = f"+82{sep}1{rng.choice('016789')}"
+        # 국가번호 표기 (앞자리 0 생략) — PhoneDetector의 +82 분기 커버. "+82"와 "1X" 사이는
+        # _MOBILE_RE에서 `[-.\s]?`(단일 문자, #339 확장 전 그대로)로 여전히 좁다 — en-dash·
+        # em-dash·다중문자 sep을 여기 쓰면 그 자체가 미탐이 되니 원래의 좁은 집합만 쓴다.
+        # (뒤이은 mid/last 구간은 아래에서 그대로 확장된 sep을 쓴다 — 그 경계까지 실측한다.)
+        intl_sep = sep if sep in intl_prefix_seps else rng.choice(intl_prefix_seps)
+        prefix = f"+82{intl_sep}1{rng.choice('016789')}"
     elif variant == "landline":
         # 유선전화 — 자택·사무실 번호. 서울(02)은 국번이 3자리인 경우도 흔해 길이를 섞는다.
         prefix = rng.choice(_LANDLINE_AREA_CODES)
@@ -414,7 +433,14 @@ def gen_address(rng: random.Random, difficulty: str = "mixed") -> Entity:
         gu_dong = rng.choice(_GU_DONG)
         bunji = rng.randint(1, 999)
         ho = rng.randint(1, 20)
-        base = f"{city} {gu_dong} {bunji}-{ho}"
+        if rng.random() < 0.3:
+            # #340(core 대응 완료): 번지 숫자 뒤에 "번지"라는 리터럴이 실제로 풀어써지면
+            # (예: "123번지") 그 뒤 건물명·호수로 이어지는 체인이 끊겨 세대정보가 새던
+            # 버그가 있었다 — 이 표기를 실제로 생성해야 재측정이 그 경계를 계속 지킨다.
+            apt = rng.choice(_APARTMENT_NAMES)
+            base = f"{city} {gu_dong} {bunji}번지 {apt}빌라 {ho:03d}호"
+        else:
+            base = f"{city} {gu_dong} {bunji}-{ho}"
     else:  # road
         road = rng.choice(_ROAD_ADDRESSES)
         base = f"{city} {road}{rng.randint(1, 300)}길 {rng.randint(1, 90)}"
