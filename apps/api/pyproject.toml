@@ -14,7 +14,9 @@ requires-python = ">=3.10"
 authors = [{ name = "Team maskingtape" }]
 dependencies = [
   "fastapi>=0.116,<1",
-  "maskingtape",
+  # 0.2.0 미만에는 주민등록번호·전화번호 분리자 변형 미탐(#339)과 이름 끝음절 유출(#340)이
+  # 남아 있다 — 개인정보가 그대로 새는 버전이라 하한을 고정한다.
+  "maskingtape>=0.2.0,<1",
   "pydantic>=2.9,<3",
   "uvicorn>=0.35,<1",
 ]

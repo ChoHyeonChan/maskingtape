@@ -64,8 +64,32 @@ def test_rate_limit_ignores_spoofable_x_forwarded_for() -> None:
     assert response.status_code == 429
 
 
-def test_rate_limit_uses_trusted_platform_client_ip_headers() -> None:
-    client = TestClient(_rate_limited_app(limit=1))
+def test_rate_limit_ignores_client_ip_headers_when_not_configured_as_trusted() -> None:
+    # 기본값(신뢰 헤더 없음)에서는 x-vercel-forwarded-for·x-real-ip도 믿지 않는다 —
+    # 프록시가 덮어써 준다는 보장이 없는 배포(맨 uvicorn 등)에서 이 헤더를 신뢰하면
+    # 값만 바꿔가며 요청해 rate limit을 통째로 우회할 수 있다.
+    for header in ("x-vercel-forwarded-for", "x-real-ip"):
+        client = TestClient(_rate_limited_app(limit=1))
+        body = {"text": "합성 테스트 문장입니다"}
+
+        assert client.post(
+            "/scan",
+            json=body,
+            headers={header: "203.0.113.10"},
+        ).status_code == 200
+        assert client.post(
+            "/scan",
+            json=body,
+            headers={header: "203.0.113.11"},
+        ).status_code == 429
+
+
+def test_rate_limit_uses_client_ip_header_when_configured_as_trusted() -> None:
+    # 신뢰 프록시 뒤(Vercel 등)라고 명시하면 그 헤더로 클라이언트를 구분한다 —
+    # 그래야 한 사용자의 과다 요청이 다른 사용자를 막지 않는다.
+    client = TestClient(
+        _rate_limited_app(limit=1, trusted_client_ip_headers=("x-vercel-forwarded-for",))
+    )
     body = {"text": "합성 테스트 문장입니다"}
 
     assert client.post(
@@ -78,6 +102,12 @@ def test_rate_limit_uses_trusted_platform_client_ip_headers() -> None:
         json=body,
         headers={"x-vercel-forwarded-for": "203.0.113.11"},
     ).status_code == 200
+    # 같은 IP를 다시 쓰면 그 IP의 한도는 그대로 적용된다
+    assert client.post(
+        "/scan",
+        json=body,
+        headers={"x-vercel-forwarded-for": "203.0.113.10"},
+    ).status_code == 429
 
 
 def test_rate_limiter_caps_bucket_count_with_lru_eviction() -> None:
@@ -120,12 +150,16 @@ def test_rate_limit_does_not_apply_to_health_endpoint() -> None:
     assert client.get("/health").status_code == 200
 
 
-def _rate_limited_app(limit: int) -> FastAPI:
+def _rate_limited_app(
+    limit: int,
+    trusted_client_ip_headers: tuple[str, ...] = (),
+) -> FastAPI:
     return create_app(
         settings=ApiSettings(
             cors_allowed_origins=(),
             rate_limit_requests=limit,
             rate_limit_window_seconds=60,
             rate_limit_max_buckets=10,
+            trusted_client_ip_headers=trusted_client_ip_headers,
         )
     )

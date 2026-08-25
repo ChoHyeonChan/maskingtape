@@ -111,7 +111,10 @@ class InMemoryRateLimiter:
 
 def enforce_rate_limit(request: Request) -> None:
     limiter: InMemoryRateLimiter = request.app.state.rate_limiter
-    result = limiter.check(_client_key(request))
+    trusted_headers: tuple[str, ...] = getattr(
+        request.app.state, "trusted_client_ip_headers", ()
+    )
+    result = limiter.check(_client_key(request, trusted_headers))
     if result.allowed:
         return
 
@@ -135,8 +138,15 @@ async def rate_limit_exception_handler(
     )
 
 
-def _client_key(request: Request) -> str:
-    for header in ("x-vercel-forwarded-for", "x-real-ip"):
+def _client_key(request: Request, trusted_headers: tuple[str, ...] = ()) -> str:
+    """rate limit 버킷 키를 고른다 — 신뢰할 수 있다고 설정된 헤더만 본다.
+
+    보안: 클라이언트가 값을 바꿀 수 있는 헤더를 무조건 신뢰하면, 매 요청 헤더만 바꿔
+    새 버킷을 만들어 제한을 통째로 우회할 수 있다. 그래서 목록은 설정에서 받고
+    (기본은 비어 있음), 비어 있으면 위조할 수 없는 TCP 소켓 주소만 쓴다.
+    어떤 헤더를 신뢰할지는 settings._default_trusted_client_ip_headers 참고.
+    """
+    for header in trusted_headers:
         client_ip = _first_header_value(request.headers.get(header))
         if client_ip:
             return client_ip
