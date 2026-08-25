@@ -37,6 +37,8 @@ cd maskingtape && pip install -e "packages/core[dev]"
 pytest packages/core
 ```
 
+> **설치는 항상 개별 패키지 경로로 한다** — 저장소 루트에는 배포용 `[build-system]`이 없어(uv 워크스페이스 전용) `pip install .`은 루트에서 실패한다. 위 예시처럼 `packages/core`, `packages/mcp-server`, `apps/api`를 각각 지정하면 된다.
+
 로컬 LLM 기능은 선택 사항이며 설치 방법은 [packages/core](packages/core)에 있다. 웹 데모는 Node.js 20+, 데스크톱 앱은 Flutter가 추가로 필요하며 각 폴더 README를 참고한다.
 
 현재 탐지(11종): **주민등록번호**(체크섬 검증), **전화번호**(휴대폰·유선·070·050X, +82 표기), **이메일**, **주소**(행정구역·도로명), **신용카드**(Luhn 검증), **계좌번호**, **사업자등록번호**, **여권번호**, **생년월일**, **운전면허번호**, **이름**(규칙 + 로컬 LLM 문맥 판단)
@@ -118,7 +120,7 @@ core [#252](https://github.com/ChoHyeonChan/maskingtape/pull/252)가 고쳤지�
 (negative 문서의 상당수에서 재현) — 그 결과 precision이 규칙판 F1 개선 이전 수준으로 다시
 떨어졌다(precision 0.875) — 남은 과제는 문맥 없는 이름뿐이다:
 
-- **이름** — 한국어 이름은 형태만으로 구분되지 않아 규칙만으로는 문맥 없는 이름을 놓친다. 이것이 **로컬 LLM 하이브리드**(`--llm`)가 필요한 이유이고, 그 효과는 [#46](https://github.com/ChoHyeonChan/maskingtape/issues/46)에서 같은 데이터셋으로 비교 측정한다 — 하이브리드로 켜면 recall이 **0.658 → 0.903**으로 오르고, precision도 규칙판보다 높다(0.875 → 0.944, F1 0.751 → 0.923) — 로컬 Ollama(qwen2.5:7b)로 현재 데이터셋(#315) 재측정, 상세는 [bench/](bench/) 참고.
+- **이름** — 한국어 이름은 형태만으로 구분되지 않아 규칙만으로는 문맥 없는 이름을 놓친다. 이것이 **로컬 LLM 하이브리드**(`--llm`)가 필요한 이유이고, 그 효과는 [#46](https://github.com/ChoHyeonChan/maskingtape/issues/46)에서 같은 데이터셋으로 비교 측정한다 — 하이브리드로 켜면 recall이 **0.658 → 0.906**으로 오르고, precision도 규칙판보다 높다(0.875 → 0.924, F1 0.751 → 0.915) — 로컬 Ollama(qwen2.5:7b)로 현재 데이터셋(#315) 재측정, 상세는 [bench/](bench/) 참고. ※ LLM 판단은 결정적이지 않아 재현 시 소수점 셋째 자리가 흔들릴 수 있다(규칙 전용 지표는 결정적이라 그대로 재현된다).
 
 마스킹 결과에 개인정보가 실제로 남는지도 따로 측정한다 — `python -m bench.evaluators.evaluate_masking bench/datasets/synth_v1.jsonl`. 상세는 [bench/](bench/) 참고.
 
