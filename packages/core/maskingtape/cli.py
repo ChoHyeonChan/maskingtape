@@ -60,6 +60,7 @@ def _read_stdin() -> str:
 
 
 def main() -> int:
+    """CLI 진입점 — 인자를 파싱해 Pipeline을 조립하고, 결과 텍스트(또는 --scan 리포트)를 출력한다."""
     _use_utf8_output()
     parser = argparse.ArgumentParser(
         prog="maskingtape", description="한국어 개인정보 비식별화 엔진"
