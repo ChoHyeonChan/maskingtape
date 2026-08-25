@@ -7,8 +7,39 @@ from maskingtape_api.settings import (
     DEFAULT_RATE_LIMIT_MAX_BUCKETS,
     DEFAULT_RATE_LIMIT_REQUESTS,
     DEFAULT_RATE_LIMIT_WINDOW_SECONDS,
+    PROXY_CLIENT_IP_HEADERS,
     get_api_settings,
 )
+
+
+def test_client_ip_headers_are_not_trusted_by_default(monkeypatch) -> None:
+    # 보안: 프록시가 덮어써 준다는 보장이 없는 환경(맨 uvicorn 등)에서 이 헤더를 신뢰하면
+    # 값만 바꿔가며 rate limit을 우회할 수 있다 — 기본은 아무것도 신뢰하지 않는다.
+    monkeypatch.delenv("VERCEL", raising=False)
+    monkeypatch.delenv("MASKINGTAPE_API_TRUSTED_CLIENT_IP_HEADERS", raising=False)
+
+    assert get_api_settings().trusted_client_ip_headers == ()
+
+
+def test_client_ip_headers_are_trusted_on_vercel_runtime(monkeypatch) -> None:
+    # Vercel은 외부에서 들어온 forwarding 헤더를 플랫폼이 덮어쓰므로(IP 스푸핑 방지)
+    # 거기서는 신뢰해야 사용자별로 제한이 걸린다 — 안 그러면 전원이 한 버킷을 공유한다.
+    monkeypatch.setenv("VERCEL", "1")
+    monkeypatch.delenv("MASKINGTAPE_API_TRUSTED_CLIENT_IP_HEADERS", raising=False)
+
+    assert get_api_settings().trusted_client_ip_headers == PROXY_CLIENT_IP_HEADERS
+
+
+def test_trusted_client_ip_headers_can_be_set_explicitly(monkeypatch) -> None:
+    monkeypatch.delenv("VERCEL", raising=False)
+    monkeypatch.setenv(
+        "MASKINGTAPE_API_TRUSTED_CLIENT_IP_HEADERS",
+        "x-real-ip, cf-connecting-ip",
+    )
+
+    settings = get_api_settings()
+
+    assert settings.trusted_client_ip_headers == ("x-real-ip", "cf-connecting-ip")
 
 
 def test_settings_default_to_local_web_dev_origins(monkeypatch) -> None:

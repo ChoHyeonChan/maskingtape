@@ -38,6 +38,8 @@ $env:MASKINGTAPE_API_RATE_LIMIT_REQUESTS="60"
 $env:MASKINGTAPE_API_RATE_LIMIT_WINDOW_SECONDS="60"
 $env:MASKINGTAPE_API_RATE_LIMIT_MAX_BUCKETS="10000"
 $env:MASKINGTAPE_API_MAX_BODY_BYTES="1000000"
+# 앞단 프록시가 이 헤더를 반드시 덮어써 주는 배포에서만 설정한다(기본: 비어 있음)
+# $env:MASKINGTAPE_API_TRUSTED_CLIENT_IP_HEADERS="x-vercel-forwarded-for,x-real-ip"
 ```
 
 `MASKINGTAPE_API_CORS_ORIGINS` is a comma-separated allowlist. Do not use `*`;
@@ -49,8 +51,18 @@ for local/dev and low-traffic demo protection, but it is not shared across serve
 or horizontally scaled instances. `MASKINGTAPE_API_RATE_LIMIT_MAX_BUCKETS` caps the
 number of tracked client buckets to avoid unbounded memory growth when many distinct
 client keys are presented.
-`MASKINGTAPE_API_MAX_BODY_BYTES` rejects oversized requests from `Content-Length`
-before JSON parsing.
+`MASKINGTAPE_API_MAX_BODY_BYTES` rejects oversized requests before JSON parsing.
+The limit is enforced on the bytes actually received, not just on `Content-Length`,
+so a chunked request that omits the header cannot bypass it.
+
+`MASKINGTAPE_API_TRUSTED_CLIENT_IP_HEADERS` lists the headers the limiter may use to
+identify a client (comma-separated). **It is empty by default and must stay empty unless
+a proxy in front of the app always overwrites those headers** — otherwise a caller can
+rotate the header value on every request and get a fresh bucket each time, which
+disables rate limiting entirely. With no trusted header the limiter falls back to the
+TCP peer address, which cannot be forged. On Vercel the platform overwrites incoming
+forwarding headers to prevent IP spoofing, so the default turns on automatically there
+(detected via the `VERCEL` runtime variable).
 
 헬스체크:
 
