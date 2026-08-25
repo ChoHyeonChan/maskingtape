@@ -202,6 +202,56 @@ def test_rrn_generator_covers_dot_separator():
     assert any("." in s for s in samples)  # 점 구분자가 실제로 나온다
 
 
+def test_rrn_generator_covers_339_separator_variants():
+    """#339(core 대응 완료): en-dash·em-dash·"공백-하이픈-공백"·"점+공백" 구분자도 실제로
+    나오고, core RRNDetector가 정확히 한 건으로 잡아야 한다 — #339 이전에는 이 표기들이
+    전부 통째로 미탐(유출)이었다."""
+    rng = random.Random(60)
+    detector = RRNDetector()
+    samples = []
+    for _ in range(500):
+        entity = generate_entity("rrn", rng, difficulty="mixed")
+        found = detector.detect(entity.text)
+        assert len(found) == 1, f"탐지 실패: {entity.text!r}"
+        assert found[0].text == entity.text
+        samples.append(entity.text)
+    assert any("–" in s for s in samples)  # en-dash
+    assert any("—" in s for s in samples)  # em-dash
+    assert any(" - " in s for s in samples)  # 공백-하이픈-공백
+    assert any(". " in s for s in samples)  # 점+공백
+
+
+def test_phone_generator_covers_339_separator_variants():
+    """#339(core 대응 완료): 전화번호도 RRN과 같은 확장된 구분자 표기를 지원한다 — 단
+    "+82"와 "1X" 사이는 core의 `_MOBILE_RE`가 여전히 단일 문자(`[-.\\s]?`)만 허용해서
+    (아래 별도 테스트로 이 경계를 고정) intl 표기의 국가번호 구간에는 이 확장 구분자를
+    쓰지 않는다."""
+    rng = random.Random(61)
+    detector = PhoneDetector()
+    samples = []
+    for _ in range(500):
+        entity = generate_entity("phone", rng, difficulty="mixed")
+        found = detector.detect(entity.text)
+        assert len(found) == 1, f"탐지 실패: {entity.text!r}"
+        assert found[0].text == entity.text
+        samples.append(entity.text)
+    assert any("–" in s for s in samples)  # en-dash
+    assert any(" - " in s for s in samples)  # 공백-하이픈-공백
+
+
+def test_phone_intl_prefix_separator_stays_within_narrow_set():
+    """#339: "+82"와 "1X" 사이 구분자는 core `_MOBILE_RE`에서 여전히 단일 문자
+    (`[-.\\s]?`)만 허용한다(뒤이은 mid/last 구간과 달리 확장되지 않음) — 여기 en-dash 같은
+    확장 구분자를 실수로 쓰면 그 자체가 미탐이 되므로, "+82" 바로 뒤 문자가 항상 좁은
+    집합(하이픈/점/공백/없음) 안에 있는지 고정해둔다."""
+    rng = random.Random(62)
+    for _ in range(500):
+        entity = generate_entity("phone", rng, difficulty="mixed")
+        if entity.text.startswith("+82"):
+            after_82 = entity.text[3]
+            assert after_82 in "1-. ", f"+82 뒤 구분자가 확장 문자로 샘: {entity.text!r}"
+
+
 def test_address_generator_covers_road_and_jibun_styles():
     """지번 주소(예: 강남구 역삼동 12-3)와 도로명 주소(예: 테헤란로12길 3)가 둘 다 나오는지 확인한다."""
     rng = random.Random(12)
@@ -262,6 +312,24 @@ def test_address_generator_covers_partial_style():
     assert partial_count > 0  # 부분 주소가 실제로 나온다
     assert 0.5 in confidences  # 시/도만 — 최저 확신도
     assert 0.65 in confidences  # 시/도+구 — 그 다음 확신도
+
+
+def test_address_generator_covers_bunji_literal_style():
+    """#340(core 대응 완료): 번지 숫자 뒤에 "번지"라는 리터럴이 실제로 풀어써진 표기도
+    나오고, core가 건물명·호수까지 체인을 안 끊고 전체를 한 건으로 잡아야 한다 — #340
+    이전에는 "번지" 뒤 건물명·호수(세대 특정 정보)가 그대로 노출됐다."""
+    rng = random.Random(63)
+    detector = AddressDetector()
+    bunji_count = 0
+    for _ in range(500):
+        entity = generate_entity("address", rng, difficulty="easy")
+        if "번지" not in entity.text:
+            continue
+        bunji_count += 1
+        found = detector.detect(entity.text)
+        assert len(found) == 1, f"탐지 실패(체인 끊김 의심): {entity.text!r} -> {found!r}"
+        assert found[0].text == entity.text
+    assert bunji_count > 0  # "번지" 리터럴 표기가 실제로 나온다
 
 
 def test_bare_province_before_copula_ending_is_detected():
@@ -802,6 +870,22 @@ def test_phone_separator_variants_partially_fixed_by_339():
     assert detector.detect("연락 (010) 1234-5678") == [], (
         "기대: 아직 미탐(유출) — 지역번호 괄호 표기까지 고쳤다면 이 테스트를 갱신할 것"
     )
+
+
+def test_name_generator_covers_yang_gun_endings():
+    """#340(core 대응 완료): 이름 끝음절이 "양"·"군"인 경우도 실제로 나오고, 존칭이 공백
+    없이 바로 붙는 문서(예: "고객 {name}님께")에서 core가 이름 전체를 잘리지 않고 잡아야
+    한다 — #340 이전에는 이 마지막 글자가 존칭으로 오인돼 노출됐다."""
+    rng = random.Random(64)
+    samples = [generate_entity("name", rng).text for _ in range(2000)]
+    yang_or_gun = [s for s in samples if s.endswith(("양", "군"))]
+    assert yang_or_gun  # "양"/"군"으로 끝나는 이름이 실제로 나온다
+
+    detector = NameDetector()
+    for name in yang_or_gun[:50]:  # 전수 검사는 느리니 표본만
+        text = f"고객 {name}님께"
+        found = detector.detect(text)
+        assert len(found) == 1 and found[0].text == name, f"탐지 실패(끝음절 유실 의심): {text!r} -> {found!r}"
 
 
 def test_name_honorific_tail_yang_or_gun_no_longer_leaks_last_syllable():
