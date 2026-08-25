@@ -65,7 +65,7 @@ python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl
 
 합성 데이터셋(500건)도 시드로 고정돼 있어 바이트 단위로 똑같이 재생성된다 — `python -m bench.generate_dataset --count 500 --seed 42 --out bench/datasets/synth_v1.jsonl`
 
-**측정 기준: `25c9ea7` · 규칙 전용 모드(LLM 미사용)**
+**측정 기준: #370 병합 시점 main · 규칙 전용 모드(LLM 미사용)** — #339/#340이 추가한 표기 변형(en-dash·"공백-하이픈-공백"·"번지" 리터럴·양/군 끝음절)이 데이터셋에 반영된 재측정값이다
 
 | 종류 | precision | recall | F1 |
 |---|---|---|---|
@@ -79,8 +79,8 @@ python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl
 | 계좌번호 | 1.000 | 1.000 | 1.000 |
 | 생년월일 | 1.000 | 1.000 | 1.000 |
 | 운전면허번호 | 1.000 | 1.000 | 1.000 |
-| 이름 (규칙 전용) | 0.875 | 0.658 | 0.751 |
-| **전체** | **0.961** | **0.872** | **0.915** |
+| 이름 (규칙 전용) | 0.859 | 0.668 | 0.752 |
+| **전체** | **0.954** | **0.872** | **0.911** |
 
 번호·카드·사업자등록번호·여권번호·계좌번호·생년월일은 형태(와 있는 경우 체크섬)로 완전히
 잡힌다(유선전화·plus 이메일·서브도메인·여러 문장으로 구성된 복합 문서까지 섞어도 흔들리지
@@ -118,9 +118,9 @@ core [#252](https://github.com/ChoHyeonChan/maskingtape/pull/252)가 고쳤지�
 — 하드코딩 5개 부서어만 막는 방식이라, 그 밖의 흔한 업무어("차량"/"허가" 등)는
 [#255](https://github.com/ChoHyeonChan/maskingtape/issues/255)에서 여전히 뚫리는 걸 확인했다
 (negative 문서의 상당수에서 재현) — 그 결과 precision이 규칙판 F1 개선 이전 수준으로 다시
-떨어졌다(precision 0.875) — 남은 과제는 문맥 없는 이름뿐이다:
+떨어졌다(precision 0.859) — 남은 과제는 문맥 없는 이름뿐이다:
 
-- **이름** — 한국어 이름은 형태만으로 구분되지 않아 규칙만으로는 문맥 없는 이름을 놓친다. 이것이 **로컬 LLM 하이브리드**(`--llm`)가 필요한 이유이고, 그 효과는 [#46](https://github.com/ChoHyeonChan/maskingtape/issues/46)에서 같은 데이터셋으로 비교 측정한다 — 하이브리드로 켜면 recall이 **0.658 → 0.906**으로 오르고, precision도 규칙판보다 높다(0.875 → 0.924, F1 0.751 → 0.915) — 로컬 Ollama(qwen2.5:7b)로 현재 데이터셋(#315) 재측정, 상세는 [bench/](bench/) 참고. ※ LLM 판단은 결정적이지 않아 재현 시 소수점 셋째 자리가 흔들릴 수 있다(규칙 전용 지표는 결정적이라 그대로 재현된다).
+- **이름** — 한국어 이름은 형태만으로 구분되지 않아 규칙만으로는 문맥 없는 이름을 놓친다. 이것이 **로컬 LLM 하이브리드**(`--llm`)가 필요한 이유이고, 그 효과는 [#46](https://github.com/ChoHyeonChan/maskingtape/issues/46)에서 같은 데이터셋으로 비교 측정한다 — 하이브리드로 켜면 recall이 **0.668 → 0.927**로 오르고, precision도 규칙판보다 높다(0.859 → 0.920, F1 0.752 → 0.923) — 로컬 Ollama(qwen2.5:7b)로 현재 데이터셋(#339/#340 반영본) 재측정, 상세는 [bench/](bench/) 참고. ※ LLM 판단은 결정적이지 않아 재현 시 소수점 셋째 자리가 흔들릴 수 있다(규칙 전용 지표는 결정적이라 그대로 재현된다).
 
 마스킹 결과에 개인정보가 실제로 남는지도 따로 측정한다 — `python -m bench.evaluators.evaluate_masking bench/datasets/synth_v1.jsonl`. 상세는 [bench/](bench/) 참고.
 
