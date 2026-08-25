@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "maskingtape"
-version = "0.1.0"
+version = "0.2.0"
 description = "한국어 개인정보 비식별화 엔진 — 규칙 + 로컬 LLM 하이브리드 PII 탐지·마스킹"
 readme = "README.md"
 license = { text = "Apache-2.0" }
