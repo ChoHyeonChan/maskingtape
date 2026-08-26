@@ -96,4 +96,12 @@ describe("AppHeader accuracy bubble (도움말 옆에 잠깐 뜨는 정확도 �
 
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
+
+  it("hides while the coachmark overlay is active, since both use the same red dismiss-hint styling and clash", () => {
+    const { rerender } = render(<AppHeader onHelpClick={() => {}} coachMarkActive={true} />);
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+
+    rerender(<AppHeader onHelpClick={() => {}} coachMarkActive={false} />);
+    expect(screen.getByRole("status")).toBeInTheDocument();
+  });
 });

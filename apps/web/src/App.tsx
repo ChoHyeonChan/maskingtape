@@ -70,7 +70,11 @@ export function App() {
 
   return (
     <div className="app-shell">
-      <AppHeader onHelpClick={openCoachMark} hasResult={Boolean(scanned)} />
+      <AppHeader
+        onHelpClick={openCoachMark}
+        hasResult={Boolean(scanned)}
+        coachMarkActive={coachMarkVariant !== null}
+      />
 
       <div className="privacy-note" role="note" aria-label="개인정보 입력 주의 안내">
         <span className="privacy-note__icon" aria-hidden="true">▣</span>
