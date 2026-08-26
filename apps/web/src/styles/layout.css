@@ -287,40 +287,6 @@
   color: #0b55f0;
 }
 
-/* 배포판은 규칙 전용이라 문맥 단서 없는 이름 일부를 놓친다 — 로컬 LLM(--llm)으로 정확도가
-   오른다는 걸 알려서, 정확도를 더 원하는 사용자가 다음 행동(로컬 설치)을 알 수 있게 한다(#236). */
-.accuracy-note {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-  margin-top: 1rem;
-  padding: 0.55rem 0.9rem;
-  border-top: 1px solid var(--border);
-  color: var(--text-secondary);
-  font-size: 0.84rem;
-  line-height: 1.5;
-}
-
-.accuracy-note strong {
-  color: var(--text-primary);
-}
-
-.accuracy-note a {
-  color: var(--brand-blue);
-  font-weight: 700;
-}
-
-.accuracy-note code {
-  padding: 0.05rem 0.32rem;
-  border-radius: 4px;
-  background: var(--surface-strong);
-  font-size: 0.9em;
-}
-
-.accuracy-note__icon {
-  flex: 0 0 auto;
-}
-
 @media (max-width: 900px) {
   html,
   body,
