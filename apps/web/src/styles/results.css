@@ -100,35 +100,6 @@
   padding: 0.75rem 0;
 }
 
-/* 가명처리(pseudonym)는 항목별 조정이 없어(#346) DetectionList 대신 안내만 보여준다. */
-.pseudonym-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
-
-.pseudonym-note {
-  margin: 0;
-  padding: 0.68rem 0.8rem;
-  border: 1px solid rgba(24, 58, 139, 0.16);
-  border-radius: 8px;
-  background: #f8faff;
-  color: var(--text-secondary);
-  font-size: 0.86rem;
-  line-height: 1.5;
-}
-
-.pseudonym-status {
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: 0.86rem;
-}
-
-.pseudonym-status--error {
-  color: var(--kind-address);
-  font-weight: 600;
-}
-
 .detect__bulk {
   display: flex;
   align-items: center;
