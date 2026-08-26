@@ -1,7 +1,10 @@
 import { KIND_LABELS } from "../types/detection";
 import type { Detection } from "../types/detection";
 
-export type MaskMode = "mask" | "label";
+// pseudonym(가명처리)은 core의 "그럴듯한 가짜 값" 생성 로직이 필요해 클라이언트에서
+// 계산할 수 없다 — /anonymize API 호출로만 얻는다(#346). 이 파일의 함수들은 mask/label
+// 전용이고, pseudonym은 ResultsPanel이 이 경로를 타지 않고 API 결과를 직접 사용한다.
+export type MaskMode = "mask" | "label" | "pseudonym";
 
 /**
  * 탐지 구간을 별표(mask) 또는 종류 라벨(label, 예: "[전화번호]")로 치환한다(#277).
