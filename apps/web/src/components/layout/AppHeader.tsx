@@ -3,11 +3,12 @@ import { useEffect, useRef, useState } from "react";
 interface Props {
   onHelpClick: () => void;
   hasResult?: boolean;
+  coachMarkActive?: boolean;
 }
 
 const ACCURACY_BUBBLE_TIMEOUT_MS = 30_000;
 
-export function AppHeader({ onHelpClick, hasResult = false }: Props) {
+export function AppHeader({ onHelpClick, hasResult = false, coachMarkActive = false }: Props) {
   // 정확도 안내(예전엔 맨 아래 footer에만 있었다)를 도움말 버튼 옆에도 잠깐 띄워서, 처음
   // 쓰는 사람이 스크롤해서 맨 아래까지 안 내려도 "규칙 기반이라 이름을 놓칠 수 있다"는 걸
   // 바로 알게 한다. 예전엔 아무 데나 클릭해도 닫혔는데, 그러면 텍스트를 입력하거나 탐지
@@ -56,7 +57,10 @@ export function AppHeader({ onHelpClick, hasResult = false }: Props) {
           i
         </button>
 
-        {showAccuracyBubble && (
+        {/* 코치마크 오버레이가 떠 있는 동안엔 숨긴다 — 코치마크의 빨간 "아무 데나 누르면
+            닫힙니다" 힌트와 이 말풍선이 같은 배색이라 겹쳐 보이면 서로 다른 안내인지
+            구분이 안 된다. 코치마크가 닫히면 남은 타이머·닫기 상태 그대로 다시 보인다. */}
+        {showAccuracyBubble && !coachMarkActive && (
           <div className="accuracy-bubble" role="status">
             <button
               type="button"
