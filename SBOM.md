@@ -21,7 +21,7 @@
 | 13 | @types/node, @types/react, @types/react-dom | 26.1.1 / 19.2.17 / 19.2.3 | MIT | https://github.com/DefinitelyTyped/DefinitelyTyped | (개발 도구) TypeScript 타입 선언 |
 | 14 | cp949_codec | ^1.0.2 | BSD-3-Clause | https://github.com/letyletylety/cp949_codec | 데스크톱 앱 — CP949(EUC-KR) 텍스트 파일 읽기 폴백 (순수 Dart) |
 | 15 | file_selector | ^1.1.0 | BSD-3-Clause | https://github.com/flutter/packages/tree/main/packages/file_selector/file_selector | 데스크톱 앱 — OS 파일 선택 대화상자 (Flutter 공식 플러그인) |
-| 16 | Ollama | 0.32.1 | MIT | https://github.com/ollama/ollama | 로컬 LLM 실행 런타임 — 코어 `--llm` 이름 탐지에 사용 (**선택 의존성**: 없어도 규칙 탐지는 동작) |
+| 16 | Ollama | 0.32.15 | MIT | https://github.com/ollama/ollama | 로컬 LLM 실행 런타임 — 코어 `--llm` 이름 탐지에 사용 (**선택 의존성**: 없어도 규칙 탐지는 동작) |
 | 17 | Qwen2.5-7B-Instruct (AI 모델) | qwen2.5:7b | Apache-2.0 | https://github.com/QwenLM/Qwen2.5 | 이름(인명) 문맥 판단용 오픈웨이트 모델 — **로컬 실행 전용, 외부 API 호출 없음** |
 | 18 | FastAPI | >=0.116,<1 | MIT | https://github.com/fastapi/fastapi | API 서버 프레임워크 — 웹·데스크톱 공용 REST 엔드포인트 제공 |
 | 19 | Uvicorn | >=0.35,<1 | BSD-3-Clause | https://github.com/encode/uvicorn | API 서버 실행용 ASGI 서버 |

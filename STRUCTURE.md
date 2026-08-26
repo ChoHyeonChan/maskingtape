@@ -20,15 +20,16 @@
 |---|---|---|
 | **apps/web** (프론트) | `components/{help, input, layout, results}` | 화면 **역할**별 |
 | **apps/desktop** (Flutter) | `lib/{models, services, screens, widgets}` | **레이어**별 |
-| **packages/core** (엔진) | `detectors/{identity, contact, financial, personal}` | 개인정보 **도메인**별 |
+| **packages/core** (엔진) | `detectors/{identity, contact, financial, business, personal}` | 개인정보 **도메인**별 |
 
 예를 들어 `core`의 탐지기는 개인정보보호법 분류에 맞춰 묶었습니다:
 ```
 detectors/
-  identity/    # 고유식별정보 — rrn.py (주민등록번호)
+  identity/    # 고유식별정보 — rrn.py, passport.py, driver_license.py
   contact/     # 연락처 — phone.py, email.py
-  financial/   # 금융정보 — creditcard.py
-  personal/    # 인적·신상 — name.py, name_llm.py, address.py
+  financial/   # 금융정보 — creditcard.py, account.py
+  business/    # 사업자 — business_registration.py
+  personal/    # 인적·신상 — name.py, name_llm.py, address.py, birthdate.py
 ```
 → 폴더만 봐도 "우리가 어떤 개인정보를 다루는지"가 읽힙니다.
 

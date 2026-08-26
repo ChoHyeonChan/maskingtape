@@ -29,7 +29,7 @@ maskingtape --help                                # 이게 나오면 준비 완�
 ```
 
 ```powershell
-# 또는 REST API 서버 — mask·label만 (가명처리·이름 정밀 탐지는 CLI 전용)
+# 또는 REST API 서버 — mask·label·pseudonym (이름 정밀 탐지는 CLI 전용)
 pip install -e packages/core
 pip install -e "apps/api[dev]"
 python -m uvicorn maskingtape_api.main:app --host 127.0.0.1 --port 8000
@@ -104,7 +104,7 @@ test/
 
 순서를 이렇게 둔 이유:
 
-- 로컬 CLI는 기능이 온전하다 — 가명처리(`pseudonym`)와 이름 정밀 탐지(LLM)는 **API가 지원하지 않는다**(배포판은 규칙 기반 탐지만 제공하고 strategy도 mask·label 두 가지뿐). 텍스트가 이 PC를 벗어나지도 않는다.
+- 로컬 CLI는 기능이 온전하다 — 가명처리(`pseudonym`)는 #309 이후 API도 지원하지만, **이름 정밀 탐지(LLM)는 여전히 CLI 전용**이다(배포 API는 규칙 기반 탐지만 제공한다). 텍스트가 이 PC를 벗어나지도 않는다.
 - CLI를 설치하지 않은 PC에서도 앱이 그냥 동작해야 한다 — 설치 없이 실행하는 배포판·시연 상황.
 
 백엔드를 넘기는 건 **닿지 못했을 때뿐**이다(`AnonymizerUnavailableException` — CLI가 PATH에 없거나 API 서버가 안 떠 있음). 처리 중 발생한 오류(예: Ollama 미실행)는 백엔드를 바꿔도 같은 결과라 그대로 보여준다 — 넘기면 원인만 가려진다.

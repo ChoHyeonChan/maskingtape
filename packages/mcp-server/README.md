@@ -10,7 +10,7 @@ AI 에이전트가 한국어 데이터를 다루기 전에 거치는 **프라이
 | 도구 | 역할 |
 |---|---|
 | `scan_text(text)` | 개인정보 탐지 리포트 반환 (종류·위치·확신도 — **원문 값은 싣지 않음**) |
-| `anonymize_text(text, strategy)` | 비식별화된 텍스트 반환 — `mask`(\*로 가림) / `label`([전화번호] 치환) |
+| `anonymize_text(text, strategy)` | 비식별화된 텍스트 반환 — `mask`(\*로 가림) / `label`([전화번호] 치환) / `pseudonym`(그럴듯한 가짜 값으로 치환) |
 | `anonymize_file(path, strategy)` | 로컬 텍스트 파일을 `<이름>_masked.<확장자>`로 저장 |
 
 **파일 접근 안전**: `anonymize_file`은 **허용 루트 안의 경로만** 읽고 쓴다(기본=서버 작업 디렉터리,

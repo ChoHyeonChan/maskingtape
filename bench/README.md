@@ -13,7 +13,7 @@
 
 ```
 generator/
-  entities.py     # 종류별 합성 값 생성 (name/phone/email/rrn/address/card/biz_reg/passport/account)
+  entities.py     # 종류별 합성 값 생성 (name/phone/email/rrn/address/card/biz_reg/passport/account/birth_date/driver_license)
   distractors.py  # 개인정보가 아닌 '헷갈리는' 값 생성 (오탐 측정용)
   documents.py    # 문장 템플릿에 값을 심어 문서 + 라벨(span) 생성
 generate_dataset.py  # CLI — JSONL 데이터셋 생성

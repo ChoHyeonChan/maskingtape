@@ -5,6 +5,8 @@
 한국어 문서·데이터셋에서 개인정보(주민등록번호·전화번호·주소·이름 등)를 탐지해 마스킹·가명처리하는 **Python 라이브러리 + CLI + MCP 서버**.
 AI 에이전트가 한국어 데이터를 다루기 전에 거치는 **프라이버시 계층**을 목표로 한다.
 
+**[라이브 데모](https://maskingtape-lilac.vercel.app)** · **[PyPI](https://pypi.org/project/maskingtape/)** (`pip install maskingtape`) · **[개발 로드맵](ROADMAP.md)** · **[기여 가이드](CONTRIBUTING.md)**
+
 **2026 오픈소스 개발자대회**(과학기술정보통신부 주최·NIPA 주관) 출품작 — 팀 **마스킹테이프** · Apache-2.0
 
 ## 왜 maskingtape인가
@@ -133,7 +135,7 @@ pip install -e packages/core -e packages/mcp-server
 claude mcp add maskingtape -- maskingtape-mcp      # Claude Code 등록
 ```
 
-제공 도구: `scan_text`(탐지 리포트), `anonymize_text`(mask/label 비식별화), `anonymize_file`(로컬 파일을 통째로 비식별화해 사본 저장). 상세: [packages/mcp-server](packages/mcp-server)
+제공 도구: `scan_text`(탐지 리포트), `anonymize_text`(mask/label/pseudonym 비식별화), `anonymize_file`(로컬 파일을 통째로 비식별화해 사본 저장). 상세: [packages/mcp-server](packages/mcp-server)
 
 ## 저장소 구조
 
@@ -150,7 +152,23 @@ flowchart TD
     bench["bench: 합성 벤치마크"] -.->|정확도 측정| core
 ```
 
-> 웹·데스크톱은 통합 전까지 `apps/api` 대신 core CLI를 직접 호출한다(같은 엔진).
+> 웹은 `apps/api`를 거쳐 동작한다. 데스크톱은 로컬 CLI를 우선 쓰고, CLI가 없으면 `apps/api`로 넘어간다.
+> **로컬에서 웹을 띄울 때는 API 백엔드도 함께 띄워야 한다** — 아래 [웹 플레이그라운드 로컬 실행](#웹-플레이그라운드-로컬-실행) 참고.
+
+### 웹 플레이그라운드 로컬 실행
+
+웹은 `/api`를 REST 백엔드로 프록시한다. **터미널 두 개**가 필요하다.
+
+```bash
+# 터미널 1 — API 백엔드 (기본 포트 8000)
+pip install -e "packages/core" -e "apps/api"
+python -m uvicorn maskingtape_api.main:app --app-dir apps/api --port 8000
+
+# 터미널 2 — 웹
+cd apps/web && npm install && npm run dev      # http://localhost:5173
+```
+
+다른 포트에 API를 띄웠다면 `VITE_API_TARGET`으로 알려준다 (예: `VITE_API_TARGET=http://127.0.0.1:8001 npm run dev`).
 
 | 경로 | 내용 | 담당 |
 |---|---|---|
