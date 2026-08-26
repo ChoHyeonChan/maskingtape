@@ -1,4 +1,4 @@
-import type { ScanResponse } from "../types/detection";
+import type { AnonymizeResponse, ScanResponse } from "../types/detection";
 
 interface ApiErrorBody {
   code?: string;
@@ -40,4 +40,12 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
  */
 export function scanText(text: string): Promise<ScanResponse> {
   return postJson<ScanResponse>("/api/scan", { text });
+}
+
+/**
+ * pseudonym(가명처리)처럼 core의 값 생성 로직이 필요해 클라이언트에서 계산할 수 없는
+ * 전략은 /anonymize를 직접 호출해 이미 치환된 text를 받는다(#346).
+ */
+export function anonymizeText(text: string, strategy: "mask" | "label" | "pseudonym"): Promise<AnonymizeResponse> {
+  return postJson<AnonymizeResponse>("/api/anonymize", { text, strategy });
 }

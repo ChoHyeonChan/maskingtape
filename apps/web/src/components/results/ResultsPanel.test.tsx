@@ -1,7 +1,18 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { ResultsPanel } from "./ResultsPanel";
+import { anonymizeText } from "../../api/scanClient";
 import type { Detection } from "../../types/detection";
+
+vi.mock("../../api/scanClient", () => ({
+  anonymizeText: vi.fn(),
+}));
+
+const mockAnonymizeText = vi.mocked(anonymizeText);
+
+afterEach(() => {
+  mockAnonymizeText.mockReset();
+});
 
 const name: Detection = { kind: "name", start: 0, end: 3, confidence: 0.9, detector: "T" };
 const phone: Detection = { kind: "phone", start: 4, end: 17, confidence: 0.4, detector: "T" };
@@ -218,5 +229,89 @@ describe("ResultsPanel reports a highlight range for the left panel on row hover
     );
 
     expect(onHighlightChange).toHaveBeenCalledWith(null);
+  });
+});
+
+describe("ResultsPanel pseudonym mode (#346)", () => {
+  it("does not call the API in mask/label mode", () => {
+    render(<ResultsPanel scanned={scanned} scanRun={1} maskMode="mask" onMaskedTextChange={() => {}} />);
+    expect(mockAnonymizeText).not.toHaveBeenCalled();
+  });
+
+  it("requests the pseudonymized text from the API and reports it once it resolves", async () => {
+    mockAnonymizeText.mockResolvedValue({
+      text: "고객 김서준 010-8842-1097",
+      detections: [name, phone],
+    });
+    const onMaskedTextChange = vi.fn();
+
+    render(
+      <ResultsPanel scanned={scanned} scanRun={1} maskMode="pseudonym" onMaskedTextChange={onMaskedTextChange} />,
+    );
+
+    expect(mockAnonymizeText).toHaveBeenCalledWith("김철수 010-1234-5678", "pseudonym");
+    expect(screen.getByRole("status")).toHaveTextContent("가명처리 결과를 불러오는 중");
+
+    await waitFor(() => expect(onMaskedTextChange).toHaveBeenLastCalledWith("고객 김서준 010-8842-1097"));
+
+    // 항목별 조정 목록(mask/label 전용)은 이 모드에서 렌더되지 않는다.
+    expect(screen.queryByRole("spinbutton", { name: "확신도 임계값" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("switch")).not.toBeInTheDocument();
+  });
+
+  it("shows the server's error message and reports empty text when the request fails", async () => {
+    mockAnonymizeText.mockRejectedValue(new Error("가명처리 엔진 호출에 실패했습니다."));
+    const onMaskedTextChange = vi.fn();
+
+    render(
+      <ResultsPanel scanned={scanned} scanRun={1} maskMode="pseudonym" onMaskedTextChange={onMaskedTextChange} />,
+    );
+
+    await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("가명처리 엔진 호출에 실패했습니다."));
+    expect(onMaskedTextChange).toHaveBeenLastCalledWith("");
+  });
+
+  it("clears any hover highlight left over from mask/label mode when switching to pseudonym", async () => {
+    mockAnonymizeText.mockResolvedValue({ text: "가명 처리된 문장", detections: [] });
+    const onHighlightChange = vi.fn();
+
+    const { rerender } = render(
+      <ResultsPanel
+        scanned={scanned}
+        scanRun={1}
+        maskMode="mask"
+        onMaskedTextChange={() => {}}
+        onHighlightChange={onHighlightChange}
+      />,
+    );
+    fireEvent.mouseEnter(rowFor("김철수"));
+    onHighlightChange.mockClear();
+
+    rerender(
+      <ResultsPanel
+        scanned={scanned}
+        scanRun={1}
+        maskMode="pseudonym"
+        onMaskedTextChange={() => {}}
+        onHighlightChange={onHighlightChange}
+      />,
+    );
+
+    expect(onHighlightChange).toHaveBeenCalledWith(null);
+  });
+
+  it("re-fetches when a new scan arrives while already in pseudonym mode", async () => {
+    mockAnonymizeText.mockResolvedValue({ text: "첫 번째 가명 결과", detections: [] });
+    const { rerender } = render(
+      <ResultsPanel scanned={scanned} scanRun={1} maskMode="pseudonym" onMaskedTextChange={() => {}} />,
+    );
+    await waitFor(() => expect(mockAnonymizeText).toHaveBeenCalledTimes(1));
+
+    const nextScan = { text: "다른 문장 010-9999-8888", detections: [phone] };
+    mockAnonymizeText.mockResolvedValue({ text: "두 번째 가명 결과", detections: [] });
+    rerender(<ResultsPanel scanned={nextScan} scanRun={2} maskMode="pseudonym" onMaskedTextChange={() => {}} />);
+
+    await waitFor(() => expect(mockAnonymizeText).toHaveBeenCalledTimes(2));
+    expect(mockAnonymizeText).toHaveBeenLastCalledWith("다른 문장 010-9999-8888", "pseudonym");
   });
 });
