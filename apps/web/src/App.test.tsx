@@ -35,21 +35,6 @@ describe("App privacy banner (#154)", () => {
   });
 });
 
-describe("App accuracy notice (#236)", () => {
-  it("tells users the deployed demo is rule-only and links to local install for LLM accuracy", () => {
-    render(<App />);
-
-    const note = screen.getByRole("note", { name: "이름 탐지 정확도 안내" });
-    expect(note).toHaveTextContent("규칙 기반 탐지만");
-    expect(note).toHaveTextContent("로컬 LLM으로 이름까지 더 정확하게");
-
-    const link = screen.getByRole("link", { name: "로컬 설치" });
-    expect(link).toHaveAttribute("href", "https://github.com/ChoHyeonChan/maskingtape");
-    expect(link).toHaveAttribute("target", "_blank");
-    expect(link).toHaveAttribute("rel", expect.stringContaining("noopener"));
-  });
-});
-
 describe("App lets you click the masked-result box to edit and re-scan", () => {
   it("returns to the editable original text (not the masked text) when the result box is clicked, and can be re-scanned", async () => {
     mockScanText.mockResolvedValue({

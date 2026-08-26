@@ -109,18 +109,6 @@ export function App() {
         />
       </main>
 
-      <footer className="accuracy-note" role="note" aria-label="이름 탐지 정확도 안내">
-        <span className="accuracy-note__icon" aria-hidden="true">ⓘ</span>
-        <span>
-          이 웹 데모는 <strong>규칙 기반 탐지만</strong> 사용합니다. 문맥 단서가 없는 이름 일부는 놓칠 수
-          있어요 —{" "}
-          <a href="https://github.com/ChoHyeonChan/maskingtape" target="_blank" rel="noopener noreferrer">
-            로컬 설치
-          </a>{" "}
-          후 <code>--llm</code> 옵션을 쓰면 로컬 LLM으로 이름까지 더 정확하게 탐지합니다.
-        </span>
-      </footer>
-
       {coachMarkVariant && <CoachMark variant={coachMarkVariant} onDismiss={dismissCoachMark} />}
     </div>
   );

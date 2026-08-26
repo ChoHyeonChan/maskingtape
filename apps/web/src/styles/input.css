@@ -122,7 +122,7 @@
   z-index: 1;
   margin: 0;
   padding: 1.45rem 1.55rem 3.45rem;
-  border: 1px solid transparent;
+  border: 1.5px solid transparent;
   color: var(--text-primary);
   font: inherit;
   line-height: normal;
@@ -154,7 +154,10 @@
   z-index: 0;
   margin: 0;
   padding: 0.35rem 0.25rem 0.6rem;
-  border: 1px solid transparent;
+  /* border-box라 border 두께가 곧 콘텐츠 폭에 영향을 준다 — 실제 결과 textarea(1.5px,
+     색만 투명하게 바뀜)와 여기 두께가 다르면(예전엔 1px) 두 요소의 줄바꿈 위치가
+     미묘하게 갈라져, 문서가 길어질수록 형광펜(mark)이 실제 글자와 어긋나 보였다. */
+  border: 1.5px solid transparent;
   color: transparent;
   font: inherit;
   line-height: normal;
