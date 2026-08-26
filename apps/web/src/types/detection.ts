@@ -11,12 +11,6 @@ export interface ScanResponse {
   detections: Detection[];
 }
 
-/** POST /anonymize 응답 — strategy에 따라 비식별화까지 끝난 text를 함께 돌려준다(#346). */
-export interface AnonymizeResponse {
-  text: string;
-  detections: Detection[];
-}
-
 export const KIND_LABELS: Record<string, string> = {
   rrn: "주민등록번호",
   passport: "여권번호",
