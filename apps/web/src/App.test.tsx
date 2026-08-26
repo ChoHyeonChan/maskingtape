@@ -17,13 +17,12 @@ beforeEach(() => {
 });
 
 describe("App privacy banner (#154)", () => {
-  it("always shows a privacy note warning against real personal data and describing local, unsaved processing", () => {
+  it("always shows a privacy note warning against real personal data and recommending local install", () => {
     render(<App />);
 
     const note = screen.getByRole("note", { name: "개인정보 입력 주의 안내" });
-    expect(note).toHaveTextContent("실제 개인정보를 입력하지 마세요");
-    expect(note).toHaveTextContent("저장되지 않으며");
-    expect(note).toHaveTextContent("로컬");
+    expect(note).toHaveTextContent("실제 개인정보는 입력하지 마세요");
+    expect(note).toHaveTextContent("로컬 설치");
   });
 
   it("bolds the local-install recommendation, not the personal-data warning", () => {
@@ -31,7 +30,7 @@ describe("App privacy banner (#154)", () => {
 
     const note = screen.getByRole("note", { name: "개인정보 입력 주의 안내" });
     const strong = note.querySelector("strong");
-    expect(strong).toHaveTextContent("실사용은 로컬 설치를 권장합니다");
+    expect(strong).toHaveTextContent("정확한 결과가 필요하면 로컬 설치를 권장합니다");
     expect(strong).not.toHaveTextContent("개인정보");
   });
 });

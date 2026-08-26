@@ -70,13 +70,13 @@ export function App() {
 
   return (
     <div className="app-shell">
-      <AppHeader onHelpClick={openCoachMark} />
+      <AppHeader onHelpClick={openCoachMark} hasResult={Boolean(scanned)} />
 
       <div className="privacy-note" role="note" aria-label="개인정보 입력 주의 안내">
         <span className="privacy-note__icon" aria-hidden="true">▣</span>
         <span>
-          이 데모는 시연·학습용입니다. 실제 개인정보를 입력하지 마세요. 입력 내용은
-          저장되지 않으며, 로컬(브라우저 ↔ 로컬 API)에서만 처리됩니다. <strong>실사용은 로컬 설치를 권장합니다.</strong>
+          이 데모는 시연·학습용입니다. 실제 개인정보는 입력하지 마세요 —{" "}
+          <strong>정확한 결과가 필요하면 로컬 설치를 권장합니다.</strong>
         </span>
       </div>
 

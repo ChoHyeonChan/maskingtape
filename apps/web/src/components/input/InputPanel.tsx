@@ -209,14 +209,6 @@ export function InputPanel({
               >
                 라벨
               </button>
-              <button
-                type="button"
-                className={`input-panel__mask-mode-btn${maskMode === "pseudonym" ? " is-active" : ""}`}
-                aria-pressed={maskMode === "pseudonym"}
-                onClick={() => onMaskModeChange("pseudonym")}
-              >
-                가명처리
-              </button>
             </div>
             <button
               type="button"

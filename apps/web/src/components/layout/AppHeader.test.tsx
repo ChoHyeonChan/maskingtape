@@ -41,14 +41,23 @@ describe("AppHeader accuracy bubble (도움말 옆에 잠깐 뜨는 정확도 �
 
   it("shows the rule-based-detection caveat next to the help button on mount", () => {
     render(<AppHeader onHelpClick={() => {}} />);
-    expect(screen.getByRole("status")).toHaveTextContent("규칙 기반 탐지만");
+    expect(screen.getByRole("status")).toHaveTextContent("로컬 설치를 권장합니다");
   });
 
-  it("dismisses on any click anywhere on the page", () => {
+  it("does not dismiss just because the page was clicked elsewhere", () => {
     render(<AppHeader onHelpClick={() => {}} />);
     expect(screen.getByRole("status")).toBeInTheDocument();
 
     fireEvent.click(document.body);
+
+    expect(screen.getByRole("status")).toBeInTheDocument();
+  });
+
+  it("dismisses when its own X (close) button is clicked", () => {
+    render(<AppHeader onHelpClick={() => {}} />);
+    expect(screen.getByRole("status")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "정확도 안내 닫기" }));
 
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
@@ -60,6 +69,30 @@ describe("AppHeader accuracy bubble (도움말 옆에 잠깐 뜨는 정확도 �
     act(() => {
       vi.advanceTimersByTime(30_000);
     });
+
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
+  it("shows again when a scan result first appears, even if it already timed out on the first page", () => {
+    const { rerender } = render(<AppHeader onHelpClick={() => {}} hasResult={false} />);
+
+    act(() => {
+      vi.advanceTimersByTime(30_000);
+    });
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+
+    rerender(<AppHeader onHelpClick={() => {}} hasResult={true} />);
+
+    expect(screen.getByRole("status")).toBeInTheDocument();
+  });
+
+  it("does not re-show on every re-render while a result is already displayed", () => {
+    const { rerender } = render(<AppHeader onHelpClick={() => {}} hasResult={true} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "정확도 안내 닫기" }));
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+
+    rerender(<AppHeader onHelpClick={() => {}} hasResult={true} />);
 
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });

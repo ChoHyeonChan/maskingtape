@@ -51,6 +51,11 @@
   line-height: 1.45;
 }
 
+.help-button-wrap {
+  position: relative;
+  flex: 0 0 auto;
+}
+
 .help-button {
   flex: 0 0 auto;
   width: 2.1rem;
@@ -87,10 +92,10 @@
 .accuracy-bubble {
   position: absolute;
   z-index: 30;
-  top: calc(100% + 0.6rem);
+  top: calc(100% + 2px);
   right: 0;
   width: min(19rem, 80vw);
-  padding: 0.75rem 0.9rem;
+  padding: 0.75rem 1.9rem 0.75rem 0.9rem;
   border: 1px solid #dc2626;
   border-radius: 12px;
   background: #fde3e7;
@@ -101,11 +106,35 @@
   animation: accuracyBubbleFloat 3.2s ease-in-out infinite;
 }
 
+/* 예전엔 "아무 데나 누르면 닫힘"이라 실수로 바로 사라지곤 했다 — 이제는 이 X 버튼으로만
+   명시적으로 닫는다. */
+.accuracy-bubble__close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.55rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #dc2626;
+  font-size: 1.05rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.accuracy-bubble__close:hover {
+  background: rgba(220, 38, 38, 0.14);
+}
+
 .accuracy-bubble::before {
   content: "";
   position: absolute;
   top: -0.4rem;
-  right: 0.85rem;
+  right: 0.65rem;
   width: 0.8rem;
   height: 0.8rem;
   background: #fde3e7;
@@ -131,14 +160,6 @@
   border-radius: 4px;
   background: rgba(220, 38, 38, 0.12);
   font-size: 0.78rem;
-}
-
-.accuracy-bubble__dismiss-hint {
-  display: block;
-  margin-top: 0.45rem;
-  color: #dc2626;
-  font-size: 0.72rem;
-  font-weight: 700;
 }
 
 @media (max-width: 640px) {
