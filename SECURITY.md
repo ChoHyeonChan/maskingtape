@@ -41,7 +41,7 @@ maskingtape는 **개인정보를 가리는 도구**입니다. 그래서 이 저�
 
 - 어떤 값이, 어떤 입력에서, 어떻게 노출되는지
 - 재현 가능한 최소 입력 (합성 데이터)
-- 사용한 버전 (`maskingtape --version`) 과 실행 방식 (CLI / 라이브러리 / MCP / API)
+- 사용한 버전 (`python -c "import maskingtape; print(maskingtape.__version__)"`) 과 실행 방식 (CLI / 라이브러리 / MCP / API)
 - 규칙 전용인지 `--llm`을 켰는지
 
 ## 처리
