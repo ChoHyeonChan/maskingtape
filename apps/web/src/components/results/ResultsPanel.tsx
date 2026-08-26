@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { DetectionList } from "./DetectionList";
 import type { DetectionRow } from "./DetectionList";
+import { anonymizeText } from "../../api/scanClient";
 import { locateDetections, type MaskMode } from "../../lib/masking";
 import { KIND_COLORS } from "../../types/detection";
 import type { Detection, HighlightRange } from "../../types/detection";
@@ -44,6 +45,48 @@ export function ResultsPanel({
   const [overrides, setOverrides] = useState<Map<string, boolean>>(() => new Map());
   const resultsRef = useRef<HTMLElement>(null);
 
+  // pseudonym(가명처리)은 core의 값 생성 로직이 필요해 mask/label처럼 클라이언트에서
+  // 즉시 계산할 수 없다 — /anonymize를 호출해서 받는다(#346). 그동안은 로딩·에러 상태를
+  // 따로 들고, 이 모드에서는 항목별 조정 목록(DetectionList) 대신 안내만 보여준다.
+  const [pseudonymText, setPseudonymText] = useState<string | null>(null);
+  const [pseudonymLoading, setPseudonymLoading] = useState(false);
+  const [pseudonymError, setPseudonymError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (maskMode !== "pseudonym" || !scanned) {
+      setPseudonymText(null);
+      setPseudonymLoading(false);
+      setPseudonymError(null);
+      return;
+    }
+
+    // 이 모드엔 항목별 가림/노출 조정이 없으니, 오른쪽 목록 호버로 남아있을 수 있는
+    // 왼쪽 강조를 지워 상태가 어긋나 보이지 않게 한다.
+    onHighlightChange(null);
+
+    let ignore = false;
+    setPseudonymLoading(true);
+    setPseudonymError(null);
+
+    anonymizeText(scanned.text, "pseudonym")
+      .then((result) => {
+        if (ignore) return;
+        setPseudonymText(result.text);
+      })
+      .catch((err) => {
+        if (ignore) return;
+        setPseudonymError(err instanceof Error ? err.message : "가명처리 요청 중 알 수 없는 오류가 발생했습니다.");
+      })
+      .finally(() => {
+        if (!ignore) setPseudonymLoading(false);
+      });
+
+    return () => {
+      ignore = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [maskMode, scanned]);
+
   useEffect(() => {
     const confidences = (scanned?.detections ?? []).map(confidencePercent);
     setConfidenceThreshold(confidences.length > 0 ? Math.min(...confidences) : FALLBACK_THRESHOLD);
@@ -81,13 +124,16 @@ export function ResultsPanel({
     masked: isMasked(detection),
   }));
 
-  const { text: maskedText, ranges } = scanned
-    ? locateDetections(scanned.text, rows, maskMode)
-    : { text: "", ranges: new Map<string, [number, number]>() };
+  const { text: maskedText, ranges } =
+    scanned && maskMode !== "pseudonym"
+      ? locateDetections(scanned.text, rows, maskMode)
+      : { text: "", ranges: new Map<string, [number, number]>() };
+
+  const displayedText = maskMode === "pseudonym" ? (pseudonymText ?? "") : maskedText;
 
   useEffect(() => {
-    onMaskedTextChange(maskedText);
-  }, [maskedText, onMaskedTextChange]);
+    onMaskedTextChange(displayedText);
+  }, [displayedText, onMaskedTextChange]);
 
   // "일괄 조정"은 이름 그대로 전체를 다시 정하는 컨트롤이다 — 이전에 항목 몇 개를 수동으로
   // 뒤집어(override) 둔 상태에서 이 슬라이더/링을 만지면, override가 남아있는 항목은 새
@@ -142,7 +188,29 @@ export function ResultsPanel({
         )}
       </div>
 
-      {scanned ? (
+      {scanned && maskMode === "pseudonym" ? (
+        <div className="pseudonym-panel">
+          <p className="pseudonym-note">
+            가명처리는 같은 원본값을 항상 같은 그럴듯한 가짜 값으로 바꿔 문서의 구조와 맥락을
+            그대로 유지합니다. 이 모드에서는 항목별 가림·노출 조정을 지원하지 않습니다.
+          </p>
+          {pseudonymLoading && (
+            <p className="pseudonym-status" role="status">
+              가명처리 결과를 불러오는 중...
+            </p>
+          )}
+          {pseudonymError && (
+            <p className="pseudonym-status pseudonym-status--error" role="alert">
+              {pseudonymError}
+            </p>
+          )}
+          {!pseudonymLoading && !pseudonymError && scanned.detections.length === 0 && (
+            <p className="detect-empty" role="status">
+              개인정보가 발견되지 않았습니다.
+            </p>
+          )}
+        </div>
+      ) : scanned ? (
         <DetectionList
           rows={rows}
           confidenceThreshold={confidenceThreshold}
