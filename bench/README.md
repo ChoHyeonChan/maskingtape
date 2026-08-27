@@ -99,7 +99,7 @@ en-dash(–)로 바꾸거나 "공백-하이픈-공백"·"점+공백"처럼 표·
 
 address·card는 한때 이 표에서 문제(F1 0.371, 오탐 2건)가 있었는데, core 쪽에서 이미 수정됐다
 (각각 [#86](https://github.com/ChoHyeonChan/maskingtape/issues/86), [#87](https://github.com/ChoHyeonChan/maskingtape/issues/87)로
-발견해 확인 후 중복 종료 — 실제 수정은 조현찬님이 #69/#86 관련 커밋에서 먼저 완료해둔 상태였음).
+발견해 확인 후 중복 종료 — 실제 수정은 [@ChoHyeonChan](https://github.com/ChoHyeonChan)이 #69/#86 관련 커밋에서 먼저 완료해둔 상태였음).
 card는 `gen_card`(Visa/Mastercard/Amex 계열 IIN + Luhn 체크섬)로 데이터셋에 정답 라벨이 생기면서
 처음으로 실측이 가능해졌다 — `#69`(distractor가 카드로 오탐되던 문제)의 회귀 방지 테스트
 (`test_distractors_are_never_detected_as_card`)도 같이 추가했다.

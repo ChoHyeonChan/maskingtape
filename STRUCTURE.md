@@ -37,11 +37,11 @@ detectors/
 
 | 파트 | 담당 | 상태 · 힌트 |
 |---|---|---|
-| `apps/web` | 수연 / plana | ✅ **이미 모범** (`components`를 역할별로). 새 화면도 같은 방식으로 폴더 추가 |
-| `apps/desktop` | 준형 | ✅ **이미 레이어별로 잘 됨**. 유지 |
-| `packages/core` | 현찬 | ✅ 도메인별 완료 |
-| `apps/api` | 기태 | `routers/`는 나뉘어 있음. `schemas.py`가 커지면 `schemas/{scan, anonymize}` 처럼 **엔드포인트 도메인별**로 분리 검토 |
-| `bench` | 서연 | `generator/`는 잘 나뉨. 루트의 평가 스크립트들(`evaluate`, `evaluate_masking`, `mask_quality`, `confidence_analysis`, `compare_name_detectors`)을 `evaluators/` 폴더로 묶으면 "평가 도구 모음"이 한눈에 보임 |
+| `apps/web` | [@imsoo0816](https://github.com/imsoo0816) / [@plana1470](https://github.com/plana1470) | ✅ **이미 모범** (`components`를 역할별로). 새 화면도 같은 방식으로 폴더 추가 |
+| `apps/desktop` | [@stayalive000](https://github.com/stayalive000) | ✅ **이미 레이어별로 잘 됨**. 유지 |
+| `packages/core` | [@ChoHyeonChan](https://github.com/ChoHyeonChan) | ✅ 도메인별 완료 |
+| `apps/api` | [@kitae13](https://github.com/kitae13) | `routers/`는 나뉘어 있음. `schemas.py`가 커지면 `schemas/{scan, anonymize}` 처럼 **엔드포인트 도메인별**로 분리 검토 |
+| `bench` | [@seoyeon056](https://github.com/seoyeon056) | `generator/`는 잘 나뉨. 루트의 평가 스크립트들(`evaluate`, `evaluate_masking`, `mask_quality`, `confidence_analysis`, `compare_name_detectors`)을 `evaluators/` 폴더로 묶으면 "평가 도구 모음"이 한눈에 보임 |
 
 > **아직 파일이 몇 개 안 되면 억지로 나누지 마세요.** 5~6개를 넘어 "폴더로 묶으면 더 읽히겠다" 싶을 때가 신호입니다.
 
