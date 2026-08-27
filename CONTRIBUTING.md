@@ -23,7 +23,7 @@
 
 - 제목: `[파트] 할 일` 예) `[API] POST /scan 엔드포인트 구현`
 - **라벨**을 답니다: `part: core` / `part: api` / `part: web` / `part: desktop` / `part: bench` / `part: mcp` / `part: repo` (+ `bug`, `enhancement`, `documentation`, `security`)
-- **마일스톤**을 답니다: `Phase 1 — 기능 완성` / `Phase 2 — 통합·배포` / `Phase 3 — 제출물`
+- **마일스톤**을 답니다: 현재 열려 있는 것은 `이후 — 대회 종료 후` 하나입니다 (`Phase 1 — 기능 완성` · `Phase 2 — 통합·배포`는 완료되어 닫혔습니다)
 - 본문에 배경·할 일 체크리스트·완료 기준을 씁니다.
 
 ### 2단계. 그 이슈에서 브랜치를 판다
