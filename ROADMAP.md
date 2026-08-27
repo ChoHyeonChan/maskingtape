@@ -1,7 +1,7 @@
 # 개발 로드맵
 
 > 팀 마스킹테이프의 개발 계획입니다. 진행 상황은 [Issues](https://github.com/ChoHyeonChan/maskingtape/issues)와 [Milestones](https://github.com/ChoHyeonChan/maskingtape/milestones)에서 확인할 수 있습니다.
-> 최종 갱신: 2026-08-17
+> 최종 갱신: 2026-08-27
 
 ## 우리가 만드는 것
 
@@ -9,7 +9,7 @@
 
 **차별점**: 영어권 도구(Presidio 등)는 한국어 개인정보를 제대로 못 잡습니다. 한국어에 특화하고, **규칙(정규식·사전) + 로컬 LLM(Ollama) 하이브리드**로 문맥까지 판단합니다. 데이터가 외부로 나가지 않도록 **전부 로컬에서 처리**합니다.
 
-## 산출물 5종
+## 산출물 6종
 
 | 구성요소 | 설명 | 상태 |
 |---|---|---|
@@ -22,7 +22,7 @@
 
 ## 마일스톤
 
-### Phase 1 — 기능 완성 (~2026-08-10)
+### Phase 1 — 기능 완성 (~2026-08-10) ✅ 완료
 
 - 코어: 하이브리드 이름 탐지 고도화(규칙 후보 → LLM 검증으로 호출 최소화)
 - 코어: 벤치마크로 규칙 vs LLM 정확도 비교 측정
@@ -31,7 +31,7 @@
 - 데스크톱: 안정성·UX 개선
 - 벤치: LLM 모드 평가 + 리포트 자동 생성
 
-### Phase 2 — 통합·배포 (~2026-08-24) ✅ 대부분 완료
+### Phase 2 — 통합·배포 (~2026-08-24) ✅ 완료
 
 - ✅ API 통합 (웹·데스크톱을 REST로 전환)
 - ✅ **PyPI 배포** (`pip install maskingtape`)
@@ -39,10 +39,10 @@
 - ✅ README 정비 (아키텍처·퀵스타트·벤치마크 수치)
 - **8/24 기능 동결**(8/17→연기) — 이후 버그 수정만
 
-### Phase 3 — 제출물 (~2026-08-27)
+### Phase 3 — 제출물 (~2026-08-27) ✅ 완료
 
-- 결과보고서, 시연 영상
-- 라이선스 최종 점검 ([SBOM.md](SBOM.md) 전수 대조)
+- ✅ 결과보고서, 시연 영상 — 2026-08-27 제출
+- ✅ 라이선스 최종 점검 ([SBOM.md](SBOM.md) 전수 대조)
 
 ### 이후 (대회 종료 후에도)
 
@@ -52,20 +52,19 @@
 
 ## 지금 각자 할 일 — 파트별
 
-엔진·API·웹·데스크톱 통합과 배포가 모두 완료됐습니다. 웹 데모가 [라이브](https://maskingtape-lilac.vercel.app)이고 `pip install maskingtape`로 설치됩니다. 지금은 **제출 준비와 완성도**에 집중합니다:
+엔진·API·웹·데스크톱 통합과 배포가 모두 완료됐고, **2026-08-27 결과보고서·시연 영상 제출을 마쳤습니다**. 웹 데모가 [라이브](https://maskingtape-lilac.vercel.app)이고 `pip install maskingtape`로 설치됩니다. 남은 작업은 [「이후 — 대회 종료 후」 마일스톤](https://github.com/ChoHyeonChan/maskingtape/milestone/4)에 모여 있습니다:
 
-- **엔진 고도화** (계속): 이름 하이브리드 정확도, 새 탐지기(운전면허 등), 보안 하드닝(ReDoS 등)
-- **제출물** (지금 우선): 결과보고서 · 시연 영상 · 문서 정합성
+- ✅ **제출물** (2026-08-27 완료): 결과보고서 · 시연 영상 · 문서 정합성
+- **엔진 고도화** (계속): 이름 하이브리드 정확도, [README에 공개한 알려진 미탐 표기](README.md#지원-범위와-한계) 보완
 
 | 담당 | 파트 | 당장 할 것 (1순위) | 그다음 |
 |---|---|---|---|
-| [@ChoHyeonChan](https://github.com/ChoHyeonChan) (팀장) | `core` · `mcp` | 새 탐지기(운전면허)·보안 하드닝 + **팀원 PR 리뷰** | 결과보고서 · 아키텍처 |
+| [@ChoHyeonChan](https://github.com/ChoHyeonChan) (팀장) | `core` · `mcp` | ✅ 운전면허 탐지기(#305)·ReDoS 하드닝(#289) → **팀원 PR 리뷰** | 알려진 미탐 보완 · 아키텍처 |
 | [@kitae13](https://github.com/kitae13) | `api` | ✅ 통합·배포 완료 → rate limit 강화·서버리스 안정화 | 문서 |
-| [@imsoo0816](https://github.com/imsoo0816) | `web` | 결과·배치 화면 완성 + 디자인 일관성 | 마스킹 토글 · PDF 업로드 |
-| [@stayalive000](https://github.com/stayalive000) | `desktop` | 배치 처리 완성 + 제출용 데모 | 새 kind 라벨 반영 |
-| [@seoyeon056](https://github.com/seoyeon056) | `bench` | 운전면허 벤치(#315) · 발표용 정확도 자료 | 새 탐지기 벤치 추가 |
+| [@plana1470](https://github.com/plana1470) · [@imsoo0816](https://github.com/imsoo0816) | `web` | 결과·배치 화면 완성(#217) + 디자인 일관성(#218) | 마스킹 토글 · PDF 업로드 |
+| [@stayalive000](https://github.com/stayalive000) | `desktop` | ✅ 배치 처리·제출용 데모 완료(#219) | 새 kind 라벨 추종 (상시) |
+| [@seoyeon056](https://github.com/seoyeon056) | `bench` | ✅ 운전면허 벤치(#315) → 발표용 정확도 자료 | 새 탐지기 벤치 추가 |
 
-> [@plana1470](https://github.com/plana1470)은 8월 둘째 주 복귀 예정 — 그동안 웹 입력·하이라이트 뷰는 [@imsoo0816](https://github.com/imsoo0816)이 함께 봅니다.
 
 ### 파트별 상세 (위에서 아래로, 위가 먼저)
 
@@ -84,10 +83,10 @@
 - [x] 새 탐지기: 계좌번호·사업자등록번호·여권·생년월일
 - [x] 주소 개선: 광역단체명 없는 주소 ([#68](https://github.com/ChoHyeonChan/maskingtape/issues/68)), 콤마 뒤 동/호 ([#265](https://github.com/ChoHyeonChan/maskingtape/issues/265))
 - [x] PyPI 배포 ([#48](https://github.com/ChoHyeonChan/maskingtape/issues/48))
-- [ ] 새 탐지기: 운전면허 ([#267](https://github.com/ChoHyeonChan/maskingtape/issues/267)) + 보안 하드닝 (ReDoS [#289](https://github.com/ChoHyeonChan/maskingtape/issues/289))
+- [x] 새 탐지기: 운전면허 ([#267](https://github.com/ChoHyeonChan/maskingtape/issues/267)) + 보안 하드닝 (ReDoS [#289](https://github.com/ChoHyeonChan/maskingtape/issues/289))
 - 상시: 팀원 PR 리뷰·아키텍처
 
-**[@imsoo0816](https://github.com/imsoo0816) — `web`**
+**[@plana1470](https://github.com/plana1470) · [@imsoo0816](https://github.com/imsoo0816) — `web`**
 - [x] 접근성: `prefers-reduced-motion`, 코치마크 ESC로 닫기 (PR #76 리뷰 반영) — #189, #190
 - [x] README 정리: 로컬 경로·포크 안내 제거 — #191
 - [x] API 연동되면 임시 프록시(`dev-server`) → 실제 `/api/scan`으로 교체 — 완료(`apps/web/src/api/scanClient.ts`가 `/api/scan` 실호출, `vite.config.ts` 프록시가 `VITE_API_TARGET`로 실제 FastAPI 백엔드 지정)
@@ -102,7 +101,7 @@
 - [x] 디자인 재설계 "책상 위의 테이프" + 앱 아이콘 — #261
 - [x] desktop CI 잡(analyze + test) — #286. 그전까지 데스크톱 테스트 ~1066줄이 CI에서 한 번도 안 돌았다
 - [x] 설치 선행조건 문서화(개발자 모드·백엔드) — #285. 2차 기능테스트의 clean-install 대비
-- [ ] 제출용 스크린샷 세트 촬영 — #219. 데모 파일 5종과 시연 시나리오는 #233에서 준비 완료
+- [x] 제출용 스크린샷 세트 촬영 — #219. 데모 파일 5종과 시연 시나리오는 #233에서 준비 완료
 
 **[@seoyeon056](https://github.com/seoyeon056) — `bench`**
 - [x] 평가 스크립트를 `evaluators/` 폴더로 묶기 ([STRUCTURE.md](STRUCTURE.md)) — #109/#110
