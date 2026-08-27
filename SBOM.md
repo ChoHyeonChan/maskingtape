@@ -28,6 +28,8 @@
 | 20 | Pydantic | >=2.9,<3 | MIT | https://github.com/pydantic/pydantic | API 요청·응답 데이터 검증 및 OpenAPI 스키마 생성 |
 | 21 | HTTPX2 | >=2,<3 | BSD-3-Clause | https://github.com/pydantic/httpx2 | (개발 도구) FastAPI/Starlette TestClient 기반 API 테스트 실행 |
 | 22 | pdfjs-dist | ^6.2.108 | Apache-2.0 | https://github.com/mozilla/pdf.js | 웹 플레이그라운드 — 브라우저(클라이언트) 안에서 PDF 텍스트 추출, 파일을 서버로 보내지 않기 위함 |
+| 23 | cupertino_icons | ^1.0.8 | MIT | https://github.com/flutter/packages/tree/main/third_party/packages/cupertino_icons | 데스크톱 앱 — 기본 아이콘 폰트 (Flutter 프로젝트 생성 시 포함) |
+| 24 | flutter_lints | ^6.0.0 | BSD-3-Clause | https://github.com/flutter/packages/tree/main/packages/flutter_lints | (개발 도구) 데스크톱 앱 Dart 린트 규칙 모음 |
 
 ※ **AI 모델 주의**: Qwen2.5는 **3B·72B만 비상업 제한(Qwen Research License)**이고 나머지(0.5B/1.5B/**7B**/14B/32B)가 Apache-2.0이다. OSI 인증 라이선스 요건 때문에 **7B를 쓴다 — 3B로 바꾸지 말 것.**
 ※ 위 16·17번은 결과보고서 **붙임2(AI 모델 활용 및 라이선스 기술 명세서)**에도 반영한다(유형1 '외부 모델 그대로' + 기반 모델명·라이선스 기재).
