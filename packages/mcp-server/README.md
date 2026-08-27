@@ -1,6 +1,6 @@
 # packages/mcp-server — MCP 서버
 
-**담당: 조현찬 (팀장)** · 상태: ✅ v1 동작 (stdio)
+**담당: [@ChoHyeonChan](https://github.com/ChoHyeonChan) (팀장)** · 상태: ✅ v1 동작 (stdio)
 
 AI 에이전트가 한국어 데이터를 다루기 전에 거치는 **프라이버시 계층**.
 `packages/core`를 import해서 MCP 도구로 **노출만** 한다 — 탐지 로직은 `tools.py`가 core를 호출할 뿐, 여기에 두지 않는다.

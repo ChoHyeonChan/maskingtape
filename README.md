@@ -232,12 +232,12 @@ cd apps/web && npm install && npm run dev      # http://localhost:5173
 
 | 경로 | 내용 | 담당 |
 |---|---|---|
-| `packages/core/` | Python 탐지·마스킹 엔진 + CLI (순수 로직) | 조현찬 |
-| `packages/mcp-server/` | MCP 서버 — core를 에이전트 도구로 노출 | 조현찬 |
-| `apps/api/` | FastAPI 백엔드 — 웹·데스크톱 공용 | 풀스택 |
-| `apps/web/` | 웹 플레이그라운드 (탐지 하이라이트 데모) | 프론트 ×2 |
-| `apps/desktop/` | Flutter 데스크톱 앱 (드래그&드롭 배치 처리) | Flutter |
-| `bench/` | 합성 벤치마크 데이터 + F1 정확도 리포트 | 데이터 |
+| `packages/core/` | Python 탐지·마스킹 엔진 + CLI (순수 로직) | [@ChoHyeonChan](https://github.com/ChoHyeonChan) |
+| `packages/mcp-server/` | MCP 서버 — core를 에이전트 도구로 노출 | [@ChoHyeonChan](https://github.com/ChoHyeonChan) |
+| `apps/api/` | FastAPI 백엔드 — 웹·데스크톱 공용 | [@kitae13](https://github.com/kitae13) |
+| `apps/web/` | 웹 플레이그라운드 (탐지 하이라이트 데모) | [@plana1470](https://github.com/plana1470) · [@imsoo0816](https://github.com/imsoo0816) |
+| `apps/desktop/` | Flutter 데스크톱 앱 (드래그&드롭 배치 처리) | [@stayalive000](https://github.com/stayalive000) |
+| `bench/` | 합성 벤치마크 데이터 + F1 정확도 리포트 | [@seoyeon056](https://github.com/seoyeon056) |
 
 ## 개발에 참여하기
 

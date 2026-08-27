@@ -59,17 +59,17 @@
 
 | 담당 | 파트 | 당장 할 것 (1순위) | 그다음 |
 |---|---|---|---|
-| 조현찬 (팀장) | `core` · `mcp` | 새 탐지기(운전면허)·보안 하드닝 + **팀원 PR 리뷰** | 결과보고서 · 아키텍처 |
-| 기태 | `api` | ✅ 통합·배포 완료 → rate limit 강화·서버리스 안정화 | 문서 |
-| 수연 | `web` | 결과·배치 화면 완성 + 디자인 일관성 | 마스킹 토글 · PDF 업로드 |
-| 준형 | `desktop` | 배치 처리 완성 + 제출용 데모 | 새 kind 라벨 반영 |
-| 서연 | `bench` | 운전면허 벤치(#315) · 발표용 정확도 자료 | 새 탐지기 벤치 추가 |
+| [@ChoHyeonChan](https://github.com/ChoHyeonChan) (팀장) | `core` · `mcp` | 새 탐지기(운전면허)·보안 하드닝 + **팀원 PR 리뷰** | 결과보고서 · 아키텍처 |
+| [@kitae13](https://github.com/kitae13) | `api` | ✅ 통합·배포 완료 → rate limit 강화·서버리스 안정화 | 문서 |
+| [@imsoo0816](https://github.com/imsoo0816) | `web` | 결과·배치 화면 완성 + 디자인 일관성 | 마스킹 토글 · PDF 업로드 |
+| [@stayalive000](https://github.com/stayalive000) | `desktop` | 배치 처리 완성 + 제출용 데모 | 새 kind 라벨 반영 |
+| [@seoyeon056](https://github.com/seoyeon056) | `bench` | 운전면허 벤치(#315) · 발표용 정확도 자료 | 새 탐지기 벤치 추가 |
 
-> 승현(plana)은 8월 둘째 주 복귀 예정 — 그동안 웹 입력·하이라이트 뷰는 수연이 함께 봅니다.
+> [@plana1470](https://github.com/plana1470)은 8월 둘째 주 복귀 예정 — 그동안 웹 입력·하이라이트 뷰는 [@imsoo0816](https://github.com/imsoo0816)이 함께 봅니다.
 
 ### 파트별 상세 (위에서 아래로, 위가 먼저)
 
-**기태 — `api`** ✅ 통합·배포 완료
+**[@kitae13](https://github.com/kitae13) — `api`** ✅ 통합·배포 완료
 - [x] 스키마 ↔ `core` 어댑터: 요청을 `Pipeline`에 넘기고 결과를 응답 스키마로 변환
 - [x] `POST /scan` — 실제 탐지 결과 (core `scan()` 연결)
 - [x] `POST /anonymize` — 실제 마스킹 결과 ([#28](https://github.com/ChoHyeonChan/maskingtape/issues/28))
@@ -79,7 +79,7 @@
 - [x] → Vercel 배포 (라이브, [apps/api 보안 요구사항](apps/api/README.md) 준수)
 - [ ] rate limit 강화 — 서버리스 인스턴스별 한계 보완
 
-**조현찬(팀장) — `core` · `mcp`**
+**[@ChoHyeonChan](https://github.com/ChoHyeonChan) (팀장) — `core` · `mcp`**
 - [x] API 연동 지원 (core 어댑터 인터페이스)
 - [x] 새 탐지기: 계좌번호·사업자등록번호·여권·생년월일
 - [x] 주소 개선: 광역단체명 없는 주소 ([#68](https://github.com/ChoHyeonChan/maskingtape/issues/68)), 콤마 뒤 동/호 ([#265](https://github.com/ChoHyeonChan/maskingtape/issues/265))
@@ -87,13 +87,13 @@
 - [ ] 새 탐지기: 운전면허 ([#267](https://github.com/ChoHyeonChan/maskingtape/issues/267)) + 보안 하드닝 (ReDoS [#289](https://github.com/ChoHyeonChan/maskingtape/issues/289))
 - 상시: 팀원 PR 리뷰·아키텍처
 
-**수연 — `web`**
+**[@imsoo0816](https://github.com/imsoo0816) — `web`**
 - [x] 접근성: `prefers-reduced-motion`, 코치마크 ESC로 닫기 (PR #76 리뷰 반영) — #189, #190
 - [x] README 정리: 로컬 경로·포크 안내 제거 — #191
 - [x] API 연동되면 임시 프록시(`dev-server`) → 실제 `/api/scan`으로 교체 — 완료(`apps/web/src/api/scanClient.ts`가 `/api/scan` 실호출, `vite.config.ts` 프록시가 `VITE_API_TARGET`로 실제 FastAPI 백엔드 지정)
 - [x] 결과 화면에 확신도 표시(막대) → "N% 이상만 마스킹" 슬라이더 — #237, #243, #250
 
-**준형 — `desktop`**
+**[@stayalive000](https://github.com/stayalive000) — `desktop`**
 - [x] UX·안정성 완성도 (에러 처리·취소·진행 표시) — #13 (CP949 폴백·입력 검증·처리 취소·진행률·결과 미리보기)
 - [x] 새 엔진 기능(가명처리 전략 등) 데스크톱에 반영 — #103(가명처리), #50(LLM 이름 토글), #245(LLM 준비 상태 표시)
 - [x] 배치 처리 안정화 (대량 파일) — #108 (미리보기 텍스트를 메모리 대신 디스크에서 로드)
@@ -104,7 +104,7 @@
 - [x] 설치 선행조건 문서화(개발자 모드·백엔드) — #285. 2차 기능테스트의 clean-install 대비
 - [ ] 제출용 스크린샷 세트 촬영 — #219. 데모 파일 5종과 시연 시나리오는 #233에서 준비 완료
 
-**서연 — `bench`**
+**[@seoyeon056](https://github.com/seoyeon056) — `bench`**
 - [x] 평가 스크립트를 `evaluators/` 폴더로 묶기 ([STRUCTURE.md](STRUCTURE.md)) — #109/#110
 - [ ] 발표용 정확도 자료: 규칙 vs 하이브리드 대비표 정리 — 다른 항목들 안정된 후 진행하기로 결정
 - [x] 데이터 확대: 엣지 케이스(복합 문장·드문 표기) — #111/#112, 이어서 #118(시/도 없는 주소)
