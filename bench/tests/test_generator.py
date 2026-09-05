@@ -872,6 +872,28 @@ def test_phone_separator_variants_partially_fixed_by_339():
     )
 
 
+def test_common_title_words_outside_cue_vocabulary_miss_the_name():
+    """실무 문서에서 흔한 직함(총무/매니저/간호사/변호사/인턴 등)은 core NameDetector의
+    _TITLE_CUES/_PREFIX_CUES/_SUFFIX_CUES 어휘(name.py)에 없어, 앞뒤 문맥 단서가 하나도
+    없는 것으로 처리돼 이름이 그대로 새어나간다(직접 확인: 실제 /scan 서버로 15개 표본 중
+    14개 미탐 — "부사장"만 예외인데 "사장"의 부분 문자열이라 우연히 잡힌다).
+
+    #213/#239의 "직함만으로는 2음절 이름을 일부러 놓친다"와 달리, 이건 설계된 트레이드오프가
+    아니라 core가 아직 다루지 않은 어휘 커버리지 갭이다(3글자 이상 풀네임도 예외 없이 놓침).
+    core 이슈로 별도 등록했다 — core가 어휘를 넓히거나 LLM판을 기본으로 바꾸면 이 테스트가
+    실패하며 알려준다."""
+    detector = NameDetector()
+    common_titles_not_in_cue_vocabulary = [
+        "총무", "매니저", "상무", "전무", "국장", "지점장",
+        "간호사", "변호사", "회계사", "코치", "감독", "강사", "인턴", "팀원",
+    ]
+    for title in common_titles_not_in_cue_vocabulary:
+        text = f"{title} 김하늘이 참석했습니다."
+        assert detector.detect(text) == [], (
+            f"'{title}'가 core 어휘에 새로 추가된 듯하다 — 이 목록에서 빼고 README도 갱신할 것: {text!r}"
+        )
+
+
 def test_name_generator_covers_yang_gun_endings():
     """#340(core 대응 완료): 이름 끝음절이 "양"·"군"인 경우도 실제로 나오고, 존칭이 공백
     없이 바로 붙는 문서(예: "고객 {name}님께")에서 core가 이름 전체를 잘리지 않고 잡아야
