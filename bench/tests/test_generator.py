@@ -456,6 +456,25 @@ def test_generated_passport_passes_core_detector():
         assert found[0].text == entity.text
 
 
+def test_generated_passport_confidence_splits_by_context_word():
+    """#392: core PassportDetector는 체크섬이 없어 confidence를 문맥어("여권")로만 가른다
+    (passport.py) — 문맥어가 가까이 있으면 0.9, 형식만 있으면 0.6이다. bench/README 신뢰도
+    임계값 절이 실측한 21.2%/78.8% 분포(정답 33건 기준)가 이 분기 때문임을 고정하는
+    회귀 테스트다 — birth_date/driver_license의 confidence 단언 패턴과 동일하다."""
+    rng = random.Random(32)
+    detector = PassportDetector()
+    for _ in range(50):
+        entity = generate_entity("passport", rng)
+
+        with_context = detector.detect(f"여권번호 {entity.text}입니다.")
+        assert len(with_context) == 1, f"문맥어 있는데 탐지 실패: {entity.text!r}"
+        assert with_context[0].confidence == 0.9
+
+        without_context = detector.detect(entity.text)
+        assert len(without_context) == 1, f"형식만 있는데 탐지 실패: {entity.text!r}"
+        assert without_context[0].confidence == 0.6
+
+
 def test_passport_generator_covers_old_and_new_styles():
     """구여권(문자+숫자8자리)과 신여권(문자+3자리+문자+4자리) 둘 다 나오는지 확인한다."""
     rng = random.Random(29)
