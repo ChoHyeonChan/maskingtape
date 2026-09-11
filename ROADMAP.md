@@ -1,7 +1,7 @@
 # 개발 로드맵
 
 > 팀 마스킹테이프의 개발 계획입니다. 진행 상황은 [Issues](https://github.com/ChoHyeonChan/maskingtape/issues)와 [Milestones](https://github.com/ChoHyeonChan/maskingtape/milestones)에서 확인할 수 있습니다.
-> 최종 갱신: 2026-08-27
+> 최종 갱신: 2026-09-11
 
 ## 우리가 만드는 것
 
@@ -44,7 +44,17 @@
 - ✅ 결과보고서, 시연 영상 — 2026-08-27 제출
 - ✅ 라이선스 최종 점검 ([SBOM.md](SBOM.md) 전수 대조)
 
-### 이후 (대회 종료 후에도)
+### Phase 4 — 2차 평가 대비 (~2026-10-12) 🔵 진행 중
+
+1차 서면평가를 통과했습니다(2026-09-09). 2차 기능테스트와 라이선스 검증이 10/12~28에
+진행되며, 규정상 **각 평가 시점의 저장소 상태**가 평가됩니다. 그 전에 아래를 끝냅니다.
+
+- **알려진 미탐 표기 5종 수정** — [#396](https://github.com/ChoHyeonChan/maskingtape/issues/396) 주소 시/도 축약형 · [#397](https://github.com/ChoHyeonChan/maskingtape/issues/397) 전화 괄호 표기 · [#398](https://github.com/ChoHyeonChan/maskingtape/issues/398) 여권 소문자 · [#399](https://github.com/ChoHyeonChan/maskingtape/issues/399) 생년월일 2자리 연도 · [#400](https://github.com/ChoHyeonChan/maskingtape/issues/400) 이메일 한글 로컬파트
+- **확신도 슬라이더 제거** — [#401](https://github.com/ChoHyeonChan/maskingtape/issues/401). 임계값을 올리면 특정 종류가 100% 노출되는 문제
+- **이름 문맥 단서 어휘 확장** — [#394](https://github.com/ChoHyeonChan/maskingtape/issues/394)
+- **여권 확신도 임계값 위험 문서화** — [#392](https://github.com/ChoHyeonChan/maskingtape/issues/392)
+
+### 이후 — 대회 종료 후
 
 - 문서 형식 지원: docx, csv, PDF
 - 탐지기 확장: 신규 kind(계좌번호·여권번호·사업자등록번호·생년월일·운전면허번호는 이미 완료 — 아래 정확도표 참고)
@@ -52,18 +62,22 @@
 
 ## 지금 각자 할 일 — 파트별
 
-엔진·API·웹·데스크톱 통합과 배포가 모두 완료됐고, **2026-08-27 결과보고서·시연 영상 제출을 마쳤습니다**. 웹 데모가 [라이브](https://maskingtape-lilac.vercel.app)이고 `pip install maskingtape`로 설치됩니다. 남은 작업은 [「이후 — 대회 종료 후」 마일스톤](https://github.com/ChoHyeonChan/maskingtape/milestone/4)에 모여 있습니다:
+**2026-09-09 1차 서면평가를 통과했습니다.** 지금은 2차 기능테스트·라이선스 검증(10/12~28)을
+준비합니다. 웹 데모가 [라이브](https://maskingtape-lilac.vercel.app)이고 `pip install maskingtape`로
+설치됩니다.
 
 - ✅ **제출물** (2026-08-27 완료): 결과보고서 · 시연 영상 · 문서 정합성
-- **엔진 고도화** (계속): 이름 하이브리드 정확도, [README에 공개한 알려진 미탐 표기](README.md#지원-범위와-한계) 보완
+- 🔵 **[Phase 4](https://github.com/ChoHyeonChan/maskingtape/milestone/5)** (지금): [README에 공개한 알려진 미탐 표기](README.md#지원-범위와-한계) 보완 + 확신도 설계 정리
+- ⚪ **[이후 — 대회 종료 후](https://github.com/ChoHyeonChan/maskingtape/milestone/4)**: 문서 형식 확대, 공개 벤치마크로 발전
 
 | 담당 | 파트 | 당장 할 것 (1순위) | 그다음 |
 |---|---|---|---|
-| [@ChoHyeonChan](https://github.com/ChoHyeonChan) (팀장) | `core` · `mcp` | ✅ 운전면허 탐지기(#305)·ReDoS 하드닝(#289) → **팀원 PR 리뷰** | 알려진 미탐 보완 · 아키텍처 |
-| [@kitae13](https://github.com/kitae13) | `api` | ✅ 통합·배포 완료 → rate limit 강화·서버리스 안정화 | 문서 |
-| [@plana1470](https://github.com/plana1470) · [@imsoo0816](https://github.com/imsoo0816) | `web` | 결과·배치 화면 완성(#217) + 디자인 일관성(#218) | 마스킹 토글 · PDF 업로드 |
-| [@stayalive000](https://github.com/stayalive000) | `desktop` | ✅ 배치 처리·제출용 데모 완료(#219) | 새 kind 라벨 추종 (상시) |
-| [@seoyeon056](https://github.com/seoyeon056) | `bench` | ✅ 운전면허 벤치(#315) → 발표용 정확도 자료 | 새 탐지기 벤치 추가 |
+| [@ChoHyeonChan](https://github.com/ChoHyeonChan) (팀장) | `core` · `mcp` | 미탐 5종 (#396 #397 #398 #399 #400) | 이름 문맥 어휘(#394) · **팀원 PR 리뷰** |
+| [@kitae13](https://github.com/kitae13) | `api` | rate limit 강화 · ruff 0.16 대응(#60) | docstring 보강(#391) |
+| [@plana1470](https://github.com/plana1470) | `web` | Dependabot 정리(#386) | 디자인 일관성(#218) |
+| [@imsoo0816](https://github.com/imsoo0816) | `web` | **확신도 슬라이더 제거(#401)** | 결과·배치 화면(#217) |
+| [@stayalive000](https://github.com/stayalive000) | `desktop` | 미탐 수정 머지 후 데스크톱 재현 확인 | 발표평가 대비 파트 코드 정리 |
+| [@seoyeon056](https://github.com/seoyeon056) | `bench` | 여권 확신도 문서화(#392) | 미탐 벤치 데이터 · 발표용 정확도 자료 |
 
 
 ### 파트별 상세 (위에서 아래로, 위가 먼저)
