@@ -47,12 +47,17 @@
 ### Phase 4 — 2차 평가 대비 (~2026-10-12) 🔵 진행 중
 
 1차 서면평가를 통과했습니다(2026-09-09). 2차 기능테스트와 라이선스 검증이 10/12~28에
-진행되며, 규정상 **각 평가 시점의 저장소 상태**가 평가됩니다. 그 전에 아래를 끝냅니다.
+진행되며, 규정상 **각 평가 시점의 저장소 상태**가 평가됩니다.
 
-- **알려진 미탐 표기 5종 수정** — [#396](https://github.com/ChoHyeonChan/maskingtape/issues/396) 주소 시/도 축약형 · [#397](https://github.com/ChoHyeonChan/maskingtape/issues/397) 전화 괄호 표기 · [#398](https://github.com/ChoHyeonChan/maskingtape/issues/398) 여권 소문자 · [#399](https://github.com/ChoHyeonChan/maskingtape/issues/399) 생년월일 2자리 연도 · [#400](https://github.com/ChoHyeonChan/maskingtape/issues/400) 이메일 한글 로컬파트
-- **확신도 슬라이더 제거** — [#401](https://github.com/ChoHyeonChan/maskingtape/issues/401). 임계값을 올리면 특정 종류가 100% 노출되는 문제
-- **이름 문맥 단서 어휘 확장** — [#394](https://github.com/ChoHyeonChan/maskingtape/issues/394)
-- **여권 확신도 임계값 위험 문서화** — [#392](https://github.com/ChoHyeonChan/maskingtape/issues/392)
+이 단계의 목표는 **검증기관이 직접 설치하고 실행했을 때 걸릴 것을 미리 없애는 것**입니다.
+
+- **알려진 미탐 표기를 좁힌다** — README 「지원 범위와 한계」에 공개한 입력이 실제로 잡히게 한다
+- **확신도 설계를 정리한다** — 사용자 조작만으로 특정 종류가 통째로 노출되지 않게 한다
+- **표면별 기능 차이를 없애거나 문서로 알린다** — 웹·데스크톱·CLI가 서로 다른 것을 지원하는 상태를 정돈한다
+- **개발 환경 의존성과 문서를 정돈한다**
+
+> 개별 항목의 진행 상황은 **[Phase 4 마일스톤](https://github.com/ChoHyeonChan/maskingtape/milestone/5)**에서 봅니다.
+> 이 문서에는 이슈 번호를 적지 않습니다 — 열리고 닫힐 때마다 낡기 때문입니다.
 
 ### 이후 — 대회 종료 후
 
@@ -60,7 +65,7 @@
 - 탐지기 확장: 신규 kind(계좌번호·여권번호·사업자등록번호·생년월일·운전면허번호는 이미 완료 — 아래 정확도표 참고)
 - 한국어 PII 공개 벤치마크로 발전
 
-## 지금 각자 할 일 — 파트별
+## 파트별 담당
 
 **2026-09-09 1차 서면평가를 통과했습니다.** 지금은 2차 기능테스트·라이선스 검증(10/12~28)을
 준비합니다. 웹 데모가 [라이브](https://maskingtape-lilac.vercel.app)이고 `pip install maskingtape`로
@@ -70,14 +75,16 @@
 - 🔵 **[Phase 4](https://github.com/ChoHyeonChan/maskingtape/milestone/5)** (지금): [README에 공개한 알려진 미탐 표기](README.md#지원-범위와-한계) 보완 + 확신도 설계 정리
 - ⚪ **[이후 — 대회 종료 후](https://github.com/ChoHyeonChan/maskingtape/milestone/4)**: 문서 형식 확대, 공개 벤치마크로 발전
 
-| 담당 | 파트 | 당장 할 것 (1순위) | 그다음 |
-|---|---|---|---|
-| [@ChoHyeonChan](https://github.com/ChoHyeonChan) (팀장) | `core` · `mcp` | 미탐 5종 (#396 #397 #398 #399 #400) | 이름 문맥 어휘(#394) · **팀원 PR 리뷰** |
-| [@kitae13](https://github.com/kitae13) | `api` | rate limit 강화 · ruff 0.16 대응(#60) | docstring 보강(#391) |
-| [@plana1470](https://github.com/plana1470) | `web` | Dependabot 정리(#386) | 디자인 일관성(#218) |
-| [@imsoo0816](https://github.com/imsoo0816) | `web` | **확신도 슬라이더 제거(#401)** | 결과·배치 화면(#217) |
-| [@stayalive000](https://github.com/stayalive000) | `desktop` | 미탐 수정 머지 후 데스크톱 재현 확인 | 발표평가 대비 파트 코드 정리 |
-| [@seoyeon056](https://github.com/seoyeon056) | `bench` | 여권 확신도 문서화(#392) | 미탐 벤치 데이터 · 발표용 정확도 자료 |
+| 담당 | 파트 | 책임 영역 |
+|---|---|---|
+| [@ChoHyeonChan](https://github.com/ChoHyeonChan) (팀장) | `core` · `mcp` | 탐지·마스킹 엔진, MCP 서버, 아키텍처, **팀원 PR 리뷰** |
+| [@kitae13](https://github.com/kitae13) | `api` | REST API, CI·저장소 설정 |
+| [@plana1470](https://github.com/plana1470) | `web` | 입력·하이라이트 뷰 |
+| [@imsoo0816](https://github.com/imsoo0816) | `web` | 결과·배치 화면, 디자인 |
+| [@stayalive000](https://github.com/stayalive000) | `desktop` | Flutter 데스크톱 앱 (Windows) |
+| [@seoyeon056](https://github.com/seoyeon056) | `bench` | 합성 데이터 생성기, 정확도 평가 |
+
+> 지금 각자 맡은 작업은 **[열린 이슈](https://github.com/ChoHyeonChan/maskingtape/issues)**에서 담당자로 필터해 봅니다.
 
 
 ### 파트별 상세 (위에서 아래로, 위가 먼저)
