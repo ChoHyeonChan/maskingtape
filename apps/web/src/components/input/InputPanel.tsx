@@ -291,10 +291,10 @@ export function InputPanel({
           <input
             ref={fileInputRef}
             type="file"
-            accept=".txt,.pdf,text/plain,application/pdf"
+            accept=".txt,.csv,.tsv,.md,.json,.log,.pdf,text/plain,text/csv,text/tab-separated-values,text/markdown,application/json,application/pdf"
             className="input-panel__file-input"
             onChange={handleFileInputChange}
-            aria-label="txt 또는 텍스트 PDF 파일 업로드"
+            aria-label="txt·csv·tsv·md·json·log 또는 텍스트 PDF 파일 업로드"
           />
         </div>
       </div>
