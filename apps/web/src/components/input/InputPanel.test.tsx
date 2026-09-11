@@ -92,7 +92,7 @@ describe("InputPanel file upload (#263)", () => {
     renderPanelWithChange(onTextChange);
 
     const file = new File(["고객 홍길동님 연락처 010-1234-5678"], "메모.txt", { type: "text/plain" });
-    fireEvent.change(screen.getByLabelText("txt 또는 텍스트 PDF 파일 업로드"), { target: { files: [file] } });
+    fireEvent.change(screen.getByLabelText("txt·csv·tsv·md·json·log 또는 텍스트 PDF 파일 업로드"), { target: { files: [file] } });
 
     await waitFor(() => expect(onTextChange).toHaveBeenCalledWith("고객 홍길동님 연락처 010-1234-5678"));
   });
@@ -101,7 +101,7 @@ describe("InputPanel file upload (#263)", () => {
     renderPanel("");
 
     const file = new File(["binary"], "photo.png", { type: "image/png" });
-    fireEvent.change(screen.getByLabelText("txt 또는 텍스트 PDF 파일 업로드"), { target: { files: [file] } });
+    fireEvent.change(screen.getByLabelText("txt·csv·tsv·md·json·log 또는 텍스트 PDF 파일 업로드"), { target: { files: [file] } });
 
     await waitFor(() =>
       expect(screen.getByRole("alert")).toHaveTextContent("지원하지 않는 파일 형식입니다"),
@@ -124,6 +124,38 @@ describe("InputPanel file upload (#263)", () => {
   it("shows an instant tooltip on the icon-only upload button, and switches it while extracting", () => {
     renderPanel("");
     expect(screen.getByRole("button", { name: "파일 업로드" })).toHaveAttribute("data-tooltip", "파일 업로드");
+  });
+});
+
+describe("InputPanel supports the same plain-text formats as desktop (#407)", () => {
+  it.each([
+    ["csv", "text/csv"],
+    ["tsv", "text/tab-separated-values"],
+    ["md", "text/markdown"],
+    ["json", "application/json"],
+    ["log", "text/plain"],
+  ])("reads a .%s file's content directly, the same as .txt", async (ext, mime) => {
+    const onTextChange = vi.fn();
+    renderPanelWithChange(onTextChange);
+
+    const file = new File(["거래처명,연락처\n가온상사,010-1234-5678"], `데모.${ext}`, { type: mime });
+    fireEvent.change(screen.getByLabelText("txt·csv·tsv·md·json·log 또는 텍스트 PDF 파일 업로드"), {
+      target: { files: [file] },
+    });
+
+    await waitFor(() => expect(onTextChange).toHaveBeenCalledWith("거래처명,연락처\n가온상사,010-1234-5678"));
+  });
+
+  it("falls back to the extension when the browser reports an empty file.type (흔한 .md/.csv 케이스)", async () => {
+    const onTextChange = vi.fn();
+    renderPanelWithChange(onTextChange);
+
+    const file = new File(["# 출장 신청서\n담당자 010-1234-5678"], "출장신청서.md", { type: "" });
+    fireEvent.change(screen.getByLabelText("txt·csv·tsv·md·json·log 또는 텍스트 PDF 파일 업로드"), {
+      target: { files: [file] },
+    });
+
+    await waitFor(() => expect(onTextChange).toHaveBeenCalledWith("# 출장 신청서\n담당자 010-1234-5678"));
   });
 });
 
