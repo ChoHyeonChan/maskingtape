@@ -2,13 +2,17 @@
 
 **담당: [@stayalive000](https://github.com/stayalive000)** · 상태: ✅ 기능 완성 (드롭 → 일괄 비식별화 → `_masked` 저장, 전략 선택·이름 정밀 탐지·결과 미리보기) — 백엔드는 로컬 CLI 우선 + REST API 폴백
 
-파일 드래그&드롭으로 문서 여러 개를 한 번에 비식별화하는 데스크톱 도구.
+파일 드래그&드롭으로 문서 여러 개를 한 번에 비식별화하는 데스크톱 도구. **Windows 전용**이다 — macOS·Linux는 아래 [지원 플랫폼](#지원-플랫폼) 참고.
 
 ## 실행·테스트
 
 ### 1. 선행조건 — 먼저 확인한다
 
-이 두 가지를 건너뛰면 **빌드가 실패하거나, 앱은 떠도 모든 파일이 실패로 표시된다.**
+**⓪ 지원 플랫폼: Windows** — 러너가 `windows/` 하나뿐이라 **macOS·Linux는 현재 빌드 대상이 아니다.**
+그 환경에서는 같은 비식별화 기능을 CLI(`pip install maskingtape`)나
+[웹 데모](https://maskingtape-lilac.vercel.app)로 쓴다. 러너를 추가하지 않은 이유는 아래 [지원 플랫폼](#지원-플랫폼) 절 참고.
+
+아래 두 가지를 건너뛰면 **빌드가 실패하거나, 앱은 떠도 모든 파일이 실패로 표시된다.**
 
 **① Windows 개발자 모드 (켜야 빌드된다)**
 
@@ -49,6 +53,9 @@ flutter build windows       # 릴리스 빌드
 
 Flutter 3.44.6 stable / Windows 기준. 새 패키지 추가 전 라이선스 확인 후 [SBOM.md](../../SBOM.md)에 기록.
 
+CI([ci.yml](../../.github/workflows/ci.yml)의 `desktop` 잡)는 ubuntu에서 `flutter analyze`·`flutter test`까지만 검증한다 —
+**`flutter build windows`는 CI가 검증하지 않으므로** 릴리스 빌드는 Windows PC에서 직접 확인한다.
+
 ### 3. 막히면
 
 | 증상 | 원인과 조치 |
@@ -57,6 +64,7 @@ Flutter 3.44.6 stable / Windows 기준. 새 패키지 추가 전 라이선스 �
 | `flutter test`가 출력 없이 멈춘다 | **Windows 사용자명에 한글 등 비ASCII 문자**가 있으면 재현된다(실측: 7분간 무응답). 임시 폴더를 ASCII 경로로 바꾸고 다시 실행한다 — `$env:TEMP='D:\dev\tmp'; $env:TMP='D:\dev\tmp'` |
 | 빌드가 `LNK1104 ... .exe 파일을 열 수 없습니다` | 앱이 이미 실행 중이라 exe가 잠겨 있다. 창을 닫거나 `Get-Process maskingtape_desktop \| Stop-Process -Force` |
 | 모든 파일이 "백엔드에 연결하지 못했습니다" | 선행조건 ②가 안 돼 있다 |
+| macOS·Linux에서 `flutter run`이 대상 장치를 못 찾는다 (`No supported devices`) | 이 앱은 Windows 전용이다 (선행조건 ⓪). CLI나 웹 데모를 쓴다 |
 
 ## 구조
 
@@ -164,6 +172,15 @@ API 경로에서 지원하지 않는 옵션을 고르면 네트워크를 타기 
 
 > 개발자 모드·백엔드 준비는 위 [선행조건](#1-선행조건--먼저-확인한다)으로 옮겼다 — 여기 묻혀 있으면
 > 위에서부터 따라 하는 사람이 못 보고 설치에 실패한다.
+
+## 지원 플랫폼
+
+**Windows만 지원한다.** `apps/desktop/`에 플랫폼 러너가 `windows/` 하나뿐이라 macOS·Linux에서는 빌드되지 않는다.
+
+- macOS·Linux 사용자는 **CLI(`pip install maskingtape`)** 또는 **[웹 데모](https://maskingtape-lilac.vercel.app)**로 같은 비식별화를 할 수 있다 —
+  탐지·마스킹은 전부 core에 있고 이 앱은 그걸 감싸는 껍데기다. CLI는 앱과 기능이 같고(이름 정밀 탐지 포함), 웹 데모는 규칙 기반 탐지만 제공한다.
+- `flutter create --platforms=macos,linux .`로 러너를 추가할 수는 있지만, 팀에 그 환경이 없어 동작을 확인할 수 없다.
+  검증 없이 추가하면 "폴더는 있는데 빌드가 깨지는" 상태가 되어 더 나쁘므로 **대회 이후 과제로 남긴다** (#404).
 
 ## 규칙
 
