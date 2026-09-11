@@ -456,6 +456,25 @@ def test_generated_passport_passes_core_detector():
         assert found[0].text == entity.text
 
 
+def test_generated_passport_confidence_splits_by_context_word():
+    """#392: core PassportDetector는 체크섬이 없어 confidence를 문맥어("여권")로만 가른다
+    (passport.py) — 문맥어가 가까이 있으면 0.9, 형식만 있으면 0.6이다. bench/README 신뢰도
+    임계값 절이 실측한 21.2%/78.8% 분포(정답 33건 기준)가 이 분기 때문임을 고정하는
+    회귀 테스트다 — birth_date/driver_license의 confidence 단언 패턴과 동일하다."""
+    rng = random.Random(32)
+    detector = PassportDetector()
+    for _ in range(50):
+        entity = generate_entity("passport", rng)
+
+        with_context = detector.detect(f"여권번호 {entity.text}입니다.")
+        assert len(with_context) == 1, f"문맥어 있는데 탐지 실패: {entity.text!r}"
+        assert with_context[0].confidence == 0.9
+
+        without_context = detector.detect(entity.text)
+        assert len(without_context) == 1, f"형식만 있는데 탐지 실패: {entity.text!r}"
+        assert without_context[0].confidence == 0.6
+
+
 def test_passport_generator_covers_old_and_new_styles():
     """구여권(문자+숫자8자리)과 신여권(문자+3자리+문자+4자리) 둘 다 나오는지 확인한다."""
     rng = random.Random(29)
@@ -870,6 +889,28 @@ def test_phone_separator_variants_partially_fixed_by_339():
     assert detector.detect("연락 (010) 1234-5678") == [], (
         "기대: 아직 미탐(유출) — 지역번호 괄호 표기까지 고쳤다면 이 테스트를 갱신할 것"
     )
+
+
+def test_common_title_words_outside_cue_vocabulary_miss_the_name():
+    """실무 문서에서 흔한 직함(총무/매니저/간호사/변호사/인턴 등)은 core NameDetector의
+    _TITLE_CUES/_PREFIX_CUES/_SUFFIX_CUES 어휘(name.py)에 없어, 앞뒤 문맥 단서가 하나도
+    없는 것으로 처리돼 이름이 그대로 새어나간다(직접 확인: 실제 /scan 서버로 15개 표본 중
+    14개 미탐 — "부사장"만 예외인데 "사장"의 부분 문자열이라 우연히 잡힌다).
+
+    #213/#239의 "직함만으로는 2음절 이름을 일부러 놓친다"와 달리, 이건 설계된 트레이드오프가
+    아니라 core가 아직 다루지 않은 어휘 커버리지 갭이다(3글자 이상 풀네임도 예외 없이 놓침).
+    core 이슈로 별도 등록했다 — core가 어휘를 넓히거나 LLM판을 기본으로 바꾸면 이 테스트가
+    실패하며 알려준다."""
+    detector = NameDetector()
+    common_titles_not_in_cue_vocabulary = [
+        "총무", "매니저", "상무", "전무", "국장", "지점장",
+        "간호사", "변호사", "회계사", "코치", "감독", "강사", "인턴", "팀원",
+    ]
+    for title in common_titles_not_in_cue_vocabulary:
+        text = f"{title} 김하늘이 참석했습니다."
+        assert detector.detect(text) == [], (
+            f"'{title}'가 core 어휘에 새로 추가된 듯하다 — 이 목록에서 빼고 README도 갱신할 것: {text!r}"
+        )
 
 
 def test_name_generator_covers_yang_gun_endings():
