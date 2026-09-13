@@ -11,7 +11,11 @@ import json
 import random
 from pathlib import Path
 
-from bench.generator.documents import generate_document, generate_multi_sentence_document, generate_negative_document
+from bench.generator.documents import (
+    generate_document,
+    generate_multi_sentence_document,
+    generate_negative_document,
+)
 
 
 def build_dataset(

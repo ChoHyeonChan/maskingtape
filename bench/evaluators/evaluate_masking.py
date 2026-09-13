@@ -21,7 +21,10 @@ from maskingtape.anonymizers import LabelAnonymizer, MaskAnonymizer, PseudonymAn
 from maskingtape.pipeline import Pipeline
 
 from bench.evaluators.evaluate import load_dataset
-from bench.evaluators.mask_quality import evaluate_mask_quality, format_mask_quality_report
+from bench.evaluators.mask_quality import (
+    evaluate_mask_quality,
+    format_mask_quality_report,
+)
 
 _STRATEGIES = {
     "mask": MaskAnonymizer,
