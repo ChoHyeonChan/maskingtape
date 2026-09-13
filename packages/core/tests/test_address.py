@@ -285,3 +285,113 @@ def test_abbreviation_attached_without_space_is_a_known_miss():
     축약형 뒤 공백을 조건으로 삼아 "서울사람" 같은 붙여 쓴 단어와 구분하기 때문이다.
     """
     assert detect("서울강남구 테헤란로 123") == []
+
+
+# --- #423: 동/도로명 자리에서 구간이 끊기는 부분 유출 ---
+# 이 자리에서 구간이 끊기면 뒤따르는 도로명·건물번호가 원문 그대로 남는다.
+# 주소에서 가장 구체적인 부분이 새므로, 입력 전체가 한 구간으로 잡혀야 한다.
+
+
+def _assert_detected_whole(texts):
+    for text in texts:
+        got = [d.text for d in detect(text)]
+        assert got == [text], f"{text!r} 부분 유출: {got}"
+
+
+def test_eup_myeon_followed_by_road_name_is_detected_whole():
+    # 군 지역 도로명주소의 표준 형식. 예전에는 읍·면에서 멈춰 "중앙1로 330"이 샜다
+    _assert_detected_whole([
+        "경기도 양평군 양평읍 양평시장길 10",
+        "전라남도 해남군 해남읍 중앙1로 330",
+        "경상북도 칠곡군 왜관읍 중앙로 1",
+        "충청남도 홍성군 홍북읍 충남대로 21",
+    ])
+
+
+def test_eup_myeon_followed_by_ri_is_detected_whole():
+    # 군 지역 지번주소의 표준 형식. 예전에는 읍·면에서 멈춰 "양근리 123"이 샜다
+    _assert_detected_whole([
+        "경기도 양평군 양평읍 양근리 123",
+        "전라남도 해남군 해남읍 해리 123-4",
+        "강원특별자치도 홍천군 화촌면 구성포리 45",
+        "양평군 양서면 양수리 12",
+        "세종특별자치시 조치원읍 원리 12",
+        "경상북도 칠곡군 왜관읍 왜관리 1 행복아파트 101동 202호",
+    ])
+
+
+def test_road_names_containing_dong_or_ri_are_not_cut():
+    # "대동로"의 "대동"처럼 이름 앞부분이 동/리로 끝나도 도로명 전체를 잡아야 한다
+    _assert_detected_whole([
+        "세종시 한누리대로 2130",
+        "세종특별자치시 한누리대로 2130",
+        "서울특별시 강남구 대동로 12",
+        "서울특별시 강서구 화곡동로 1",
+        "경기도 김포시 사우리로 5",
+        "성남시 분당구 정자동로 3",
+    ])
+
+
+def test_names_with_digits_are_detected_whole():
+    # 도로명("센텀2로", "올림픽로35가길"), 행정동("신림2동"), N가 동("을지로3가")은 이름에 숫자가 든다
+    _assert_detected_whole([
+        "세종특별자치시 도움6로 11",
+        "부산광역시 해운대구 센텀2로 25",
+        "서울특별시 송파구 올림픽로35가길 10",
+        "서울특별시 관악구 신림2동 123-4",
+        "서울특별시 노원구 상계10동 5",
+        "서울특별시 중구 을지로3가 12",
+        "서울특별시 종로구 종로5가 7",
+    ])
+
+
+def test_numbered_dong_is_detected_by_si_and_abbreviated_anchors():
+    # 시 앵커와 축약형 앵커는 동/도로명이 있어야 주소로 인정한다.
+    # 예전에는 숫자 든 행정동을 동으로 못 읽어서 이 입력들을 통째로 놓쳤다
+    _assert_detected_whole([
+        "성남시 분당구 정자1동 45-6",
+        "김포시 사우1동 12",
+        "서울 관악구 신림2동 123-4",
+    ])
+
+
+def test_dong_followed_by_road_address_is_detected_whole():
+    # 도로명주소에 동을 덧붙여 쓰는 표기
+    _assert_detected_whole(["서울특별시 강남구 역삼동 테헤란로 123"])
+
+
+def test_josa_after_dong_or_road_is_not_part_of_the_address():
+    """조사는 구간에 넣지 않는다. 조사 '로'와 도로명 끝 '로'는 모양이 같아 번지가 뒤따르는지로 가른다."""
+    assert detect("서울특별시 강남구 역삼동으로 이사")[0].text == "서울특별시 강남구 역삼동"
+    assert detect("서울특별시 강남구 역삼동에서 만나")[0].text == "서울특별시 강남구 역삼동"
+    assert detect("서울특별시 강남구 테헤란로에 있다")[0].text == "서울특별시 강남구 테헤란로"
+    # 번지 없이 리 뒤에 '로'가 오면 조사로 읽는다
+    assert detect("경기도 김포시 사우리로 이사")[0].text == "경기도 김포시 사우리"
+    # '로' 뒤에 다른 조사가 또 붙으면 '로'는 도로명의 끝이다
+    assert detect("서울특별시 강남구 대동로에서 만나")[0].text == "서울특별시 강남구 대동로"
+
+
+def test_second_part_road_requires_building_number():
+    """동·읍·면 뒤의 도로명은 번지가 뒤따를 때만 붙인다. '로'로 끝나는 일반 낱말을 삼키지 않게 하려는 것이다."""
+    assert detect("서울특별시 강남구 역삼동 근처로 이사")[0].text == "서울특별시 강남구 역삼동"
+    assert detect("서울특별시 강남구 역삼동 쪽으로 12명이 이동")[0].text == "서울특별시 강남구 역삼동"
+
+
+def test_longer_number_is_not_taken_as_building_number():
+    """번지 자리의 숫자가 주민등록번호·전화번호면 도로명 근거로 쓰지 않고, 그 번호와 구간이 겹치지도 않는다."""
+    assert detect("전라남도 해남군 해남읍 해리 800101-1234560")[0].text == "전라남도 해남군 해남읍 해리"
+    assert detect("부산광역시 해운대구 센텀2로 010-9876-5432")[0].text == "부산광역시 해운대구 센텀2로"
+    assert detect("경기도 김포시 사우리로 010-1234-5678")[0].text == "경기도 김포시 사우리"
+
+
+def test_unlisted_suffix_falls_back_to_previous_rule():
+    # 조사 목록 밖의 말("쪽으로")이 붙으면 새 해석이 전부 실패하고 예전 규칙과 같은 구간을 잡는다
+    assert detect("서울특별시 강남구 역삼동쪽으로 이동")[0].text == "서울특별시 강남구 역삼동"
+
+
+def test_common_word_ending_in_ri_after_eup_myeon_is_over_masked():
+    """읍·면 뒤의 '…리' 낱말은 리 이름인지 일반 낱말인지 가리지 않고 붙인다.
+
+    과다 마스킹이라 안전한 쪽이다. 시 앵커가 "양평군 우리"를 잡는 기존 동작과 같은 기준이다.
+    """
+    assert detect("경기도 양평군 양평읍 사거리에서 만나")[0].text == "경기도 양평군 양평읍 사거리"
