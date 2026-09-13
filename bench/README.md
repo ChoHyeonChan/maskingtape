@@ -59,7 +59,7 @@ python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl --report bench
 | kind | precision | recall | f1 | 비고 |
 |---|---|---|---|---|
 | email / biz_reg / card | 1.000 | 1.000 | 1.000 | 변동 없음 |
-| **phone** | **1.000** | **1.000** | **1.000** | 050X 평생번호·안심번호 포함 유지 + [#339](https://github.com/ChoHyeonChan/maskingtape/issues/339) 분리자 변형(en-dash·"공백-하이픈-공백" 등) 신규 커버 — 지역번호 괄호 표기는 아직 core 미해결(아래 참고) |
+| **phone** | **1.000** | **1.000** | **1.000** | 050X 평생번호·안심번호 포함 유지 + [#339](https://github.com/ChoHyeonChan/maskingtape/issues/339) 분리자 변형(en-dash·"공백-하이픈-공백" 등) 신규 커버 + 지역번호 괄호 표기([#397](https://github.com/ChoHyeonChan/maskingtape/issues/397)) 커버 |
 | **rrn** | **1.000** | **1.000** | **1.000** | 점(.) 구분자 포함 유지 + [#339](https://github.com/ChoHyeonChan/maskingtape/issues/339) 분리자 변형(en-dash·em-dash·"공백-하이픈-공백"·"점+공백") 신규 커버 — 아래 confidence 절 참고 |
 | account | 1.000 | 1.000 | 1.000 | 문맥어 하드 게이트라 confidence가 항상 정확히 0.6으로 고정 — 아래 confidence 절 참고 |
 | passport | 1.000 | 1.000 | 1.000 | 변동 없음 |
@@ -86,8 +86,9 @@ en-dash(–)로 바꾸거나 "공백-하이픈-공백"·"점+공백"처럼 표·
 바로 뒤 분리자는 여전히 좁은 원래 집합만 허용한다** — `gen_phone`이 이 경계를 실수로 넘지
 않도록 별도 테스트(`test_phone_intl_prefix_separator_stays_within_narrow_set`)로 고정했다.
 **전화번호의 지역번호 괄호 표기("(010) 1234-5678")는 원인이 달라(괄호 자체를 파싱하지
-않음) 여전히 미탐이다** — core 이슈로 남아있고, bench canary(`test_phone_separator_variants_partially_fixed_by_339`)가
-이 잔여 위험을 계속 실측한다.
+않음) 그때 남겨 뒀고, [#397](https://github.com/ChoHyeonChan/maskingtape/issues/397)에서 core가 고쳤다.**
+잔여 위험을 실측하던 canary는 이제 세 표기(하이픈 / 공백-하이픈-공백 / 괄호)가 모두 탐지되는지
+고정한다(`test_phone_separator_and_parenthesis_variants_all_detected`).
 
 **이름 끝음절 양/군·주소 번지 리터럴([#340](https://github.com/ChoHyeonChan/maskingtape/issues/340), core 대응 완료)**:
 존칭 양보 규칙(`_HONORIFIC_TAIL="님씨군양"`, #147)이 실명의 마지막 글자가 마침 "양"·"군"이면

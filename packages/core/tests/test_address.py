@@ -186,3 +186,102 @@ def test_dong_and_ho_after_comma_are_included():
     )
     # 콤마 뒤가 동/호가 아니면(이름 등) 주소 구간에 삼키지 않는다
     assert detect("서울특별시 강남구 역삼동 12-3, 김철수 담당")[0].text == "서울특별시 강남구 역삼동 12-3"
+
+
+# --- #396: 시/도 축약형 ---
+# 일상 문서는 "서울특별시"보다 "서울 강남구"처럼 줄여 쓰는 경우가 많다.
+# 지역 이름으로만 쓰인 문장("서울 사람")을 막으려고, 축약형 뒤에 시/군/구가 오고
+# 그 뒤에 동/읍/면/리·도로명까지 이어질 때만 주소로 본다.
+
+
+def test_detects_abbreviated_province_address():
+    found = detect("주소: 서울 강남구 테헤란로 123")
+    assert len(found) == 1
+    assert found[0].text == "서울 강남구 테헤란로 123"
+    # 정식 시/도명이 없으니 시/군 앵커와 같은 상한(0.9)을 둔다
+    assert found[0].confidence == 0.9
+
+
+def test_detects_abbreviated_provinces_across_regions():
+    for text in [
+        "부산 해운대구 센텀중앙로 79",
+        "충북 청주시 상당구 상당로 82",
+        "제주 서귀포시 중정로 1",
+        "광주 북구 용봉로 77",
+        "경남 김해시 김해대로 2401",
+    ]:
+        found = detect(text)
+        assert len(found) == 1, f"{text!r} 미탐지"
+        assert found[0].text == text, f"{text!r} 범위 오류: {found[0].text}"
+
+
+def test_abbreviated_province_keeps_building_and_unit():
+    # 세대를 특정하는 건물·동·호까지 이어져야 한다 (정식명 앵커와 같은 꼬리를 쓴다)
+    text = "대구 수성구 범어동 123 더샵아파트 101동 1203호"
+    found = detect(text)
+    assert len(found) == 1
+    assert found[0].text == text
+
+
+def test_abbreviated_province_with_si_is_detected_once():
+    # "경기 성남시 …"는 시/군 앵커도 "성남시 …"로 잡을 수 있다. 더 넓은 구간 하나만 남아야 한다
+    found = detect("경기 성남시 분당구 정자동 45-6")
+    assert len(found) == 1
+    assert found[0].text == "경기 성남시 분당구 정자동 45-6"
+
+
+def test_full_and_si_forms_are_unchanged_by_abbreviation_support():
+    assert [(d.text, d.confidence) for d in detect("서울특별시 강남구 테헤란로 123")] == [
+        ("서울특별시 강남구 테헤란로 123", 1.0)
+    ]
+    assert [d.text for d in detect("서울시 강남구 테헤란로 123")] == ["서울시 강남구 테헤란로 123"]
+
+
+def test_abbreviated_province_rejects_region_mentions():
+    """축약형이 지역 이름으로만 쓰인 문장은 주소가 아니다.
+
+    1단계로 축약형 뒤에 시/군/구가 없으면 걸러지고("서울 사람"), 2단계로 시/군/구 뒤에
+    동/읍/면/리·도로명이 없으면 걸러진다("서울 강남구에 산다").
+    """
+    for text in [
+        "서울 사람이다",
+        "부산 출신입니다",
+        "경기 침체가 길어진다",
+        "대구 매운탕 맛집",
+        "서울 강남구에 산다",
+        "충남 논산군 훈련소",
+        "경남 거제시청 방문",
+        "서울 강남구청장",
+    ]:
+        assert detect(text) == [], f"{text!r}는 주소가 아니다"
+
+
+def test_abbreviation_inside_another_word_is_not_an_anchor():
+    assert detect("남서울 강남구 테헤란로 1") == []
+
+
+def test_abbreviated_province_with_dong_only_is_over_masked():
+    """번지 없이 동까지만 있어도 잡는다. 장소 언급일 수 있지만 과다 마스킹이라 안전한 쪽이다.
+
+    시/군 앵커("성남시 분당구 정자동")와 같은 기준이다.
+    """
+    found = detect("서울 중구 명동 방문")
+    assert [(d.text, d.confidence) for d in found] == [("서울 중구 명동", 0.7)]
+
+
+def test_sejong_abbreviation_is_a_known_miss():
+    """알려진 한계: "세종 …"은 잡지 않는다.
+
+    세종특별자치시는 시/군/구 단계 없이 바로 동·읍·면이 와서 "축약형 뒤에 시/군/구"
+    조건을 만족할 수 없다. 조건을 풀면 "세종 대왕로" 같은 표현과 구분이 어렵다.
+    현재 동작을 여기 고정한다.
+    """
+    assert detect("세종 한누리대로 2130") == []
+
+
+def test_abbreviation_attached_without_space_is_a_known_miss():
+    """알려진 한계: 축약형과 시/군/구를 붙여 쓰면("서울강남구") 잡지 않는다.
+
+    축약형 뒤 공백을 조건으로 삼아 "서울사람" 같은 붙여 쓴 단어와 구분하기 때문이다.
+    """
+    assert detect("서울강남구 테헤란로 123") == []

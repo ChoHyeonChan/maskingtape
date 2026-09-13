@@ -10,6 +10,9 @@
    "서울특별시청"처럼 시/도명이 다른 단어의 일부일 뿐이면 매칭하지 않는다.
 4. 시/도 없이 시/군으로 시작하는 주소("성남시 분당구 정자동 45-6")도 별도 앵커로 잡는다.
    시/군 뒤에 구·동/읍/면/리가 이어질 때만(지역 언급·조사 배제) 낮은 확신도(0.4~)로 잡는다(이슈 #68).
+5. 시/도를 줄여 쓴 주소("서울 강남구 테헤란로 123")도 잡는다(#396). 일상 문서는 정식명보다
+   축약형을 더 자주 쓴다. "서울 사람", "경기 침체"처럼 지역 이름으로만 쓰인 문장을 막으려고
+   축약형 바로 뒤에 시/군/구가 오고, 그 뒤에 동/읍/면/리나 도로명까지 이어질 때만 인정한다.
 
 구간을 끝까지 넓히는 게 핵심이다. 시/도만 가리고 "월드컵로237길 49 ..."를 남기면
 개인정보 가치가 가장 낮은 부분만 가린 셈이라 사실상 유출이다(이슈 #66).
@@ -47,6 +50,15 @@ _PROVINCES = [
 
 # 긴 이름부터 매칭해야 "전라북도"가 "전북특별자치도" 매칭을 가로채지 않는다.
 _PROVINCE_RE = "|".join(sorted(_PROVINCES, key=len, reverse=True))
+
+# 시/도 축약형(#396). 모두 두 글자라 정렬이 필요 없다.
+# 세종은 넣지 않았다. 세종특별자치시는 시/군/구 단계 없이 바로 동·읍·면이 와서 아래의
+# "축약형 뒤에 시/군/구" 조건을 만족할 수 없고, 조건을 풀면 "세종 대왕로" 같은 표현과
+# 구분이 어려워진다. 정식명 "세종특별자치시 …"는 _ADDR_RE가 잡는다.
+_PROVINCE_ABBR = [
+    "서울", "부산", "대구", "인천", "광주", "대전", "울산",
+    "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주",
+]
 
 # 시/도 앵커와 시/군 앵커가 공유하는 꼬리. 시/군/구·동·번지·건물을 이어붙인다.
 # 시/군/구는 두 단계까지 이어진다 — "성남시 분당구", "수원시 영통구".
@@ -94,6 +106,16 @@ _ADDR_NO_PROVINCE_RE = re.compile(
     r"(?=\s[가-힣]{1,10}(?:구|동|읍|면|리))" + _GU + _GU2 + _TAIL
 )
 
+# 시/도 축약형으로 시작하는 주소 — "서울 강남구 테헤란로 123"(#396).
+_ADDR_ABBR_RE = re.compile(
+    # 앞에 한글이 붙으면("남서울") 다른 단어의 일부이므로 시작점으로 보지 않는다.
+    r"(?<![가-힣])(?P<abbr>" + "|".join(_PROVINCE_ABBR) + r")"
+    # 오탐 억제 1단계: 공백 뒤에 시/군/구가 바로 이어져야 후보로 삼는다.
+    # "서울 사람", "부산 출신", "경기 침체"처럼 지역 이름으로만 쓰인 문장이 여기서 걸러진다.
+    # 2단계(동/읍/면/리·도로명 필수)는 detect()에서 확인한다.
+    r"(?=\s[가-힣]{1,10}[시군구])" + _GU + _GU2 + _TAIL
+)
+
 
 def _score(m: re.Match[str], base: float, cap: float) -> float:
     """매칭된 구성 요소가 많을수록 확신도를 높인다(시/군만 vs 동·번지·건물까지)."""
@@ -123,12 +145,22 @@ class AddressDetector(Detector):
         for m in _ADDR_RE.finditer(text):
             province_spans.append((m.start(), m.end()))
             found.append(self._make(m, base=0.5, cap=1.0))
+        # 시/도 축약형 앵커(#396) — 정식 시/도명이 없으니 시/군 앵커와 같은 확신도(0.4~)로 둔다.
+        # 시/군 앵커보다 먼저 돌려야 "경기 성남시 분당구 …"가 "성남시 분당구 …"로 잘려
+        # 두 번 잡히지 않는다. 먼저 잡은 더 넓은 구간을 province_spans에 넣어 뒤에서 중복을 거른다.
+        for m in _ADDR_ABBR_RE.finditer(text):
+            if not m.group("dong"):
+                continue  # "서울 강남구에 산다"처럼 구까지만이면 지역 언급일 뿐 — 유출 아님
+            if any(m.start() < end and m.end() > start for start, end in province_spans):
+                continue
+            province_spans.append((m.start(), m.end()))
+            found.append(self._make(m, base=0.4, cap=0.9))
         # 시/군 앵커(시/도 없음) — 확신도 0.4부터. 시/도가 없어 확신이 낮으니 임계값으로 조절 가능.
         for m in _ADDR_NO_PROVINCE_RE.finditer(text):
             if not m.group("dong"):
                 continue  # 동/읍/면/리(도로명 포함) 없이 시/군+구만이면 지역 언급일 뿐 — 유출 아님
             if any(m.start() < end and m.end() > start for start, end in province_spans):
-                continue  # 시/도 앵커 매칭에 이미 포함된 구간이므로 중복
+                continue  # 시/도 앵커(정식명·축약형) 매칭에 이미 포함된 구간이므로 중복
             found.append(self._make(m, base=0.4, cap=0.9))
         found.sort(key=lambda d: d.start)
         return found
