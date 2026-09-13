@@ -9,7 +9,11 @@ from maskingtape.detectors.base import Detector
 from maskingtape.pipeline import Pipeline
 from maskingtape.types import Detection
 
-from bench.evaluators.compare_name_detectors import evaluate_name_only, format_comparison, try_evaluate_llm_name
+from bench.evaluators.compare_name_detectors import (
+    evaluate_name_only,
+    format_comparison,
+    try_evaluate_llm_name,
+)
 from bench.evaluators.evaluate import Counts
 
 

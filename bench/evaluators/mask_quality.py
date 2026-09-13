@@ -150,10 +150,14 @@ def format_mask_quality_report(result: MaskQualityResult) -> str:
     lines += [
         f"평가 문서 수:        {result.doc_count}",
         f"정답 개인정보 항목 수: {result.gold_pii_count}",
-        f"유출 항목 수:        {result.leak_count} (유출률 {result.leak_rate:.1%}) "
-        f"— 완전유출 {result.full_leak_count} / 부분유출 {result.partial_leak_count}",
-        f"길이 보존 문서 비율:  {result.length_preserved_rate:.1%} "
-        f"(불일치 {result.length_mismatch_count}건 — {length_note})",
+        (
+            f"유출 항목 수:        {result.leak_count} (유출률 {result.leak_rate:.1%}) "
+            f"— 완전유출 {result.full_leak_count} / 부분유출 {result.partial_leak_count}"
+        ),
+        (
+            f"길이 보존 문서 비율:  {result.length_preserved_rate:.1%} "
+            f"(불일치 {result.length_mismatch_count}건 — {length_note})"
+        ),
     ]
     if result.leaks:
         by_kind: dict[str, list[float]] = {}
