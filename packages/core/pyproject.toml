@@ -30,9 +30,7 @@ Repository = "https://github.com/ChoHyeonChan/maskingtape"
 Issues = "https://github.com/ChoHyeonChan/maskingtape/issues"
 
 [project.optional-dependencies]
-# ruff는 0.16에서 새 규칙(TRY004 등)이 stable로 승격돼 기존 코드까지 린트를 깬다.
-# CI와 로컬이 같은 규칙을 쓰도록 상한을 둔다 — 0.16 규칙 정리는 별도 이슈(#60)에서.
-dev = ["pytest>=8", "ruff>=0.4,<0.16"]
+dev = ["pytest>=8", "ruff>=0.16"]
 
 [project.scripts]
 maskingtape = "maskingtape.cli:main"
@@ -43,6 +41,9 @@ include = ["maskingtape*"]
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I001", "ISC004", "PIE808", "PLW1510", "RUF007", "TRY004"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

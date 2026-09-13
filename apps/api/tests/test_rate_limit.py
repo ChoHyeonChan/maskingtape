@@ -5,7 +5,11 @@ from fastapi.testclient import TestClient
 
 from maskingtape_api.main import create_app
 from maskingtape_api.rate_limit import InMemoryRateLimiter
-from maskingtape_api.settings import ApiSettings
+from maskingtape_api.settings import (
+    DEFAULT_RATE_LIMIT_REQUESTS,
+    DEFAULT_RATE_LIMIT_WINDOW_SECONDS,
+    ApiSettings,
+)
 
 
 class Clock:
@@ -34,6 +38,30 @@ def test_scan_returns_429_after_rate_limit_is_exceeded() -> None:
     assert 1 <= int(response.headers["retry-after"]) <= 60
 
 
+def test_default_rate_limit_is_60_requests_per_60_seconds() -> None:
+    body = {"text": "합성 테스트 문장입니다"}
+
+    for endpoint in ("/scan", "/anonymize"):
+        client = TestClient(create_app(settings=ApiSettings(cors_allowed_origins=())))
+
+        for request_number in range(1, DEFAULT_RATE_LIMIT_REQUESTS + 1):
+            response = client.post(endpoint, json=body)
+            assert response.status_code == 200, (endpoint, request_number)
+
+        response = client.post(endpoint, json=body)
+
+        assert response.status_code == 429
+        assert response.json() == {
+            "code": "rate_limit_exceeded",
+            "message": "too many requests.",
+            "details": {
+                "limit": DEFAULT_RATE_LIMIT_REQUESTS,
+                "window_seconds": DEFAULT_RATE_LIMIT_WINDOW_SECONDS,
+            },
+        }
+        assert 1 <= int(response.headers["retry-after"]) <= DEFAULT_RATE_LIMIT_WINDOW_SECONDS
+
+
 def test_anonymize_returns_429_after_rate_limit_is_exceeded() -> None:
     client = TestClient(_rate_limited_app(limit=1))
     body = {"text": "합성 테스트 문장입니다"}
@@ -44,6 +72,19 @@ def test_anonymize_returns_429_after_rate_limit_is_exceeded() -> None:
 
     assert response.status_code == 429
     assert response.json()["code"] == "rate_limit_exceeded"
+
+
+def test_rate_limit_counters_are_not_shared_between_app_instances() -> None:
+    body = {"text": "합성 테스트 문장입니다"}
+    instance_a = TestClient(_rate_limited_app(limit=1))
+    instance_b = TestClient(_rate_limited_app(limit=1))
+
+    assert instance_a.post("/scan", json=body).status_code == 200
+    assert instance_a.post("/scan", json=body).status_code == 429
+
+    # Serverless/horizontal scaling has the same limitation: each instance owns its
+    # in-memory limiter, so a request routed to another instance starts from an empty bucket.
+    assert instance_b.post("/scan", json=body).status_code == 200
 
 
 def test_rate_limit_ignores_spoofable_x_forwarded_for() -> None:

@@ -25,6 +25,7 @@ def run_cli(*args: str, stdin: bytes = b"") -> subprocess.CompletedProcess[bytes
         [sys.executable, "-m", "maskingtape.cli", *args],
         input=stdin,
         capture_output=True,
+        check=False,
         env=env,
     )
 

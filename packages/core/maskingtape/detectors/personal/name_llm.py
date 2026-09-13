@@ -154,7 +154,7 @@ class LLMNameDetector(Detector):
         names = parsed.get("names", []) if isinstance(parsed, dict) else None
         if not isinstance(names, list):
             # 응답 본문에는 추출된 이름(개인정보)이 들어있을 수 있으므로 타입만 알린다.
-            raise RuntimeError(
+            raise TypeError(
                 f"모델 {self.model}의 응답에 이름 목록(names)이 없습니다 "
                 f"(받은 형태: {type(parsed).__name__}). 응답 본문은 개인정보가 섞일 수 있어 표시하지 않습니다."
             )
