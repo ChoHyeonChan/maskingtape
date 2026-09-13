@@ -64,6 +64,22 @@ TCP peer address, which cannot be forged. On Vercel the platform overwrites inco
 forwarding headers to prevent IP spoofing, so the default turns on automatically there
 (detected via the `VERCEL` runtime variable).
 
+### Rate limit 운영 기록
+
+- 현재 제한값: 클라이언트 키 1개당 60초에 60회. 61번째 `/scan` 또는 `/anonymize` 요청은
+  429와 `Retry-After` 헤더로 거절된다. `/health`는 제한하지 않는다.
+- 로컬 검증: `apps/api/tests/test_rate_limit.py`가 기본값 그대로 60회 허용·61회차 429,
+  짧은 테스트 설정의 `/anonymize` 429, 버킷 최대 개수 10,000개 상한, 만료 버킷 제거를
+  회귀 테스트한다.
+- 서버리스 한계: limiter는 `create_app()`마다 생성되는 프로세스 메모리 객체다. 테스트로
+  두 앱 인스턴스가 같은 클라이언트 요청을 공유 카운터로 보지 않는 것을 확인한다. 따라서
+  Vercel serverless나 수평 확장 환경에서 요청이 여러 인스턴스로 분산되면 실효 한도는
+  인스턴스 수만큼 느슨해질 수 있다.
+- 선택(2026-09-13): 공모전 데모는 현행 인메모리 제한을 best-effort 보호로 유지한다.
+  새 외부 스토어 의존성은 추가하지 않았으므로 `SBOM.md` 갱신은 없다. 트래픽이 커지거나
+  실제 남용이 보이면 Vercel 플랫폼 보호를 먼저 켜고, 그 다음 외부 공유 스토어 기반
+  limiter를 검토한다.
+
 헬스체크:
 
 ```bash
@@ -144,7 +160,7 @@ FastAPI 라우터는 core를 직접 호출하지 않고 `maskingtape_api.service
 2. **저장하지 않는다(stateless).** 요청 내용을 DB·파일·캐시에 쓰지 않는다. 처리 후 메모리에서 끝난다.
 3. **응답에 원문을 불필요하게 담지 않는다.** `/anonymize`는 비식별화된 텍스트를 돌려주는 게 목적이다. 디버그 필드로 원문을 반환하지 않고, `/scan`·`/anonymize`의 `detections`에도 원문 PII 조각을 넣지 않는다.
 4. **입력 크기 상한**을 둔다(예: 100KB). 초과 시 413으로 거절 — 비용·자원 보호.
-5. **호출 빈도 제한(rate limit)**을 둔다. 공개 URL은 남용된다. 현재 API는 `/scan`·`/anonymize`에 IP별 인메모리 제한을 적용하며 초과 시 429로 거절한다. 단, Vercel serverless처럼 여러 인스턴스가 생길 수 있는 환경에서는 카운터가 공유되지 않아 배포 등급의 강한 제한으로 보지 않는다. **결정(2026-08-17): 공모전 데모는 현행 인메모리 제한을 best-effort 보호로 유지하고 배포를 진행한다.** 남용/비용/DoS 위험이 커지면 Vercel 플랫폼 보호 또는 외부 공유 스토어 기반 limiter로 전환한다.
+5. **호출 빈도 제한(rate limit)**을 둔다. 공개 URL은 남용된다. 현재 API는 `/scan`·`/anonymize`에 IP별 인메모리 제한을 적용하며 초과 시 429로 거절한다. 단, Vercel serverless처럼 여러 인스턴스가 생길 수 있는 환경에서는 카운터가 공유되지 않아 배포 등급의 강한 제한으로 보지 않는다. **결정(2026-08-17, 재확인 2026-09-13): 공모전 데모는 현행 인메모리 제한을 best-effort 보호로 유지하고 배포를 진행한다.** 남용/비용/DoS 위험이 커지면 Vercel 플랫폼 보호 또는 외부 공유 스토어 기반 limiter로 전환한다.
 6. **CORS를 우리 프론트 도메인으로 제한**한다. `*` 금지.
 7. **HTTPS만 허용**한다.
 
