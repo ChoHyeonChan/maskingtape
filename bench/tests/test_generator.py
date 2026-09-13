@@ -8,19 +8,23 @@ from __future__ import annotations
 
 import random
 import re
+from itertools import pairwise
 
-from maskingtape.detectors import AccountDetector
-from maskingtape.detectors import AddressDetector
-from maskingtape.detectors import BirthDateDetector
-from maskingtape.detectors import BusinessRegistrationDetector
-from maskingtape.detectors import CreditCardDetector
-from maskingtape.detectors import DriverLicenseDetector
-from maskingtape.detectors import EmailDetector
-from maskingtape.detectors import NameDetector
-from maskingtape.detectors import PassportDetector
-from maskingtape.detectors import PhoneDetector
-from maskingtape.detectors import RRNDetector
-from maskingtape.detectors import default_detectors
+from maskingtape.detectors import (
+    AccountDetector,
+    AddressDetector,
+    BirthDateDetector,
+    BusinessRegistrationDetector,
+    CreditCardDetector,
+    DriverLicenseDetector,
+    EmailDetector,
+    NameDetector,
+    PassportDetector,
+    PhoneDetector,
+    RRNDetector,
+    default_detectors,
+)
+
 from bench.generator.distractors import (
     gen_account_number_like,
     gen_business_reg_number,
@@ -39,8 +43,7 @@ from bench.generator.documents import (
     negative_templates,
     templates,
 )
-from bench.generator.entities import ALL_KINDS, generate_entity
-from bench.generator.entities import _CITIES
+from bench.generator.entities import _CITIES, ALL_KINDS, generate_entity
 
 
 def test_labels_match_text_spans_exactly():
@@ -87,7 +90,7 @@ def test_labels_do_not_overlap():
     for _ in range(50):
         doc = generate_document(rng)
         ordered = sorted(doc.labels, key=lambda lb: lb.start)
-        for prev, cur in zip(ordered, ordered[1:]):
+        for prev, cur in pairwise(ordered):
             assert prev.end <= cur.start
 
 
@@ -571,7 +574,7 @@ def test_multi_sentence_document_labels_do_not_overlap():
     for _ in range(50):
         doc = generate_multi_sentence_document(rng)
         ordered = sorted(doc.labels, key=lambda lb: lb.start)
-        for prev, cur in zip(ordered, ordered[1:]):
+        for prev, cur in pairwise(ordered):
             assert prev.end <= cur.start
 
 

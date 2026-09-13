@@ -14,7 +14,12 @@ import random
 
 from maskingtape.detectors.financial.creditcard import _luhn_ok
 
-from bench.generator.entities import _ACCOUNT_GROUP_PATTERNS, _biz_reg_check_digit, _DL_REGIONS, _PASSPORT_TYPE_CODES
+from bench.generator.entities import (
+    _ACCOUNT_GROUP_PATTERNS,
+    _DL_REGIONS,
+    _PASSPORT_TYPE_CODES,
+    _biz_reg_check_digit,
+)
 
 # core RRNDetector가 허용하는 지역번호(rrn.py 참고)에 없는 국번 — 형식은 유선전화 같지만 매칭되면 안 됨.
 _INVALID_AREA_CODES = ["09", "07", "00", "08"]
@@ -144,7 +149,7 @@ def gen_invalid_driver_license_like(rng: random.Random) -> str:
     반대로 말하면 지역코드가 우연히 유효한 임의의 12자리 숫자(사원번호 등)는 core가 문맥과
     무관하게 무조건 운전면허번호로 오탐한다는 뜻이라, 이 함수는 그 경계선만 검증한다.
     """
-    invalid_region = rng.choice([r for r in range(0, 100) if r not in _DL_REGIONS])
+    invalid_region = rng.choice([r for r in range(100) if r not in _DL_REGIONS])
     sep = rng.choice(["-", ""])
     body = f"{rng.randint(0, 99):02d}{sep}{rng.randint(0, 999999):06d}{sep}{rng.randint(0, 99):02d}"
     return f"{invalid_region:02d}{sep}{body}"

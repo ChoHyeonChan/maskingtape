@@ -50,8 +50,10 @@ def format_comparison(rule_counts: Counts, llm_counts: Counts | None) -> str:
         "이름(name) 탐지 방식 비교",
         "--------------------------",
         f"{'방식':<12} {'precision':>10} {'recall':>10} {'f1':>10} {'tp':>6} {'fp':>6} {'fn':>6}",
-        f"{'규칙판':<12} {rule_counts.precision:>10.3f} {rule_counts.recall:>10.3f} "
-        f"{rule_counts.f1:>10.3f} {rule_counts.tp:>6} {rule_counts.fp:>6} {rule_counts.fn:>6}",
+        (
+            f"{'규칙판':<12} {rule_counts.precision:>10.3f} {rule_counts.recall:>10.3f} "
+            f"{rule_counts.f1:>10.3f} {rule_counts.tp:>6} {rule_counts.fp:>6} {rule_counts.fn:>6}"
+        ),
     ]
     if llm_counts is None:
         lines.append(f"{'하이브리드':<12} {'(LLM 사용 불가 — 로컬 Ollama 실행 후 재시도)':>0}")
