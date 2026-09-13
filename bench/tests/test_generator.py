@@ -877,21 +877,28 @@ def test_rrn_separator_variants_are_detected():
         assert found[0].confidence == 1.0
 
 
-def test_phone_separator_variants_partially_fixed_by_339():
-    """#339(core 부분 대응) — PhoneDetector의 분리자 변형 중 공백-하이픈-공백("010 - 1234 -
-    5678")은 이번 수정으로 고쳐졌지만, 지역번호 괄호 표기("(010) 1234-5678")는 원인이 달라
-    (괄호 자체를 파싱하지 않음) 아직 놓친다 — 마스킹 후에도 평문으로 남는 유출이 여전하다.
-    이 괄호 케이스가 마저 고쳐지면 아래 마지막 assert가 깨져서 알 수 있다."""
+def test_phone_separator_and_parenthesis_variants_all_detected():
+    """PhoneDetector의 분리자·괄호 변형이 모두 탐지되는지 고정한다.
+
+    이력: #339에서 공백-하이픈-공백("010 - 1234 - 5678")을 고쳤고, 괄호 표기
+    ("(010) 1234-5678")는 원인이 달라(괄호를 파싱하지 않음) 그때 남겨 뒀다.
+    남은 괄호 케이스는 **#397에서 고쳤다** — 국번을 감싼 괄호 쌍을 정규식 조건부
+    참조로 받는다. 이 테스트는 그때까지 "아직 미탐"을 고정해 두는 알람이었고,
+    #397 작업 중 실제로 실패하며 수정 사실을 알려 줬다.
+
+    지금은 세 표기가 모두 잡히는 것을 고정한다. 하나라도 다시 새면 여기서 걸린다.
+    """
     detector = PhoneDetector()
     # 대조군: 표준 하이픈 표기 — 예전에도 지금도 정상 탐지.
     assert len(detector.detect("연락 010-1234-5678")) == 1
 
-    fixed = detector.detect("연락 010 - 1234 - 5678")
-    assert len(fixed) == 1 and fixed[0].text == "010 - 1234 - 5678" and fixed[0].confidence == 1.0
+    spaced = detector.detect("연락 010 - 1234 - 5678")
+    assert len(spaced) == 1 and spaced[0].text == "010 - 1234 - 5678" and spaced[0].confidence == 1.0
 
-    assert detector.detect("연락 (010) 1234-5678") == [], (
-        "기대: 아직 미탐(유출) — 지역번호 괄호 표기까지 고쳤다면 이 테스트를 갱신할 것"
-    )
+    paren = detector.detect("연락 (010) 1234-5678")
+    assert len(paren) == 1, "괄호 표기 미탐 — #397이 되돌아갔는지 확인할 것"
+    assert paren[0].text == "(010) 1234-5678"
+    assert paren[0].confidence == 1.0
 
 
 def test_common_title_words_outside_cue_vocabulary_miss_the_name():
