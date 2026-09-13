@@ -123,7 +123,7 @@ def test_names_key_is_used_when_present(monkeypatch):
 def test_non_list_names_raises_without_leaking_the_response(monkeypatch):
     # 응답 본문에는 추출된 이름(개인정보)이 들어있을 수 있다 — 오류 메시지에 새면 안 된다
     d = _detector_with_model_response(monkeypatch, '{"names": "김철수"}')
-    with pytest.raises(RuntimeError, match="이름 목록") as exc_info:
+    with pytest.raises(TypeError, match="이름 목록") as exc_info:
         d.detect("고객 김철수님")
     assert "김철수" not in str(exc_info.value)
 

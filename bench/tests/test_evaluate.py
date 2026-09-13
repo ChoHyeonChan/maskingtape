@@ -4,8 +4,15 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from bench.evaluators.evaluate import Counts, Span, evaluate, evaluate_by_difficulty, write_markdown_report
 from maskingtape.pipeline import Pipeline
+
+from bench.evaluators.evaluate import (
+    Counts,
+    Span,
+    evaluate,
+    evaluate_by_difficulty,
+    write_markdown_report,
+)
 
 
 def test_counts_precision_recall_f1():

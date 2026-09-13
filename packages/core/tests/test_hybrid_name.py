@@ -6,9 +6,8 @@
 LLM 호출 여부는 client 주입으로 관찰한다(CI에는 Ollama가 없다).
 """
 
-from maskingtape.detectors.personal.name import has_name_candidate
 from maskingtape.detectors import LLMNameDetector
-
+from maskingtape.detectors.personal.name import has_name_candidate
 
 # --- 후보 판정 필터 ---
 

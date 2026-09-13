@@ -97,7 +97,7 @@
 - [x] CORS·개발 환경 설정 ([#30](https://github.com/ChoHyeonChan/maskingtape/issues/30))
 - [x] API 테스트 자동화 ([#31](https://github.com/ChoHyeonChan/maskingtape/issues/31))
 - [x] → Vercel 배포 (라이브, [apps/api 보안 요구사항](apps/api/README.md) 준수)
-- [ ] rate limit 강화 — 서버리스 인스턴스별 한계 보완
+- [x] rate limit 강화 — 서버리스 인스턴스별 한계 문서화·best-effort 유지 결정
 
 **[@ChoHyeonChan](https://github.com/ChoHyeonChan) (팀장) — `core` · `mcp`**
 - [x] API 연동 지원 (core 어댑터 인터페이스)
