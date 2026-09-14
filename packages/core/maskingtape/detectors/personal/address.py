@@ -22,6 +22,7 @@
 from __future__ import annotations
 
 import re
+from bisect import bisect_left
 
 from maskingtape.detectors.base import Detector
 from maskingtape.types import Detection
@@ -187,6 +188,19 @@ def _score(m: re.Match[str], base: float, cap: float) -> float:
     return round(min(confidence, cap), 2)
 
 
+def _overlaps(spans: list[tuple[int, int]], starts: list[int], start: int, end: int) -> bool:
+    """[start, end)가 spans의 어느 구간과 겹치는지 이분 탐색으로 확인한다(#426).
+
+    spans는 시작 위치 순으로 정렬돼 있고 서로 겹치지 않아야 한다. starts는 그 시작 위치 목록이다.
+    그러면 끝 위치도 같은 순서로 커지므로, end보다 앞에서 시작하는 마지막 구간 하나만 보면 된다.
+    그 구간이 start 뒤에서 끝나지 않으면 그보다 앞의 구간은 더 일찍 끝나서 겹칠 수 없다.
+
+    예전에는 후보마다 구간 전체를 훑어서, 주소가 반복되는 긴 입력에서 O(n²)이 됐다.
+    """
+    i = bisect_left(starts, end) - 1
+    return i >= 0 and spans[i][1] > start
+
+
 class AddressDetector(Detector):
     """한국 행정구역 주소 탐지기 (시/도 단위부터 번지까지)."""
 
@@ -194,26 +208,33 @@ class AddressDetector(Detector):
 
     def detect(self, text: str) -> list[Detection]:
         found: list[Detection] = []
+        # finditer는 앞에서부터 겹치지 않게 찾으므로 구간이 시작 위치 순으로 쌓인다(_overlaps의 전제).
         province_spans: list[tuple[int, int]] = []
         # 시/도 앵커 — 확신도 0.5부터 시작.
         for m in _ADDR_RE.finditer(text):
             province_spans.append((m.start(), m.end()))
             found.append(self._make(m, base=0.5, cap=1.0))
+        province_starts = [start for start, _ in province_spans]
         # 시/도 축약형 앵커(#396) — 정식 시/도명이 없으니 시/군 앵커와 같은 확신도(0.4~)로 둔다.
         # 시/군 앵커보다 먼저 돌려야 "경기 성남시 분당구 …"가 "성남시 분당구 …"로 잘려
-        # 두 번 잡히지 않는다. 먼저 잡은 더 넓은 구간을 province_spans에 넣어 뒤에서 중복을 거른다.
+        # 두 번 잡히지 않는다. 먼저 잡은 더 넓은 구간을 abbr_spans에 모아 뒤에서 중복을 거른다.
+        # 축약형 구간끼리는 같은 finditer에서 나와 겹치지 않으므로 시/도 구간하고만 비교하면 된다.
+        abbr_spans: list[tuple[int, int]] = []
         for m in _ADDR_ABBR_RE.finditer(text):
             if not m.group("dong"):
                 continue  # "서울 강남구에 산다"처럼 구까지만이면 지역 언급일 뿐 — 유출 아님
-            if any(m.start() < end and m.end() > start for start, end in province_spans):
+            if _overlaps(province_spans, province_starts, m.start(), m.end()):
                 continue
-            province_spans.append((m.start(), m.end()))
+            abbr_spans.append((m.start(), m.end()))
             found.append(self._make(m, base=0.4, cap=0.9))
+        # 축약형 구간은 시/도 구간과 겹치지 않을 때만 들어왔으므로, 합쳐 정렬해도 서로 겹치지 않는다.
+        taken = sorted(province_spans + abbr_spans)
+        taken_starts = [start for start, _ in taken]
         # 시/군 앵커(시/도 없음) — 확신도 0.4부터. 시/도가 없어 확신이 낮으니 임계값으로 조절 가능.
         for m in _ADDR_NO_PROVINCE_RE.finditer(text):
             if not m.group("dong"):
                 continue  # 동/읍/면/리(도로명 포함) 없이 시/군+구만이면 지역 언급일 뿐 — 유출 아님
-            if any(m.start() < end and m.end() > start for start, end in province_spans):
+            if _overlaps(taken, taken_starts, m.start(), m.end()):
                 continue  # 시/도 앵커(정식명·축약형) 매칭에 이미 포함된 구간이므로 중복
             found.append(self._make(m, base=0.4, cap=0.9))
         found.sort(key=lambda d: d.start)

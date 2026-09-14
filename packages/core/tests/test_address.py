@@ -2,6 +2,8 @@
 
 """주소 탐지기 테스트 — 모든 주소는 합성(가짜)이다."""
 
+import time
+
 from maskingtape.detectors import AddressDetector
 
 
@@ -395,3 +397,22 @@ def test_common_word_ending_in_ri_after_eup_myeon_is_over_masked():
     과다 마스킹이라 안전한 쪽이다. 시 앵커가 "양평군 우리"를 잡는 기존 동작과 같은 기준이다.
     """
     assert detect("경기도 양평군 양평읍 사거리에서 만나")[0].text == "경기도 양평군 양평읍 사거리"
+
+
+# --- #426: 겹침 검사 시간 ---
+
+
+def test_repeated_addresses_are_scanned_in_linear_time():
+    """주소가 반복되는 긴 입력도 빨리 끝나야 한다.
+
+    예전에는 축약형·시/군 앵커 후보마다 앞서 잡은 구간 전체와 겹침을 비교해서 O(n²)이었다.
+    원인이 정규식이 아니라 파이썬 반복문이라, 앵커가 없는 bench ReDoS 입력("가" 반복)으로는 드러나지 않았다.
+    아래 세 입력은 각각 축약형끼리, 시/도 구간과 시 앵커, 축약형 구간과 시 앵커의 겹침 검사를 탄다.
+    """
+    for unit in ["서울 강남구 대동로 ", "서울특별시 강남구 역삼동에서 ", "경기 성남시 분당구 정자동 45-6 "]:
+        text = unit * (200_000 // len(unit))
+        start = time.perf_counter()
+        found = detect(text)
+        elapsed = time.perf_counter() - start
+        assert found, f"{unit!r} 반복 입력에서 주소를 못 찾음"
+        assert elapsed < 1.0, f"{unit!r} 반복 20만 자 탐지가 {elapsed:.2f}초 — 겹침 검사 O(n²) 회귀 의심"
