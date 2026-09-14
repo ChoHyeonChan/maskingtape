@@ -154,9 +154,15 @@ class LLMNameDetector(Detector):
         names = parsed.get("names", []) if isinstance(parsed, dict) else None
         if not isinstance(names, list):
             # 응답 본문에는 추출된 이름(개인정보)이 들어있을 수 있으므로 타입만 알린다.
+            # 최상위가 객체면 names 값의 타입을, 아니면 최상위 타입을 알린다. 예전엔 항상
+            # 최상위 타입(dict)만 찍어 {"names": "김철수"}처럼 names가 문자열인 경우를 가렸다(#420).
+            if isinstance(parsed, dict):
+                received = f"names={type(names).__name__}"
+            else:
+                received = type(parsed).__name__
             raise TypeError(
                 f"모델 {self.model}의 응답에 이름 목록(names)이 없습니다 "
-                f"(받은 형태: {type(parsed).__name__}). 응답 본문은 개인정보가 섞일 수 있어 표시하지 않습니다."
+                f"(받은 형태: {received}). 응답 본문은 개인정보가 섞일 수 있어 표시하지 않습니다."
             )
         return names
 
