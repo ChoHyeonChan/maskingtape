@@ -110,6 +110,14 @@ def main() -> int:
     except RuntimeError as exc:  # --llm인데 Ollama가 없는 등 — 무엇을 고쳐야 하는지 알린다
         print(f"오류: {exc}", file=sys.stderr)
         return 1
+    except TypeError as exc:
+        # --llm 모드에서 모델 응답의 형태가 틀리면 로컬 LLM 탐지기가 TypeError를 던진다(#420).
+        # 규칙 전용 모드의 TypeError는 코드 버그일 수 있으니 트레이스백을 그대로 보여 준다.
+        # 여기서 한꺼번에 삼키면 진짜 버그가 "오류:" 한 줄로 가려진다.
+        if not args.llm:
+            raise
+        print(f"오류: {exc}", file=sys.stderr)
+        return 1
 
     if args.scan:
         print(json.dumps([asdict(d) for d in detections], ensure_ascii=False, indent=2))

@@ -149,3 +149,17 @@ def test_rejects_remote_hosts(host):
 def test_rejects_non_http_scheme():
     with pytest.raises(ValueError, match="http/https"):
         LLMNameDetector(host="file:///etc/passwd")
+
+
+def test_malformed_names_message_reports_the_actual_type(monkeypatch):
+    """names 값의 실제 타입을 알린다. 예전엔 최상위 타입(dict)만 찍어 원인이 가려졌다(#420)."""
+    d = _detector_with_model_response(monkeypatch, '{"names": "김철수"}')
+    with pytest.raises(TypeError, match="names=str") as exc_info:
+        d.detect("고객 김철수님")
+    assert "김철수" not in str(exc_info.value)
+
+    # 최상위가 객체가 아니면 최상위 타입을 알린다
+    d = _detector_with_model_response(monkeypatch, '["김철수"]')
+    with pytest.raises(TypeError, match="list") as exc_info:
+        d.detect("고객 김철수님")
+    assert "김철수" not in str(exc_info.value)
