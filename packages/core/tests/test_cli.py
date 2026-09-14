@@ -7,9 +7,14 @@
 
 from __future__ import annotations
 
+import json
 import os
 import subprocess
 import sys
+import urllib.error
+
+from maskingtape import cli
+from maskingtape.detectors.personal import name_llm
 
 SAMPLE = "고객 김철수 주민번호 800101-1234560 연락처 010-1234-5678"
 
@@ -81,3 +86,64 @@ def test_scan_reports_detections_as_utf8_json():
     payload = result.stdout.decode("utf-8")
     assert '"rrn"' in payload
     assert "800101-1234560" in payload  # --scan은 탐지 리포트라 원문을 그대로 보여준다
+
+
+# --- --llm 오류 경로 (#420) ---
+# 모델 응답을 가짜로 바꿔야 해서 별도 프로세스가 아니라 같은 프로세스에서 main()을 부른다.
+# 위의 인코딩 회귀 테스트와 목적이 다르다. 여기서는 두 가지만 본다.
+#   1) 오류가 나도 트레이스백 없이 안내 메시지와 종료 코드 1로 끝나는가
+#   2) 그 메시지에 원문(모델이 뽑은 이름)이 새지 않는가
+
+
+class _FakeResponse:
+    """urlopen 컨텍스트 매니저 흉내 — 모델 응답 본문만 돌려준다."""
+
+    def __init__(self, response_field: str) -> None:
+        self._body = json.dumps({"response": response_field}).encode("utf-8")
+
+    def read(self) -> bytes:
+        return self._body
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_exc):
+        return False
+
+
+def _run_main_in_process(monkeypatch, capsys, *args: str) -> tuple[int, str, str]:
+    monkeypatch.setattr(sys, "argv", ["maskingtape", *args])
+    code = cli.main()
+    captured = capsys.readouterr()
+    return code, captured.out, captured.err
+
+
+def test_llm_malformed_response_exits_with_message_not_traceback(monkeypatch, capsys):
+    """--llm에서 모델이 names를 리스트가 아닌 값으로 주면 종료 코드 1과 안내 메시지로 끝난다.
+
+    #416이 ruff TRY004에 맞춰 이 오류를 RuntimeError에서 TypeError로 바꿨는데, CLI는
+    RuntimeError만 잡고 있어 트레이스백으로 종료했다(#420). 응답 본문에는 모델이 뽑은
+    이름이 들어 있을 수 있으므로 어떤 출력에도 원문이 나오면 안 된다.
+    """
+    monkeypatch.setattr(
+        name_llm.urllib.request, "urlopen", lambda *_a, **_kw: _FakeResponse('{"names": "김철수"}')
+    )
+    code, out, err = _run_main_in_process(monkeypatch, capsys, "--llm", "고객 김철수님")
+    assert code == 1
+    assert "이름 목록" in err
+    assert "names=str" in err  # 실제 원인(names가 문자열)을 알려 준다
+    assert "김철수" not in err
+    assert out == ""
+
+
+def test_llm_unreachable_ollama_exits_with_guidance(monkeypatch, capsys):
+    """Ollama에 연결하지 못하면 무엇을 확인해야 하는지 안내하고 종료 코드 1로 끝난다."""
+
+    def _refuse(*_a, **_kw):
+        raise urllib.error.URLError("connection refused")
+
+    monkeypatch.setattr(name_llm.urllib.request, "urlopen", _refuse)
+    code, out, err = _run_main_in_process(monkeypatch, capsys, "--llm", "고객 김철수님")
+    assert code == 1
+    assert "Ollama" in err
+    assert out == ""
