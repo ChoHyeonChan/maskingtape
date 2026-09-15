@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 /** Public detection shape returned by apps/api /scan and /anonymize. */
 export interface Detection {
   kind: string;

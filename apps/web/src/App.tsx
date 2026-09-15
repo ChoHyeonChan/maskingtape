@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { useRef, useState } from "react";
 import { CoachMark } from "./components/help/CoachMark";
 import { InputPanel } from "./components/input/InputPanel";
