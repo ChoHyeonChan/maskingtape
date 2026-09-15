@@ -103,13 +103,13 @@ wheels = [
 
 [[package]]
 name = "maskingtape"
-version = "0.2.0"
+version = "0.3.0"
 source = { editable = "packages/core" }
 
 [package.metadata]
 requires-dist = [
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.4,<0.16" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.16" },
 ]
 provides-extras = ["dev"]
 
