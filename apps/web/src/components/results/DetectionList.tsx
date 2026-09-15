@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { useState, type CSSProperties } from "react";
 import { ConfidenceControl } from "./ConfidenceControl";
 import { KIND_COLORS, KIND_LABELS } from "../../types/detection";

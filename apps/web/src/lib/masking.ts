@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { KIND_LABELS } from "../types/detection";
 import type { Detection } from "../types/detection";
 

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { useEffect, useRef, useState } from "react";
 import { scanText } from "../../api/scanClient";
 import { EXTRACT_ERROR_MESSAGES, extractTextFromFile } from "../../lib/extractText";
