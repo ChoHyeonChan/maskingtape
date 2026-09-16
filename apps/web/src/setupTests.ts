@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import "@testing-library/jest-dom/vitest";
 
 // jsdom은 matchMedia를 구현하지 않는다 — prefers-reduced-motion 등을 확인하는 코드가

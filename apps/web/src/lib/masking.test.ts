@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { describe, expect, it } from "vitest";
 import { applyMasking, locateDetections } from "./masking";
 import type { Detection } from "../types/detection";
