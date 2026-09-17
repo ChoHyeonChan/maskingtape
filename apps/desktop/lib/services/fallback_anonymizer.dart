@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 The maskingtape Authors
+// SPDX-License-Identifier: Apache-2.0
+
 import 'anonymizer.dart';
 
 /// 백엔드를 순서대로 시도하는 조합 구현 — 자신은 비식별화를 하지 않는다.

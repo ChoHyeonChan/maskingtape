@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 The maskingtape Authors
+// SPDX-License-Identifier: Apache-2.0
+
 import 'detection.dart';
 
 enum FileTaskStatus { waiting, processing, done, failed }

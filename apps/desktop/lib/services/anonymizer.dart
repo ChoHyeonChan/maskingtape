@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 The maskingtape Authors
+// SPDX-License-Identifier: Apache-2.0
+
 import '../models/detection.dart';
 
 /// 비식별화 전략 — API 계약 v1의 strategy 필드와 1:1.

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The maskingtape Authors
+# SPDX-License-Identifier: Apache-2.0
+
 """문장 템플릿에 개인정보 값을 심어 문서(JSONL 한 줄)를 만든다.
 
 동작 원리:

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The maskingtape Authors
+# SPDX-License-Identifier: Apache-2.0
+
 """개인정보 종류별 합성 값 생성기.
 
 모든 값은 난수로 조합해 생성한다 — 실존 인물·번호와 무관한 가짜 데이터만 만든다.

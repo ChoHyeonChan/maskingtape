@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The maskingtape Authors
+# SPDX-License-Identifier: Apache-2.0
+
 """합성 평가 데이터셋(JSONL)을 생성하는 CLI.
 
 사용법:

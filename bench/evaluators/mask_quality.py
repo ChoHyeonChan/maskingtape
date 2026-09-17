@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The maskingtape Authors
+# SPDX-License-Identifier: Apache-2.0
+
 """마스킹 결과 자체의 안전성을 검증한다 (탐지 정확도가 아니라 최종 산출물 검사).
 
 동작 원리:
