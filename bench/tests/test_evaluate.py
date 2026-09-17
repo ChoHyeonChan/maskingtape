@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The maskingtape Authors
+# SPDX-License-Identifier: Apache-2.0
+
 """evaluate.py의 precision/recall/F1 집계 로직 검증 (core 탐지기와 무관한 순수 계산 테스트)."""
 
 from __future__ import annotations

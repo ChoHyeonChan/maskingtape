@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The maskingtape Authors
+# SPDX-License-Identifier: Apache-2.0
+
 """개인정보가 아닌 '헷갈리는' 문자열 생성기 — 오탐(false positive) 테스트용.
 
 동작 원리:

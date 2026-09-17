@@ -1,3 +1,4 @@
+# SPDX-FileCopyrightText: 2026 The maskingtape Authors
 # SPDX-License-Identifier: Apache-2.0
 
 """MCP 서버 진입점 — tools.py의 함수를 MCP 도구로 노출만 한다.

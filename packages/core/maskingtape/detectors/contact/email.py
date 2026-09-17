@@ -1,3 +1,4 @@
+# SPDX-FileCopyrightText: 2026 The maskingtape Authors
 # SPDX-License-Identifier: Apache-2.0
 
 """이메일 주소 탐지기 — 표준 형태의 이메일을 정규식으로 찾는다.

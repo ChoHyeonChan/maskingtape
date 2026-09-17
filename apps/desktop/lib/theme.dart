@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 The maskingtape Authors
+// SPDX-License-Identifier: Apache-2.0
+
 import 'package:flutter/material.dart';
 
 /// 마스킹테이프 브랜드 테마 — "책상 위의 테이프" 방향.

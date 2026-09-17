@@ -1,3 +1,4 @@
+# SPDX-FileCopyrightText: 2026 The maskingtape Authors
 # SPDX-License-Identifier: Apache-2.0
 
 """MCP 도구의 실제 동작 — 순수 함수로 분리해 MCP 런타임 없이도 테스트한다.
