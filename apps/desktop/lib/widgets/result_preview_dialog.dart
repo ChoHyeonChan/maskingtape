@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import '../models/detection.dart';
 import '../models/file_task.dart';
 import '../services/file_reader.dart';
-import '../kind_colors.dart';
+import 'highlighted_text.dart';
 
 /// 미리보기에 필요한 원문·마스킹 텍스트 한 쌍. 열 때 디스크에서 읽는다.
 class _PreviewTexts {
@@ -76,8 +76,9 @@ class _ResultPreviewDialogState extends State<ResultPreviewDialog> {
               Text(
                 '탐지 ${widget.task.detections.length}건 — '
                 '${Detection.summarize(widget.task.detections)}',
-                style: textTheme.bodyMedium
-                    ?.copyWith(color: colors.onSurfaceVariant),
+                style: textTheme.bodyMedium?.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
               ),
               const SizedBox(height: 16),
               Expanded(
@@ -141,18 +142,15 @@ class _Comparison extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final colors = Theme.of(context).colorScheme;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Expanded(
           child: _Pane(
             title: '원문',
-            child: SelectableText.rich(
-              TextSpan(
-                style: textTheme.bodyMedium,
-                children: _highlightedSpans(colors),
-              ),
+            child: HighlightedText(
+              text: texts.original,
+              detections: detections,
             ),
           ),
         ),
@@ -165,40 +163,6 @@ class _Comparison extends StatelessWidget {
         ),
       ],
     );
-  }
-
-  /// 원문을 탐지 구간 기준으로 잘라, 탐지된 부분에 종류별 색 하이라이트를 입힌다.
-  List<TextSpan> _highlightedSpans(ColorScheme colors) {
-    final text = texts.original;
-    final ordered = [...detections]..sort((a, b) => a.start - b.start);
-    final spans = <TextSpan>[];
-    var cursor = 0;
-    for (final d in ordered) {
-      // 원본이 처리 후 바뀌었으면 offset이 범위를 벗어날 수 있다 — 안전하게 건너뛴다.
-      if (d.start < cursor || d.end > text.length || d.start > d.end) {
-        continue;
-      }
-      if (d.start > cursor) {
-        spans.add(TextSpan(text: text.substring(cursor, d.start)));
-      }
-      spans.add(
-        TextSpan(
-          text: text.substring(d.start, d.end),
-          // 웹 결과 화면과 같은 종류별 색 — 주민번호는 남색, 전화는 초록, 이메일은
-          // 자주… 두 표면을 오가도 색만 보고 종류를 알아본다(kind_colors.dart).
-          style: TextStyle(
-            backgroundColor: KindColors.backgroundOf(d.kind),
-            color: KindColors.of(d.kind),
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      );
-      cursor = d.end;
-    }
-    if (cursor < text.length) {
-      spans.add(TextSpan(text: text.substring(cursor)));
-    }
-    return spans;
   }
 }
 
