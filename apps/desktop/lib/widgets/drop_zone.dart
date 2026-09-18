@@ -162,7 +162,7 @@ class _SampleDocument extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(18, 14, 18, 16),
       decoration: BoxDecoration(
-        color: isLight ? AppTheme.desk : AppTheme.deskDark,
+        color: isLight ? AppTheme.surface : AppTheme.surfaceDark,
         borderRadius: BorderRadius.circular(AppTheme.panelRadius - 4),
       ),
       child: Column(
