@@ -45,7 +45,7 @@ class TapeStrip extends StatelessWidget {
               : Center(
                   child: DefaultTextStyle.merge(
                     style: const TextStyle(
-                      color: AppTheme.tapeDeep,
+                      color: Colors.white,
                       fontWeight: FontWeight.w700,
                       fontSize: 11,
                       letterSpacing: 0.6,
