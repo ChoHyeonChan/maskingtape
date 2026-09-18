@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../models/sample_texts.dart';
+import '../models/detection.dart';
 import '../services/anonymizer.dart';
-import '../theme.dart';
-import '../widgets/detection_list.dart';
+import '../services/mask_applier.dart';
+import '../widgets/detection_panel.dart';
 import '../widgets/highlighted_text.dart';
 import '../widgets/options_toolbar.dart';
 import '../widgets/panel.dart';
@@ -44,6 +45,26 @@ class _TextScreenState extends State<TextScreen> {
   /// 결과 패널에서 원문(하이라이트)을 볼지 마스킹 결과를 볼지.
   bool _showOriginal = false;
 
+  /// 사용자가 「보임」으로 바꾼 항목 — 결과 텍스트에서 원문 그대로 남긴다.
+  /// 새 결과가 오면 비운다(항목 정체성이 바뀌므로).
+  final Set<Detection> _exposed = {};
+
+  /// 가명 전략은 코어만 값을 만들 수 있어 항목별 조정이 없다 — 웹과 같은 제약.
+  bool get _canAdjust => MaskApplier.supports(widget.options.strategy);
+
+  bool _isMasked(Detection d) => !_exposed.contains(d);
+
+  /// 화면에 보이는 마스킹 결과. mask/label은 항목별 선택을 반영해 앱에서 치환하고,
+  /// pseudonym은 코어가 준 결과를 그대로 쓴다. 전부 가림이면 코어 출력과 같다.
+  String _displayText(AnonymizeResult result) => _canAdjust
+      ? MaskApplier.apply(
+          _controller.text,
+          result.detections,
+          strategy: widget.options.strategy,
+          isMasked: _isMasked,
+        )
+      : result.maskedText;
+
   @override
   void initState() {
     super.initState();
@@ -80,7 +101,12 @@ class _TextScreenState extends State<TextScreen> {
         _controller.text,
         options: widget.options,
       );
-      if (mounted) setState(() => _result = result);
+      if (mounted) {
+        setState(() {
+          _result = result;
+          _exposed.clear();
+        });
+      }
     } on AnonymizerException catch (e) {
       // 백엔드가 준 안내(Ollama 미실행 등)를 그대로 보여준다 — 덮어쓰면 원인이 가려진다.
       if (mounted) setState(() => _error = e.message);
@@ -95,6 +121,7 @@ class _TextScreenState extends State<TextScreen> {
       _result = null;
       _error = null;
       _showOriginal = false;
+      _exposed.clear();
     });
   }
 
@@ -102,8 +129,9 @@ class _TextScreenState extends State<TextScreen> {
   void _edit() => setState(() => _result = null);
 
   Future<void> _copyMasked() async {
-    final masked = _result?.maskedText;
-    if (masked == null) return;
+    final result = _result;
+    if (result == null) return;
+    final masked = _displayText(result);
     await Clipboard.setData(ClipboardData(text: masked));
     if (!mounted) return;
     ScaffoldMessenger.of(
@@ -293,7 +321,7 @@ class _TextScreenState extends State<TextScreen> {
                       detections: result.detections,
                     )
                   : SelectableText(
-                      result.maskedText,
+                      _displayText(result),
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
             ),
@@ -310,33 +338,21 @@ class _TextScreenState extends State<TextScreen> {
   }
 
   Widget _detectionsPanel(BuildContext context, AnonymizeResult? result) {
-    final colors = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    return Panel(
-      title: '탐지 결과',
-      actions: [
-        if (result != null)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: AppTheme.brandSoft,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              '총 ${result.detections.length}건 발견',
-              style: textTheme.titleSmall?.copyWith(color: AppTheme.action),
-            ),
-          ),
-      ],
-      child: result == null
-          ? Text(
-              '왼쪽에 텍스트를 입력하고 개인정보 탐지 및 마스킹을 실행하면 '
-              '결과가 여기에 표시됩니다.',
-              style: textTheme.bodyMedium?.copyWith(
-                color: colors.onSurfaceVariant,
-              ),
-            )
-          : DetectionList(detections: result.detections),
+    return DetectionPanel(
+      detections: result?.detections,
+      isMasked: _isMasked,
+      toggleEnabled: _canAdjust,
+      disabledNote: _canAdjust
+          ? null
+          : '가명처리는 같은 원본값을 항상 같은 그럴듯한 가짜 값으로 바꿔 문서의 구조와 '
+                '맥락을 그대로 유지합니다. 이 모드에서는 항목별 가림·노출 조정을 지원하지 않습니다.',
+      onToggle: (d, masked) => setState(() {
+        if (masked) {
+          _exposed.remove(d);
+        } else {
+          _exposed.add(d);
+        }
+      }),
     );
   }
 

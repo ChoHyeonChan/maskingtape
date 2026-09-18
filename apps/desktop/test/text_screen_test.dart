@@ -60,7 +60,9 @@ void main() {
       findsOneWidget,
     );
     // 오른쪽: 건수 배지 + 종류·값 행
+    expect(find.text('탐지 결과 조정'), findsOneWidget);
     expect(find.text('총 1건 발견'), findsOneWidget);
+    expect(find.text('개인정보 1건 발견 · 1건 가림 · 0건 노출'), findsOneWidget);
     expect(find.text('주민번호'), findsOneWidget);
     expect(find.text(FakeAnonymizer.rrn), findsOneWidget);
     expect(find.text('100%'), findsOneWidget);
@@ -154,6 +156,83 @@ void main() {
     expect(find.text('Ollama가 실행 중이 아닙니다'), findsOneWidget);
     // 실패해도 입력은 남아 고쳐서 다시 시도할 수 있다.
     expect(find.byType(TextField), findsOneWidget);
+  });
+
+  testWidgets('항목을 「보임」으로 바꾸면 결과 텍스트에 원문이 남고 요약이 바뀐다', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(_host(FakeAnonymizer()));
+    await tester.enterText(find.byType(TextField), _sentence);
+    await tester.pump();
+    await tester.tap(find.text('개인정보 탐지 및 마스킹 하기'));
+    await tester.pumpAndSettle();
+    expect(
+      find.textContaining('*' * FakeAnonymizer.rrn.length),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.text('가림'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('보임'), findsOneWidget);
+    expect(find.text('개인정보 1건 발견 · 0건 가림 · 1건 노출'), findsOneWidget);
+    // 결과 본문에 주민번호가 그대로 보인다(목록 행의 값과 합쳐 두 곳).
+    expect(find.textContaining(FakeAnonymizer.rrn), findsNWidgets(2));
+    expect(find.textContaining('*' * FakeAnonymizer.rrn.length), findsNothing);
+
+    // 다시 「가림」으로 돌리면 원래대로.
+    await tester.tap(find.text('보임'));
+    await tester.pumpAndSettle();
+    expect(
+      find.textContaining('*' * FakeAnonymizer.rrn.length),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('카테고리별 정렬로 바꾸면 종류명 가나다순으로 나열된다', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _host(FakeAnonymizer(), initial: const AnonymizeOptions(useLlm: true)),
+    );
+    // 이름(김민서)이 주민번호보다 앞에 있는 문장 — 순서대로면 이름이 먼저다.
+    await tester.enterText(
+      find.byType(TextField),
+      '참석자 ${FakeAnonymizer.name}, 주민번호 ${FakeAnonymizer.rrn}',
+    );
+    await tester.pump();
+    await tester.tap(find.text('개인정보 탐지 및 마스킹 하기'));
+    await tester.pumpAndSettle();
+
+    double yOf(String label) => tester.getTopLeft(find.text(label)).dy;
+    expect(yOf('이름'), lessThan(yOf('주민번호')));
+
+    await tester.tap(find.text('카테고리별'));
+    await tester.pumpAndSettle();
+    // 가나다순: 이름(ㅇ) 뒤에 주민번호(ㅈ) — 여전히 이름이 먼저.
+    expect(yOf('이름'), lessThan(yOf('주민번호')));
+
+    await tester.tap(find.text('순서대로'));
+    await tester.pumpAndSettle();
+    expect(yOf('이름'), lessThan(yOf('주민번호')));
+  });
+
+  testWidgets('가명 전략에서는 항목별 토글이 꺼지고 안내가 보인다', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _host(
+        FakeAnonymizer(),
+        initial: const AnonymizeOptions(strategy: MaskStrategy.pseudonym),
+      ),
+    );
+    await tester.enterText(find.byType(TextField), _sentence);
+    await tester.pump();
+    await tester.tap(find.text('개인정보 탐지 및 마스킹 하기'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('항목별 가림·노출 조정을 지원하지 않습니다'), findsOneWidget);
+    await tester.tap(find.text('가림'));
+    await tester.pumpAndSettle();
+    // 눌러도 바뀌지 않는다.
+    expect(find.text('가림'), findsOneWidget);
+    expect(find.text('보임'), findsNothing);
   });
 
   testWidgets('홈 화면 툴바에서 텍스트 입력 모드로 전환된다', (WidgetTester tester) async {
