@@ -841,12 +841,13 @@ def test_title_prefix_guard_holds_when_particle_attaches():
     assert [d.text for d in detector.detect("대표 김지은 확인 바랍니다.")] == ["김지은"]
 
 
-def test_title_prefix_dept_word_guard_only_covers_hardcoded_stems():
-    """#255 (신규 발견, core 부분 해결·의도된 트레이드오프일 수 있음) — core #252가 #247을
-    고친 방식은 하드코딩 5개 stem(구매/정기/홍보/안전/노무)만 차단하는 목록 기반이다. 목록
-    밖의 흔한 업무어("차량"·"허가"·"성과"·"안내", 전부 성씨와 우연히 겹침)는 조사가 붙으면
-    여전히 오탐된다 — bench 소관이 아니라 core 이슈로 남겼다(코드는 안 고침). core가 목록을
-    넓히거나 일반화하면 이 테스트가 깨져서 알 수 있다."""
+def test_title_prefix_common_word_with_particle_is_not_a_name():
+    """#255(core 대응 완료) — core #252의 부서어 가드는 하드코딩 5개 stem(구매/정기/홍보/안전/
+    노무)만 막아서, 목록 밖 흔한 업무어("차량"·"허가"·"성과"·"안내", 전부 성씨와 우연히 겹침)에
+    조사가 붙으면 여전히 오탐됐다(negative 문서 23건 전부가 이 네 단어). core가 목록을
+    일반명사 정지어(_COMMON_WORDS)로 넓히고 **단어 경계**로 거르게 바꿔 이제 잡히지 않는다.
+    단, 같은 두 글자로 시작해도 글자가 더 이어지면("정기훈") 실명이므로 그대로 잡아야 한다 —
+    정지어를 startswith로 걸면 실명이 새어나간다(회귀 방지)."""
     detector = NameDetector()
     for text in (
         "대표 차량이 배정되었습니다.",
@@ -854,8 +855,8 @@ def test_title_prefix_dept_word_guard_only_covers_hardcoded_stems():
         "부장 성과가 좋았습니다.",
         "팀장 안내가 시작되었습니다.",
     ):
-        found = detector.detect(text)
-        assert len(found) == 1 and found[0].confidence == 0.5, f"예상과 다른 동작: {text!r} -> {found!r}"
+        assert detector.detect(text) == [], f"업무어+조사가 이름으로 오탐됨: {text!r}"
+    assert [d.text for d in detector.detect("대표 정기훈 참석")] == ["정기훈"]
 
 
 def test_rrn_separator_variants_are_detected():
@@ -901,26 +902,21 @@ def test_phone_separator_and_parenthesis_variants_all_detected():
     assert paren[0].confidence == 1.0
 
 
-def test_common_title_words_outside_cue_vocabulary_miss_the_name():
-    """실무 문서에서 흔한 직함(총무/매니저/간호사/변호사/인턴 등)은 core NameDetector의
-    _TITLE_CUES/_PREFIX_CUES/_SUFFIX_CUES 어휘(name.py)에 없어, 앞뒤 문맥 단서가 하나도
-    없는 것으로 처리돼 이름이 그대로 새어나간다(직접 확인: 실제 /scan 서버로 15개 표본 중
-    14개 미탐 — "부사장"만 예외인데 "사장"의 부분 문자열이라 우연히 잡힌다).
-
-    #213/#239의 "직함만으로는 2음절 이름을 일부러 놓친다"와 달리, 이건 설계된 트레이드오프가
-    아니라 core가 아직 다루지 않은 어휘 커버리지 갭이다(3글자 이상 풀네임도 예외 없이 놓침).
-    core 이슈로 별도 등록했다 — core가 어휘를 넓히거나 LLM판을 기본으로 바꾸면 이 테스트가
-    실패하며 알려준다."""
+def test_common_title_words_are_now_in_cue_vocabulary():
+    """#394(core 대응 완료) — 실무 문서에서 흔한 직함(총무/매니저/간호사/변호사/인턴 등)이 core
+    NameDetector의 _TITLE_CUES(name.py)에 없어 옆 이름이 풀네임도 통째로 새어나갔다(실서버
+    /scan으로 15개 표본 중 14개 미탐 확인). core가 어휘를 넓혀 이제 3글자 이상 풀네임은 잡힌다.
+    #213/#239의 설계된 트레이드오프(직함만으로는 2음절 이름을 놓친다)는 그대로다."""
     detector = NameDetector()
-    common_titles_not_in_cue_vocabulary = [
-        "총무", "매니저", "상무", "전무", "국장", "지점장",
+    common_titles = [
+        "총무", "매니저", "상무", "전무", "국장", "지점장", "부사장",
         "간호사", "변호사", "회계사", "코치", "감독", "강사", "인턴", "팀원",
     ]
-    for title in common_titles_not_in_cue_vocabulary:
+    for title in common_titles:
         text = f"{title} 김하늘이 참석했습니다."
-        assert detector.detect(text) == [], (
-            f"'{title}'가 core 어휘에 새로 추가된 듯하다 — 이 목록에서 빼고 README도 갱신할 것: {text!r}"
-        )
+        assert [d.text for d in detector.detect(text)] == ["김하늘"], f"직함 옆 풀네임 미탐: {text!r}"
+        # 이름 뒤에 직함이 와도("김하늘 간호사") 같은 어휘로 잡힌다.
+        assert [d.text for d in detector.detect(f"김하늘 {title} 참석")] == ["김하늘"]
 
 
 def test_name_generator_covers_yang_gun_endings():
