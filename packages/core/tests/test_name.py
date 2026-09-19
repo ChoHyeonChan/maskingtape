@@ -143,3 +143,72 @@ def test_department_word_with_particle_does_not_bypass_title_guard():
     # 부서 stem이어도 조사 아닌 글자로 끝나면(정기훈) 실명으로 잡힌다.
     assert detect("대표 정기훈 참석")[0].text == "정기훈"
     assert detect("대표 김지은 확인")[0].text == "김지은"
+
+
+# ─── #394 규칙판 정비: 역할어·직함 어휘, 조사, 라벨 단어, 실명 유출 ───────────────
+
+
+def test_common_titles_from_real_documents_are_cues():
+    # #394: 실무 문서에서 흔한 직함이 어휘에 없어 풀네임도 통째로 새어나갔다. 앞·뒤 모두 잡는다.
+    for title in ("총무", "매니저", "상무", "국장", "지점장", "간호사", "변호사", "회계사", "인턴", "팀원"):
+        assert [d.text for d in detect(f"{title} 김하늘이 참석했습니다.")] == ["김하늘"], title
+        assert [d.text for d in detect(f"김하늘 {title} 참석")] == ["김하늘"], title
+    # "부사장"은 "사장"의 부분 문자열로 우연히 잡히던 것 — 정식 항목이라 앞에서도 잡힌다.
+    assert [d.text for d in detect("부사장 박서준이 참석했습니다.")] == ["박서준"]
+    # 직함만 단서일 땐 2음절 이름을 일부러 놓치는 설계(#213/#239)는 그대로다.
+    assert detect("총무 김민, 참석") == []
+
+
+def test_form_labels_before_a_name_are_cues():
+    # 서식의 사람 칸 라벨 — 벤치 미탐의 절반 이상이 이 어휘 부족이었다.
+    assert [d.text for d in detect("환자명 오훈, 주민번호 확인")] == ["오훈"]
+    assert [d.text for d in detect("명의자 양규하, 연락처 010-1234-5678")] == ["양규하"]
+    assert [d.text for d in detect("전입신고 대상자: 윤은성, 신주소 대구")] == ["윤은성"]
+    assert [d.text for d in detect("신규 채용자 김우, 운전면허번호는")] == ["김우"]
+    assert [d.text for d in detect("학생 김정규(학부모 연락처 010-1234-5678)")] == ["김정규"]
+    # 역할어 + 존칭이면 0.75 — "민원인"은 전엔 그 자체가 민+원인으로 오탐되던 단어다.
+    found = detect("민원인 양민지님, 주민등록번호 확인")
+    assert [(d.text, d.confidence) for d in found] == [("양민지", 0.75)]
+
+
+def test_particle_after_a_cue_does_not_break_the_cue():
+    # "담당자는 X", "예금주는 X" — 조사 하나 때문에 단서를 통째로 잃고 있었다.
+    assert [d.text for d in detect("담당자는 서정호입니다.")] == ["서정호"]
+    assert [d.text for d in detect("예금주는 고혜입니다.")] == ["고혜"]
+    assert [d.text for d in detect("서명자는 임진입니다.")] == ["임진"]
+    assert [d.text for d in detect("담당자가 손인은에서 변경되었습니다")] == ["손인은"]
+
+
+def test_ip_of_imnida_is_not_swallowed_into_two_char_name():
+    # "입니다"의 "입"은 이름 끝음절로 쓰이지 않는다 — 2음절 이름 뒤에 붙어도 이름에 넣지 않는다.
+    assert [d.text for d in detect("예금주는 고혜입니다.")] == ["고혜"]
+    assert [d.text for d in detect("고객 김민을 안내했습니다")] == ["김민"]
+
+
+def test_real_names_sharing_a_prefix_with_a_label_word_are_not_leaked():
+    # 예전엔 "이용"·"이유"를 startswith로 걸러 실명 이용재·이유진이 통째로 새어나갔다(유출).
+    assert [(d.text, d.confidence) for d in detect("고객 이유진님 연락 바랍니다")] == [("이유진", 0.75)]
+    assert [d.text for d in detect("담당자 이용재입니다")] == ["이용재"]
+    # 라벨 단어 자체는 여전히 이름이 아니다.
+    assert detect("고객 이용 안내를 드립니다") == []
+    assert detect("이유가 무엇인가요") == []
+
+
+def test_label_word_after_a_cue_hands_the_cue_to_the_next_name():
+    # "신청자 성명 김하늘" — 예전엔 "성명"을 이름으로 오탐하고 정작 "김하늘"은 단서를 잃어 놓쳤다.
+    assert [d.text for d in detect("신청자 성명 김하늘")] == ["김하늘"]
+    assert [d.text for d in detect("고객 이름 김하늘")] == ["김하늘"]
+    assert detect("신청자 성명, 주소를 적으세요") == []
+
+
+def test_common_two_syllable_nouns_next_to_a_cue_are_not_names():
+    # 성씨로 시작하는 흔한 일반명사 — 역할어·직함 옆에 오면 이름처럼 보인다.
+    for text in (
+        "고객 문의 접수", "고객 서류 제출", "고객 지원 담당", "작성자 정보를 확인하세요",
+        "대표 차량이 배정되었습니다", "부장 성과가 좋았습니다", "팀장 안내가 시작되었습니다",
+        "대표 허가가 필요합니다", "담당자 최근 변경",
+    ):
+        assert detect(text) == [], text
+    # 같은 두 글자로 시작해도 글자가 더 이어지면 실명일 수 있어 그대로 잡는다(단어 경계).
+    assert [d.text for d in detect("대표 정기훈 참석")] == ["정기훈"]
+    assert [d.text for d in detect("작성자 정보라 확인")] == ["정보라"]
