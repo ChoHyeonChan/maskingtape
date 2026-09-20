@@ -1,3 +1,4 @@
+# SPDX-FileCopyrightText: 2026 The maskingtape Authors
 # SPDX-License-Identifier: Apache-2.0
 
 """신용카드번호 탐지기 — 그룹 구조 정규식 + Luhn 체크섬 검증.

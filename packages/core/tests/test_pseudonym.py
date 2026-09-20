@@ -1,3 +1,4 @@
+# SPDX-FileCopyrightText: 2026 The maskingtape Authors
 # SPDX-License-Identifier: Apache-2.0
 
 """가명처리 전략 테스트 — 모든 개인정보는 합성(가짜)이다.

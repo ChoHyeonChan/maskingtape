@@ -1,3 +1,4 @@
+# SPDX-FileCopyrightText: 2026 The maskingtape Authors
 # SPDX-License-Identifier: Apache-2.0
 
 """MCP 도구 함수 테스트 — MCP 런타임 없이 순수 함수만 검증한다. 합성 데이터만 사용."""

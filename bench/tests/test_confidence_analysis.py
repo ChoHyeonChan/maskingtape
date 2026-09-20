@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The maskingtape Authors
+# SPDX-License-Identifier: Apache-2.0
+
 """confidence_analysis.py의 임계값별 집계 로직을 확인한다."""
 
 from __future__ import annotations

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The maskingtape Authors
+# SPDX-License-Identifier: Apache-2.0
+
 """이름(name) 탐지 방식 비교 — 규칙판(NameDetector 단독) vs 하이브리드(LLM + 규칙 안전망).
 
 동작 원리:

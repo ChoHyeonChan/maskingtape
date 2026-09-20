@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The maskingtape Authors
+# SPDX-License-Identifier: Apache-2.0
+
 """탐지 결과 vs 정답 라벨 → precision/recall/F1 리포트.
 
 동작 원리:
