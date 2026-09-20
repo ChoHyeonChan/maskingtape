@@ -1,3 +1,4 @@
+# SPDX-FileCopyrightText: 2026 The maskingtape Authors
 # SPDX-License-Identifier: Apache-2.0
 
 """가명처리 전략 — 탐지 구간을 그럴듯한 가짜 값으로 치환한다.

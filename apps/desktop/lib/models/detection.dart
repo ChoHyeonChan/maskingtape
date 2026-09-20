@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 The maskingtape Authors
+// SPDX-License-Identifier: Apache-2.0
+
 /// core의 Detection 타입(JSON)과 1:1 대응하는 데이터 클래스.
 /// apps/api README의 API 계약 v1과 같은 스키마라 REST 전환 후에도 그대로 쓴다.
 class Detection {

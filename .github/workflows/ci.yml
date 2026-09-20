@@ -17,8 +17,12 @@ jobs:
         run: |
           pip install -e "packages/core[dev]"
           pip install -e packages/mcp-server
+      - name: License headers (저작권·라이선스 헤더 누락 검사)
+        run: |
+          python scripts/check_license_headers.py
+          pytest scripts -q
       - name: Lint
-        run: ruff check packages/core packages/mcp-server bench
+        run: ruff check packages/core packages/mcp-server bench scripts/check_license_headers.py scripts/tests
       - name: Test core
         run: pytest packages/core -q
       - name: Test mcp-server

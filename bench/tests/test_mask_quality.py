@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The maskingtape Authors
+# SPDX-License-Identifier: Apache-2.0
+
 """mask_quality.py의 유출(leak) 판정과 구조 보존(길이) 검증 로직을 확인한다."""
 
 from __future__ import annotations

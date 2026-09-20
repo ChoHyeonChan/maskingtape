@@ -111,6 +111,7 @@ PR 본문에는 [템플릿](.github/PULL_REQUEST_TEMPLATE.md)대로:
 - 작업 전에 이슈를 만들고(라벨·마일스톤 포함), 그 이슈 번호로 브랜치를 만들어서 작업해
 - PR 본문에는 "Closes #이슈번호", 무엇을/동작 원리 3줄/검증 근거를 포함해
 - main에 직접 커밋하지 말고, 새 의존성을 추가하면 SBOM.md도 같은 PR에서 갱신해
+- 새 소스 파일 맨 위에는 저작권·라이선스 헤더 두 줄을 넣어 (CONTRIBUTING.md 「라이선스 규칙」)
 - 테스트는 반드시 합성(가짜) 데이터로만 작성해
 ```
 
@@ -120,11 +121,32 @@ PR 본문에는 [템플릿](.github/PULL_REQUEST_TEMPLATE.md)대로:
 
 자세한 내용은 **[CLAUDE.md](CLAUDE.md) §2**에 있습니다. 요약하면:
 
-1. 새 코드는 전부 **Apache-2.0**. 다른 라이선스 코드를 복사해 붙이지 않습니다.
+1. 새 코드는 전부 **Apache-2.0**. 다른 라이선스 코드를 복사해 붙이지 않습니다. 새 파일에는 헤더 두 줄을 넣습니다(아래 「라이선스 규칙」).
 2. 의존성 추가 시 **라이선스 확인 + SBOM 기재**. 허용: MIT·Apache-2.0·BSD·ISC.
 3. **제품 코드에서 상용 AI API 호출 금지.** LLM은 로컬 Ollama + 오픈웨이트 모델만.
 4. **진짜 개인정보를 저장소에 넣지 않습니다.** 테스트·예시는 전부 합성 데이터.
 5. 다른 대회·과제에서 만든 코드를 가져오지 않습니다.
+
+## 📜 라이선스 규칙 (2차 라이선스 검증 대비)
+
+2026년 9월 OpenUP 오픈소스 라이선스 컨설팅에서 받은 권고를 규칙으로 옮겼습니다.
+SBOM·고지 파일 같은 서류는 팀장이 관리합니다. 팀원은 아래 네 가지를 지켜 주세요.
+
+1. **새 소스 파일 맨 위에 헤더 두 줄을 넣습니다.** 우리가 작성하는 `.py` `.ts` `.tsx` `.css` `.html` `.dart` 파일 전부가 대상입니다. 빠지면 CI가 실패합니다. 커밋 전에 `python scripts/check_license_headers.py`로 확인할 수 있습니다.
+
+   | 파일 | 헤더 |
+   |---|---|
+   | `.py` | `# SPDX-FileCopyrightText: 2026 The maskingtape Authors`<br>`# SPDX-License-Identifier: Apache-2.0` |
+   | `.ts` `.tsx` `.dart` | `// SPDX-FileCopyrightText: 2026 The maskingtape Authors`<br>`// SPDX-License-Identifier: Apache-2.0` |
+   | `.css` | `/* SPDX-FileCopyrightText: 2026 The maskingtape Authors */`<br>`/* SPDX-License-Identifier: Apache-2.0 */` |
+   | `.html` | `<!doctype html>` 다음 줄에 `<!-- ... -->` 주석으로 같은 두 줄 |
+
+   저작권자 "The maskingtape Authors"는 [AUTHORS.md](AUTHORS.md)에 적힌 팀원 전체입니다. 처음 기여하는 사람은 첫 PR에서 그 표에 자신을 추가합니다.
+2. **의존성을 추가하거나 버전을 올리면 PR 본문에 적습니다.** `SBOM.md` 본표 한 줄은 지금처럼 같은 PR에서 넣고, 전이 의존성 표는 팀장이 갱신합니다.
+3. **남이 만든 코드·폰트·아이콘·이미지를 배포물에 넣기 전에 팀장에게 알립니다.** 웹 빌드 결과물처럼 사용자에게 전달되는 곳에 들어가면 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)에 고지해야 합니다.
+4. **설치 파일·실행 파일(바이너리)로 배포하기 전에 팀장과 정합니다.** 바이너리로 배포하면 설치 후 실행 화면에서 고지문을 볼 수 있어야 합니다. 데스크톱 앱은 Flutter의 `showLicensePage`로 보여 줄 수 있습니다.
+
+LICENSE 파일은 저장소 루트와 배포 패키지 세 곳(`packages/core`, `packages/mcp-server`, `apps/api`)에만 둡니다.
 
 ## 🔒 보안이 최우선입니다
 

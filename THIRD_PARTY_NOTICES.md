@@ -1,0 +1,73 @@
+# 서드파티 고지 (Third-Party Notices)
+
+maskingtape 배포물에 **코드가 함께 실려 나가는** 제3자 소프트웨어와 그 라이선스를 고지한다.
+의존성 전체 목록은 [SBOM.md](SBOM.md)에 있다.
+
+## 고지 대상
+
+현재 제3자 코드가 들어가는 배포물은 **웹 데모의 빌드 결과물**(`apps/web/dist/`) 하나다.
+이 파일들은 방문자의 브라우저로 전송되므로 아래 소프트웨어를 고지한다.
+웹 데모 화면에서 이 파일로 가는 링크는 [#439](https://github.com/ChoHyeonChan/maskingtape/issues/439)에서 추가한다.
+
+| 소프트웨어 | 버전 | 라이선스 | 저작권 | 원본 | 빌드 결과물 안의 위치 |
+|---|---|---|---|---|---|
+| pdf.js (`pdfjs-dist`) | 6.2.108 | Apache-2.0 | Copyright 2024 Mozilla Foundation | https://github.com/mozilla/pdf.js | `assets/pdf-*.js`, `assets/pdf.worker.min-*.mjs` |
+| React (`react`) | 19.2.7 | MIT | Copyright (c) Meta Platforms, Inc. and affiliates. | https://github.com/facebook/react | `assets/index-*.js` |
+| React DOM (`react-dom`) | 19.2.7 | MIT | Copyright (c) Meta Platforms, Inc. and affiliates. | https://github.com/facebook/react | `assets/index-*.js` |
+| Scheduler (`scheduler`) | 0.27.0 | MIT | Copyright (c) Meta Platforms, Inc. and affiliates. | https://github.com/facebook/react | `assets/index-*.js` |
+
+네 가지 모두 소스를 고치지 않았다. 빌드 도구(Vite)가 압축해서 결과물에 넣는다.
+pdfjs-dist 6.2.108 패키지에는 NOTICE 파일이 없다.
+React 계열은 빌드 과정에서 파일 안의 라이선스 주석이 빠지므로 이 파일로 고지를 대신한다.
+
+## 라이선스 전문
+
+### Apache License 2.0 (pdf.js)
+
+전문은 이 저장소의 [LICENSE](LICENSE)와 같다. 원문은 https://www.apache.org/licenses/LICENSE-2.0 에 있다.
+
+### MIT License (React, React DOM, Scheduler)
+
+세 패키지는 같은 저작권 문구와 라이선스 전문을 쓴다.
+
+```
+MIT License
+
+Copyright (c) Meta Platforms, Inc. and affiliates.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+## 고지 대상이 아닌 것
+
+| 대상 | 이유 |
+|---|---|
+| PyPI 코어 패키지(`maskingtape`) | 런타임 외부 의존성이 0개라 제3자 코드가 들어가지 않는다 |
+| MCP 서버, 데스크톱 앱 | 소스로 배포한다. 의존성은 사용자가 설치·빌드할 때 각 패키지 저장소에서 받는다 |
+| REST API 공개 데모 | 서버에서만 실행되고 코드가 방문자에게 전달되지 않는다 |
+| Qwen2.5-7B-Instruct 모델 | 재배포하지 않는다. 사용자가 Ollama로 직접 받는다 |
+
+각 의존성의 버전과 라이선스는 [SBOM.md](SBOM.md)에 있다.
+
+## 이 파일을 고쳐야 할 때
+
+- 제3자 코드·폰트·아이콘·이미지가 배포물(웹 빌드 결과물, 설치 파일 등)에 새로 들어갈 때
+- 위 소프트웨어의 버전이 바뀔 때
+- 설치 파일·실행 파일(바이너리)로 배포할 때. 이때는 설치 후 실행 화면에서도 고지문을 볼 수 있어야 한다
+  (2026년 9월 OpenUP 오픈소스 라이선스 컨설팅). 데스크톱 앱은 Flutter의 `showLicensePage`로 보여 줄 수 있다.

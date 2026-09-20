@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The maskingtape Authors
+# SPDX-License-Identifier: Apache-2.0
+
 """Pipeline._resolve_overlaps()의 겹침 병합 계약을 확인한다.
 
 핵심 계약(pipeline.py docstring에 명시된 실제 유출 사고 기반): 겹치는 탐지 구간은 절대

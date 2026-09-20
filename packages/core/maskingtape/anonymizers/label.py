@@ -1,3 +1,4 @@
+# SPDX-FileCopyrightText: 2026 The maskingtape Authors
 # SPDX-License-Identifier: Apache-2.0
 
 """라벨 치환 전략 — 탐지 구간을 종류별 라벨로 바꾼다.

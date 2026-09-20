@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The maskingtape Authors
+# SPDX-License-Identifier: Apache-2.0
+
 """합성 문서 생성기. entities가 개별 개인정보 값을 만들고, documents가 문장에 심어 라벨을 붙인다."""
 
 from __future__ import annotations

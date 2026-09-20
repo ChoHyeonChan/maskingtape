@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The maskingtape Authors
+# SPDX-License-Identifier: Apache-2.0
+
 """탐지 신뢰도(confidence) 임계값별로 precision/recall/F1이 어떻게 변하는지 분석한다.
 
 동작 원리:
