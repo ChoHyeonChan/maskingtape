@@ -1,3 +1,4 @@
+# SPDX-FileCopyrightText: 2026 The maskingtape Authors
 # SPDX-License-Identifier: Apache-2.0
 
 """주민등록번호(RRN) 탐지기 — 정규식 + 유효성 검사.

@@ -1,3 +1,4 @@
+# SPDX-FileCopyrightText: 2026 The maskingtape Authors
 # SPDX-License-Identifier: Apache-2.0
 
 """탐지기 공통 인터페이스.

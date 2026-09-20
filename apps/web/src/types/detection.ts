@@ -1,3 +1,4 @@
+// SPDX-FileCopyrightText: 2026 The maskingtape Authors
 // SPDX-License-Identifier: Apache-2.0
 
 /** Public detection shape returned by apps/api /scan and /anonymize. */

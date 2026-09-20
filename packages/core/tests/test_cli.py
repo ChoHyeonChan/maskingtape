@@ -1,3 +1,4 @@
+# SPDX-FileCopyrightText: 2026 The maskingtape Authors
 # SPDX-License-Identifier: Apache-2.0
 
 """CLI 통합 테스트 — 표준입출력 인코딩까지 검증하므로 실제 프로세스를 띄운다.

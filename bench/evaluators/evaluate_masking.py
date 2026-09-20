@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The maskingtape Authors
+# SPDX-License-Identifier: Apache-2.0
+
 """마스킹 결과물 자체의 안전성(개인정보 유출 여부)을 평가하는 CLI.
 
 evaluate.py가 "탐지 위치가 정답과 일치하는가"를 보는 내부 지표라면,

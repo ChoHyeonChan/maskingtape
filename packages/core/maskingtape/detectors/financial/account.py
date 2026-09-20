@@ -1,3 +1,4 @@
+# SPDX-FileCopyrightText: 2026 The maskingtape Authors
 # SPDX-License-Identifier: Apache-2.0
 
 """계좌번호 탐지기 — 문맥어(은행명·계좌 관련어) 필수 + 숫자 그룹 패턴.

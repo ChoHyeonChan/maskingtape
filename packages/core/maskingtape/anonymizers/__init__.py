@@ -1,3 +1,4 @@
+# SPDX-FileCopyrightText: 2026 The maskingtape Authors
 # SPDX-License-Identifier: Apache-2.0
 
 """마스킹 전략 모음. 새 전략을 만들면 여기서 export한다."""

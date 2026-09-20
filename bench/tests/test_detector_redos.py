@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The maskingtape Authors
+# SPDX-License-Identifier: Apache-2.0
+
 """core detector들의 ReDoS(정규식 과다 역추적) 방지 회귀 테스트.
 
 핵심 계약: 여러 detector의 docstring/주석에 "정규식 반복에 상한을 둬 ReDoS를 막는다"가
