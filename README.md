@@ -249,7 +249,18 @@ cd apps/web && npm install && npm run dev      # http://localhost:5173
 - **[CLAUDE.md](CLAUDE.md)** — 대회 규정에서 나온 필수 규칙 (위반 시 팀 전체 실격)
 - 진행 상황: [Issues](https://github.com/ChoHyeonChan/maskingtape/issues) · [Milestones](https://github.com/ChoHyeonChan/maskingtape/milestones)
 - 의존성을 추가할 땐 같은 PR에서 [SBOM.md](SBOM.md)를 갱신합니다.
+- 새로 만드는 소스 파일 맨 위에는 저작권·라이선스 헤더 두 줄을 넣습니다 — 언어별 형식은 [CONTRIBUTING.md](CONTRIBUTING.md)의 「라이선스 규칙」에 있고, 빠지면 CI가 막습니다.
 
 ## 라이선스
 
-[Apache-2.0](LICENSE). 사용한 모든 의존성의 출처·라이선스는 [SBOM.md](SBOM.md)에 기록한다.
+[Apache-2.0](LICENSE). 우리가 새로 쓴 소스 파일은 전부 이 라이선스로 공개하고, 파일 맨 위에
+저작권·라이선스 헤더 두 줄을 넣는다(규칙은 [CONTRIBUTING.md](CONTRIBUTING.md)의 「라이선스 규칙」).
+
+- **[SBOM.md](SBOM.md)** — 쓰는 라이브러리와 AI 모델의 버전·라이선스·출처. 부록에 배포물별 전이
+  의존성과 모델 상세(태그·양자화·파일 해시)까지 적어 둔다.
+- **[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)** — 배포물에 코드가 함께 실리는 제3자
+  소프트웨어의 고지문. 지금은 웹 번들에 들어가는 pdf.js와 React 계열이다.
+- **[AUTHORS.md](AUTHORS.md)** — 헤더에 적은 "The maskingtape Authors"가 누구인지.
+
+LICENSE 파일은 저장소 루트와 배포 패키지 세 곳(`packages/core`, `packages/mcp-server`,
+`apps/api`)에 둔다.
