@@ -176,7 +176,7 @@ class Document:
     difficulty: str  # "easy" | "hard" | "mixed" | "negative"
 
 
-def _render(template: str, rng: random.Random, difficulty: str) -> Document:
+def _render(template: str, rng: random.Random, difficulty: str, address_extended: bool = False) -> Document:
     """템플릿의 {kind} 자리표시자를 채우고, 개인정보 종류만 라벨로 기록한다.
 
     {distractor}는 개인정보가 아니므로 텍스트에는 삽입하되 라벨은 남기지 않는다 —
@@ -191,7 +191,10 @@ def _render(template: str, rng: random.Random, difficulty: str) -> Document:
         cursor += m.start() - last_end
 
         kind = m.group(1)
-        value = generate_distractor(rng) if kind in _NON_LABEL_KINDS else generate_entity(kind, rng, difficulty).text
+        if kind in _NON_LABEL_KINDS:
+            value = generate_distractor(rng)
+        else:
+            value = generate_entity(kind, rng, difficulty, address_extended=address_extended).text
         start = cursor
         text_parts.append(value)
         cursor += len(value)
@@ -204,18 +207,28 @@ def _render(template: str, rng: random.Random, difficulty: str) -> Document:
     return Document(text="".join(text_parts), labels=labels, difficulty=difficulty)
 
 
-def generate_document(rng: random.Random, template: str | None = None, difficulty: str | None = None) -> Document:
+def generate_document(
+    rng: random.Random,
+    template: str | None = None,
+    difficulty: str | None = None,
+    address_extended: bool = False,
+) -> Document:
     """실제 개인정보가 포함된 합성 문서 하나를 만든다 (정답 라벨 1개 이상).
 
     difficulty가 None이면 "easy"/"hard" 중 하나를 무작위로 골라 문서 전체에 일관되게 적용한다
     (entities.generate_entity의 difficulty 파라미터로 표기 형식을 제어 — entities.py 참고).
     """
     resolved_difficulty = difficulty if difficulty is not None else rng.choice(["easy", "hard"])
-    return _render(template if template is not None else rng.choice(_TEMPLATES), rng, resolved_difficulty)
+    return _render(
+        template if template is not None else rng.choice(_TEMPLATES), rng, resolved_difficulty, address_extended
+    )
 
 
 def generate_multi_sentence_document(
-    rng: random.Random, sentence_count: int | None = None, difficulty: str | None = None
+    rng: random.Random,
+    sentence_count: int | None = None,
+    difficulty: str | None = None,
+    address_extended: bool = False,
 ) -> Document:
     """여러 문장을 이어붙인 복합 문서 하나를 만든다 (정답 라벨 2개 이상 문장에 걸쳐 분포).
 
@@ -232,7 +245,7 @@ def generate_multi_sentence_document(
         if i > 0:
             text_parts.append(" ")
             cursor += 1
-        sentence = _render(rng.choice(_TEMPLATES), rng, resolved_difficulty)
+        sentence = _render(rng.choice(_TEMPLATES), rng, resolved_difficulty, address_extended)
         text_parts.append(sentence.text)
         labels.extend(Label(kind=lb.kind, start=lb.start + cursor, end=lb.end + cursor) for lb in sentence.labels)
         cursor += len(sentence.text)
