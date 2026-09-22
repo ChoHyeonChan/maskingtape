@@ -1,3 +1,4 @@
+# SPDX-FileCopyrightText: 2026 The maskingtape Authors
 # SPDX-License-Identifier: Apache-2.0
 
 """신용카드번호 탐지기 테스트 — 모든 번호는 합성(가짜)이다.

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The maskingtape Authors
+# SPDX-License-Identifier: Apache-2.0
+
 """compare_name_detectors.py의 비교 로직을 확인한다."""
 
 from __future__ import annotations

@@ -1,113 +1,130 @@
+// SPDX-FileCopyrightText: 2026 The maskingtape Authors
+// SPDX-License-Identifier: Apache-2.0
+
 import 'package:flutter/material.dart';
 
-/// 마스킹테이프 브랜드 테마 — "책상 위의 테이프" 방향.
+/// 마스킹테이프 브랜드 테마 — 웹 플레이그라운드와 같은 팔레트.
 ///
 /// 설계 근거(왜 이렇게 골랐는지 — 리뷰 시 이 문단부터 보면 된다):
 ///
-/// 이 앱의 이름은 **마스킹테이프**다. 그런데 이전 테마(시안 C, 페리윙클)는 그 소재와
-/// 아무 관계가 없는 라벤더-블루였다. 어느 SaaS에나 붙일 수 있는 색이라, 화면만 보고는
-/// 무슨 도구인지 알 수 없었다. 그래서 팔레트를 **실제 마스킹테이프**에서 다시 가져왔다.
+/// 산출물이 다섯(CLI·MCP·API·웹·데스크톱)인데 사용자가 **눈으로 보는** 건 웹과
+/// 데스크톱 둘뿐이다. 이 둘이 다른 색을 쓰면 같은 제품으로 읽히지 않는다 — 발표에서
+/// 나란히 띄우는 순간 드러난다. 그래서 데스크톱만의 팔레트(노란 테이프 + 검정)를
+/// 버리고 **웹 `apps/web/src/styles/tokens.css`의 값을 그대로 옮겼다**(#442).
+/// 토큰 이름도 웹과 맞춰 두었으니, 웹이 바뀌면 여기 상수만 같이 고치면 된다.
 ///
-/// 핵심은 **차가운 바탕 + 따뜻한 테이프**의 대비다:
-/// - 바탕([desk])과 문서([paper])는 차가운 회색 계열 — 사무실 책상과 종이.
-/// - 유일하게 따뜻한 색은 [tape] 하나뿐이다. 이 색은 **가려진 자리에만** 쓴다.
+/// 테이프 모티프([tape])는 남긴다 — 이름이 마스킹테이프인 도구가 화면에서 테이프를
+/// 보여주지 않으면 이름이 붕 뜬다. 다만 색은 **로고의 파란 테이프 롤**과 같은 브랜드
+/// 남색이다. "가려진 자리 = 테이프가 붙은 자리 = 완료"라는 뜻은 그대로다.
 ///
-/// 이 반전이 의도적인 선택이다. "따뜻한 크림색 바탕 + 세리프 + 테라코타"는 요즘
-/// 어디서나 보이는 조합이라, 소재가 따뜻한 색이라고 바탕까지 따뜻하게 가면 그 흔한
-/// 화면이 된다. 바탕을 차갑게 두면 테이프 한 조각이 화면에서 유일하게 튀어,
-/// 그 자체가 이 앱의 정체성이 된다.
+/// 색이 셋뿐인 원칙도 유지한다: 남색(브랜드·완료·강조), 회색(대기·처리 중·보조),
+/// 빨강(실패에만). 탐지 종류별 색은 결과 미리보기 안에서만 쓴다(`kind_colors.dart`).
 ///
-/// 상태 색도 여기서 나온다 — **완료 = 테이프가 붙은 상태**라 완료 칩만 테이프 색을 쓴다.
-/// 나머지는 조용한 회색이고, 빨강은 실패에만 남긴다. 색이 셋(회색·테이프·빨강)뿐이라
-/// 화면이 시끄러워지지 않는다.
-///
-/// 라운딩을 줄인 것도 소재에서 나왔다(이전엔 16). 테이프와 종이는 모서리가 각지고,
-/// 둥근 모서리가 크면 다시 일반적인 앱처럼 보인다. 곡선은 칩에만 남긴다.
-///
-/// 글꼴은 시스템 글꼴을 그대로 쓴다. 한글 표시용 글꼴을 번들하려면 라이선스 확인과
-/// SBOM 등록이 필요한데(§2-2), 팀 허용 목록(MIT/Apache/BSD/ISC)에 흔한 한글 글꼴
-/// 라이선스(OFL)가 없어 동결 직전에 벌일 일이 아니다. 대신 **굵기·자간·크기 대비**로
-/// 성격을 만든다.
+/// 글꼴은 시스템 글꼴을 그대로 쓴다. 웹도 `Inter, "Segoe UI", system-ui` 폴백 체인이라
+/// 폰트 파일을 싣지 않는다 — Windows에선 둘 다 Segoe UI + 맑은 고딕으로 렌더된다.
+/// 한글 글꼴을 번들하려면 라이선스 확인과 SBOM 등록이 필요한데(§2-2), 팀 허용
+/// 목록(MIT/Apache/BSD/ISC)에 흔한 한글 글꼴 라이선스(OFL)가 없다.
 abstract final class AppTheme {
-  // ─── 소재 ───────────────────────────────────────────────
-  /// 마스킹테이프 — 화면에서 유일하게 따뜻한 색. 가려진 자리에만 쓴다.
-  static const tape = Color(0xFFE9B44C);
+  // ─── 브랜드 (웹 tokens.css --brand-*) ────────────────────
+  /// 브랜드 남색 — 로고·선택된 세그먼트·완료 칩·테이프. 웹 `--brand-blue`.
+  static const brand = Color(0xFF183A8B);
 
-  /// 테이프의 그늘진 면 — 테두리·글자용(밝은 테이프 위 대비 확보).
-  static const tapeDeep = Color(0xFF9A6B12);
+  /// 브랜드 남색의 짙은 면 — 테이프 테두리·강조 글자. 웹 `--brand-blue-deep`.
+  static const brandDeep = Color(0xFF102A68);
 
-  /// 테이프를 옅게 깐 면 — 칩 배경처럼 넓은 면적에 쓴다.
-  static const tapeSoft = Color(0xFFFBEFD3);
+  /// 브랜드 남색을 옅게 깐 면 — 칩 배경·드롭 호버. 웹 `--brand-blue-soft`.
+  static const brandSoft = Color(0xFFE8EEFB);
 
-  // ─── 바탕 ───────────────────────────────────────────────
-  /// 작업대 — 창 바탕. **차가운** 회색이어야 테이프가 산다.
-  static const desk = Color(0xFFEBEDF2);
+  /// 가장 옅은 브랜드 면 — 배지 배경. 웹 `--brand-blue-tint`.
+  static const brandTint = Color(0xFFF5F8FE);
 
-  /// 종이 — 패널·카드 면.
-  static const paper = Color(0xFFFFFFFF);
+  /// 행동 버튼 파랑 — "탐지 실행"·"비식별화 시작" 같은 주 버튼 하나에만.
+  /// 웹 `.input-panel__primary`의 `#0b55f0`.
+  static const action = Color(0xFF0B55F0);
 
-  /// 잉크 — 본문 글자.
-  static const graphite = Color(0xFF22242C);
+  // ─── 테이프 — 브랜드색의 별칭 ───────────────────────────
+  // 이름을 남겨 두는 이유: 위젯 쪽에서 "테이프 색"이라고 읽히는 게 의도를 보존한다.
+  // 값은 로고의 파란 테이프 롤과 같다.
+  static const tape = brand;
+  static const tapeDeep = brandDeep;
+  static const tapeSoft = brandSoft;
 
-  /// 흐린 글자 — 보조 설명.
-  static const slate = Color(0xFF6C7285);
+  // ─── 바탕·글자 (웹 --surface, --text-*) ──────────────────
+  /// 창 바탕 — 웹 `body` 배경 `#f6f8fb`.
+  static const surface = Color(0xFFF6F8FB);
 
-  /// 괘선 — 패널 테두리.
-  static const rule = Color(0xFFD9DDE6);
+  /// 패널·카드 면 — 웹 `--surface-strong`.
+  static const surfaceStrong = Color(0xFFFFFFFF);
 
-  /// 드롭존 점선.
-  static const dashedLine = Color(0xFFC2C8D6);
+  /// 본문 글자 — 웹 `--text-primary`.
+  static const textPrimary = Color(0xFF10203D);
+
+  /// 보조 글자 — 웹 `--text-secondary`.
+  static const textSecondary = Color(0xFF4B5F7D);
+
+  /// 패널 테두리 — 웹 `.panel`의 `rgba(24,58,139,.18)`.
+  static const border = Color(0x2E183A8B);
+
+  /// 옅은 테두리 — 행·칩. 웹 `--border`(`rgba(24,58,139,.14)`).
+  static const borderSoft = Color(0x24183A8B);
+
+  /// 드롭존 점선 — 웹의 스크롤바 색과 같은 톤(`#91a2c9`).
+  static const dashedLine = Color(0xFF91A2C9);
 
   // ─── 다크 ───────────────────────────────────────────────
-  static const deskDark = Color(0xFF14161B);
-  static const paperDark = Color(0xFF1E212A);
-  static const ruleDark = Color(0xFF2E3340);
+  // 웹은 라이트 전용(`color-scheme: light`)이지만 데스크톱은 OS 설정을 따르므로
+  // 같은 남색 계열로 어두운 면을 둔다.
+  static const surfaceDark = Color(0xFF0F1730);
+  static const surfaceStrongDark = Color(0xFF162040);
+  static const borderDark = Color(0xFF2A3A66);
 
   // ─── 상태 ───────────────────────────────────────────────
-  // 완료만 테이프 색이다 — "테이프가 붙었다"가 곧 완료라서.
-  static const doneBg = tapeSoft;
-  static const doneFg = tapeDeep;
-  static const runBg = Color(0xFFE4E7EF);
-  static const runFg = Color(0xFF3F4557);
-  static const waitBg = Color(0xFFF0F1F5);
-  static const waitFg = slate;
-  static const failBg = Color(0xFFFBE4DE);
-  static const failFg = Color(0xFFB2432C);
+  // 완료만 브랜드색이다 — "테이프가 붙었다"가 곧 완료라서.
+  static const doneBg = brandSoft;
+  static const doneFg = brand;
+  static const runBg = Color(0xFFEEF1F6);
+  static const runFg = textSecondary;
+  static const waitBg = Color(0xFFF0F3F8);
+  static const waitFg = textSecondary;
 
-  /// 모서리 — 종이·테이프는 각지다. 곡선은 칩에만.
-  static const panelRadius = 10.0;
+  /// 실패 — 웹 안내 말풍선과 같은 빨강(`#dc2626` / `#fde3e7`).
+  static const failBg = Color(0xFFFDE3E7);
+  static const failFg = Color(0xFFDC2626);
+
+  /// 모서리 — 웹 `.panel` 14px, 버튼·세그먼트 8px.
+  static const panelRadius = 14.0;
   static const controlRadius = 8.0;
 
   static ThemeData light() {
-    final scheme = ColorScheme.fromSeed(seedColor: tape).copyWith(
-      primary: graphite,
+    final scheme = ColorScheme.fromSeed(seedColor: brand).copyWith(
+      primary: brand,
       onPrimary: Colors.white,
-      secondary: tape,
-      onSecondary: graphite,
-      surface: paper,
-      onSurface: graphite,
-      onSurfaceVariant: slate,
-      outlineVariant: rule,
+      secondary: action,
+      onSecondary: Colors.white,
+      surface: surfaceStrong,
+      onSurface: textPrimary,
+      onSurfaceVariant: textSecondary,
+      outlineVariant: border,
       error: failFg,
     );
-    return _base(scheme, scaffold: desk);
+    return _base(scheme, scaffold: surface);
   }
 
   static ThemeData dark() {
     final scheme = ColorScheme.fromSeed(
-      seedColor: tape,
+      seedColor: brand,
       brightness: Brightness.dark,
     ).copyWith(
-      primary: const Color(0xFFE8EAF0),
-      onPrimary: graphite,
-      secondary: tape,
-      onSecondary: graphite,
-      surface: paperDark,
-      onSurface: const Color(0xFFE8EAF0),
-      onSurfaceVariant: const Color(0xFF9AA1B4),
-      outlineVariant: ruleDark,
+      primary: const Color(0xFFB9C8F2),
+      onPrimary: brandDeep,
+      secondary: const Color(0xFF6E9BFF),
+      onSecondary: Colors.white,
+      surface: surfaceStrongDark,
+      onSurface: const Color(0xFFE6EBF7),
+      onSurfaceVariant: const Color(0xFF9DAAC9),
+      outlineVariant: borderDark,
     );
-    return _base(scheme, scaffold: deskDark);
+    return _base(scheme, scaffold: surfaceDark);
   }
 
   static ThemeData _base(ColorScheme scheme, {required Color scaffold}) {
@@ -121,7 +138,7 @@ abstract final class AppTheme {
         centerTitle: false,
         titleSpacing: 28,
       ),
-      // 굵기와 자간으로 성격을 만든다 — 글꼴을 추가하지 않는 대신.
+      // 웹과 같은 굵기 체계 — 제목 800, 라벨 700~800, 본문 400.
       textTheme: const TextTheme(
         displaySmall: TextStyle(
           fontSize: 28,
@@ -129,13 +146,13 @@ abstract final class AppTheme {
           letterSpacing: -1.1,
         ),
         titleLarge: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.w700,
-          letterSpacing: -0.5,
+          fontSize: 19,
+          fontWeight: FontWeight.w800,
+          letterSpacing: -0.4,
         ),
         titleMedium: TextStyle(
           fontSize: 15,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
           letterSpacing: -0.2,
         ),
         titleSmall: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
@@ -147,18 +164,36 @@ abstract final class AppTheme {
           fontWeight: FontWeight.w700,
           letterSpacing: 0.8,
         ),
-        labelLarge: TextStyle(fontWeight: FontWeight.w600),
+        labelLarge: TextStyle(fontWeight: FontWeight.w800),
       ),
+      // 주 버튼은 웹 CTA와 같은 파랑 — 한 화면에 하나뿐이라 세게 써도 된다.
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
+          backgroundColor: scheme.secondary,
+          foregroundColor: scheme.onSecondary,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(controlRadius),
           ),
         ),
       ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: scheme.onSurface,
+          side: BorderSide(color: scheme.outlineVariant),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(controlRadius),
+          ),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(foregroundColor: scheme.primary),
+      ),
+      // 웹 `.input-panel__mask-mode` — 선택된 칸만 남색, 나머지는 흰 바탕에 보조 글자.
       segmentedButtonTheme: SegmentedButtonThemeData(
         style: SegmentedButton.styleFrom(
+          backgroundColor: scheme.surface,
+          foregroundColor: scheme.onSurfaceVariant,
           selectedBackgroundColor: scheme.primary,
           selectedForegroundColor: scheme.onPrimary,
           side: BorderSide(color: scheme.outlineVariant),
@@ -167,7 +202,7 @@ abstract final class AppTheme {
           ),
         ),
       ),
-      // 진행률은 테이프가 깔리는 것으로 읽히게 — 색을 테이프로 고정한다.
+      // 진행률은 테이프가 깔리는 것으로 읽히게 — 색을 테이프(브랜드)로 고정한다.
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: tape,
         linearTrackColor: scheme.outlineVariant,
@@ -182,14 +217,16 @@ abstract final class AppTheme {
         // 지정하지 않으면 선택 안 된 칩의 글자가 흐려져 비활성처럼 보인다.
         labelStyle: TextStyle(
           color: scheme.onSurface,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
           fontSize: 13,
         ),
         iconTheme: IconThemeData(color: scheme.onSurfaceVariant, size: 18),
       ),
       dialogTheme: DialogThemeData(
+        backgroundColor: scheme.surface,
+        surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(panelRadius + 2),
+          borderRadius: BorderRadius.circular(panelRadius),
         ),
       ),
       dividerTheme: DividerThemeData(color: scheme.outlineVariant, space: 1),

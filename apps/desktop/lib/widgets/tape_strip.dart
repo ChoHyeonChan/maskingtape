@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 The maskingtape Authors
+// SPDX-License-Identifier: Apache-2.0
+
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
@@ -45,7 +48,7 @@ class TapeStrip extends StatelessWidget {
               : Center(
                   child: DefaultTextStyle.merge(
                     style: const TextStyle(
-                      color: AppTheme.tapeDeep,
+                      color: Colors.white,
                       fontWeight: FontWeight.w700,
                       fontSize: 11,
                       letterSpacing: 0.6,

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 The maskingtape Authors
+// SPDX-License-Identifier: Apache-2.0
+
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 
@@ -162,7 +165,7 @@ class _SampleDocument extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(18, 14, 18, 16),
       decoration: BoxDecoration(
-        color: isLight ? AppTheme.desk : AppTheme.deskDark,
+        color: isLight ? AppTheme.surface : AppTheme.surfaceDark,
         borderRadius: BorderRadius.circular(AppTheme.panelRadius - 4),
       ),
       child: Column(

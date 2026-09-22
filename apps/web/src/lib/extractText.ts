@@ -1,3 +1,4 @@
+// SPDX-FileCopyrightText: 2026 The maskingtape Authors
 // SPDX-License-Identifier: Apache-2.0
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB — 브라우저에서 PDF 파싱이 느려지지 않게 상한을 둔다.

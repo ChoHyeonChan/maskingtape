@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 The maskingtape Authors
+// SPDX-License-Identifier: Apache-2.0
+
 // 사람이 보라고 만든 콘솔 스크립트라 print가 출력 수단 그 자체다 (앱 코드 아님).
 // ignore_for_file: avoid_print
 

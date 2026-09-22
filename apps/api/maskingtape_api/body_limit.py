@@ -1,3 +1,4 @@
+# SPDX-FileCopyrightText: 2026 The maskingtape Authors
 # SPDX-License-Identifier: Apache-2.0
 
 """요청 바디 크기 상한 — 선언된 Content-Length가 아니라 실제로 흘러온 바이트로 막는다.
