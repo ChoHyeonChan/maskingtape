@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 The maskingtape Authors
+// SPDX-License-Identifier: Apache-2.0
+
 /// 텍스트 입력 모드의 예시 문장 — **전부 합성**이다(실제 개인정보 없음).
 ///
 /// 웹 플레이그라운드(`apps/web` InputPanel의 PRESETS)와 같은 문장을 쓴다. 두 표면에서
