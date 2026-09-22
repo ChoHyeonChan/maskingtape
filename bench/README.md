@@ -45,9 +45,19 @@ python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl --report bench
 >    import해서** 그 형식에 맞는 값만 만든다 — 예: `_LANDLINE_RE`(전화), `_luhn_ok`(카드),
 >    `_RRN_WEIGHTS`(주민번호), `_DL_REGIONS`(운전면허). 즉 구조화 10종의 1.000은 "탐지기가
 >    이해하는 형식을 정확히 그 경계(span)까지 잡아내는가"를 보는 자기일관성 검증이지, "탐지기가
->    모르는 실세계의 다양한 표기까지 다 잡는다"는 뜻이 아니다. (`name`처럼 문맥 판단이 필요한
->    kind는 애초에 이 순환에서 자유롭다 — 그래서 1.000이 아니다.)
-> 2. **양성 생성기가 kind 간 형식 충돌을 의도적으로 회피한다** — `gen_account`/
+>    모르는 실세계의 다양한 표기까지 다 잡는다"는 뜻이 아니다.
+> 2. **`name`도 [#394](https://github.com/ChoHyeonChan/maskingtape/issues/394) 정비로 이 순환에 부분적으로 들어왔다.** 예전엔 문맥 판단이 필요한 kind라
+>    이 순환에서 자유로웠지만, 정비에서 새로 넣은 서식 역할어 34개 중 **11개**(환자명·명의자·
+>    예금주·서명자·대상자·채용자·지원자·가입자·보호자·민원인·학생)가 생성기 템플릿
+>    (`bench/generator/documents.py`)이 쓰는 단어와 같다. 그 11개를 빼고 재측정하면 F1이
+>    0.910 → **0.802**, recall이 0.869 → **0.702**로 내려간다. 즉 recall 상승분(+0.201) 중
+>    **+0.167이 이 벤치가 쓰는 어휘를 덮어서 나온 값**이고, **0.869는 실세계 recall의 추정치가
+>    아니라 상한**으로 읽어야 한다. 반대로 같은 정비에서 넣은 직함 35개(총무·매니저·간호사·
+>    변호사 등)는 템플릿에 하나도 없어 이 점수에 기여가 0이다 — 그 효과(실서버 15개 표본에서
+>    14개 미탐)는 이 표에 잡히지 않는다. 반면 **precision은 어휘 11개를 모두 빼도 0.934**로
+>    유지되므로, 일반명사를 단어 경계로 판정하게 바꾼 구조 개선의 효과는 순환과 무관하게 맞다.
+>    재현: `_PREFIX_CUES`/`_SUFFIX_CUES`에서 위 11개를 지우고 `python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl`.
+> 3. **양성 생성기가 kind 간 형식 충돌을 의도적으로 회피한다** — `gen_account`/
 >    `gen_account_number_like`는 구분자 없는 12~16자리를 만들 때 우연히 card(Luhn)·
 >    driver_license(지역코드)·phone(050) 형식과 겹치면 값을 일부러 무효화한다(위 각 kind
 >    설명 참고). 이건 정당한 "distractor 오염 방지"이자 동시에, **실제 서비스에서 계좌번호가
@@ -66,7 +76,7 @@ python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl --report bench
 | **address** | **1.000** | **1.000** | **1.000** | core [#252](https://github.com/ChoHyeonChan/maskingtape/pull/252)가 [#248](https://github.com/ChoHyeonChan/maskingtape/issues/248)(계사 어미 미탐)을 고쳐 recall 1.000 완전 복구 + [#340](https://github.com/ChoHyeonChan/maskingtape/issues/340) "번지" 리터럴 체인 끊김 신규 커버 — 아래 참고 |
 | birth_date | 1.000 | 1.000 | 1.000 | [#266](https://github.com/ChoHyeonChan/maskingtape/issues/266)/[#271](https://github.com/ChoHyeonChan/maskingtape/pull/271)에서 core가 추가한 10번째 kind. confidence가 항상 정확히 0.9로 고정 — 아래 confidence 절 참고 |
 | driver_license | 1.000 | 1.000 | 1.000 | [#267](https://github.com/ChoHyeonChan/maskingtape/issues/267)/[#305](https://github.com/ChoHyeonChan/maskingtape/pull/305)에서 core가 추가한 11번째 kind. 문맥 앵커조차 없이 confidence가 항상 정확히 0.85로 고정 — 아래 참고 |
-| **name** | **0.954** | **0.869** | **0.910** | [#394](https://github.com/ChoHyeonChan/maskingtape/issues/394) 규칙판 정비(0.752 → 0.910): 실무 직함·서식 역할어 어휘 확장, 역할어 뒤 조사("담당자는 X") 처리, 일반명사 정지어를 **단어 경계**로 판정 — #255 잔여 오탐(negative 23건) 0건. 남은 미탐 50건은 2음절 이름+조사·직함(설계된 한계)과 단서 없는 이름 — 상세는 아래 참고 |
+| **name** | **0.954** | **0.869** | **0.910** | [#394](https://github.com/ChoHyeonChan/maskingtape/issues/394) 규칙판 정비(0.752 → 0.910): 실무 직함·서식 역할어 어휘 확장, 역할어 뒤 조사("담당자는 X") 처리, 일반명사 정지어를 **단어 경계**로 판정 — #255 잔여 오탐(negative 23건) 0건. 남은 미탐 50건은 2음절 이름+조사·직함(설계된 한계)과 단서 없는 이름. **recall 0.869는 실세계 추정치가 아니라 상한** — 위 한계 고지 2번 참고 |
 
 card는 `gen_account_number_like`가 구분자 없이 13자리 이상을 만들 때 core `CreditCardDetector`의
 "구분자 없는 13~19자리" 분기와 우연히 겹칠 수 있다는 걸 이번 재측정 중 실제로 재현했다
