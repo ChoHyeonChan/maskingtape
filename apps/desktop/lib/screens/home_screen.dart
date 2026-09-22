@@ -118,17 +118,26 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 72,
-        title: Row(
+        toolbarHeight: 84,
+        // 웹 헤더와 같은 구성 — 로고 이미지 + 한 줄 설명. 같은 PNG를 쓴다(#442).
+        title: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          textBaseline: TextBaseline.alphabetic,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('마스킹테이프', style: Theme.of(context).textTheme.displaySmall),
-            const SizedBox(width: 14),
+            Image.asset(
+              'assets/maskingtape-logo-blue.png',
+              height: 40,
+              semanticLabel: '마스킹테이프',
+              // 다크 모드에선 로고의 남색 글자가 바탕에 묻히므로 밝게 반전한다.
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Theme.of(context).colorScheme.onSurface
+                  : null,
+              colorBlendMode: BlendMode.srcIn,
+            ),
+            const SizedBox(height: 4),
             Text(
-              '문서 일괄 비식별화',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              '문서를 끌어다 놓으면 개인정보를 한 번에 가립니다.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
             ),

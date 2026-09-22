@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import '../models/detection.dart';
 import '../models/file_task.dart';
 import '../services/file_reader.dart';
-import '../theme.dart';
+import '../kind_colors.dart';
 
 /// 미리보기에 필요한 원문·마스킹 텍스트 한 쌍. 열 때 디스크에서 읽는다.
 class _PreviewTexts {
@@ -170,7 +170,7 @@ class _Comparison extends StatelessWidget {
     );
   }
 
-  /// 원문을 탐지 구간 기준으로 잘라, 탐지된 부분에 페리윙클 하이라이트를 입힌다.
+  /// 원문을 탐지 구간 기준으로 잘라, 탐지된 부분에 종류별 색 하이라이트를 입힌다.
   List<TextSpan> _highlightedSpans(ColorScheme colors) {
     final text = texts.original;
     final ordered = [...detections]..sort((a, b) => a.start - b.start);
@@ -187,10 +187,11 @@ class _Comparison extends StatelessWidget {
       spans.add(
         TextSpan(
           text: text.substring(d.start, d.end),
-          // 탐지 구간은 "테이프가 붙을 자리"다 — 앱의 시그니처 색으로 표시한다.
-          style: const TextStyle(
-            backgroundColor: AppTheme.tapeSoft,
-            color: AppTheme.tapeDeep,
+          // 웹 결과 화면과 같은 종류별 색 — 주민번호는 남색, 전화는 초록, 이메일은
+          // 자주… 두 표면을 오가도 색만 보고 종류를 알아본다(kind_colors.dart).
+          style: TextStyle(
+            backgroundColor: KindColors.backgroundOf(d.kind),
+            color: KindColors.of(d.kind),
             fontWeight: FontWeight.w700,
           ),
         ),
