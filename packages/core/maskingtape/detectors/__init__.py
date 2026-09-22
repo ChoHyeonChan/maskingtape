@@ -1,3 +1,4 @@
+# SPDX-FileCopyrightText: 2026 The maskingtape Authors
 # SPDX-License-Identifier: Apache-2.0
 
 """탐지기 모음. 새 탐지기를 만들면 default_detectors()에 등록한다.

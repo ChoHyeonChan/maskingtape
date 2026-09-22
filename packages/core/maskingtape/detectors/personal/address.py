@@ -1,3 +1,4 @@
+# SPDX-FileCopyrightText: 2026 The maskingtape Authors
 # SPDX-License-Identifier: Apache-2.0
 
 """주소 탐지기 — 시/도명을 기준으로 지번·도로명 주소 패턴을 찾는다.

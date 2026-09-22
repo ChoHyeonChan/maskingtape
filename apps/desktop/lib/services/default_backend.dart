@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 The maskingtape Authors
+// SPDX-License-Identifier: Apache-2.0
+
 import 'anonymizer.dart';
 import 'cli_anonymizer.dart';
 import 'fallback_anonymizer.dart';

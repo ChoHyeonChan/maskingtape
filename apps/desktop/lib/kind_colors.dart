@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 The maskingtape Authors
+// SPDX-License-Identifier: Apache-2.0
+
 import 'package:flutter/material.dart';
 
 /// 탐지 종류(kind)별 강조색 — 웹 `tokens.css`의 `--kind-*`와 같은 값.
