@@ -173,11 +173,21 @@ def _is_common_word_at(text: str, pos: int) -> bool:
     return False
 
 
-def _is_label_word_at(text: str, pos: int) -> bool:
-    """text[pos:]가 이름이 아닌 라벨·일반명사로 시작하는지(두 목록의 규칙을 합친 판정)."""
-    return any(text.startswith(word, pos) for word in _NON_NAME_WORDS) or _is_common_word_at(
-        text, pos
-    )
+def _is_label_word_at(text: str, pos: int, *, strong: bool = False) -> bool:
+    """text[pos:]가 이름이 아닌 라벨·일반명사로 시작하는지.
+
+    라벨 단어(_NON_NAME_WORDS: 성명·전화번호…)는 **언제나** 버린다 — 서식 라벨이라
+    앞뒤에 단서가 붙어도("작성자 성명 님") 이름이 아니다.
+
+    반면 일반명사 정지어(_COMMON_WORDS: 문서·조정·이상…)는 앞뒤 단서가 **둘 다** 있는
+    강한 경우(strong)엔 면제한다. 이 목록에는 2음절 실명과 겹치는 말이 있어서(문서·배정·
+    신규·양성·유지·이하·조정 — 생성기 이름 공간과 실측 교집합 7건), 그냥 버리면
+    "고객 이상 씨"·"신청자 조정 님" 같은 실명을 놓친다 — 미탐은 곧 유출이다.
+    단서가 하나뿐인 약한 경우엔 "대표 차량이"처럼 오탐이 더 위험하므로 그대로 버린다.
+    """
+    if any(text.startswith(word, pos) for word in _NON_NAME_WORDS):
+        return True
+    return not strong and _is_common_word_at(text, pos)
 
 
 def has_name_candidate(text: str) -> bool:
@@ -217,7 +227,9 @@ class NameDetector(Detector):
         # 통째로 소비하고 지나가 "김하늘"이 단서 없는 이름이 돼 새어나갔다.
         while (m := _NAME_RE.search(text, pos)) is not None:
             name_start = m.start("name")
-            if _is_label_word_at(text, name_start):
+            # 앞뒤 단서가 둘 다 있으면 확신도 0.75짜리 강한 근거다(아래 confidence와 같은 조건).
+            strong = m.group("prefix") is not None and m.group("suffix") is not None
+            if _is_label_word_at(text, name_start, strong=strong):
                 # 라벨 단어는 이름이 아니다. 앞 단서를 달고 잡혔다면 그 단어 자리에서 다시 찾아
                 # 그 단어가 다음 이름의 단서가 되게 한다. 같은 자리를 또 잡으면(단서 없이) 넘긴다.
                 pos = name_start if (m.group("prefix") is not None and name_start > pos) else m.end()

@@ -213,3 +213,23 @@ def test_common_two_syllable_nouns_next_to_a_cue_are_not_names():
     # 같은 두 글자로 시작해도 글자가 더 이어지면 실명일 수 있어 그대로 잡는다(단어 경계).
     assert [d.text for d in detect("대표 정기훈 참석")] == ["정기훈"]
     assert [d.text for d in detect("작성자 정보라 확인")] == ["정보라"]
+
+
+def test_strong_cues_exempt_common_word_stopwords():
+    # 정지어에는 2음절 실명과 겹치는 말이 있다(문서·조정·이상·유지·양성…). 앞뒤 단서가 둘 다
+    # 있는 강한 경우까지 버리면 실명을 놓친다 — 미탐은 곧 유출이라 그때만 면제한다(#446 리뷰).
+    assert [d.text for d in detect("고객 이상 씨 확인")] == ["이상"]
+    assert [d.text for d in detect("신청자 조정 님 확인")] == ["조정"]
+    assert [d.text for d in detect("작성자 문서 님")] == ["문서"]
+    # 단서가 한쪽뿐인 약한 경우엔 오탐이 더 위험하므로 그대로 버린다.
+    assert detect("대표 차량이 배정되었습니다") == []
+    assert detect("부장 성과가 좋았습니다") == []
+    assert detect("고객 문의 접수") == []
+
+
+def test_label_words_are_dropped_even_with_strong_cues():
+    # 라벨 단어(성명·전화번호…)는 서식 라벨이라 앞뒤 단서가 다 붙어도 이름이 아니다.
+    assert detect("작성자 성명 님") == []
+    assert detect("담당자 전화번호 님") == []
+    assert detect("고객 생년월일 씨") == []
+
