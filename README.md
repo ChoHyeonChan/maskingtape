@@ -259,7 +259,7 @@ cd apps/web && npm install && npm run dev      # http://localhost:5173
 - **[SBOM.md](SBOM.md)** — 쓰는 라이브러리와 AI 모델의 버전·라이선스·출처. 부록에 배포물별 전이
   의존성과 모델 상세(태그·양자화·파일 해시)까지 적어 둔다.
 - **[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)** — 배포물에 코드가 함께 실리는 제3자
-  소프트웨어의 고지문. 지금은 웹 번들에 들어가는 pdf.js와 React 계열이다.
+  소프트웨어와, 저장소에 들어 있는 제3자 템플릿 파일의 출처·라이선스 고지문.
 - **[AUTHORS.md](AUTHORS.md)** — 헤더에 적은 "The maskingtape Authors"가 누구인지.
 
 LICENSE 파일은 저장소 루트와 배포 패키지 세 곳(`packages/core`, `packages/mcp-server`,
