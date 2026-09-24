@@ -233,3 +233,24 @@ def test_label_words_are_dropped_even_with_strong_cues():
     assert detect("담당자 전화번호 님") == []
     assert detect("고객 생년월일 씨") == []
 
+
+def test_cue_words_followed_by_an_honorific_are_not_names():
+    # #450: 호칭 단어의 첫 글자가 성씨 사전에 있으면("고"객·"원"장·"차"장…) 뒤의 "님"과
+    # 함께 "성+이름 + 존칭"으로 읽혀 호칭 자체가 이름으로 잡혔다.
+    for text in (
+        "고객님께 안내드립니다.",
+        "원장님께 안내드립니다.",
+        "차장님께 보고드립니다.",
+        "강사님께 여쭙니다.",
+        "신청자님께 안내드립니다.",
+        "민원인님께 회신드립니다.",
+    ):
+        assert detect(text) == [], f"호칭이 이름으로 잡힘: {text!r}"
+
+
+def test_real_names_that_start_like_a_cue_word_are_still_detected():
+    # 호칭과 완전히 같을 때만 버린다. 호칭 글자로 시작하는 실명("원장훈")은 그대로 잡는다.
+    assert [d.text for d in detect("고객 원장훈님께 안내드립니다.")] == ["원장훈"]
+    assert [d.text for d in detect("원장 김철수님께 보고드립니다.")] == ["김철수"]
+    # 호칭이 버려져도 바로 뒤의 실명은 놓치지 않는다.
+    assert [d.text for d in detect("고객님 김철수 씨 확인 바랍니다.")] == ["김철수"]
