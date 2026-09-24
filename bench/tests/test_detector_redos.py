@@ -34,6 +34,12 @@ from maskingtape.detectors import (
 _TIME_BUDGET_SECONDS = 5.0
 _LENGTH = 400_000
 
+
+def _repeat_to_length(unit: str, length: int = _LENGTH) -> str:
+    """unit을 이어 붙여 정확히 length자로 맞춘다 — 매칭이 수만 건 나는 입력을 만들 때 쓴다."""
+    return (unit * (length // len(unit) + 1))[:length]
+
+
 _CASES = [
     ("email", EmailDetector(), "0" * _LENGTH),  # email.py docstring의 실측 시나리오와 동일
     ("phone", PhoneDetector(), "0" * _LENGTH),
@@ -47,6 +53,13 @@ _CASES = [
     # birthdate는 앵커(생일/생년월일)+공백열이 폭발 입력이다 — 다른 탐지기의 "0"*N 입력으론
     # 트리거되지 않아 이 케이스가 빠져 있었고, 그래서 #289 ReDoS를 회귀 테스트가 못 잡았다.
     ("birth_date", BirthDateDetector(), "생일" + " " * _LENGTH),
+    # 위 address 입력("가"*N)은 시/도명 같은 앵커가 하나도 없어 매칭이 0건이다. #426은 정규식이
+    # 아니라 **매칭 뒤의 파이썬 반복문**(겹침 검사)이 O(n²)이던 문제라, 매칭이 수만 건 나는
+    # 입력이어야만 드러난다(수정 전 80~90초, 수정 후 0.34초 이내). 앵커 종류별로 겹침 검사
+    # 경로가 달라 세 가지를 모두 넣는다 — core의 시간 회귀 테스트가 쓴 입력과 같은 구성이다.
+    ("address_repeat_abbr_road", AddressDetector(), _repeat_to_length("서울 강남구 대동로 ")),  # 축약형 앵커끼리
+    ("address_repeat_province_si", AddressDetector(), _repeat_to_length("서울특별시 강남구 역삼동에서 ")),  # 시/도 구간 × 시 앵커
+    ("address_repeat_abbr_jibun", AddressDetector(), _repeat_to_length("경기 성남시 분당구 정자동 45-6 ")),  # 축약형 구간 × 시 앵커
 ]
 
 
