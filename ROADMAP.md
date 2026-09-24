@@ -1,11 +1,11 @@
 # 개발 로드맵
 
 > 팀 마스킹테이프의 개발 계획입니다. 진행 상황은 [Issues](https://github.com/ChoHyeonChan/maskingtape/issues)와 [Milestones](https://github.com/ChoHyeonChan/maskingtape/milestones)에서 확인할 수 있습니다.
-> 최종 갱신: 2026-09-11
+> 최종 갱신: 2026-09-24
 
 ## 우리가 만드는 것
 
-**한국어 개인정보 비식별화 엔진** — 한국어 문서에서 개인정보(주민등록번호·전화번호·이메일·주소·이름)를 찾아 가려주는 오픈소스 도구입니다.
+**한국어 개인정보 비식별화 엔진** — 한국어 문서에서 개인정보(주민등록번호·전화번호·주소·이름 등 11종)를 찾아 가려주는 오픈소스 도구입니다.
 
 **차별점**: 영어권 도구(Presidio 등)는 한국어 개인정보를 제대로 못 잡습니다. 한국어에 특화하고, **규칙(정규식·사전) + 로컬 LLM(Ollama) 하이브리드**로 문맥까지 판단합니다. 데이터가 외부로 나가지 않도록 **전부 로컬에서 처리**합니다.
 
@@ -52,12 +52,23 @@
 이 단계의 목표는 **검증기관이 직접 설치하고 실행했을 때 걸릴 것을 미리 없애는 것**입니다.
 
 - **알려진 미탐 표기를 좁힌다** — README 「지원 범위와 한계」에 공개한 입력이 실제로 잡히게 한다
-- **확신도 설계를 정리한다** — 사용자 조작만으로 특정 종류가 통째로 노출되지 않게 한다
+- **확신도 설계를 정리한다** — 사용자가 기준을 올렸을 때 어떤 항목이 가려지지 않게 되는지 화면에서 바로 알 수 있게 한다
+- **라이선스 검증을 미리 받는다** — 모든 소스 파일의 저작권 헤더(CI 검사), 제3자 고지 파일, 배포물별 전이 의존성과 AI 모델까지 담은 SBOM을 정비하고, OpenUP 사전 검증(FossID 스캔)으로 확인한다
 - **표면별 기능 차이를 없애거나 문서로 알린다** — 웹·데스크톱·CLI가 서로 다른 것을 지원하는 상태를 정돈한다
 - **개발 환경 의존성과 문서를 정돈한다**
 
 > 개별 항목의 진행 상황은 **[Phase 4 마일스톤](https://github.com/ChoHyeonChan/maskingtape/milestone/5)**에서 봅니다.
 > 이 문서에는 이슈 번호를 적지 않습니다 — 열리고 닫힐 때마다 낡기 때문입니다.
+
+### Phase 5 — 발표평가 대비 (~2026-11-04) ⚪ 예정
+
+2차 평가(10/12~28) 뒤 발표평가(11/4~5)까지입니다.
+
+- **정확도 수치의 근거를 단단히 한다** — 규칙을 고칠 때 보는 데이터와 점수를 보고하는 데이터를 나누고, 기존 오픈소스 도구와 같은 데이터로 비교한다
+- **미탐을 무겁게 보는 지표로 설명한다** — 미탐이 곧 유출이라 재현율에 가중을 둔 F2를 F1과 함께 보여준다
+- **시연과 발표 자료를 준비한다**
+
+> 개별 항목은 **[Phase 5 마일스톤](https://github.com/ChoHyeonChan/maskingtape/milestone/6)**에서 봅니다.
 
 ### 이후 — 대회 종료 후
 
@@ -72,7 +83,8 @@
 설치됩니다.
 
 - ✅ **제출물** (2026-08-27 완료): 결과보고서 · 시연 영상 · 문서 정합성
-- 🔵 **[Phase 4](https://github.com/ChoHyeonChan/maskingtape/milestone/5)** (지금): [README에 공개한 알려진 미탐 표기](README.md#지원-범위와-한계) 보완 + 확신도 설계 정리
+- 🔵 **[Phase 4](https://github.com/ChoHyeonChan/maskingtape/milestone/5)** (지금): [README에 공개한 알려진 미탐 표기](README.md#지원-범위와-한계) 보완 + 확신도 설계 정리 + 라이선스 사전 검증
+- ⚪ **[Phase 5](https://github.com/ChoHyeonChan/maskingtape/milestone/6)** (다음): 평가 데이터 분리·기존 도구 비교, F2 중심 설명, 시연·발표 자료
 - ⚪ **[이후 — 대회 종료 후](https://github.com/ChoHyeonChan/maskingtape/milestone/4)**: 문서 형식 확대, 공개 벤치마크로 발전
 
 | 담당 | 파트 | 책임 영역 |
@@ -105,6 +117,9 @@
 - [x] 주소 개선: 광역단체명 없는 주소 ([#68](https://github.com/ChoHyeonChan/maskingtape/issues/68)), 콤마 뒤 동/호 ([#265](https://github.com/ChoHyeonChan/maskingtape/issues/265))
 - [x] PyPI 배포 ([#48](https://github.com/ChoHyeonChan/maskingtape/issues/48))
 - [x] 새 탐지기: 운전면허 ([#267](https://github.com/ChoHyeonChan/maskingtape/issues/267)) + 보안 하드닝 (ReDoS [#289](https://github.com/ChoHyeonChan/maskingtape/issues/289))
+- [x] 0.3.0 배포 ([#429](https://github.com/ChoHyeonChan/maskingtape/issues/429)) — 주소 부분 유출 ([#423](https://github.com/ChoHyeonChan/maskingtape/issues/423))·주소 겹침 검사 O(n²) ([#426](https://github.com/ChoHyeonChan/maskingtape/issues/426)) 수정 포함
+- [x] 시·군 뒤에 바로 오는 도로명 주소 ([#425](https://github.com/ChoHyeonChan/maskingtape/issues/425))
+- [x] 라이선스 정비: 모든 소스 파일 저작권 헤더 + CI 검사 ([#437](https://github.com/ChoHyeonChan/maskingtape/issues/437)), SBOM 전이 의존성·AI 모델 상세 ([#438](https://github.com/ChoHyeonChan/maskingtape/issues/438)), OpenUP 사전 검증 1차 스캔(2026-09-24)
 - 상시: 팀원 PR 리뷰·아키텍처
 
 **[@plana1470](https://github.com/plana1470) · [@imsoo0816](https://github.com/imsoo0816) — `web`**
@@ -112,6 +127,7 @@
 - [x] README 정리: 로컬 경로·포크 안내 제거 — #191
 - [x] API 연동되면 임시 프록시(`dev-server`) → 실제 `/api/scan`으로 교체 — 완료(`apps/web/src/api/scanClient.ts`가 `/api/scan` 실호출, `vite.config.ts` 프록시가 `VITE_API_TARGET`로 실제 FastAPI 백엔드 지정)
 - [x] 결과 화면에 확신도 표시(막대) → "N% 이상만 마스킹" 슬라이더 — #237, #243, #250
+- [x] 소스 파일 SPDX 헤더 — #433, 웹 화면에서 오픈소스 고지문 링크 — #439
 
 **[@stayalive000](https://github.com/stayalive000) — `desktop`**
 - [x] UX·안정성 완성도 (에러 처리·취소·진행 표시) — #13 (CP949 폴백·입력 검증·처리 취소·진행률·결과 미리보기)
@@ -123,10 +139,12 @@
 - [x] desktop CI 잡(analyze + test) — #286. 그전까지 데스크톱 테스트 ~1066줄이 CI에서 한 번도 안 돌았다
 - [x] 설치 선행조건 문서화(개발자 모드·백엔드) — #285. 2차 기능테스트의 clean-install 대비
 - [x] 제출용 스크린샷 세트 촬영 — #219. 데모 파일 5종과 시연 시나리오는 #233에서 준비 완료
+- [x] 디자인을 웹과 통일 — #442, 텍스트 입력 모드 — #444
+- [x] core 기여: 이름 규칙판 정비(실무 직함·서식 역할어·단어 경계)와 생년월일 2자리 연도 — #394, #399
 
 **[@seoyeon056](https://github.com/seoyeon056) — `bench`**
 - [x] 평가 스크립트를 `evaluators/` 폴더로 묶기 ([STRUCTURE.md](STRUCTURE.md)) — #109/#110
-- [ ] 발표용 정확도 자료: 규칙 vs 하이브리드 대비표 정리 — 다른 항목들 안정된 후 진행하기로 결정
+- [ ] 발표용 정확도 자료: 규칙 vs 하이브리드 대비표 — Phase 5에서 평가 데이터 분리·기존 도구 비교와 함께 진행
 - [x] 데이터 확대: 엣지 케이스(복합 문장·드문 표기) — #111/#112, 이어서 #118(시/도 없는 주소)
 - [x] 새 탐지기 나오면 해당 종류 벤치 데이터 추가 — card(#73/#88), biz_reg(#123), passport(#139), account(#180), birth_date(#275), driver_license(#315) 완료. 상시 진행 항목이라 계속 열어둠
 
