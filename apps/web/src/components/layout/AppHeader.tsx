@@ -47,6 +47,14 @@ export function AppHeader({ onHelpClick, hasResult = false, coachMarkActive = fa
           height={276}
         />
         <p>한국어 문서 속 개인정보를 탐지하고, 안전하게 마스킹해 공유할 수 있게 돕습니다.</p>
+        <a
+          className="license-link"
+          href="https://github.com/ChoHyeonChan/maskingtape/blob/main/THIRD_PARTY_NOTICES.md"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          오픈소스 라이선스
+        </a>
       </div>
 
       <div className="help-button-wrap">

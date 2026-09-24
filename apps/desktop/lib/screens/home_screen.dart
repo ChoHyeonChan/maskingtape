@@ -14,10 +14,18 @@ import '../services/shell.dart';
 import '../theme.dart';
 import '../widgets/drop_zone.dart';
 import '../widgets/llm_status_pill.dart';
+import '../widgets/options_toolbar.dart';
 import '../widgets/result_preview_dialog.dart';
 import '../widgets/status_pill.dart';
+import 'text_screen.dart';
+
+/// 홈 화면의 두 모드 — 파일을 끌어다 놓는 일괄 처리와, 문장을 직접 넣는 텍스트 입력.
+enum HomeMode { files, text }
 
 /// 홈 화면 — 드롭된 파일 작업 목록 상태를 들고 배치 처리 흐름을 잇는다.
+///
+/// 텍스트 입력 모드([TextScreen])로 전환할 수 있고, 백엔드·옵션·LLM 상태는 두 모드가
+/// 공유한다 — 모드를 오가도 선택한 전략이 그대로다.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
     super.key,
@@ -55,6 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _running = false;
   bool _cancelRequested = false;
   AnonymizeOptions _options = const AnonymizeOptions();
+  HomeMode _mode = HomeMode.files;
   LlmStatus _llmStatus = const LlmStatus.checking();
 
   @override
@@ -70,12 +79,14 @@ class _HomeScreenState extends State<HomeScreen> {
     if (mounted) setState(() => _llmStatus = status);
   }
 
-  bool get _hasWaiting =>
-      _tasks.any((t) => t.status == FileTaskStatus.waiting);
+  bool get _hasWaiting => _tasks.any((t) => t.status == FileTaskStatus.waiting);
 
   int get _finished => _tasks
-      .where((t) =>
-          t.status == FileTaskStatus.done || t.status == FileTaskStatus.failed)
+      .where(
+        (t) =>
+            t.status == FileTaskStatus.done ||
+            t.status == FileTaskStatus.failed,
+      )
       .length;
 
   Future<void> _browse() async {
@@ -118,27 +129,57 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 72,
-        title: Row(
+        toolbarHeight: 84,
+        // 웹 헤더와 같은 구성 — 로고 이미지 + 한 줄 설명. 같은 PNG를 쓴다(#442).
+        title: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          textBaseline: TextBaseline.alphabetic,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('마스킹테이프', style: Theme.of(context).textTheme.displaySmall),
-            const SizedBox(width: 14),
+            Image.asset(
+              'assets/maskingtape-logo-blue.png',
+              height: 40,
+              semanticLabel: '마스킹테이프',
+              // 다크 모드에선 로고의 남색 글자가 바탕에 묻히므로 밝게 반전한다.
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Theme.of(context).colorScheme.onSurface
+                  : null,
+              colorBlendMode: BlendMode.srcIn,
+            ),
+            const SizedBox(height: 4),
             Text(
-              '문서 일괄 비식별화',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+              '문서를 끌어다 놓으면 개인정보를 한 번에 가립니다.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           ],
         ),
         actions: [
+          // 파일 일괄 ↔ 텍스트 입력. 처리 중에는 화면을 바꾸지 못하게 잠근다.
+          SegmentedButton<HomeMode>(
+            segments: const [
+              ButtonSegment(
+                value: HomeMode.files,
+                icon: Icon(Icons.folder_copy_outlined, size: 18),
+                label: Text('파일 일괄'),
+              ),
+              ButtonSegment(
+                value: HomeMode.text,
+                icon: Icon(Icons.edit_note, size: 18),
+                label: Text('텍스트 입력'),
+              ),
+            ],
+            selected: {_mode},
+            showSelectedIcon: false,
+            onSelectionChanged: _running
+                ? null
+                : (s) => setState(() => _mode = s.first),
+          ),
+          const SizedBox(width: 12),
           // LLM 상태는 파일이 없을 때도 보여야 한다 — 파일을 올리기 전에 Ollama를
           // 켜야 하는지 알 수 있어야 의미가 있다(#245 리뷰 메모).
           LlmStatusPill(status: _llmStatus, onRefresh: _refreshLlmStatus),
-          if (_tasks.isNotEmpty)
+          if (_mode == HomeMode.files && _tasks.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(left: 8),
               child: TextButton.icon(
@@ -152,122 +193,103 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.fromLTRB(32, 4, 32, 32),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              flex: _tasks.isEmpty ? 1 : 0,
-              child: SizedBox(
-                height: _tasks.isEmpty ? null : 76,
-                child: DropZone(onFilesDropped: _addFiles, onBrowse: _browse),
+        child: _mode == HomeMode.text ? _textBody() : _filesBody(context),
+      ),
+    );
+  }
+
+  Widget _textBody() => TextScreen(
+    anonymizer: _anonymizer,
+    options: _options,
+    onOptionsChanged: (o) => setState(() => _options = o),
+    onLlmTurnedOn: _refreshLlmStatus,
+  );
+
+  Widget _filesBody(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(
+          flex: _tasks.isEmpty ? 1 : 0,
+          child: SizedBox(
+            height: _tasks.isEmpty ? null : 76,
+            child: DropZone(onFilesDropped: _addFiles, onBrowse: _browse),
+          ),
+        ),
+        if (_tasks.isNotEmpty) ...[
+          const SizedBox(height: 20),
+          // 창이 좁으면 파일 수와 조작부가 두 줄로 나뉜다.
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            runSpacing: 12,
+            children: [
+              Text(
+                '파일 ${_tasks.length}개',
+                style: Theme.of(context).textTheme.titleMedium,
               ),
-            ),
-            if (_tasks.isNotEmpty) ...[
-              const SizedBox(height: 20),
-              // 창이 좁으면 파일 수와 조작부가 두 줄로 나뉜다.
               Wrap(
-                alignment: WrapAlignment.spaceBetween,
+                spacing: 12,
+                runSpacing: 8,
                 crossAxisAlignment: WrapCrossAlignment.center,
-                runSpacing: 12,
+                alignment: WrapAlignment.end,
                 children: [
-                  Text(
-                    '파일 ${_tasks.length}개',
-                    style: Theme.of(context).textTheme.titleMedium,
+                  OptionsToolbar(
+                    options: _options,
+                    onChanged: (o) => setState(() => _options = o),
+                    enabled: !_running,
+                    onLlmTurnedOn: _refreshLlmStatus,
                   ),
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 8,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    alignment: WrapAlignment.end,
-                    children: [
-                      Tooltip(
-                        message: '이름을 규칙 대신 로컬 LLM으로 판단합니다.\n'
-                            '이 PC에서 Ollama가 실행 중이어야 합니다.',
-                        child: FilterChip(
-                          avatar:
-                              const Icon(Icons.psychology_outlined, size: 18),
-                          label: const Text('이름 정밀 탐지'),
-                          selected: _options.useLlm,
-                          onSelected: _running
+                  FilledButton.icon(
+                    onPressed: _running
+                        ? (_cancelRequested
                               ? null
-                              : (on) {
-                                  setState(
-                                    () => _options =
-                                        _options.copyWith(useLlm: on),
-                                  );
-                                  // 켜는 순간 상태를 새로 확인한다 — 그 사이 Ollama를
-                                  // 띄웠을 수 있고, 지금이 사용자가 가장 알고 싶은 시점이다.
-                                  if (on) _refreshLlmStatus();
-                                },
-                        ),
-                      ),
-                      SegmentedButton<MaskStrategy>(
-                        segments: [
-                          for (final s in MaskStrategy.values)
-                            ButtonSegment(value: s, label: Text(s.displayName)),
-                        ],
-                        selected: {_options.strategy},
-                        onSelectionChanged: _running
-                            ? null
-                            : (selection) => setState(
-                                  () => _options = _options.copyWith(
-                                    strategy: selection.first,
-                                  ),
-                                ),
-                      ),
-                      FilledButton.icon(
-                        onPressed: _running
-                            ? (_cancelRequested
-                                ? null
-                                : () => setState(() => _cancelRequested = true))
-                            : (_hasWaiting ? _start : null),
-                        icon: Icon(_running ? Icons.stop : Icons.play_arrow),
-                        label: Text(
-                          _running
-                              ? (_cancelRequested ? '취소 중…' : '취소')
-                              : '비식별화 시작',
-                        ),
-                      ),
-                    ],
+                              : () => setState(() => _cancelRequested = true))
+                        : (_hasWaiting ? _start : null),
+                    icon: Icon(_running ? Icons.stop : Icons.play_arrow),
+                    label: Text(
+                      _running
+                          ? (_cancelRequested ? '취소 중…' : '취소')
+                          : '비식별화 시작',
+                    ),
                   ),
                 ],
               ),
-              if (_running) ...[
-                const SizedBox(height: 14),
-                // 진행률은 테이프가 깔리는 것으로 읽힌다 — 색이 테이프 색이다(theme).
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(3),
-                  child: LinearProgressIndicator(
-                    value: _tasks.isEmpty ? null : _finished / _tasks.length,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  '$_finished / ${_tasks.length} 처리됨',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                ),
-              ],
-              const SizedBox(height: 12),
-              Expanded(
-                child: Material(
-                  color: Theme.of(context).colorScheme.surface,
-                  clipBehavior: Clip.antiAlias,
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(AppTheme.panelRadius),
-                    side: BorderSide(
-                      color: Theme.of(context).colorScheme.outlineVariant,
-                    ),
-                  ),
-                  child: _FileList(tasks: _tasks),
+            ],
+          ),
+          if (_running) ...[
+            const SizedBox(height: 14),
+            // 진행률은 테이프가 깔리는 것으로 읽힌다 — 색이 테이프 색이다(theme).
+            ClipRRect(
+              borderRadius: BorderRadius.circular(3),
+              child: LinearProgressIndicator(
+                value: _tasks.isEmpty ? null : _finished / _tasks.length,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              '$_finished / ${_tasks.length} 처리됨',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+          const SizedBox(height: 12),
+          Expanded(
+            child: Material(
+              color: Theme.of(context).colorScheme.surface,
+              clipBehavior: Clip.antiAlias,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppTheme.panelRadius),
+                side: BorderSide(
+                  color: Theme.of(context).colorScheme.outlineVariant,
                 ),
               ),
-            ],
-          ],
-        ),
-      ),
+              child: _FileList(tasks: _tasks),
+            ),
+          ),
+        ],
+      ],
     );
   }
 }
@@ -298,27 +320,24 @@ class _FileTile extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
 
     final (Widget leading, String subtitle) = switch (task.status) {
-      FileTaskStatus.waiting => (
-          const Icon(Icons.schedule),
-          task.path,
-        ),
+      FileTaskStatus.waiting => (const Icon(Icons.schedule), task.path),
       FileTaskStatus.processing => (
-          const SizedBox(
-            width: 20,
-            height: 20,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-          '처리 중…',
+        const SizedBox(
+          width: 20,
+          height: 20,
+          child: CircularProgressIndicator(strokeWidth: 2),
         ),
+        '처리 중…',
+      ),
       FileTaskStatus.done => (
-          Icon(Icons.check_circle, color: colors.primary),
-          '탐지 ${task.detections.length}건 — ${Detection.summarize(task.detections)}\n'
-              '저장: ${task.outputPath} · 클릭하면 비교 미리보기',
-        ),
+        Icon(Icons.check_circle, color: colors.primary),
+        '탐지 ${task.detections.length}건 — ${Detection.summarize(task.detections)}\n'
+            '저장: ${task.outputPath} · 클릭하면 비교 미리보기',
+      ),
       FileTaskStatus.failed => (
-          Icon(Icons.error_outline, color: colors.error),
-          '실패: ${task.error}',
-        ),
+        Icon(Icons.error_outline, color: colors.error),
+        '실패: ${task.error}',
+      ),
     };
 
     final done = task.status == FileTaskStatus.done;
@@ -328,9 +347,9 @@ class _FileTile extends StatelessWidget {
       subtitle: Text(subtitle, maxLines: 2, overflow: TextOverflow.ellipsis),
       onTap: done
           ? () => showDialog<void>(
-                context: context,
-                builder: (_) => ResultPreviewDialog(task: task),
-              )
+              context: context,
+              builder: (_) => ResultPreviewDialog(task: task),
+            )
           : null,
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
