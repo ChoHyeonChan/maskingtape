@@ -34,8 +34,12 @@ def test_min_confidence_keeps_only_certain_names():
 
 
 def test_default_name_detector_is_unchanged():
-    # 기본값(0.0)은 기존 동작 그대로 — 0.5짜리도 반환한다
-    assert [d.text for d in NameDetector().detect("작성자 정보를 확인하세요.")] == ["정보를"]
+    # 기본값(0.0)은 기존 동작 그대로 — 단서가 한쪽뿐인 0.5짜리도 반환한다.
+    # (예전엔 "작성자 정보를"의 "정보를"이 0.5 오탐으로 잡혀 그걸 예시로 썼는데, #394 정비로
+    # "정보"가 일반명사 목록에 들어가 더는 잡히지 않는다 — 실명 예시로 바꿨다.)
+    found = NameDetector().detect("작성자 박서연 확인 부탁드립니다.")
+    assert [(d.text, d.confidence) for d in found] == [("박서연", 0.5)]
+    assert NameDetector().detect("작성자 정보를 확인하세요.") == []
 
 
 def test_llm_detectors_includes_the_rule_safety_net():

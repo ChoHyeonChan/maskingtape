@@ -1,8 +1,8 @@
 # apps/desktop — Flutter 데스크톱 앱
 
-**담당: [@stayalive000](https://github.com/stayalive000)** · 상태: ✅ 기능 완성 (드롭 → 일괄 비식별화 → `_masked` 저장, 전략 선택·이름 정밀 탐지·결과 미리보기) — 백엔드는 로컬 CLI 우선 + REST API 폴백
+**담당: [@stayalive000](https://github.com/stayalive000)** · 상태: ✅ 기능 완성 (드롭 → 일괄 비식별화 → `_masked` 저장, 전략 선택·이름 정밀 탐지·결과 미리보기, **텍스트 직접 입력 모드**) — 백엔드는 로컬 CLI 우선 + REST API 폴백
 
-파일 드래그&드롭으로 문서 여러 개를 한 번에 비식별화하는 데스크톱 도구. **Windows 전용**이다 — macOS·Linux는 아래 [지원 플랫폼](#지원-플랫폼) 참고.
+파일 드래그&드롭으로 문서 여러 개를 한 번에 비식별화하는 데스크톱 도구. 웹처럼 문장을 직접 넣어 확인하는 **텍스트 입력 모드**도 있다. **Windows 전용**이다 — macOS·Linux는 아래 [지원 플랫폼](#지원-플랫폼) 참고.
 
 ## 실행·테스트
 
@@ -71,10 +71,12 @@ CI([ci.yml](../../.github/workflows/ci.yml)의 `desktop` 잡)는 ubuntu에서 `f
 ```
 lib/
   main.dart                    # 앱 루트 — 테마·첫 화면 연결만
-  theme.dart                   # 브랜드 테마 — "책상 위의 테이프" (색·타이포·모서리)
+  theme.dart                   # 브랜드 테마 — 웹 tokens.css와 같은 값 (색·타이포·모서리)
+  kind_colors.dart             # 탐지 종류별 강조색 — 웹 --kind-*와 동일 (결과 미리보기용)
   models/
     detection.dart             # core Detection과 1:1 (API 계약 v1 스키마) + 한국어 요약
     file_task.dart             # 파일 1개의 처리 상태 (대기/처리 중/완료/실패)
+    sample_texts.dart          # 텍스트 모드 예시 문장 — 웹과 같은 합성 4종
   services/
     anonymizer.dart            # 비식별화 백엔드 인터페이스 + 예외 타입
     cli_anonymizer.dart        # core CLI 서브프로세스 호출 (stdin UTF-8)
@@ -87,9 +89,14 @@ lib/
     shell.dart                 # 탐색기에서 결과 파일 열기
     batch_processor.dart       # 읽기 → 비식별화 → _masked 저장 순차 배치 (취소 지원)
   screens/
-    home_screen.dart           # 홈 — 작업 목록 상태 관리 + 배치 시작
+    home_screen.dart           # 홈 — 파일 일괄 ↔ 텍스트 입력 모드 전환, 작업 목록 상태 + 배치 시작
+    text_screen.dart           # 텍스트 입력 모드 — 입력·실행·결과/원문 토글·탐지 목록
   widgets/
     drop_zone.dart             # 드래그&드롭 수신 + 찾아보기 버튼 (desktop_drop, 점선 드롭존)
+    panel.dart                 # 제목·조작부 달린 흰 패널 (웹 .panel과 같은 틀)
+    options_toolbar.dart       # 이름 정밀 탐지 토글 + 전략 선택 — 두 모드가 공유
+    detection_list.dart        # 탐지 목록 행 (종류 점·종류명·값·확신도)
+    highlighted_text.dart      # 원문에 종류별 색 하이라이트 — 미리보기·텍스트 모드 공용
     status_pill.dart           # 파일 상태 칩
     llm_status_pill.dart       # 로컬 LLM 준비 상태 칩 (누르면 다시 확인)
     tape_strip.dart            # 시그니처 — 뜯어 붙인 마스킹테이프 한 조각 (직접 그림)
@@ -97,6 +104,7 @@ lib/
     result_preview_dialog.dart # 원문 하이라이트 vs 마스킹 결과 비교 다이얼로그
 test/
   batch_processor_test.dart    # 배치 로직 유닛 테스트 (가짜 백엔드, 취소 포함)
+  text_screen_test.dart        # 텍스트 입력 모드 — 실행·결과/원문 토글·초기화·옵션 재실행·오류
   file_reader_test.dart        # 인코딩 폴백·검증 규칙 테스트
   rest_anonymizer_test.dart    # REST 호출 — 루프백에 실제 HTTP 서버를 띄워 검증
   fallback_anonymizer_test.dart# 백엔드 전환 규칙 테스트
@@ -105,6 +113,17 @@ test/
   fakes.dart                   # 테스트용 가짜 Anonymizer
   manual_rest_smoke.dart       # 수동 확인용 — 실제로 뜬 apps/api에 붙여본다 (자동 실행 아님)
 ```
+
+## 텍스트 입력 모드 — 파일 없이 문장을 바로 확인
+
+툴바의 **파일 일괄 / 텍스트 입력** 전환으로 웹 플레이그라운드와 같은 화면이 나온다:
+왼쪽에 문장을 넣고(10만 자 상한 — 웹과 동일) **개인정보 탐지 및 마스킹 하기**를 누르면
+왼쪽이 마스킹 결과로 바뀌고 오른쪽에 탐지 목록(종류·값·확신도)이 뜬다. **결과 ↔ 원문**
+토글로 종류별 색 하이라이트를 볼 수 있고, 결과 복사·다시 입력·초기화가 있다.
+
+- 샘플 버튼 4종은 웹 InputPanel과 **같은 합성 문장**이다 — 두 표면에서 같은 결과가 나오는 걸 보여주는 용도.
+- 전략·이름 정밀 탐지 옵션은 파일 모드와 공유한다. 결과가 떠 있는 채로 바꾸면 그 자리에서 다시 돌린다.
+- 처리는 파일 모드와 같은 백엔드(아래 절)를 탄다 — 탐지 로직을 Dart로 다시 쓴 게 아니다.
 
 ## 비식별화 백엔드 — 로컬 CLI 먼저, 없으면 REST API
 
@@ -119,26 +138,27 @@ test/
 
 API 경로에서 지원하지 않는 옵션을 고르면 네트워크를 타기 전에 거절하고, "CLI를 설치하면 이 PC에서 처리할 수 있습니다"라고 안내한다.
 
-## 디자인 — "책상 위의 테이프"
+## 디자인 — 웹 플레이그라운드와 같은 브랜드
 
-색은 실제 마스킹테이프에서 가져왔다. 핵심은 **차가운 바탕 + 따뜻한 테이프**의 대비다.
-바탕과 문서는 차가운 회색이고, 화면에서 유일하게 따뜻한 색(`AppTheme.tape`)은
-**가려진 자리에만** 쓴다. 소재가 따뜻하다고 바탕까지 크림색으로 가면 요즘 흔한 화면이
-되므로, 일부러 반대로 뒀다.
+색·모서리·글꼴 체계는 **웹([apps/web](../web)) `tokens.css`의 값을 그대로 옮겼다**(#442).
+사용자가 눈으로 보는 표면은 웹과 데스크톱 둘뿐이라, 이 둘이 다르면 같은 제품으로
+읽히지 않는다. 웹이 바뀌면 [theme.dart](lib/theme.dart)의 상수만 같이 고친다.
 
-- **시그니처는 테이프 조각**이다([tape_strip.dart](lib/widgets/tape_strip.dart)) — 뜯긴 가장자리와
-  살짝 기운 각도를 직접 그린다. 빈 화면의 예시 문서, 진행률 막대, 완료 칩, 결과 미리보기의
-  탐지 강조가 모두 이 색 하나로 이어진다.
-- **완료 = 테이프가 붙은 상태**라 완료 칩만 테이프 색이다. 나머지는 회색, 빨강은 실패에만.
-- 라운딩을 줄였다(16 → 10). 종이와 테이프는 모서리가 각지고, 곡선이 크면 다시 일반적인 앱처럼 보인다.
-- 글꼴은 시스템 글꼴을 쓴다. 한글 글꼴을 번들하려면 라이선스 확인과 SBOM 등록이 필요한데
-  팀 허용 목록(MIT/Apache/BSD/ISC)에 흔한 한글 글꼴 라이선스(OFL)가 없다 — 대신 굵기·자간·크기
-  대비로 성격을 만든다.
-- 빈 화면은 **예시 문서에 테이프가 붙은 모습**을 먼저 보여준다. 이 도구가 뭘 하는지 한 장면으로
-  말하는 자리다. 예시 값은 전부 합성이고, 테이프 아래 글자는 읽히지 않을 만큼만 비친다.
+- **팔레트**: 브랜드 남색 `#183A8B`(로고·선택된 세그먼트·완료·테이프), 행동 파랑 `#0B55F0`
+  (주 버튼 하나에만), 바탕 `#F6F8FB` + 흰 패널(테두리 남색 18%, 모서리 14). 빨강은 실패에만.
+- **헤더**: 웹과 같은 로고 PNG(`assets/maskingtape-logo-blue.png` — 팀 자산, [apps/web/public](../web/public)과 동일 파일) + 한 줄 설명.
+- **테이프 모티프는 유지**한다([tape_strip.dart](lib/widgets/tape_strip.dart)) — 뜯긴 가장자리와 살짝 기운 각도를
+  직접 그린다. 색만 로고의 파란 테이프 롤과 같은 남색이다. 빈 화면의 예시 문서, 진행률 막대,
+  완료 칩이 모두 이 색으로 이어진다. "가려진 자리 = 테이프가 붙은 자리 = 완료".
+- **탐지 종류별 색**([kind_colors.dart](lib/kind_colors.dart)): 결과 미리보기의 하이라이트는 웹 `--kind-*`와 같은 색이다
+  (주민번호 남색·전화 초록·이메일 자주·주소 보라…). 웹 결과 화면의 점과 같은 색이라 두 표면을
+  오가도 색만 보고 종류를 알아본다. 모르는 kind는 중립 회색.
+- 글꼴은 시스템 글꼴을 쓴다. 웹도 `Inter, "Segoe UI", system-ui` 폴백 체인이라 폰트 파일을
+  싣지 않는다 — Windows에선 둘 다 Segoe UI + 맑은 고딕으로 렌더된다. 한글 글꼴을 번들하려면
+  라이선스 확인과 SBOM 등록이 필요한데 팀 허용 목록(MIT/Apache/BSD/ISC)에 흔한 한글 글꼴
+  라이선스(OFL)가 없다.
 
-앱 아이콘도 같은 마크다(`windows/runner/resources/app_icon.ico`) — 어두운 바탕에 비스듬한
-테이프 한 조각. 16px에서도 읽히도록 요소는 둘뿐이다.
+앱 아이콘(`windows/runner/resources/app_icon.ico`)은 아직 이전 팔레트(노란 테이프)다 — 파란색 교체는 별도 이슈.
 
 입력 파일 규칙: txt·csv·tsv·md·json·log, 10MB 이하, UTF-8 또는 CP949(자동 판별).
 결과 `_masked` 파일은 항상 UTF-8로 저장한다. `_masked` 파일 재드롭·바이너리·빈 파일은 건너뛴다.
