@@ -23,6 +23,8 @@ from dataclasses import dataclass
 from maskingtape.detectors.contact.phone import _LANDLINE_RE
 from maskingtape.detectors.financial.creditcard import _luhn_ok
 
+from bench.generator.address_shapes import gen_extended_address
+
 # 성씨 상위 30종(통계청 인구총조사 기준 다빈도 성씨) — 특정 인물이 아닌 통계적 분포만 참고.
 _SURNAMES = [
     "김", "이", "박", "최", "정", "강", "조", "윤", "장", "임",
@@ -407,14 +409,26 @@ def gen_birth_date(rng: random.Random, difficulty: str = "mixed") -> Entity:
 
 
 _PARTIAL_ADDRESS_RATE = 0.12  # 명함·회사소개 등 동/번지 없는 부분 주소도 실제로 나오니 일부 섞는다(#195).
+# extended=True일 때 전체 주소 중 #423이 고친 형태(address_shapes.py)로 바꾸는 비율. 500건 데이터셋에서
+# 주소는 60건 안팎이라 0.5면 8형태 중 하나가 통째로 빠질 수 있었다(seed 42에서 실측: dong_then_road 0건).
+# 0.8이면 8형태가 모두 2건 이상 들어간다. 기존 형태는 v1이 이미 재므로 v2에선 20%만 남긴다.
+_EXTENDED_ADDRESS_RATE = 0.8
 
 
-def gen_address(rng: random.Random, difficulty: str = "mixed") -> Entity:
+def gen_address(rng: random.Random, difficulty: str = "mixed", *, extended: bool = False) -> Entity:
+    """주소 한 건. extended=True면 core #423이 고친 형태(address_shapes.py)도 섞는다(#431).
+
+    extended=False(기본)는 난수를 하나도 더 쓰지 않아 예전과 똑같은 값을 낸다 — 그래야 제출 수치의
+    근거인 synth_v1.jsonl이 시드만으로 계속 재생성된다.
+    """
     if rng.random() < _PARTIAL_ADDRESS_RATE:
         city = rng.choice(_CITIES)
         if rng.random() < 0.5:
             return Entity(kind="address", text=city)  # 시/도만 — core confidence 0.5
         return Entity(kind="address", text=f"{city} {rng.choice(_GU_NAMES)}")  # 시/도+구 — 0.65
+
+    if extended and rng.random() < _EXTENDED_ADDRESS_RATE:
+        return Entity(kind="address", text=gen_extended_address(rng))
 
     if difficulty == "easy":
         style = "jibun"  # 지번 주소가 더 짧고 표준적인 형태
@@ -487,5 +501,9 @@ _GENERATORS = {
 ALL_KINDS = tuple(_GENERATORS.keys())
 
 
-def generate_entity(kind: str, rng: random.Random, difficulty: str = "mixed") -> Entity:
+def generate_entity(
+    kind: str, rng: random.Random, difficulty: str = "mixed", *, address_extended: bool = False
+) -> Entity:
+    if kind == "address":
+        return gen_address(rng, difficulty, extended=address_extended)
     return _GENERATORS[kind](rng, difficulty)
