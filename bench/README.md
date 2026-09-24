@@ -14,6 +14,7 @@
 ```
 generator/
   entities.py     # 종류별 합성 값 생성 (name/phone/email/rrn/address/card/biz_reg/passport/account/birth_date/driver_license)
+  address_shapes.py # core #423이 고친 주소 형태 8종 생성 재료 (--address-extended, synth_v2 전용)
   distractors.py  # 개인정보가 아닌 '헷갈리는' 값 생성 (오탐 측정용)
   documents.py    # 문장 템플릿에 값을 심어 문서 + 라벨(span) 생성
 generate_dataset.py  # CLI — JSONL 데이터셋 생성
@@ -23,7 +24,7 @@ evaluators/           # 평가 도구 모음 — "무엇을 평가하는가"별�
   evaluate_masking.py    # CLI — 마스킹 결과에 개인정보가 실제로 남아있는지(유출률) 평가 (--strategy로 mask/label/pseudonym 선택)
   confidence_analysis.py # CLI — confidence 임계값별 precision/recall/F1 변화 분석
   compare_name_detectors.py  # CLI — 이름 탐지 규칙판 vs 하이브리드(LLM) 정확도 비교
-datasets/            # 생성된 평가셋 (정답 라벨 포함)
+datasets/            # 생성된 평가셋 (정답 라벨 포함) — synth_v1(제출 수치 근거)·synth_v2(주소 확장)
 reports/             # evaluate.py --report로 저장한 마크다운 리포트 (결과보고서 첨부용)
 tests/               # 생성기·평가 로직 단위 테스트
 ```
@@ -634,6 +635,38 @@ kind를 차지한다.** 재현해보니 confidence 1.0짜리 rrn이 confidence 0
 하류 로직(통계·로깅·정책)은 오판할 수 있다. bench 소관이 아니라
 [#172](https://github.com/ChoHyeonChan/maskingtape/issues/172)로 남기고 현재 동작은
 회귀 테스트로 고정해뒀다.
+
+## 데이터셋 버전 — v1(제출 수치 근거)과 v2(주소 확장)
+
+| | `synth_v1.jsonl` | `synth_v2.jsonl` |
+|---|---|---|
+| 만드는 법 | `python -m bench.generate_dataset --count 500 --seed 42 --out bench/datasets/synth_v1.jsonl` | 위에 `--address-extended`를 더하고 `--out bench/datasets/synth_v2.jsonl` |
+| 용도 | README·제출 보고서의 정확도 수치(전체 F1 0.911 등)의 근거 | v1이 못 재는 주소 형태의 경계를 잰다 |
+| 기존 수치 | 그대로 | 해당 없음(별도 측정) |
+
+**왜 v2가 필요한가**([#431](https://github.com/ChoHyeonChan/maskingtape/issues/431)): core가 #423(PR #427)에서
+"주소가 동/도로명 자리에서 끊겨 건물번호가 새던" 문제를 고쳤는데, v1 생성기는 그 형태를 한 건도 만들지
+않았다(v1 주소 56건 중 0건). 직접 확인해보니 **#423 수정 이전 코드로 v1을 채점해도 주소 F1은 1.000**이다 —
+버그가 있어도 벤치가 못 본다는 뜻이다. `bench/generator/address_shapes.py`가 core `test_address.py`의
+`# --- #423` 섹션이 고정한 8형태(읍·면 뒤 도로명·리, 동·리가 든 도로명, 숫자 든 도로명·행정동,
+N가 동, 동 뒤 도로명, 가길)를 만들고, `--address-extended`일 때만 주소의 80%를 이 형태로 바꾼다. 군 지역 형태는
+시/도 없이 군으로 시작하는 표기(`양평군 양평읍 ...`)도 절반 섞는다.
+
+| 주소 F1 (500건, seed 42) | 수정 전(#423 직전 `address.py`) | 현재 main |
+|---|---|---|
+| v1 | 1.000 (tp 56) | 1.000 (tp 56) |
+| **v2** | **0.373** (tp 22, fp 37, fn 37) | **1.000** (tp 59) |
+
+v2 주소 59건 중 37건이 새 형태이고 형태별로는 2~8건이다(500건 한 벌이라 얇다). 수정 전 코드에서는 이
+37건이 전부 구간이 끊겨 fp·fn으로 동시에 집계된다(exact match 채점). 형태별 근거는
+`test_address_shapes.py`가 형태마다 300번씩 core에 넣어 **입력 전체가 한 구간으로** 잡히는지 확인하는
+쪽이 맡는다. v2 전체 지표는 `bench/reports/report_v2.md`에 있다.
+
+**v1을 지키는 장치**: 새 형태를 기본 생성에 섞으면 난수 흐름이 바뀌어 v1을 시드로 다시 만들 수 없게
+된다. 그래서 (1) `gen_address`는 `extended=False`(기본)일 때 난수를 하나도 더 쓰지 않고, (2)
+`--address-extended`로 `synth_v1.jsonl`에 저장하려 하면 CLI가 거부하며, (3) `test_generate_dataset.py`가
+커밋된 v1·v2를 시드로 재생성해 한 줄이라도 다르면 CI에서 실패시킨다. 생성기를 바꾸는 후속 작업은 v2처럼
+옵션 뒤로 옮기거나, v1을 일부러 갱신할 땐 수치를 함께 갱신해야 한다.
 
 ## 데이터셋 포맷 (생성기·평가기가 공유하는 계약)
 
