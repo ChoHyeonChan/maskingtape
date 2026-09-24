@@ -25,6 +25,19 @@
   min-width: 0;
 }
 
+.license-link {
+  display: inline-block;
+  margin-top: 0.2rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-decoration: underline;
+}
+
+.license-link:hover {
+  color: var(--brand-blue);
+}
+
 .app-header__eyebrow,
 .eyebrow {
   display: inline-flex;

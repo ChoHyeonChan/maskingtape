@@ -33,6 +33,20 @@ describe("AppHeader logo (layout-shift regression)", () => {
   });
 });
 
+describe("AppHeader 오픈소스 고지 링크 (#439)", () => {
+  it("links to THIRD_PARTY_NOTICES.md and opens it in a new tab", () => {
+    render(<AppHeader onHelpClick={() => {}} />);
+    const link = screen.getByRole("link", { name: "오픈소스 라이선스" });
+
+    expect(link).toHaveAttribute(
+      "href",
+      "https://github.com/ChoHyeonChan/maskingtape/blob/main/THIRD_PARTY_NOTICES.md",
+    );
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(link).toHaveAttribute("rel", "noopener noreferrer");
+  });
+});
+
 describe("AppHeader accuracy bubble (도움말 옆에 잠깐 뜨는 정확도 안내)", () => {
   beforeEach(() => {
     vi.useFakeTimers();
