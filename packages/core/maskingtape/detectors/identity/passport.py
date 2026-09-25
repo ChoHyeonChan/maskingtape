@@ -43,6 +43,11 @@ class PassportDetector(Detector):
     kind = "passport"
 
     def detect(self, text: str) -> list[Detection]:
+        """후보 앞 _CONTEXT_WINDOW(15자) 안에 '여권'이 있으면 확신도 0.9, 없으면 0.6을 준다.
+
+        여권번호에는 체크섬이 없어 문맥으로만 확신도를 가른다. 확신도가 낮아도 탐지
+        결과에 들어가 기본 파이프라인에서는 가려진다(확신도로 거르는 건 웹 데모의 슬라이더다).
+        """
         found: list[Detection] = []
         for m in _PASSPORT_RE.finditer(text):
             context = text[max(0, m.start() - _CONTEXT_WINDOW) : m.start()]

@@ -34,6 +34,10 @@ class DriverLicenseDetector(Detector):
     kind = "driver_license"
 
     def detect(self, text: str) -> list[Detection]:
+        """형식과 지역코드(정규식에 포함)가 맞는 12자리를 확신도 0.85로 돌려준다.
+
+        검증번호 알고리즘이 공개돼 있지 않아 형식만으로는 확정할 수 없다.
+        """
         return [
             Detection(
                 kind=self.kind,

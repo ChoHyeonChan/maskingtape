@@ -105,6 +105,12 @@ class LLMNameDetector(Detector):
         self._client = client if client is not None else self._ask_ollama
 
     def detect(self, text: str) -> list[Detection]:
+        """규칙으로 이름 후보가 있는지 먼저 보고, 없으면 LLM을 부르지 않는다.
+
+        숫자·코드처럼 이름이 있을 수 없는 입력에서 느린 호출을 아끼려는 것이다. 후보가
+        있으면 문장 전체를 로컬 LLM에 보내고, 돌아온 이름을 원문 위치로 바꾼다. 원문에
+        없는 이름(환각)은 _to_detections()에서 버린다.
+        """
         if not text.strip():
             return []
         # 하이브리드: 규칙으로 이름 후보를 먼저 훑어, 후보가 없는 텍스트는 LLM을 건너뛴다.
