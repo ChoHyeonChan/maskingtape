@@ -195,6 +195,57 @@ recall도 0.668 → 0.869로 올랐다 — 남은 과제는 문맥 단서가 없
 (precision 0.954는 어휘를 모두 빼도 0.934로 유지돼 구조 개선의 효과가 맞다). 자세한 내용은
 [bench/README.md](bench/README.md)의 한계 고지를 참고한다.
 
+## 원문은 어디로 가나
+
+개인정보를 가리는 도구가 가리기 전의 원문을 밖으로 보내면 쓸 이유가 없다. 쓰는 방법마다 원문이
+어디까지 가는지 적는다. 아래는 전부 코드로 확인한 동작이다.
+
+```mermaid
+flowchart LR
+    subgraph pc["사용자 PC: 원문이 머무는 곳"]
+        doc["원문 문서·텍스트"]
+        cli["CLI · Python 라이브러리"]
+        desk["데스크톱 앱"]
+        llm["Ollama<br/>--llm일 때만"]
+        mcp["MCP 서버<br/>stdio"]
+        copy["가린 사본 파일"]
+    end
+    subgraph agent["AI 에이전트"]
+        ag["에이전트<br/>클라우드 LLM일 수 있음"]
+    end
+    subgraph demo["웹 데모"]
+        browser["브라우저<br/>파일은 여기서 글자만 뽑음"]
+        api["우리 API 서버(Vercel)<br/>규칙만 씀<br/>우리 코드는<br/>저장·로그 안 함"]
+    end
+    doc --> cli
+    doc --> desk
+    desk -- "로컬 CLI 호출<br/>없으면 이 PC의 API" --> cli
+    cli -. "로컬 주소만 허용" .-> llm
+    mcp -. "로컬 주소만 허용" .-> llm
+    doc -- "PC 안에서 읽음" --> mcp
+    ag -- "anonymize_file: 경로만" --> mcp
+    ag -- "anonymize_text: 이미 가진 글자" --> mcp
+    mcp --> copy
+    mcp -- "경로·건수 또는 가린 글자" --> ag
+    copy -- "가린 사본" --> ag
+    doc -- "붙여넣기·파일 선택" --> browser
+    browser -- "입력한 글자" --> api
+    api -- "탐지 결과·가린 글자" --> browser
+```
+
+| 쓰는 방법 | 원문이 가는 곳 | 근거 |
+|---|---|---|
+| CLI · Python 라이브러리 | 이 PC 안 | 탐지와 마스킹이 로컬 프로세스에서 끝난다. core에서 네트워크를 쓰는 곳은 아래 `--llm` 한 곳뿐이다 |
+| `--llm` (이름 하이브리드) | 이 PC의 Ollama | `name_llm.py`의 `_require_local_host`가 `localhost`·`127.0.0.1`·`::1`이 아닌 주소를 거부하고, 요청은 프록시·리다이렉트를 거치지 않는다. Ollama가 요청을 ollama.com으로 넘기는 클라우드 모델(이름이 `cloud`로 끝나거나, Ollama 모델 정보에 원격으로 표시된 모델)은 원문을 보내기 전에 거부한다(#468). CLI와 MCP에는 이 주소를 바꾸는 옵션이 없다 |
+| 데스크톱 앱 | 이 PC 안 | 로컬 CLI를 먼저 쓰고, 없으면 이 PC의 API(`127.0.0.1:8000`)로 넘어간다 (`apps/desktop/lib/services/default_backend.dart`) |
+| MCP `anonymize_file` | 이 PC 안 | 에이전트는 파일 경로만 넘기고 경로와 건수만 돌려받는다 |
+| MCP `anonymize_text` · `scan_text` | 이미 에이전트에 있음 | 에이전트가 가진 글자를 넘기는 도구라 그 원문은 에이전트가 이미 봤다. 가린 결과를 다른 곳으로 보내기 전에 쓴다. `scan_text`는 원문 값 없이 종류·위치·확신도·탐지기 이름만 돌려준다 |
+| 웹 데모 | 우리 API 서버 (Vercel) | 파일은 브라우저에서 글자만 뽑고(`apps/web/src/lib/extractText.ts`) 그 글자를 서버로 보낸다. 서버는 규칙 탐지기만 쓰고 LLM을 부르지 않는다. `apps/api`에는 입력을 로그·파일에 남기는 코드가 없고, 검증 오류 응답에서도 입력값을 지운다(`apps/api/maskingtape_api/errors.py`). 호스팅 플랫폼(Vercel)의 요청 기록은 우리 코드 밖이다 |
+
+> 에이전트에게 원문 대신 가린 사본만 넘기려면 `anonymize_file`을 쓴다. 다만 에이전트가 자기 도구로
+> 원본 파일을 여는 것까지 막지는 못하고, 탐지하지 못한 값은 사본에도 남는다. 실제 개인정보가 든
+> 문서는 웹 데모 대신 로컬에서 도는 CLI·데스크톱·MCP로 처리한다.
+
 ## MCP 서버로 쓰기 (AI 에이전트용)
 
 에이전트가 한국어 데이터를 외부로 보내기 전에 자동으로 비식별화하는 프라이버시 계층:
