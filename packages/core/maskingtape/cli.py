@@ -85,7 +85,8 @@ def main() -> int:
     parser.add_argument(
         "--llm-model",
         default=DEFAULT_MODEL,
-        help=f"--llm이 쓸 Ollama 모델 (기본: {DEFAULT_MODEL})",
+        help=f"--llm이 쓸 로컬 Ollama 모델 (기본: {DEFAULT_MODEL}). "
+        "원문이 ollama.com으로 넘어가는 클라우드 모델(-cloud)은 거부한다",
     )
     args = parser.parse_args()
 
@@ -103,7 +104,14 @@ def main() -> int:
             return 2
 
     anonymizer = _STRATEGIES[args.strategy]()
-    detectors = llm_detectors(model=args.llm_model) if args.llm else None
+    try:
+        detectors = llm_detectors(model=args.llm_model) if args.llm else None
+    except ValueError as exc:
+        # 클라우드 모델처럼 원문이 PC 밖으로 나가는 설정은 탐지기를 만들 때 거부된다(#468).
+        # 아직 아무것도 보내지 않은 상태다. 트레이스백 대신 무엇이 잘못됐는지만 알리고 끝낸다.
+        # 메시지에는 모델 이름만 들어 있고 원문은 없다.
+        print(f"오류: {exc}", file=sys.stderr)
+        return 2
     pipeline = Pipeline(detectors=detectors, anonymizer=anonymizer)
 
     try:
