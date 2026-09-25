@@ -58,6 +58,10 @@ class CreditCardDetector(Detector):
     kind = "card"
 
     def detect(self, text: str) -> list[Detection]:
+        """그룹 구조에 맞는 후보에서 숫자만 뽑아 자릿수(13~19)와 Luhn 체크섬을 확인한다.
+
+        체크섬이 우연히 맞을 수도 있어 확신도는 1.0이 아니라 0.95다.
+        """
         found: list[Detection] = []
         for m in _CARD_RE.finditer(text):
             digits = re.sub(r"\D", "", m.group(0))

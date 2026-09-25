@@ -42,6 +42,10 @@ _LANDLINE_RE = re.compile(r"(?<!\d)(\()?" + _LANDLINE_PREFIX + r"(?(1)\))" + _TA
 
 
 def _has_separator(matched: str) -> bool:
+    """하이픈·마침표·스페이스 중 하나가 들어 있는지 본다. detect()가 확신도를 가를 때 쓴다.
+
+    정규식(_SEP)은 탭·en dash·em dash도 구분자로 받지만 여기서는 세지 않는다.
+    """
     return any(sep in matched for sep in ("-", ".", " "))
 
 
@@ -51,6 +55,11 @@ class PhoneDetector(Detector):
     kind = "phone"
 
     def detect(self, text: str) -> list[Detection]:
+        """휴대폰과 유선·특수 번호를 각각 찾는다.
+
+        하이픈·마침표·스페이스가 있으면 확신도를 높게(휴대폰 1.0, 유선 0.95), 없으면
+        낮게(0.9, 0.8) 준다(_has_separator).
+        """
         found: list[Detection] = []
         # (정규식, 구분자 있을 때 확신도, 숫자만 붙어 있을 때 확신도)
         for regex, with_sep, bare in ((_MOBILE_RE, 1.0, 0.9), (_LANDLINE_RE, 0.95, 0.8)):

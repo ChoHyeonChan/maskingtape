@@ -48,6 +48,11 @@ class EmailDetector(Detector):
     kind = "email"
 
     def detect(self, text: str) -> list[Detection]:
+        """정규식에 맞는 이메일을 확신도 1.0으로 돌려준다.
+
+        도메인은 영문 라벨과 영문 TLD여야 해서 "회의@3층" 같은 한국어 표현은 잡지 않는다
+        (모듈 설명 참고).
+        """
         return [
             Detection(
                 kind=self.kind,

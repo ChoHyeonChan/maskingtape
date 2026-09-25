@@ -67,6 +67,10 @@ class BirthDateDetector(Detector):
     kind = "birth_date"
 
     def detect(self, text: str) -> list[Detection]:
+        """앵커 뒤 날짜 가운데 실제로 있는 날짜만 확신도 0.9로 돌려준다.
+
+        구간은 날짜 부분만 잡는다. 앵커('생년월일' 등)는 개인정보가 아니라서 가리지 않는다.
+        """
         found: list[Detection] = []
         for m in _BIRTHDATE_RE.finditer(text):
             date_text = m.group("date")
