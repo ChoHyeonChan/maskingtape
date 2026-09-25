@@ -1,12 +1,16 @@
 /* SPDX-FileCopyrightText: 2026 The maskingtape Authors */
 /* SPDX-License-Identifier: Apache-2.0 */
 
+/* #455 전엔 페이지 전체가 한 화면(100vh)에 갇힌 도구였다 — 위에 소개·탐지범위·정확도·예제
+   섹션이 붙으면서 이제 페이지 자체는 자연스럽게 스크롤돼야 한다. 예전처럼 화면 하나에 담긴
+   "체험" 영역(.experience)만 자체 높이를 유지한다(layout.css 참고). */
 html,
 body,
 #root {
   width: 100%;
-  height: 100%;
-  overflow: hidden;
+  height: auto;
+  min-height: 100%;
+  overflow: auto;
 }
 
 * {

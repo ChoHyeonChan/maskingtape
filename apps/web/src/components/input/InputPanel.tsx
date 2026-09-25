@@ -10,25 +10,6 @@ import type { Detection, HighlightRange } from "../../types/detection";
 const PLACEHOLDER = "예: 고객 홍길동님은 010-1234-5678 또는 hong@example.com으로 연락 가능합니다.";
 const MAX_TEXT_LENGTH = 100_000;
 
-const PRESETS: { label: string; text: string }[] = [
-  {
-    label: "고객 상담 기록",
-    text: "마스킹테이프 도입 검토 고객인 홍길동님과 전화 상담을 진행했습니다. 연락처는 010-1234-5678 또는 hong@example.com이며, 테스트 문서에는 주민등록번호 800101-1234560과 배송지 서울특별시 강남구 테헤란로 123이 함께 포함되어 있었습니다.",
-  },
-  {
-    label: "신청서 샘플",
-    text: "신청자 김민수, 주민등록번호 800101-1234560, 주소 서울특별시 강남구 테헤란로 123, 카드번호 4111-1111-1111-1111",
-  },
-  {
-    label: "근로계약서 발췌",
-    text: "근로계약서(발췌)\n사용자(갑): 마스킹테이프 주식회사\n근로자(을) 성명 김소연님, 주민등록번호 950322-2345671\n주소: 서울특별시 마포구 월드컵로 120 101동 502호\n연락처: 010-9876-5432\n위 당사자는 다음과 같이 근로계약을 체결하며, 근무 개시일은 2026년 3월 1일로 한다.",
-  },
-  {
-    label: "임대차계약서 발췌",
-    text: "주택임대차계약서(발췌)\n임차인 성명 박지훈씨, 주민등록번호 880715-1234567\n연락처 010-2345-6789, 이메일 jihoon.park@example.com\n주소: 경기도 성남시 분당구 정자동 178-4 스카이빌라 302동 1104호\n임대인과 위와 같이 전세 계약을 체결하며, 계약기간은 2026년 4월 1일부터 2028년 3월 31일까지로 한다.",
-  },
-];
-
 interface Props {
   text: string;
   hasResult: boolean;
@@ -57,7 +38,6 @@ export function InputPanel({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const [presetsOpen, setPresetsOpen] = useState(false);
   const [revealingResult, setRevealingResult] = useState(false);
   const [extracting, setExtracting] = useState(false);
   const [dragActive, setDragActive] = useState(false);
@@ -158,13 +138,6 @@ export function InputPanel({
     setDragActive(false);
   }
 
-  function handlePreset(text: string) {
-    onTextChange(text);
-    setError(null);
-    setCopied(false);
-    setPresetsOpen(false);
-  }
-
   function handleClear() {
     onClear();
     setError(null);
@@ -251,36 +224,6 @@ export function InputPanel({
           </div>
         )}
         <div className={hasResult ? "input-panel__tools input-panel__tools--hidden" : "input-panel__tools"}>
-          <button type="button" className="input-panel__sample" onClick={() => handlePreset(PRESETS[1].text)}>
-            신청서 샘플
-          </button>
-          <button
-            type="button"
-            className="input-panel__sample input-panel__sample--contract"
-            onClick={() => handlePreset(PRESETS[2].text)}
-          >
-            계약서 예제
-          </button>
-          <details
-            className="input-panel__presets"
-            data-coach="presets"
-            open={presetsOpen}
-            onToggle={(event) => setPresetsOpen(event.currentTarget.open)}
-          >
-            <summary className="input-panel__presets-label">샘플 더 불러오기...</summary>
-            <div className="input-panel__preset-list">
-              {PRESETS.map((preset) => (
-                <button
-                  key={preset.label}
-                  type="button"
-                  className="input-panel__preset"
-                  onClick={() => handlePreset(preset.text)}
-                >
-                  {preset.label}
-                </button>
-              ))}
-            </div>
-          </details>
           <button
             type="button"
             className="input-panel__upload"

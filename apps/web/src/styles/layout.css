@@ -3,12 +3,23 @@
 
 .app-shell {
   max-width: 1440px;
-  height: 100vh;
+  min-height: 100vh;
   margin: 0 auto;
-  padding: 1.1rem 1.75rem 1rem;
+  padding: 1.1rem 1.75rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+/* 입력·결과 "체험" 영역만 예전처럼 화면 하나에 담긴 고정 높이를 유지한다 — 목록이 길어져도
+   패널 안에서만 스크롤되던 동작(DetectionList 등)을 그대로 지키기 위해서다. 그 안에서는
+   app-shell 대신 이 컨테이너가 옛 100vh 그리드 역할을 이어받는다. */
+.experience {
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr);
-  overflow: hidden;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 0.9rem;
+  height: min(46rem, 78vh);
+  min-height: 26rem;
 }
 
 .app-header {
@@ -304,22 +315,16 @@
 }
 
 @media (max-width: 900px) {
-  html,
-  body,
-  #root {
-    height: auto;
-    min-height: 100%;
-    overflow: auto;
-  }
-
-  .app-shell {
-    height: auto;
-    min-height: 100vh;
-    overflow: visible;
-  }
-
   .app-header {
     align-items: flex-start;
+  }
+
+  /* 좁은 화면에선 "체험" 영역도 고정 높이를 버리고 페이지 흐름에 맡긴다 — 입력·결과 두
+     패널을 가로로 나란히 둘 공간이 없어 세로로 쌓이므로, 안에서 또 스크롤을 가두면 결과
+     목록이 손바닥만 한 상자 안에 갇힌다. */
+  .experience {
+    height: auto;
+    min-height: 0;
   }
 
   .app-grid {

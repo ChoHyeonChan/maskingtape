@@ -17,7 +17,7 @@ interface Rect {
   width: number;
 }
 
-type TargetKey = "presets" | "scan" | "masked-result" | "analysis-result";
+type TargetKey = "scan" | "masked-result" | "analysis-result";
 
 interface CoachTarget {
   key: TargetKey;
@@ -30,13 +30,14 @@ interface CoachTarget {
 type RawCoachTarget = Omit<CoachTarget, "note">;
 
 const TARGET_KEYS: Record<Variant, TargetKey[]> = {
-  intro: ["presets", "scan"],
+  // #455 전엔 "presets"(예제 불러오기)도 함께 가리켰다 — 예제가 이제 페이지 위쪽 갤러리
+  // 섹션으로 옮겨져 이미 눈에 띄므로, 인트로 투어는 실제 입력 동작인 scan 하나만 가리킨다.
+  intro: ["scan"],
   result: ["masked-result", "analysis-result"],
 };
 
 const TARGET_COPY: Record<TargetKey, string> = {
-  presets: "입력할 문장이 없다면 예제로 먼저 확인해 보세요.",
-  scan: "텍스트를 입력한 뒤 탐지를 실행하면 결과가 오른쪽에 표시됩니다.",
+  scan: "예제를 골랐거나 텍스트를 입력했다면, 여기를 눌러 개인정보를 탐지·마스킹하세요.",
   "masked-result": "마스킹된 결과가 여기 표시돼요. 복사 버튼으로 바로 가져갈 수 있어요.",
   "analysis-result": "탐지된 개인정보를 항목별로 확인하고, 토글로 가릴지 보일지 직접 정할 수 있어요.",
 };
@@ -44,14 +45,12 @@ const TARGET_COPY: Record<TargetKey, string> = {
 // 노트가 대상 위/아래 중 어느 쪽에 뜨는지 — scan 버튼은 패널 아래쪽에 있어 노트를 아래에 두면
 // 화면 밖으로 밀려나므로 위쪽에 띄운다. 나머지는 모두 패널 상단부라 아래쪽이 자연스럽다.
 const TARGET_SIDE: Record<TargetKey, "above" | "below"> = {
-  presets: "below",
   scan: "above",
   "masked-result": "below",
   "analysis-result": "below",
 };
 
 const TARGET_PADDING: Record<TargetKey, number> = {
-  presets: 7,
   scan: 8,
   "masked-result": 7,
   "analysis-result": 7,
@@ -151,6 +150,15 @@ export function CoachMark({ onDismiss, variant }: Props) {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [onDismiss]);
+
+  // #455로 페이지 위에 소개·탐지범위·정확도·예제 섹션이 붙으면서 "체험" 영역(scan
+  // 버튼 등)이 더 이상 화면 첫 화면(above the fold)에 있지 않다 — 코치마크가 뜰 때
+  // 첫 대상을 화면 가운데로 스크롤해 보여주지 않으면 보이지도 않는 곳을 가리키게 된다.
+  useEffect(() => {
+    const firstKey = TARGET_KEYS[variant][0];
+    const element = document.querySelector<HTMLElement>(`[data-coach="${firstKey}"]`);
+    element?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [variant]);
 
   const mini = MINI_COPY[variant];
 

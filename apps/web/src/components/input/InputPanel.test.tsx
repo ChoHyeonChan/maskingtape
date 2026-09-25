@@ -367,23 +367,3 @@ describe("InputPanel export actions (복사·파일로 저장이 이 패널에 �
     vi.unstubAllGlobals();
   });
 });
-
-describe("InputPanel contract demo preset (#215)", () => {
-  it("loads the contract example text in one click, without opening the presets dropdown", () => {
-    const onTextChange = vi.fn();
-    render(
-      <InputPanel
-        text=""
-        hasResult={false}
-        resultVersion={0}
-        onTextChange={onTextChange}
-        onClear={vi.fn()}
-        onResult={vi.fn()}
-      />,
-    );
-
-    fireEvent.click(screen.getByRole("button", { name: "계약서 예제" }));
-
-    expect(onTextChange).toHaveBeenCalledWith(expect.stringContaining("근로계약서"));
-  });
-});
