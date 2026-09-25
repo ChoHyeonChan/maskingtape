@@ -162,6 +162,7 @@ _CUE_WORDS = frozenset(_ALL_CUES)
 
 
 def _is_hangul(ch: str) -> bool:
+    """완성형 한글 음절(가~힣)인지 본다. 일반명사(_COMMON_WORDS)의 낱말 경계를 판정할 때 쓴다."""
     return "가" <= ch <= "힣"
 
 
@@ -226,6 +227,12 @@ class NameDetector(Detector):
         self.min_confidence = min_confidence
 
     def detect(self, text: str) -> list[Detection]:
+        """성씨와 1~2글자 이름 후보 가운데 앞뒤 문맥 단서가 있는 것만 이름으로 본다.
+
+        finditer 대신 직접 이어 찾는다. 버린 후보(라벨 단어)가 다음 이름의 앞 단서일 수
+        있어서, 그 자리부터 다시 찾아야 뒤 이름을 놓치지 않는다. 단서가 앞뒤 둘 다 있으면
+        확신도 0.75, 하나면 0.5를 주고, min_confidence보다 낮으면 버린다.
+        """
         found: list[Detection] = []
         pos = 0
         # finditer 대신 직접 이어 찾는다: "신청자 성명 김하늘"에서 "성명"이 이름 후보로 잡혀

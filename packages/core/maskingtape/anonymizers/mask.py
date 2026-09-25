@@ -23,10 +23,15 @@ class MaskAnonymizer(Anonymizer):
     """
 
     def __init__(self, mask_char: str = "*", keep_head: int = 0) -> None:
+        """mask_char는 가릴 때 쓸 문자, keep_head는 앞에서 남길 글자 수다.
+
+        keep_head는 실제로는 구간 길이의 절반까지만 적용된다(클래스 설명, #169).
+        """
         self.mask_char = mask_char
         self.keep_head = keep_head
 
     def apply(self, text: str, detections: Sequence[Detection]) -> str:
+        """구간마다 앞 keep_head 글자(최대 절반)만 남기고 나머지를 마스킹 문자로 바꾼다."""
         # 뒤에서부터 치환해야 앞쪽 구간의 위치(start/end)가 밀리지 않는다
         for d in sorted(detections, key=lambda d: d.start, reverse=True):
             span_len = d.end - d.start

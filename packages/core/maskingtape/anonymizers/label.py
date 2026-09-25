@@ -37,10 +37,16 @@ class LabelAnonymizer(Anonymizer):
     """탐지 구간을 `[라벨]` 형태로 치환한다."""
 
     def __init__(self, labels: dict[str, str] | None = None, numbered: bool = False) -> None:
+        """labels로 일부 종류의 라벨만 바꿀 수 있다. 넘기지 않은 종류는 DEFAULT_LABELS를 쓴다."""
         self.labels = {**DEFAULT_LABELS, **(labels or {})}
         self.numbered = numbered
 
     def apply(self, text: str, detections: Sequence[Detection]) -> str:
+        """탐지 구간을 라벨로 바꾼다.
+
+        numbered=True면 번호를 종류마다 따로 매기고, 같은 (종류, 값)은 같은 번호를 받는다.
+        라벨이 정해지지 않은 종류는 종류 이름을 그대로 라벨로 쓴다.
+        """
         # 번호는 등장 순서(앞→뒤)로 매기고, 치환은 위치가 안 밀리게 뒤→앞으로 한다
         numbers: dict[tuple[str, str], int] = {}
         if self.numbered:
