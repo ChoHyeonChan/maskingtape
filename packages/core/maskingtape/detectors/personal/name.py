@@ -154,6 +154,12 @@ _CANDIDATE_RE = re.compile(r"(?:" + _SURNAME_ALT + r")[가-힣]")
 # 후보 판정에 쓰는 문맥 단서 전체 (역할어 + 존칭 + 직함)
 _ALL_CUES = tuple(dict.fromkeys(_PREFIX_CUES + _SUFFIX_CUES + _TITLE_CUES))
 
+# 이름 후보가 단서 단어(역할어·직함) 자체와 글자까지 같으면 이름이 아니다(#450).
+# 호칭의 첫 글자가 성씨 사전에 있으면("고"객·"원"장·"차"장) "고객님께"가 "성+이름 + 존칭"으로
+# 읽혀 호칭이 이름으로 잡혔다. 앞부분 일치가 아니라 완전 일치로만 거른다 — "원장훈"처럼
+# 호칭 글자로 시작하는 실명까지 버리면 유출이다.
+_CUE_WORDS = frozenset(_ALL_CUES)
+
 
 def _is_hangul(ch: str) -> bool:
     return "가" <= ch <= "힣"
@@ -229,7 +235,7 @@ class NameDetector(Detector):
             name_start = m.start("name")
             # 앞뒤 단서가 둘 다 있으면 확신도 0.75짜리 강한 근거다(아래 confidence와 같은 조건).
             strong = m.group("prefix") is not None and m.group("suffix") is not None
-            if _is_label_word_at(text, name_start, strong=strong):
+            if m.group("name") in _CUE_WORDS or _is_label_word_at(text, name_start, strong=strong):
                 # 라벨 단어는 이름이 아니다. 앞 단서를 달고 잡혔다면 그 단어 자리에서 다시 찾아
                 # 그 단어가 다음 이름의 단서가 되게 한다. 같은 자리를 또 잡으면(단서 없이) 넘긴다.
                 pos = name_start if (m.group("prefix") is not None and name_start > pos) else m.end()
