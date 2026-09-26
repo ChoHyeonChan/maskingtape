@@ -673,6 +673,41 @@ def test_generated_account_bare_form_is_never_detected_as_driver_license():
         assert detector.detect(entity.text) == [], f"계좌번호가 driver_license로 오탐됨: {entity.text!r}"
 
 
+def test_account_space_or_dot_separated_is_a_known_unfixed_leak():
+    """#474(신규 발견, core 미해결·security) — AccountDetector의 `_ACCOUNT_RE`는 묶음 사이
+    구분자로 하이픈만 받는다. 계좌·은행 문맥어가 바로 옆에 있어도 공백이나 점으로 나눠 쓴
+    계좌번호는 통째로 미탐(유출)이다. bench 소관이 아니라 core 이슈로 남겼다(코드는 안
+    고침). 이 canary는 "지금 이렇게 새고 있다"를 고정해두는 용도라, core#474가 고치면
+    아래 assert들이 깨져야 정상이고, 그때 빈 리스트를 실제 탐지 결과로 바꿔주면 된다."""
+    detector = AccountDetector()
+    # 대조군: 하이픈 표기는 정상 탐지된다 — 문제는 공백·점 구분자에서만 난다.
+    assert len(detector.detect("계좌 110-123-456789 입금 확인 부탁드립니다.")) == 1
+    for text in (
+        "입금 계좌 1002 123 456789",  # 공백 구분 + 계좌 문맥어
+        "계좌 110 123 456789 홍길동",  # 공백 구분 + 계좌 문맥어
+        "신한 110 123 456789",  # 공백 구분 + 은행 이름
+        "신한 110.123.456789",  # 점 구분 + 은행 이름
+    ):
+        assert detector.detect(text) == [], f"기대: 여전히 미탐(유출) — core#474가 고쳤다면 이 테스트를 갱신할 것: {text!r}"
+
+
+def test_account_hyphenated_number_is_not_swallowed_by_trailing_digits():
+    """#474 완료 기준의 회귀 방지 목표: 공백·점 구분을 새로 받게 되더라도, 하이픈 번호 뒤에
+    띄어 쓴 숫자(날짜·순번 등)가 이어지면 그 뒤 숫자까지 한 덩어리로 묶여 자릿수(10~14)를
+    넘겨 통째로 놓치면 안 된다 — "묶음 전체가 아니라 그 안에서 10~14자리가 되는 연속
+    묶음"을 봐야 한다는 이슈의 설계 조건을 미리 고정해둔다. 지금 main은 하이픈만 보므로
+    이미 통과하지만, #474 구현이 이 경계를 깨지 않는지 회귀 테스트로 지킨다."""
+    detector = AccountDetector()
+    for text in (
+        "계좌 110-123-456789 12 34",
+        "계좌 110-123-456789 2026 09 25 입금",
+    ):
+        found = detector.detect(text)
+        assert len(found) == 1 and found[0].text == "110-123-456789", (
+            f"하이픈 계좌번호가 뒤따르는 공백 숫자에 삼켜짐: {text!r} -> {found!r}"
+        )
+
+
 def test_generated_birth_date_passes_core_detector_with_anchor():
     """#266/#271: 생년월일은 "생년월일/생일/출생일" 앵커가 바로 앞에 있어야만 탐지되는
     문맥 앵커 방식이다 — 앵커를 붙인 문장에서는 날짜 부분만 정확히 한 건으로 잡혀야 한다
