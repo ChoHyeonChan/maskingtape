@@ -47,6 +47,10 @@ class BusinessRegistrationDetector(Detector):
     kind = "biz_reg"
 
     def detect(self, text: str) -> list[Detection]:
+        """3-2-5 표기 후보 중 국세청 체크섬이 맞는 것만 확신도 1.0으로 돌려준다.
+
+        사업자등록번호는 모두 체크섬이 있어서, 체크섬이 틀린 후보는 사업자번호가 아니다.
+        """
         found: list[Detection] = []
         for m in _BRN_RE.finditer(text):
             digits = m.group(1) + m.group(2) + m.group(3)

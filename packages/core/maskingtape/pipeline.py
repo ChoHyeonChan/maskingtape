@@ -28,6 +28,9 @@ class Pipeline:
         detectors: list[Detector] | None = None,
         anonymizer: Anonymizer | None = None,
     ) -> None:
+        """detectors를 넘기지 않으면 규칙 탐지기 기본 세트(default_detectors, LLM 없음)를,
+        anonymizer를 넘기지 않으면 '*' 마스킹을 쓴다. 기본값만으로 로컬 LLM 없이 동작한다.
+        """
         self.detectors = detectors if detectors is not None else default_detectors()
         self.anonymizer = anonymizer if anonymizer is not None else MaskAnonymizer()
 
