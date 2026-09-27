@@ -16,6 +16,9 @@
 5. 시/도를 줄여 쓴 주소("서울 강남구 테헤란로 123")도 잡는다(#396). 일상 문서는 정식명보다
    축약형을 더 자주 쓴다. "서울 사람", "경기 침체"처럼 지역 이름으로만 쓰인 문장을 막으려고
    축약형 바로 뒤에 시/군/구가 오고, 그 뒤에 동/읍/면/리나 도로명까지 이어질 때만 인정한다.
+   시/군/구 단계가 없는 세종은 "세종 한누리대로 2130"처럼 번지까지 이어질 때만 받는다(#465).
+6. 시/도나 시 바로 뒤에 구를 붙여 써도("서울강남구", "성남시분당구") 구 이름에서 낱말이
+   끝나면 받는다. "장군면"·"대구면"처럼 이름 가운데 '군'·'구'가 든 읍·면은 군·구로 읽지 않는다(#465).
 
 구간을 끝까지 넓히는 게 핵심이다. 시/도만 가리고 "월드컵로237길 49 ..."를 남기면
 개인정보 가치가 가장 낮은 부분만 가린 셈이라 사실상 유출이다(이슈 #66).
@@ -24,7 +27,7 @@
 from __future__ import annotations
 
 import re
-from bisect import bisect_left
+from collections.abc import Iterator
 
 from maskingtape.detectors.base import Detector
 from maskingtape.types import Detection
@@ -50,6 +53,8 @@ _PROVINCES = [
     "경상남도",
     "제주특별자치도",
     "제주도",
+    # 2026-06-30 광주광역시·전라남도 통합(국토교통부 전국 법정동 자료). 옛 이름도 문서에 계속 쓰이므로 둘 다 둔다.
+    "전남광주통합특별시",
 ]
 
 # 긴 이름부터 매칭해야 "전라북도"가 "전북특별자치도" 매칭을 가로채지 않는다.
@@ -58,7 +63,8 @@ _PROVINCE_RE = "|".join(sorted(_PROVINCES, key=len, reverse=True))
 # 시/도 축약형(#396). 모두 두 글자라 정렬이 필요 없다.
 # 세종은 넣지 않았다. 세종특별자치시는 시/군/구 단계 없이 바로 동·읍·면이 와서 아래의
 # "축약형 뒤에 시/군/구" 조건을 만족할 수 없고, 조건을 풀면 "세종 대왕로" 같은 표현과
-# 구분이 어려워진다. 정식명 "세종특별자치시 …"는 _ADDR_RE가 잡는다.
+# 구분이 어려워진다. 정식명 "세종특별자치시 …"는 _ADDR_RE가 잡고, "세종 한누리대로 2130"처럼
+# 줄여 쓴 주소는 번지까지 이어질 때만 _ADDR_ABBR_RE의 세종 갈래가 잡는다(#465).
 _PROVINCE_ABBR = [
     "서울", "부산", "대구", "인천", "광주", "대전", "울산",
     "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주",
@@ -72,11 +78,6 @@ _PROVINCE_ABBR = [
 # 긴 조사(에서·으로·까지·입니다)부터 둬야 "에서"가 "에"로 잘리지 않는다.
 # 아래 동/도로명 자리에서 낱말이 끝났는지 판정할 때도 이 목록을 쓴다(#423).
 _JOSA = "입니다|입니까|예요|였|에서|에게|으로|까지|부터|처럼|보다|조차|마저|밖에|마다|한테|의|에|로|은|는|이|가|을|를|과|와|도|만"
-
-# 시/도 앵커와 시/군 앵커가 공유하는 꼬리. 시/군/구·동·번지·건물을 이어붙인다.
-# 시/군/구는 두 단계까지 이어진다 — "성남시 분당구", "수원시 영통구".
-_GU = r"(?:\s(?P<gu>[가-힣]{1,10}[시군구]))?"
-_GU2 = r"(?:\s(?P<gu2>[가-힣]{1,10}[군구]))?"
 
 # --- 동/도로명 자리(#423) ---
 # 이 자리에서 구간이 끊기면 뒤따르는 도로명·건물번호가 원문 그대로 남는다(부분 유출).
@@ -128,6 +129,26 @@ _LOCALITY = (
     + r"|[가-힣]{1,10}(?:동|읍|면|리)|[가-힣]{1,10}(?:로|길)(?:\s?\d{1,4}번?길)?"
 )
 
+# 시/도 앵커와 시/군 앵커가 공유하는 꼬리. 시/군/구·동·번지·건물을 이어붙인다.
+# 시/군/구는 두 단계까지 이어진다 — "성남시 분당구", "수원시 영통구".
+# 그 자리 낱말이 동/읍/면/리나 번지가 뒤따르는 도로명이면 시/군/구로 읽지 않는다(#465).
+# 이름 가운데 '군'·'구'가 든 읍·면("장군면", "대구면")을 "장군"·"대구"로 끊어 읽으면 뒤의 "면 …"이
+# 동/읍/면 자리에 들어가지 못해 원문으로 남았다(부분 유출). 이 확인은 동/읍/면/리·도로명일 때만 해서
+# "강남구청"·"강남구에"는 예전처럼 구까지 가린다.
+_NOT_LOCALITY = r"(?!" + _DONG + _END + r"|" + _ROAD + _BUNJI_AHEAD + r")"
+# 시/도나 시 바로 뒤에 구를 붙여 쓴 표기("서울강남구", "성남시분당구")도 받는다(#465).
+# 다른 낱말의 일부("서울강남구청역")를 구로 읽지 않게, 붙여 쓴 구는 거기서 낱말이 끝날 때만 받는다.
+# 붙여 쓸 수 있는지는 앵커마다 다르므로 각 앵커가 먼저 확인한다. 시/도 정식명("…광역시")이 든
+# 낱말은 구가 아니다. 그걸 구로 삼키면 그 시/도명에서 시작하는 주소를 놓친다.
+# 두 글자로 끝나는 시/군/구는 중구·동구·서구·남구·북구뿐이다. 나머지 두 글자 낱말("인구", "지구",
+# "도구")을 받으면 "경기도인구 1400만"이 주소가 되므로, 붙여 쓴 구는 이 다섯이거나 세 글자 이상만 받는다.
+_GLUED_GU_WORD = r"(?:[중동서남북]구|(?!시군구)[가-힣]{2,10}[시군구])"
+_GLUED_GU_AHEAD = r"(?![가-힣]{0,9}(?:" + _PROVINCE_RE + r"))(?=" + _GLUED_GU_WORD + _END + r")"
+_GU = r"(?:(?:\s|" + _GLUED_GU_AHEAD + r")" + _NOT_LOCALITY + r"(?P<gu>[가-힣]{1,10}[시군구]))?"
+# 두 번째 자리는 군·구로 끝나야 해서 시/도 정식명 전체는 읽을 수 없고, "대구광역시"의 앞부분 "대구"만
+# 읽는다. 그러면 뒤 주소의 시작을 먹어서 주소를 이어 쓴 목록이 한 구간으로 사슬처럼 합쳐지므로 막는다.
+_GU2 = r"(?:\s" + _NOT_LOCALITY + r"(?!" + _PROVINCE_RE + r")(?P<gu2>[가-힣]{1,10}[군구]))?"
+
 _TAIL = (
     # 지번은 동/읍/면/리로 끝나지만, 도로명은 "월드컵로237길"처럼 가지번호가 공백 없이 붙는다.
     r"(?:\s(?P<dong>" + _LOCALITY + r"))?"
@@ -149,7 +170,9 @@ _ADDR_RE = re.compile(
     # 시/도명 뒤: '조사가 아닌 한글'이 공백 없이 붙으면 다른 단어의 일부이므로 제외(#196).
     # 조사(…시에/…시로/…시에서)나 비한글(공백·문장부호·끝)이 오면 시/도만으로도 주소로 인정한다.
     # gu/dong/bunji 뒤에 조사가 붙는 건 원래도 허용된다("...123-4에 거주").
-    r"(?P<province>" + _PROVINCE_RE + r")(?!(?!" + _JOSA + r")[가-힣])" + _GU + _GU2 + _TAIL
+    # 붙여 쓴 구("서울특별시강남구")는 한글이 붙어도 받는다(#465).
+    r"(?P<province>" + _PROVINCE_RE + r")"
+    r"(?:" + _GLUED_GU_AHEAD + r"|(?!(?!" + _JOSA + r")[가-힣]))" + _GU + _GU2 + _TAIL
 )
 
 # --- 시/군 뒤에 바로 오는 도로명(#425) ---
@@ -159,9 +182,23 @@ _ADDR_RE = re.compile(
 #  - 도로명은 세 글자 이상. 조사 '로'가 붙는 두 글자 부사(새로·따로·별로)를 뺀다.
 #  - 번지 뒤에 한글이 바로 붙지 않는다. "12명이"·"3건이"·"2024년"의 단위 명사를 뺀다.
 #    주소에서 번지에 바로 붙는 말은 '번지'와 '호'뿐이라 그 둘만 예외로 둔다.
-# 남는 구멍은 단위 명사를 띄어 쓴 문장("참고로 3 곳")인데, 이건 과다 마스킹이라 안전한 쪽이다.
+#    조사("123에 거주", "2130으로 보내주세요")도 받는다. 문장 속 주소에는 거의 항상 붙는데 예전에는
+#    이것까지 막아 통째로 놓쳤다(#465). 수를 세는 말로도 읽히는 조사(만·도: "12만 명", "30도")는 뺀다.
+# 남는 구멍은 단위 명사를 띄어 쓴 문장("참고로 3 곳")과 번지처럼 보이는 수에 조사가 붙은 문장
+# ("조례로 3에 따라")인데, 둘 다 과다 마스킹이라 안전한 쪽이다.
 _ROAD3 = r"[가-힣][가-힣0-9]{1,9}(?<!으)(?:로|길)(?:\s?\d{1,4}번?길)?"
-_BUNJI_AHEAD_STRICT = r"(?=\s" + _BUNJI + r"(?![\d-])(?:번지|호)?(?![가-힣]))"
+_BUNJI_JOSA = "입니다|이에요|예요|에서|에게|으로|까지|부터|처럼|보다|의|에|로|은|는|이|을|를|과|와"
+_BUNJI_AHEAD_STRICT = (
+    r"(?=\s" + _BUNJI + r"(?![\d-])(?:번지|호)?(?:" + _BUNJI_JOSA + r")?(?![가-힣]))"
+)
+
+# 시 없이 "세종"으로 줄여 쓴 주소(#465). 세종은 시/군/구 단계 없이 동/읍/면이나 도로명이 바로 온다.
+# "세종"은 인물·대학·도로 이름에도 흔한 말이라 번지까지 이어질 때만 받는다. 번지 조건은 위와 같다.
+_SEJONG_AHEAD = (
+    r"(?=\s(?:[가-힣]{1,10}(?:\d{1,2}(?:동|리)|동|읍|면|리)"
+    + r"(?:\s" + _ROAD3 + r"|\s[가-힣]{1,10}\d{0,2}리)?"
+    + r"|" + _ROAD3 + r")" + _BUNJI_AHEAD_STRICT + r")"
+)
 
 # 시/도 없이 시/군으로 시작하는 주소 — "성남시 분당구 정자동 45-6"(#68).
 # 시/도 사전을 시작점으로 삼는 _ADDR_RE는 이런 표기를 통째로 놓쳐 유출된다.
@@ -172,19 +209,42 @@ _ADDR_NO_PROVINCE_RE = re.compile(
     # 와야만 주소 후보로 인정한다.
     # "성남시로 이사"의 조사 '로'(공백 없음)와 "강남구에서"의 구 단독을 배제한다.
     # 행정동은 숫자가 붙으므로("김포시 사우1동") 동/리 앞 숫자 두 자리까지 허용한다(#423).
-    r"(?=\s(?:[가-힣]{1,10}(?:\d{1,2}(?:동|리)|구|동|읍|면|리)|"
-    + _ROAD3 + _BUNJI_AHEAD_STRICT + r"))" + _GU + _GU2 + _TAIL
+    r"(?:(?=\s(?:[가-힣]{1,10}(?:\d{1,2}(?:동|리)|구|동|읍|면|리)|"
+    + _ROAD3 + _BUNJI_AHEAD_STRICT + r"))"
+    # 시 바로 뒤에 붙여 쓴 구 — "성남시분당구 정자동 45-6"(#465).
+    + r"|(?=(?:[중동서남북]구|[가-힣]{2,10}구)" + _END + r"))" + _GU + _GU2 + _TAIL
 )
 
 # 시/도 축약형으로 시작하는 주소 — "서울 강남구 테헤란로 123"(#396).
 _ADDR_ABBR_RE = re.compile(
     # 앞에 한글이 붙으면("남서울") 다른 단어의 일부이므로 시작점으로 보지 않는다.
-    r"(?<![가-힣])(?P<abbr>" + "|".join(_PROVINCE_ABBR) + r")"
-    # 오탐 억제 1단계: 공백 뒤에 시/군/구가 바로 이어져야 후보로 삼는다.
+    # 정식명의 앞부분("서울특별시", "부산광역시")은 _ADDR_RE가 잡으므로 축약형으로 보지 않는다.
+    r"(?<![가-힣])(?:(?P<abbr>" + "|".join(_PROVINCE_ABBR) + r")(?!특별|광역)"
+    # 오탐 억제 1단계: 시/군/구가 공백 뒤에 오거나 붙어서(#465) 바로 이어져야 후보로 삼는다.
     # "서울 사람", "부산 출신", "경기 침체"처럼 지역 이름으로만 쓰인 문장이 여기서 걸러진다.
+    # 시/군/구 자리와 같은 기준으로, 도로명의 앞부분("신도시로 123"의 "신도시")은 시/군/구로 보지 않는다.
     # 2단계(동/읍/면/리·도로명 필수)는 detect()에서 확인한다.
-    r"(?=\s[가-힣]{1,10}[시군구])" + _GU + _GU2 + _TAIL
+    r"(?:(?=\s" + _NOT_LOCALITY + r"[가-힣]{1,10}[시군구])|" + _GLUED_GU_AHEAD + r")"
+    # 세종은 시/군/구 단계가 없어 번지까지 이어질 때만 따로 받는다(#465).
+    r"|세종" + _SEJONG_AHEAD + r")" + _GU + _GU2 + _TAIL
 )
+
+
+def _search_every_start(pattern: re.Pattern[str], text: str) -> Iterator[re.Match[str]]:
+    """매칭마다 한 글자만 넘기고 다시 찾는다. 매칭이 글자를 소비하지 않게 하려는 것이다(#465).
+
+    finditer는 매칭이 끝난 자리부터 다시 찾아서, 매칭 안에서 시작하는 다른 주소를 시도조차 하지 않는다.
+    - 버리는 매칭이 삼킴: "부산진구 대구 수성구 범어로 123"에서 "부산진구 대구"(동 없음)를 버리면
+      "대구 수성구 …"를 찾지 않아 주소 전체가 원문으로 남았다.
+    - 남기는 매칭이 삼킴: "경상북도김포시 대구광역시"에서 구 자리가 "대구광역시"의 "대구"를 먹으면
+      "광역시"가 남았다.
+    겹치는 후보는 detect()에서 합친다. 뒤보기 (?<![가-힣])는 pos 앞 글자도 보므로 낱말 중간에서
+    시작하는 후보는 생기지 않는다.
+    """
+    pos = 0
+    while (m := pattern.search(text, pos)) is not None:
+        yield m
+        pos = m.start() + 1
 
 
 def _score(m: re.Match[str], base: float, cap: float) -> float:
@@ -203,64 +263,43 @@ def _score(m: re.Match[str], base: float, cap: float) -> float:
     return round(min(confidence, cap), 2)
 
 
-def _overlaps(spans: list[tuple[int, int]], starts: list[int], start: int, end: int) -> bool:
-    """[start, end)가 spans의 어느 구간과 겹치는지 이분 탐색으로 확인한다(#426).
-
-    spans는 시작 위치 순으로 정렬돼 있고 서로 겹치지 않아야 한다. starts는 그 시작 위치 목록이다.
-    그러면 끝 위치도 같은 순서로 커지므로, end보다 앞에서 시작하는 마지막 구간 하나만 보면 된다.
-    그 구간이 start 뒤에서 끝나지 않으면 그보다 앞의 구간은 더 일찍 끝나서 겹칠 수 없다.
-
-    예전에는 후보마다 구간 전체를 훑어서, 주소가 반복되는 긴 입력에서 O(n²)이 됐다.
-    """
-    i = bisect_left(starts, end) - 1
-    return i >= 0 and spans[i][1] > start
-
-
 class AddressDetector(Detector):
     """한국 행정구역 주소 탐지기 (시/도 단위부터 번지까지)."""
 
     kind = "address"
 
     def detect(self, text: str) -> list[Detection]:
-        found: list[Detection] = []
-        # finditer는 앞에서부터 겹치지 않게 찾으므로 구간이 시작 위치 순으로 쌓인다(_overlaps의 전제).
-        province_spans: list[tuple[int, int]] = []
+        # 세 앵커의 후보를 모두 모은 뒤 겹치는 것끼리 합친다(#465).
+        # 예전에는 먼저 돈 앵커가 자리를 차지하고 겹치는 후보를 버렸다. 그러면 안쪽에서 시작한 후보가
+        # 앞에서 시작한 더 넓은 후보를 밀어낼 때 앞부분이 원문으로 남는다("영동군 대구중구 …"의 "영동군").
+        # 합치면 어느 앵커가 먼저 잡았든 후보 전체가 가려진다. 정렬 한 번이라 주소가 반복되는
+        # 긴 입력에서도 O(n log n)이다(#426).
+        candidates: list[tuple[int, int, float]] = []
         # 시/도 앵커 — 확신도 0.5부터 시작.
-        for m in _ADDR_RE.finditer(text):
-            province_spans.append((m.start(), m.end()))
-            found.append(self._make(m, base=0.5, cap=1.0))
-        province_starts = [start for start, _ in province_spans]
-        # 시/도 축약형 앵커(#396) — 정식 시/도명이 없으니 시/군 앵커와 같은 확신도(0.4~)로 둔다.
-        # 시/군 앵커보다 먼저 돌려야 "경기 성남시 분당구 …"가 "성남시 분당구 …"로 잘려
-        # 두 번 잡히지 않는다. 먼저 잡은 더 넓은 구간을 abbr_spans에 모아 뒤에서 중복을 거른다.
-        # 축약형 구간끼리는 같은 finditer에서 나와 겹치지 않으므로 시/도 구간하고만 비교하면 된다.
-        abbr_spans: list[tuple[int, int]] = []
-        for m in _ADDR_ABBR_RE.finditer(text):
-            if not m.group("dong"):
-                continue  # "서울 강남구에 산다"처럼 구까지만이면 지역 언급일 뿐 — 유출 아님
-            if _overlaps(province_spans, province_starts, m.start(), m.end()):
-                continue
-            abbr_spans.append((m.start(), m.end()))
-            found.append(self._make(m, base=0.4, cap=0.9))
-        # 축약형 구간은 시/도 구간과 겹치지 않을 때만 들어왔으므로, 합쳐 정렬해도 서로 겹치지 않는다.
-        taken = sorted(province_spans + abbr_spans)
-        taken_starts = [start for start, _ in taken]
-        # 시/군 앵커(시/도 없음) — 확신도 0.4부터. 시/도가 없어 확신이 낮으니 임계값으로 조절 가능.
-        for m in _ADDR_NO_PROVINCE_RE.finditer(text):
-            if not m.group("dong"):
-                continue  # 동/읍/면/리(도로명 포함) 없이 시/군+구만이면 지역 언급일 뿐 — 유출 아님
-            if _overlaps(taken, taken_starts, m.start(), m.end()):
-                continue  # 시/도 앵커(정식명·축약형) 매칭에 이미 포함된 구간이므로 중복
-            found.append(self._make(m, base=0.4, cap=0.9))
-        found.sort(key=lambda d: d.start)
-        return found
+        for m in _search_every_start(_ADDR_RE, text):
+            candidates.append((m.start(), m.end(), _score(m, 0.5, 1.0)))
+        # 시/도 축약형 앵커(#396)와 시/군 앵커(#68) — 정식 시/도명이 없으니 확신도 0.4부터.
+        # 동/읍/면/리(도로명 포함) 없이 시/군/구까지만이면 지역 언급일 뿐 — 유출 아님("서울 강남구에 산다").
+        for pattern in (_ADDR_ABBR_RE, _ADDR_NO_PROVINCE_RE):
+            for m in _search_every_start(pattern, text):
+                if m.group("dong"):
+                    candidates.append((m.start(), m.end(), _score(m, 0.4, 0.9)))
+        candidates.sort()
+        merged: list[tuple[int, int, float]] = []
+        for start, end, confidence in candidates:
+            if merged and start < merged[-1][1]:
+                prev_start, prev_end, prev_confidence = merged[-1]
+                merged[-1] = (prev_start, max(prev_end, end), max(prev_confidence, confidence))
+            else:
+                merged.append((start, end, confidence))
+        return [self._make(text, start, end, confidence) for start, end, confidence in merged]
 
-    def _make(self, m: re.Match[str], base: float, cap: float) -> Detection:
+    def _make(self, text: str, start: int, end: int, confidence: float) -> Detection:
         return Detection(
             kind=self.kind,
-            start=m.start(),
-            end=m.end(),
-            text=m.group(0),
-            confidence=_score(m, base, cap),
+            start=start,
+            end=end,
+            text=text[start:end],
+            confidence=confidence,
             detector=self.__class__.__name__,
         )
