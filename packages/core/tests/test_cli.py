@@ -97,12 +97,12 @@ def test_scan_reports_detections_as_utf8_json():
 
 
 class _FakeResponse:
-    """urlopen 컨텍스트 매니저 흉내 — 모델 응답 본문만 돌려준다."""
+    """HTTP 응답 컨텍스트 매니저 흉내 — 모델 응답 본문만 돌려준다."""
 
     def __init__(self, response_field: str) -> None:
         self._body = json.dumps({"response": response_field}).encode("utf-8")
 
-    def read(self) -> bytes:
+    def read(self, _amt: int | None = None) -> bytes:
         return self._body
 
     def __enter__(self):
@@ -127,7 +127,7 @@ def test_llm_malformed_response_exits_with_message_not_traceback(monkeypatch, ca
     이름이 들어 있을 수 있으므로 어떤 출력에도 원문이 나오면 안 된다.
     """
     monkeypatch.setattr(
-        name_llm.urllib.request, "urlopen", lambda *_a, **_kw: _FakeResponse('{"names": "김철수"}')
+        name_llm, "_open_direct", lambda *_a, **_kw: _FakeResponse('{"names": "김철수"}')
     )
     code, out, err = _run_main_in_process(monkeypatch, capsys, "--llm", "고객 김철수님")
     assert code == 1
@@ -143,8 +143,30 @@ def test_llm_unreachable_ollama_exits_with_guidance(monkeypatch, capsys):
     def _refuse(*_a, **_kw):
         raise urllib.error.URLError("connection refused")
 
-    monkeypatch.setattr(name_llm.urllib.request, "urlopen", _refuse)
+    monkeypatch.setattr(name_llm, "_open_direct", _refuse)
     code, out, err = _run_main_in_process(monkeypatch, capsys, "--llm", "고객 김철수님")
     assert code == 1
     assert "Ollama" in err
+    assert out == ""
+
+
+def test_llm_cloud_model_is_rejected_before_sending(monkeypatch, capsys):
+    """클라우드 모델을 고르면 원문을 보내기 전에 막고, 안내 메시지와 종료 코드 2로 끝난다(#468).
+
+    Ollama는 이름이 -cloud로 끝나는 모델의 요청을 ollama.com으로 넘긴다. 요청을 한 번이라도
+    보내면 원문이 밖으로 나가므로, 보내는 함수가 불리면 테스트를 실패시킨다.
+    """
+
+    def _must_not_send(*_a, **_kw):
+        raise AssertionError("클라우드 모델인데 요청을 보냈다")
+
+    monkeypatch.setattr(name_llm, "_open_direct", _must_not_send, raising=False)
+    # 옛 전송 경로(urlopen)로 되돌아가는 회귀가 생겨도, 테스트 중에 실제 Ollama로 보내지 않고 실패한다.
+    monkeypatch.setattr(name_llm.urllib.request, "urlopen", _must_not_send)
+    code, out, err = _run_main_in_process(
+        monkeypatch, capsys, "--llm", "--llm-model", "gpt-oss:120b-cloud", "고객 김철수님"
+    )
+    assert code == 2
+    assert "클라우드 모델" in err
+    assert "김철수" not in err
     assert out == ""
