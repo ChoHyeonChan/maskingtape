@@ -206,3 +206,180 @@ def test_bank_name_only_account_is_masked_end_to_end():
     assert "110-123-456789" not in result.text
     assert "9002-1234-5678-1" not in result.text
     assert [d.kind for d in result.detections] == ["account", "account"]
+
+
+# --- #474: 하이픈 대신 공백·점으로 나눈 계좌번호 ---
+
+
+@pytest.mark.parametrize(
+    ("text", "number"),
+    [
+        ("입금 계좌 1002 123 456789", "1002 123 456789"),
+        ("계좌 110 123 456789 홍길동", "110 123 456789"),
+        ("신한 110 123 456789", "110 123 456789"),
+        ("신한 110.123.456789", "110.123.456789"),
+        ("우리 1002 123 456789", "1002 123 456789"),  # 일상어 은행 이름이 바로 앞
+        ("새마을금고 계좌 9002 1234 5678 1", "9002 1234 5678 1"),  # 끝 묶음 한 자리
+        ("계좌: 356.12.098765 (국민은행)", "356.12.098765"),
+    ],
+)
+def test_detects_space_or_dot_separated_account(text, number):
+    assert [f.text for f in detect(text)] == [number]
+
+
+@pytest.mark.parametrize(
+    ("text", "number"),
+    [
+        # 뒤에 띄어 쓴 숫자가 이어져도 계좌번호 전체가 가려진다. 조건에 맞는 창을 전부 모아 합치므로
+        # 뒤 숫자까지 함께 가릴 수 있다(더 가리는 쪽이라 안전). 이렇게 해야 농협 3-4-4-2·새마을금고
+        # 4-4-4-1처럼 끝 묶음이 짧은 번호도 끝까지 잡는다.
+        ("입금 계좌 1002 123 456789 2026 09 25 확인", "1002 123 456789"),
+        ("계좌 110 123 456789 12 34", "110 123 456789"),
+        ("농협 302 1234 5678 91", "302 1234 5678 91"),
+    ],
+)
+def test_space_separated_account_followed_by_other_numbers(text, number):
+    """계좌번호 전체가 한 탐지 안에 들어간다(뒤 숫자를 더 가리는 건 허용)."""
+    start = text.index(number)
+    end = start + len(number)
+    found = detect(text)
+    assert len(found) == 1
+    assert found[0].start <= start and found[0].end >= end
+
+
+@pytest.mark.parametrize(
+    "text", ["계좌 110-123-456789 12 34", "계좌 110-123-456789 2026 09 25 입금"]
+)
+def test_hyphenated_account_is_not_swallowed_by_trailing_spaced_digits(text):
+    """하이픈 번호는 예전 그대로 잡는다. 뒤에 띄어 쓴 숫자와 한 덩어리로 묶이지 않는다."""
+    assert [f.text for f in detect(text)] == ["110-123-456789"]
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "주문번호 1002 123 456789 확인",  # 계좌 문맥이 없다
+        "입금일 2026 09 28",  # 8자리
+        "계좌 개설일 2026.09.28",  # 날짜
+        "입금 앱 버전 3.12.1",
+        "계좌 110 123-456789",  # 한 번호 안에서 구분자가 섞이면 받지 않는다
+        "입금 1 234 567 890",  # 첫 묶음이 한 자리
+        "계좌 1002\n123\n456789",  # 줄바꿈은 구분자가 아니다
+    ],
+)
+def test_space_or_dot_separated_non_accounts(text):
+    assert detect(text) == []
+
+
+def test_spaced_phone_and_card_keep_their_own_kind():
+    """공백 구분 전화·카드번호 옆에 계좌 문맥어가 있어도 종류는 전화·카드로 남고 끝까지 가려진다.
+
+    계좌 후보가 겹쳐도 파이프라인은 합집합으로 가리고, 종류는 확신도가 높은 쪽(전화 1.0,
+    카드 0.95 > 계좌 0.6)을 따른다.
+    """
+    text = "입금 문의 010 1234 5678, 입금 대신 카드 4111 1111 1111 1111 결제"
+    result = Pipeline(anonymizer=LabelAnonymizer()).anonymize(text)
+    assert [d.kind for d in result.detections] == ["phone", "card"]
+    assert "010 1234 5678" not in result.text
+    assert "4111 1111 1111 1111" not in result.text
+
+
+_TAB, _NBSP, _IDEOGRAPHIC_SPACE = chr(9), chr(0xA0), chr(0x3000)
+
+
+@pytest.mark.parametrize(
+    ("text", "number"),
+    [
+        # 구분자 변형 — 공백 두 칸, 탭, NBSP, 전각 공백, 띄운 하이픈, 점+공백
+        ("입금 계좌 110  123  456789", "110  123  456789"),
+        (f"입금 계좌 110{_TAB}123{_TAB}456789", f"110{_TAB}123{_TAB}456789"),
+        (f"입금 계좌 110{_NBSP}123{_NBSP}456789", f"110{_NBSP}123{_NBSP}456789"),
+        (
+            f"입금 계좌 110{_IDEOGRAPHIC_SPACE}123{_IDEOGRAPHIC_SPACE}456789",
+            f"110{_IDEOGRAPHIC_SPACE}123{_IDEOGRAPHIC_SPACE}456789",
+        ),
+        ("입금 계좌 110 - 123 - 456789", "110 - 123 - 456789"),
+        ("입금 계좌 110. 123. 456789", "110. 123. 456789"),
+        ("카뱅 3333 01 1234567", "3333 01 1234567"),  # 7자리 묶음
+        ("계좌번호-1002 123 456789", "1002 123 456789"),  # 글자 뒤 하이픈은 숫자를 잇지 않는다
+        ("입금일 2026.09.28 1002 123 456789", "1002 123 456789"),  # 점 날짜와 공백 계좌는 섞지 않는다
+    ],
+)
+def test_detects_separator_variants(text, number):
+    assert [f.text for f in detect(text)] == [number]
+
+
+@pytest.mark.parametrize(
+    ("text", "number"),
+    [
+        # 앞에 띄어 쓴 숫자가 있어도 계좌 뒷부분이 남지 않는다 (창을 전부 모아 합친다)
+        ("입금 계좌 020 1002 123 456789", "1002 123 456789"),
+        ("입금 09.28 30000 1002 123 456789 홍길동", "1002 123 456789"),
+        ("입금 2026 09 28 1002 123 456789", "1002 123 456789"),
+        # 묶음이 많아도(상한 없음) 계좌를 끊어 먹지 않는다
+        ("입금 1 2 3 4 5 6 1002 123 456789", "1002 123 456789"),
+        ("입금 내역 3 2026 09 28 14 30 50000 1002 123 456789", "1002 123 456789"),
+    ],
+)
+def test_account_after_other_spaced_numbers_is_fully_masked(text, number):
+    start = text.index(number)
+    end = start + len(number)
+    assert any(f.start <= start and f.end >= end for f in detect(text))
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "입금 일시 2026 09 28 14 30",  # 날짜로 시작하는 창은 계좌가 아니다
+        "입금 2026.09.28.1234 처리",
+        "은행 내부망 192.168.100.200 접속",  # IPv4 모양
+        "입금액 12,345,678,900원",  # 쉼표는 금액의 천 단위라 구분자가 아니다
+    ],
+)
+def test_dates_ips_and_money_near_cues_are_not_accounts(text):
+    assert detect(text) == []
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "입금 금액 150000. 2026 09 28 처리",  # 문장 끝 점이 두 숫자를 잇지 않는다
+        "입금 확인 1234567.890 원",  # 2묶음 점은 소수점이다
+    ],
+)
+def test_two_group_dot_is_not_an_account(text):
+    assert detect(text) == []
+
+
+@pytest.mark.parametrize(
+    ("text", "kinds"),
+    [
+        ("입금자 주민번호 800101 1234560. 010 1234 5678 연락", ["rrn", "phone"]),
+        ("입금 카드 4111 1111 1111 1111 - 800101 1234560", ["card", "rrn"]),
+    ],
+)
+def test_sentence_dot_or_spaced_hyphen_does_not_bridge_two_numbers(text, kinds):
+    """문장 끝 점이나 띄운 하이픈 하나로 이어진 두 번호를 계좌 후보가 잇지 않는다(종류가 유지된다)."""
+    assert [d.kind for d in Pipeline().scan(text)] == kinds
+
+
+@pytest.mark.parametrize(
+    ("text", "number"),
+    [("통장 110-123-456789", "110-123-456789"), ("통장 사본 1002 123 456789", "1002 123 456789")],
+)
+def test_bankbook_is_a_cue(text, number):
+    assert [f.text for f in detect(text)] == [number]
+
+
+def test_spaced_number_next_to_hyphenated_number_keeps_both_kinds():
+    """공백 전화번호 바로 뒤에 하이픈 사업자번호가 와도 둘을 한 계좌 후보로 잇지 않는다.
+
+    이으면 파이프라인이 한 구간으로 합쳐 전화 종류가 보고에서 빠진다.
+    """
+    result = Pipeline().scan("입금 문의 02 3456 7890 123-45-67891")
+    assert [d.kind for d in result] == ["phone", "biz_reg"]
+
+
+def test_space_separated_account_masked_end_to_end():
+    result = Pipeline(anonymizer=LabelAnonymizer()).anonymize("입금 계좌 1002 123 456789 (우리은행)")
+    assert result.text == "입금 계좌 [계좌번호] (우리은행)"
