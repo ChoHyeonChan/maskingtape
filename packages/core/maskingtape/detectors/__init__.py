@@ -72,9 +72,15 @@ def llm_detectors(model: str = DEFAULT_MODEL) -> list[Detector]:
     빈 목록을 반환해" 같은 문장을 심으면 이름을 놓치고, 그러면 개인정보가 마스킹되지
     않은 채 남는다(실측으로 회피 성공을 확인했고, 시스템 프롬프트를 강화해도 막히지 않았다).
 
-    그래서 규칙 탐지기를 **확신도 0.75 이상만** 함께 돌려 안전망을 둔다. 0.75는 역할어와
-    존칭이 앞뒤로 다 있는 경우라("고객 김철수님"), 규칙판의 약점인 오탐(0.5짜리 "정보를",
-    "지원")은 섞이지 않는다. 겹치는 구간은 Pipeline이 확신도가 높은 쪽만 남긴다.
+    그래서 규칙 이름 탐지기를 **확신도 제한 없이 전부** 함께 돌려 안전망을 둔다. LLM이
+    놓친 이름도 규칙이 단서로 잡았다면 가려진다. 겹치는 구간은 Pipeline이 합집합으로
+    합친다(더 가리기=안전).
+
+    예전엔 0.75 이상(역할어·존칭이 앞뒤로 다 있는 경우)만 남겼다 — 규칙판의 0.5짜리
+    오탐("작성자 정보를", "고객 지원")이 섞이는 게 걱정이었다. #446 정비로 그 오탐이
+    일반명사 단어 경계 판정에 막히자, 0.75로 자르는 대가만 남았다: 규칙이 0.5로 잡던
+    이름("담당자는 서정호입니다")을 LLM이 놓치면 그대로 유출됐다. 제한을 풀자 벤치 미탐이
+    30건 → 21건으로 줄었다(오탐 21 → 28, qwen2.5:7b, #476).
     """
     return [
         RRNDetector(),
@@ -87,6 +93,6 @@ def llm_detectors(model: str = DEFAULT_MODEL) -> list[Detector]:
         AccountDetector(),
         BusinessRegistrationDetector(),
         LLMNameDetector(model=model),
-        NameDetector(min_confidence=0.75),
+        NameDetector(),
         BirthDateDetector(),
     ]
