@@ -204,7 +204,10 @@ def write_markdown_report(
 
 - `easy`: 하이픈 등 표준 구분자를 사용한 명확한 표기
 - `hard`: 구분자 없음/국제표기/도로명+아파트 등 상대적으로 탐지가 어려운 표기
-- `negative`: 개인정보가 전혀 없는(또는 distractor만 있는) 문서 — 오탐(FP) 측정용
+- `negative`: 개인정보가 전혀 없는(또는 distractor만 있는) 문서 — 오탐(FP) 측정용. 이 행은
+  정답(tp가 될 대상)이 애초에 없어 precision/recall/F1/F2가 전부 0.000으로 찍히는데, 이는
+  "탐지 실패"가 아니라 "계산이 성립하지 않음"이다(#498) — 이 행에서 의미 있는 값은 `fp`
+  (오탐 건수) 하나뿐이다.
 """
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(content, encoding="utf-8")

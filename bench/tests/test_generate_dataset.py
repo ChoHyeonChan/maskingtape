@@ -78,6 +78,30 @@ def test_address_extended_refuses_to_overwrite_v1(tmp_path, monkeypatch):
     assert target.read_text(encoding="utf-8") == "keep\n"
 
 
+def test_no_args_reproduces_v1(tmp_path, monkeypatch):
+    """#498: 인자 없이 돌리면(팀원이 흔히 하는 "그냥 다시 만들어보자") 500건짜리 v1이 그대로
+    나와야 한다 — 예전엔 --count 기본값이 200이라, 인자 없이 돌리면 실제 v1(500건)을 조용히
+    더 적은 건수로 덮어썼다. --out만 임시 경로로 바꿔서 실제 v1 파일은 건드리지 않는다."""
+    target = tmp_path / V1_DATASET_NAME
+    monkeypatch.setattr(sys, "argv", ["generate_dataset", "--out", str(target)])
+    main()
+    rows = _load_rows(target)
+    assert len(rows) == 500
+    assert rows == _load_rows(_DATASETS / V1_DATASET_NAME)
+
+
+def test_wrong_count_refuses_to_overwrite_v1(tmp_path, monkeypatch):
+    """#498: v1 파일명으로 저장하면서 --count를 500이 아닌 값으로 주면 막는다 — 실제 v1은
+    건드리지 않도록 임시 폴더에 v1과 같은 이름의 파일을 두고 시도한다."""
+    target = tmp_path / V1_DATASET_NAME
+    target.write_text("keep\n", encoding="utf-8")
+    monkeypatch.setattr(sys, "argv", ["generate_dataset", "--count", "200", "--out", str(target)])
+    with pytest.raises(SystemExit) as exc:
+        main()
+    assert exc.value.code == 2
+    assert target.read_text(encoding="utf-8") == "keep\n"
+
+
 def test_address_extended_writes_a_new_file(tmp_path, monkeypatch):
     target = tmp_path / "synth_v2_small.jsonl"
     monkeypatch.setattr(

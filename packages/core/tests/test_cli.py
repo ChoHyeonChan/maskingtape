@@ -8,6 +8,7 @@
 
 from __future__ import annotations
 
+import io
 import json
 import os
 import subprocess
@@ -68,6 +69,38 @@ def test_output_is_utf8_when_redirected():
     """리다이렉트한 결과가 UTF-8이어야 다음 단계(파일·파이프)가 깨지지 않는다."""
     result = run_cli(SAMPLE)
     assert "김철수" not in result.stdout.decode("utf-8")  # 디코딩 실패 시 예외로 드러난다
+
+
+def test_piped_crlf_input_keeps_its_line_endings():
+    """CRLF 문서가 줄마다 "\\r\\r\\n"으로 깨지지 않는다(#494).
+
+    데스크톱은 출력 끝의 줄바꿈 하나만 떼고 그대로 저장해서, 깨지면 CSV 5행이 10행이 됐다.
+    """
+    result = run_cli(stdin=b"a 010-1234-5678\r\nb\r\n")
+    assert result.stdout == b"a *************\r\nb\r\n\n"
+
+
+def test_piped_lf_input_stays_lf():
+    result = run_cli(stdin=b"a 010-1234-5678\nb\n")
+    assert result.stdout == b"a *************\nb\n\n"
+
+
+def test_stdout_does_not_translate_line_endings(monkeypatch):
+    """윈도 표준출력처럼 "\\n"을 "\\r\\n"으로 바꾸는 스트림에서도 줄바꿈을 그대로 쓴다.
+
+    윈도가 아닌 CI에서도 같은 회귀를 잡으려고, 윈도식 변환을 하는 스트림을 직접 만들어 확인한다.
+    """
+    windows_like = io.BytesIO()
+    monkeypatch.setattr(
+        sys, "stdout", io.TextIOWrapper(windows_like, encoding="cp949", newline="\r\n")
+    )
+    monkeypatch.setattr(
+        sys, "stderr", io.TextIOWrapper(io.BytesIO(), encoding="cp949", newline="\r\n")
+    )
+    cli._use_utf8_output()
+    sys.stdout.write("가\r\n나\n")
+    sys.stdout.flush()
+    assert windows_like.getvalue() == "가\r\n나\n".encode("utf-8")
 
 
 def test_rejects_input_that_is_not_utf8():

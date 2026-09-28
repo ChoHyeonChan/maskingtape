@@ -8,6 +8,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 
 from maskingtape.anonymizers.base import Anonymizer
+from maskingtape.normalize import normalize
 from maskingtape.types import Detection
 
 
@@ -35,8 +36,26 @@ class MaskAnonymizer(Anonymizer):
         # 뒤에서부터 치환해야 앞쪽 구간의 위치(start/end)가 밀리지 않는다
         for d in sorted(detections, key=lambda d: d.start, reverse=True):
             span_len = d.end - d.start
-            # 최소 절반은 항상 가린다 — 짧은 값(2글자 이름 등)이 keep_head로 통째 노출되는 걸 막는다(#169)
-            keep = min(self.keep_head, span_len // 2)
+            keep = self._kept_length(text[d.start : d.end])
             masked = text[d.start : d.start + keep] + self.mask_char * (span_len - keep)
             text = text[: d.start] + masked + text[d.end :]
         return text
+
+    def _kept_length(self, segment: str) -> int:
+        """구간 앞에서 남길 글자 수(원문 글자 기준)를 정한다.
+
+        최소 절반은 항상 가린다 — 짧은 값(2글자 이름 등)이 keep_head로 통째 노출되는 걸
+        막는다(#169). 글자 수는 표기 정리의 글자 묶음 단위로 센다(#490). 폭 없는 공백이
+        끼거나, 자모로 분해됐거나, 합쳐지지 않는 자모가 음절 뒤에 붙으면 원문 코드포인트가
+        늘어 절반이 커지고 이름 글자가 더 드러나기 때문이다.
+        """
+        if self.keep_head <= 0:
+            return 0
+        prepared = normalize(segment)
+        if prepared.starts is None:
+            return min(self.keep_head, len(segment) // 2)
+        units = sorted(set(prepared.starts))  # 글자 묶음마다 원문 시작 위치
+        count = min(self.keep_head, len(units) // 2)
+        if count == 0:
+            return 0
+        return units[count] if count < len(units) else len(segment)
