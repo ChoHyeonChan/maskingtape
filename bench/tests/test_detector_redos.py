@@ -99,10 +99,14 @@ def test_detector_handles_adversarial_input_within_time_budget(kind, detector, t
 #
 # detect()를 한 번씩만 재면 OS가 다른 프로세스에 CPU를 뺏는 순간과 겹쳐 흔들리기 쉬워서,
 # 같은 텍스트로 여러 번 반복해 process_time(프로세스가 실제로 쓴 CPU 시간, 다른 프로세스에
-# 뺏긴 시간은 안 잡힘) 누적값을 비교한다.
+# 뺏긴 시간은 안 잡힘) 누적값을 비교한다. 그래도 로컬에서 20번 연속 실행 중 1번은 이 반복만으로
+# 부족해 흔들렸다(원인 불명 — 인위적으로 CPU 경합을 만들어도 재현은 안 됐다, 순간적인 시스템
+# 지연으로 추정). 그래서 n자·2n자 각각을 3번씩 재고 그중 최솟값을 쓴다 — 노이즈는 시간을
+# 늘리기만 하니, 최솟값이 실제 계산량에 가장 가깝다(마이크로벤치마크의 일반적인 관행).
 _FUZZ_SEED = 480
 _FUZZ_BASE_LENGTH = 50_000
 _FUZZ_MAX_RATIO = 3.0
+_FUZZ_TRIALS = 3
 
 # 탐지기 어휘로 입력을 조립해야 역추적 경로를 탄다 — 아무 글자나 섞으면 정규식이 금방
 # 포기한다. core의 목록 상수를 그대로 import해서 core가 목록을 바꿔도 따라간다.
@@ -148,13 +152,17 @@ def _total_process_time(detector, text: str, iterations: int) -> float:
     return time.process_time() - start
 
 
+def _min_process_time(detector, text: str, iterations: int, trials: int = _FUZZ_TRIALS) -> float:
+    return min(_total_process_time(detector, text, iterations) for _ in range(trials))
+
+
 @pytest.mark.parametrize("kind,detector,pieces,iterations", _RATIO_CASES, ids=[c[0] for c in _RATIO_CASES])
 def test_detector_time_scales_linearly_when_input_doubles(kind, detector, pieces, iterations):
     text_n = _fuzz_string(pieces, _FUZZ_BASE_LENGTH)
     text_2n = _fuzz_string(pieces, _FUZZ_BASE_LENGTH * 2)
 
-    time_n = _total_process_time(detector, text_n, iterations)
-    time_2n = _total_process_time(detector, text_2n, iterations)
+    time_n = _min_process_time(detector, text_n, iterations)
+    time_2n = _min_process_time(detector, text_2n, iterations)
 
     ratio = time_2n / time_n
     assert ratio < _FUZZ_MAX_RATIO, (
