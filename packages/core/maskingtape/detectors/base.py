@@ -22,6 +22,9 @@ class Detector(ABC):
     #: 이 탐지기가 찾는 개인정보 종류 (Detection.kind에 그대로 들어간다)
     kind: str = ""
 
+    #: 로컬 LLM처럼 호출이 비싼 탐지기면 True. Pipeline이 한 입력에 한 번만 부른다(#490).
+    calls_model: bool = False
+
     @abstractmethod
     def detect(self, text: str) -> list[Detection]:
         """text에서 개인정보를 찾아 Detection 목록으로 반환한다."""
