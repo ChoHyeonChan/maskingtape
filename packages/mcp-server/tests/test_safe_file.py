@@ -27,6 +27,8 @@ BS = chr(92)  # 백슬래시. 윈도 경로를 소스에 그대로 적지 않고
         "/" + BS + "attacker" + BS + "share" + BS + "x.txt",  # 구분자를 섞어 쓴 UNC
         BS * 2 + "?" + BS + "C:" + BS + "x.txt",  # 장치 경로
         BS * 2 + "." + BS + "PhysicalDrive0",  # 장치 경로
+        BS + "??" + BS + "UNC" + BS + "attacker" + BS + "share" + BS + "x.txt",  # NT 경로 접두
+        "/??/UNC/attacker/share/x.txt",  # 슬래시로 쓴 NT 경로 접두
     ],
 )
 def test_rejects_network_and_device_paths_before_touching_the_filesystem(
@@ -50,6 +52,22 @@ def test_rejects_network_and_device_paths_before_touching_the_filesystem(
     monkeypatch.setattr(safe_file, "Path", guarded)
     with pytest.raises(ValueError, match="네트워크"):
         read_text_file(path, root=tmp_path)
+
+
+@pytest.mark.skipif(os.name != "nt", reason="CON·COM1은 Windows에서만 장치 이름이다")
+def test_rejects_windows_device_names(tmp_path):
+    # 장치 이름은 절대 경로로 바꾸면 장치 경로(\\.\CON)가 된다. 거부 전에 장치를 열지 않는다(#494)
+    for name in ("CON", "COM1"):
+        with pytest.raises(ValueError, match="네트워크"):
+            read_text_file(name, root=tmp_path)
+
+
+def test_blank_root_setting_is_treated_as_unset(tmp_path, monkeypatch):
+    # 공백만 있는 환경변수가 작업 폴더로 풀려 드라이브 루트 검사를 비껴가지 않는다(#494)
+    monkeypatch.setenv("MASKINGTAPE_MCP_ROOT", " ")
+    monkeypatch.chdir(tmp_path.anchor)
+    with pytest.raises(ValueError, match="MASKINGTAPE_MCP_ROOT"):
+        read_text_file("문서.txt")
 
 
 def test_default_root_refuses_a_drive_root(tmp_path, monkeypatch):

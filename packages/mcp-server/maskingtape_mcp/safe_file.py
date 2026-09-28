@@ -16,7 +16,8 @@ MCP 도구는 **AI 에이전트가 호출**한다. 에이전트는 사용자가 
    존재 확인 후 쓰기 사이의 경합(TOCTOU)에도 기존 파일이 날아가지 않는다.
 4. **거대 파일** — 상한을 넘으면 읽지 않는다(메모리 고갈 방지).
 5. **바이너리·비UTF-8** — 조용히 깨진 결과를 저장하지 않고 명확히 실패한다.
-6. **네트워크(UNC)·장치 경로** — 파일시스템을 건드리기 전에 문자열만 보고 거부한다(#494).
+6. **네트워크(UNC)·장치 경로** — NT 경로 접두(`\\??\\`)와 CON·COM1 같은 장치 이름까지, 파일시스템을
+   건드리기 전에 문자열만 보고 거부한다(#494).
    `\\\\서버\\공유\\파일`을 링크 검사나 resolve()에 먼저 넘기면 거부하기 전에 SMB 접속이
    일어나고, Windows에서는 이때 로그인 인증 정보가 상대 서버로 나갈 수 있다.
 7. **너무 넓은 기본 루트** — 환경변수 없이 드라이브 루트나 홈 폴더에서 서버를 띄우면 경로
@@ -39,8 +40,8 @@ def _allowed_root(root: Path | None) -> Path:
     """
     if root is not None:
         return root.resolve()
-    configured = os.environ.get("MASKINGTAPE_MCP_ROOT")
-    if configured:
+    configured = os.environ.get("MASKINGTAPE_MCP_ROOT", "")
+    if configured.strip():  # 공백만 있는 값은 설정하지 않은 것으로 본다(cwd로 풀리면 검사를 비껴간다)
         return Path(configured).resolve()
     cwd = Path.cwd().resolve()
     # 클라이언트가 드라이브 루트나 홈에서 서버를 띄우면 사실상 모든 파일이 허용 범위가 된다.
@@ -58,13 +59,18 @@ def _reject_network_or_device_path(path: str) -> None:
     """네트워크(UNC)·장치 경로를 파일시스템에 접근하기 전에 거부한다.
 
     Windows는 앞의 구분자 두 개를 '/'와 '\\' 어느 쪽으로 써도 UNC로 읽는다(`\\\\서버\\공유`,
-    `//서버/공유`, 장치 경로 `\\\\?\\`·`\\\\.\\`). 그래서 첫 두 글자가 모두 구분자인지만 본다.
+    `//서버/공유`, 장치 경로 `\\\\?\\`·`\\\\.\\`). NT 경로 접두 `\\??\\`는 그대로 커널로 넘어가서
+    `\\??\\UNC\\서버\\…`도 네트워크 경로가 된다. CON·COM1 같은 장치 이름은 절대 경로로 바꾸면
+    `\\\\.\\CON`이 된다. 그래서 받은 경로와 절대 경로 둘 다에서 첫 글자가 구분자이고 두 번째 글자가
+    구분자나 '?'인지 본다. os.path.abspath는 문자열만 계산하고 디스크에 접근하지 않는다. '?'는
+    Windows 파일 이름에 쓸 수 없어 정상 경로를 거르지 않는다.
     """
-    if len(path) >= 2 and path[0] in "/\\" and path[1] in "/\\":
-        raise ValueError(
-            f"네트워크 경로(UNC)나 장치 경로는 처리하지 않습니다: {path} "
-            f"(파일을 허용된 작업 디렉터리 안으로 복사한 뒤 다시 요청하세요)"
-        )
+    for candidate in (path, os.path.abspath(path)):
+        if len(candidate) >= 2 and candidate[0] in "/\\" and candidate[1] in "/\\?":
+            raise ValueError(
+                f"네트워크 경로(UNC)나 장치 경로는 처리하지 않습니다: {path} "
+                f"(파일을 허용된 작업 디렉터리 안으로 복사한 뒤 다시 요청하세요)"
+            )
 
 
 def _ensure_within_root(path: Path, root: Path | None) -> None:
