@@ -15,4 +15,9 @@ describe("ServiceIntro (#455)", () => {
     // 무엇이 브라우저에 남고 무엇이 서버로 가는지 정확히 구분해 설명해야 한다.
     expect(section).toHaveTextContent("저장·기록하지 않습니다");
   });
+
+  it("pairs the intro copy with a live masking preview on the right (#455 2단 히어로)", () => {
+    render(<ServiceIntro />);
+    expect(screen.getByLabelText("실제 마스킹 결과 미리보기")).toBeInTheDocument();
+  });
 });

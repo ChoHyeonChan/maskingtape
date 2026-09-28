@@ -100,7 +100,8 @@ export function App() {
         <div className="privacy-note" role="note" aria-label="개인정보 입력 주의 안내">
           <span className="privacy-note__icon" aria-hidden="true">▣</span>
           <span>
-            이 데모는 시연·학습용입니다. 실제 개인정보는 입력하지 마세요 —{" "}
+            이 데모는 시연·학습용입니다. 실제 개인정보는 입력하지 마세요 — 입력한 글은 분석을 위해 서버로
+            전송되며 저장하지 않습니다.{" "}
             <strong>정확한 결과가 필요하면 로컬 설치를 권장합니다.</strong>
           </span>
         </div>

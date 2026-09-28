@@ -289,6 +289,7 @@ export function InputPanel({
           placeholder={PLACEHOLDER}
           rows={8}
           readOnly={hasResult}
+          spellCheck={false}
           aria-label={hasResult ? "마스킹된 탐지 결과" : "탐지할 텍스트 입력"}
           aria-describedby={hasResult ? undefined : "input-meta"}
         />

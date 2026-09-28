@@ -20,6 +20,14 @@ function renderPanel(text: string) {
   );
 }
 
+describe("InputPanel disables browser spellcheck on the input box (#499)", () => {
+  it("does not let the browser's enhanced spellcheck send typed text to a third party", () => {
+    renderPanel("");
+    const textarea = screen.getByRole("textbox", { name: "탐지할 텍스트 입력" });
+    expect(textarea).toHaveAttribute("spellcheck", "false");
+  });
+});
+
 describe("InputPanel input length safety (#154)", () => {
   it("does not show an over-limit warning under the max length", () => {
     renderPanel("안전한 길이의 입력입니다.");
