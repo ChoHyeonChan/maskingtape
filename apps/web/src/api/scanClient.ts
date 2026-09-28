@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 The maskingtape Authors
 // SPDX-License-Identifier: Apache-2.0
 
+import { toUtf16Offsets } from "../lib/offsets";
 import type { AnonymizeResponse, ScanResponse } from "../types/detection";
 
 interface ApiErrorBody {
@@ -40,9 +41,13 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
 
 /**
  * During development, Vite proxies /api/scan to the FastAPI backend's /scan route.
+ *
+ * 탐지 위치는 서버 기준(코드포인트)이라 여기서 JS 문자열 위치로 바꿔 돌려준다(#495).
+ * 이 뒤의 화면·복사·저장은 전부 이 위치를 그대로 slice()한다.
  */
-export function scanText(text: string): Promise<ScanResponse> {
-  return postJson<ScanResponse>("/api/scan", { text });
+export async function scanText(text: string): Promise<ScanResponse> {
+  const response = await postJson<ScanResponse>("/api/scan", { text });
+  return { ...response, detections: toUtf16Offsets(text, response.detections) };
 }
 
 /**
