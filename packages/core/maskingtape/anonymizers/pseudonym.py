@@ -54,9 +54,17 @@ class PseudonymAnonymizer(Anonymizer):
     """
 
     def __init__(self, seed: int | None = None) -> None:
+        """seed를 주면 같은 입력에 같은 가명이 나온다(테스트 재현용). 기본값 None이면
+        호출마다 새 가명을 만든다.
+        """
         self._seed = seed
 
     def apply(self, text: str, detections: Sequence[Detection]) -> str:
+        """호출마다 난수 생성기를 새로 만든다(모듈 설명의 보안 설계 1).
+
+        한 번의 호출 안에서는 같은 (종류, 원본값)이 같은 가명을 받아 문맥이 유지된다.
+        seed를 주지 않으면(기본) 호출마다 매핑이 바뀌므로 매핑표를 모아 원본을 되짚을 수 없다.
+        """
         rng = random.Random(self._seed)
 
         # 같은 (종류, 원본값)에는 같은 가명을 배정한다(문맥 일관성). 배정은 등장 순서로,
@@ -73,6 +81,9 @@ class PseudonymAnonymizer(Anonymizer):
         return text
 
     def _fake_value(self, kind: str, rng: random.Random) -> str:
+        """종류에 맞는 가짜 값 생성기를 고른다. 생성기가 없는 종류는 라벨로 가린다
+        (보안 설계 3: 원본을 남기면 유출이다).
+        """
         generator = _GENERATORS.get(kind)
         if generator is None:
             # 생성기가 없는 종류도 반드시 가린다 — 원본을 남기면 유출이다.
@@ -81,14 +92,19 @@ class PseudonymAnonymizer(Anonymizer):
 
 
 def _fake_name(rng: random.Random) -> str:
+    """흔한 성 한 글자와 이름 두 글자를 무작위로 합친다. 실존 인물과 우연히 같을 수
+    있으므로 가짜 데이터로만 취급한다.
+    """
     return rng.choice(_SURNAMES) + rng.choice(_GIVEN_NAMES)
 
 
 def _fake_phone(rng: random.Random) -> str:
+    """010으로 시작하는 휴대폰 형식의 무작위 번호다. 실제 번호와 우연히 겹칠 수 있다."""
     return f"010-{rng.randint(0, 9999):04d}-{rng.randint(0, 9999):04d}"
 
 
 def _fake_email(rng: random.Random) -> str:
+    """실제 사용자에게 닿지 않는 가짜 이메일을 만든다."""
     # 회사 도메인과 겹치지 않도록 예시 전용 도메인(RFC 2606)만 쓴다.
     local = "".join(rng.choices(string.ascii_lowercase, k=rng.randint(5, 9)))
     return f"{local}@example.com"
@@ -113,6 +129,9 @@ def _fake_card(rng: random.Random) -> str:
 
 
 def _fake_address(rng: random.Random) -> str:
+    """실제 시·구·동 이름을 하나씩 따로 골라 번지와 붙인다. 셋을 따로 뽑으므로 실제
+    행정구역 체계와 맞지 않는 조합이 나올 수 있다.
+    """
     city, gu, dong = rng.choice(_CITIES), rng.choice(_GU), rng.choice(_DONG)
     return f"{city} {gu} {dong} {rng.randint(1, 499)}-{rng.randint(1, 99)}"
 
