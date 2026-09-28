@@ -142,6 +142,7 @@ class _RefuseRedirects(urllib.request.HTTPRedirectHandler):
     """
 
     def redirect_request(self, req, fp, code, msg, headers, newurl):
+        """어떤 리다이렉트든 새 요청을 만들지 않는다(None). urllib은 원래 응답을 HTTPError로 낸다."""
         return None
 
 
