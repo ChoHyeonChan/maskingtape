@@ -15,9 +15,13 @@ mask(****)·label([전화번호])와 달리 문장 구조가 살아 있어, LLM�
    테스트에서만 seed를 준다.)
 2. 주민등록번호·카드번호는 형식만 유지하고 **체크섬을 일부러 통과하지 않게** 만든다.
    유효한 번호를 생성하면 실존 인물의 것과 겹치거나 유효한 개인정보로 악용될 수 있다.
-   진짜 탐지기의 검증 함수를 재사용해 "검증하면 가짜"임을 보장한다.
+   진짜 탐지기의 검증 함수를 재사용해 "검증하면 가짜"임을 보장한다. 실제 카드번호는 모두
+   Luhn을 통과하므로 가짜 카드번호는 실존 번호와 겹치지 않는다. 주민등록번호는 2020년 10월
+   이후 발급분의 뒷자리가 난수라 체크섬이 없어서, 그 번호들과는 우연히 겹칠 수 있다(#494).
 3. 탐지된 구간은 종류를 불문하고 전부 치환한다. 생성기가 없는 종류도 라벨로 가려
    원본이 남지 않게 한다("덜 가리기"는 유출).
+4. 가명은 원본값과 같거나 원본을 품지 않게, 같은 호출의 다른 가명과도 겹치지 않게 뽑는다(#494).
+   원본이 가명 안에 남으면 원본이 드러나고, 두 사람이 같은 가명을 받으면 문맥이 섞인다.
 
 ※ 생성된 값은 가짜지만 형식이 그럴듯해 실제 정보와 우연히 겹칠 수 있다. 반드시
   '가짜 데이터'로만 취급한다.
@@ -33,7 +37,11 @@ from maskingtape.anonymizers.base import Anonymizer
 from maskingtape.anonymizers.label import DEFAULT_LABELS
 from maskingtape.detectors.financial.creditcard import _luhn_ok
 from maskingtape.detectors.identity.rrn import _checksum_ok
+from maskingtape.overlaps import resolve_overlaps
 from maskingtape.types import Detection
+
+# 겹치지 않는 가명을 찾을 때 다시 뽑는 최대 횟수. 이름 어휘는 성 20 × 이름 20 = 400개다.
+_MAX_DRAWS = 50
 
 # 가짜 이름 재료 — 흔한 성/이름 음절 조합으로 그럴듯하게 만든다(전부 합성).
 _SURNAMES = "김이박최정강조윤장임한오서신권황안송류전"
@@ -66,19 +74,45 @@ class PseudonymAnonymizer(Anonymizer):
         seed를 주지 않으면(기본) 호출마다 매핑이 바뀌므로 매핑표를 모아 원본을 되짚을 수 없다.
         """
         rng = random.Random(self._seed)
+        # 겹친 탐지는 먼저 합친다. 그대로 치환하면 위치가 밀려 원문이 남는다(#494).
+        detections = resolve_overlaps(list(detections), text)
 
         # 같은 (종류, 원본값)에는 같은 가명을 배정한다(문맥 일관성). 배정은 등장 순서로,
-        # 치환은 위치가 밀리지 않게 뒤→앞으로 한다.
+        # 치환은 위치가 밀리지 않게 뒤→앞으로 한다. 가명은 원본값·이미 쓴 가명과 겹치지 않게 뽑는다.
         mapping: dict[tuple[str, str], str] = {}
+        originals = {d.text for d in detections}
+        used: set[str] = set()
         for d in sorted(detections, key=lambda d: d.start):
             key = (d.kind, d.text)
             if key not in mapping:
-                mapping[key] = self._fake_value(d.kind, rng)
+                mapping[key] = self._fresh_fake_value(d.kind, rng, originals, used)
 
         for d in sorted(detections, key=lambda d: d.start, reverse=True):
             fake = mapping[(d.kind, d.text)]
             text = text[: d.start] + fake + text[d.end :]
         return text
+
+    def _fresh_fake_value(
+        self, kind: str, rng: random.Random, originals: set[str], used: set[str]
+    ) -> str:
+        """원본값을 드러내지 않고, 이 호출에서 이미 쓴 가명과도 다른 가짜 값을 뽑는다(#494).
+
+        가명이 원본과 같거나 원본을 품으면 원본이 드러난다. 이름 어휘 400개 안의 흔한 이름은
+        1/400 확률로 자기 자신이 나왔고, 두 글자 이름 "임하"는 "임하은"으로, 시/도만 탐지된
+        주소 "대구광역시"는 "대구광역시 서초구 …"로 바뀌기도 했다. 서로 다른 원본이 같은 가명을
+        받으면 "그 사람" 문맥이 섞인다.
+        _MAX_DRAWS번 안에 못 찾으면(어휘가 바닥나면) 라벨로 가린다. 원본은 남기지 않는다.
+        라벨로 가리는 종류는 같은 라벨이 여러 번 나와도 되므로 따지지 않는다.
+        """
+        if kind not in _GENERATORS:
+            return self._fake_value(kind, rng)
+        for _ in range(_MAX_DRAWS):
+            fake = self._fake_value(kind, rng)
+            if fake in used or any(o in fake or fake in o for o in originals):
+                continue
+            used.add(fake)
+            return fake
+        return f"[{DEFAULT_LABELS.get(kind, kind)}]"
 
     def _fake_value(self, kind: str, rng: random.Random) -> str:
         """종류에 맞는 가짜 값 생성기를 고른다. 생성기가 없는 종류는 라벨로 가린다
