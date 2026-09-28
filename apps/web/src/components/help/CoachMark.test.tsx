@@ -42,11 +42,31 @@ describe("CoachMark target visibility", () => {
   });
 
   it("skips a coach target that is present in the DOM but hidden (e.g. behind display:none while a result is shown)", () => {
-    const presets = document.createElement("button");
-    presets.setAttribute("data-coach", "presets");
-    document.body.appendChild(presets);
-    stubRect(presets, { width: 0, height: 0 });
+    const maskedResult = document.createElement("h2");
+    maskedResult.setAttribute("data-coach", "masked-result");
+    document.body.appendChild(maskedResult);
+    stubRect(maskedResult, { width: 0, height: 0 });
 
+    const analysisResult = document.createElement("h2");
+    analysisResult.setAttribute("data-coach", "analysis-result");
+    document.body.appendChild(analysisResult);
+    stubRect(analysisResult, { width: 140, height: 30, top: 80, left: 40, right: 180, bottom: 110 });
+
+    const { container } = render(<CoachMark onDismiss={vi.fn()} variant="result" />);
+
+    expect(container.querySelectorAll(".coachmark__focus")).toHaveLength(1);
+    expect(container.querySelector(".coachmark__note")?.textContent).toContain(
+      "탐지된 개인정보를 항목별로",
+    );
+  });
+});
+
+describe("CoachMark intro variant only targets scan (#455)", () => {
+  afterEach(() => {
+    document.body.innerHTML = "";
+  });
+
+  it("no longer looks for a presets target — examples now live in their own gallery section", () => {
     const scan = document.createElement("button");
     scan.setAttribute("data-coach", "scan");
     document.body.appendChild(scan);
@@ -55,9 +75,20 @@ describe("CoachMark target visibility", () => {
     const { container } = render(<CoachMark onDismiss={vi.fn()} variant="intro" />);
 
     expect(container.querySelectorAll(".coachmark__focus")).toHaveLength(1);
-    expect(container.querySelector(".coachmark__note")?.textContent).toContain(
-      "텍스트를 입력한 뒤 탐지를 실행하면",
-    );
+    expect(container.querySelector(".coachmark__note")?.textContent).toContain("탐지·마스킹하세요");
+  });
+
+  it("scrolls the scan target into view on mount, since the experience area can now sit below the fold", () => {
+    const scan = document.createElement("button");
+    scan.setAttribute("data-coach", "scan");
+    document.body.appendChild(scan);
+    stubRect(scan, { width: 120, height: 40, top: 900, left: 50, right: 170, bottom: 940 });
+    const scrollIntoView = vi.fn();
+    scan.scrollIntoView = scrollIntoView;
+
+    render(<CoachMark onDismiss={vi.fn()} variant="intro" />);
+
+    expect(scrollIntoView).toHaveBeenCalledWith({ behavior: "smooth", block: "center" });
   });
 });
 
