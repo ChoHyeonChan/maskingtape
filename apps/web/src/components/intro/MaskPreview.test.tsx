@@ -5,7 +5,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { MaskPreview } from "./MaskPreview";
 
-describe("MaskPreview (#455 hero visual)", () => {
+describe("MaskPreview (#455 소개 섹션 오른쪽 시각 자료)", () => {
   it("shows the original sentence and its actually-masked counterpart, computed by the real masking function", () => {
     render(<MaskPreview />);
 

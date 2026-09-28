@@ -16,7 +16,7 @@ describe("ServiceIntro (#455)", () => {
     expect(section).toHaveTextContent("저장·기록하지 않습니다");
   });
 
-  it("pairs the intro copy with a live masking preview on the right (#455 2단 히어로)", () => {
+  it("pairs the intro copy with a live masking preview on the right (#455 2단 구성)", () => {
     render(<ServiceIntro />);
     expect(screen.getByLabelText("실제 마스킹 결과 미리보기")).toBeInTheDocument();
   });
