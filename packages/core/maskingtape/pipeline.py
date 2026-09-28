@@ -9,6 +9,7 @@ from dataclasses import dataclass, replace
 
 from maskingtape.anonymizers import Anonymizer, MaskAnonymizer
 from maskingtape.detectors import Detector, default_detectors
+from maskingtape.normalize import normalize
 from maskingtape.types import Detection
 
 
@@ -35,10 +36,26 @@ class Pipeline:
         self.anonymizer = anonymizer if anonymizer is not None else MaskAnonymizer()
 
     def scan(self, text: str) -> list[Detection]:
-        """마스킹 없이 탐지 결과만 반환한다."""
+        """마스킹 없이 탐지 결과만 반환한다.
+
+        전각 숫자·폭 없는 공백·대시 변형·자모 분해처럼 표기를 정리하면 달라지는 입력은
+        원문과 정리본 둘 다에서 찾아 합친다(#490). 원문 결과를 그대로 두므로 정리 때문에
+        덜 가리는 일은 없다.
+
+        모델을 부르는 탐지기(calls_model)는 비싸서 보통 정리본에서만 돌린다. 공백·대시·전각을
+        바꾸거나 보이지 않는 문자만 지우는 정리는 이름 글자가 그대로라서다. 자모를 합치거나
+        결합 부호를 지워 글자 자체가 바뀌는 정리에서는 원문에서도 돌린다 — 정리본에서는 모델이
+        원문의 이름 모양을 볼 수 없어서다.
+        """
+        prepared = normalize(text)
         found: list[Detection] = []
         for detector in self.detectors:
-            found.extend(detector.detect(text))
+            if prepared.text == text:
+                found.extend(detector.detect(text))
+                continue
+            if not detector.calls_model or prepared.letters_changed:
+                found.extend(detector.detect(text))
+            found.extend(prepared.restore(d) for d in detector.detect(prepared.text))
         return _resolve_overlaps(found, text)
 
     def anonymize(self, text: str) -> AnonymizeResult:
