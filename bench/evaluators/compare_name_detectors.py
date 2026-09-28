@@ -5,8 +5,10 @@
 
 동작 원리:
 1. core에 이름을 찾는 방법이 두 가지 있다 — default_detectors()(성씨 사전 기반 규칙판만)와
-   llm_detectors()(로컬 LLM이 문맥으로 판단하고, 확신도 0.75 이상 규칙판을 안전망으로 겹치는 하이브리드).
-   같은 데이터셋을 두 Pipeline 구성으로 각각 돌려서 "name" kind만 뽑아 precision/recall/F1을 비교한다.
+   llm_detectors()(로컬 LLM이 문맥으로 판단하고, 규칙판 전체를 확신도 제한 없이 안전망으로
+   겹치는 하이브리드 — #476/#477 전에는 확신도 0.75 이상만 겹쳤으나, LLM이 놓친 단서
+   한쪽짜리 이름까지 규칙이 잡아주도록 제한을 풀었다). 같은 데이터셋을 두 Pipeline 구성으로
+   각각 돌려서 "name" kind만 뽑아 precision/recall/F1을 비교한다.
 2. LLM 쪽은 로컬 Ollama가 떠 있어야 동작하는데, 없으면 LLMNameDetector가 RuntimeError를 낸다.
    이걸 잡아서 "LLM 사용 불가"로 표시하고 규칙판 결과만 정상 출력한다 — Ollama 없는 환경(CI 등)에서도
    도구 자체는 안 죽는다.

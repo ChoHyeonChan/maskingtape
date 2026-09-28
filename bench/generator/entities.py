@@ -69,7 +69,10 @@ _NO_PROVINCE_AREAS = [
     "가평군 가평읍",
 ]
 
-# 실제 회사 도메인과 겹치지 않도록 합성/예시 전용 도메인만 사용한다.
+# #498: "example.com"만 RFC 2606이 문서화 전용으로 예약한 도메인이고, 나머지 7개는 테스트용
+# 이름처럼 보일 뿐 실제로 등록돼 있을 수도 있는 일반 도메인이다(이 목록을 바꾸면 gen_email의
+# rng.choice 순서가 달라져 synth_v1.jsonl 재현성이 깨지므로 값은 그대로 둔다 — 정확한 설명만
+# 남긴다). 무작위 010 전화번호 등 다른 합성 값도 마찬가지로 실존 여부를 확인하지 않았다.
 _EMAIL_DOMAINS = [
     "example.com", "mail-test.kr", "sample.org", "testmail.net",
     "demo-corp.com", "sample-mail.net", "testcorp.io", "mail-sample.kr",

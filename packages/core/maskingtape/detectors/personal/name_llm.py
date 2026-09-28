@@ -192,6 +192,7 @@ class LLMNameDetector(Detector):
     """
 
     kind = "name"
+    calls_model = True
 
     def __init__(
         self,
