@@ -23,6 +23,7 @@ from maskingtape.detectors import (
     PhoneDetector,
     RRNDetector,
 )
+from maskingtape.detectors.base import Detector
 from maskingtape.detectors.financial.creditcard import _luhn_ok
 from maskingtape.detectors.identity.rrn import _checksum_ok
 from maskingtape.pipeline import Pipeline
@@ -44,6 +45,32 @@ class _HalfMaskAnonymizer(Anonymizer):
             masked = "*" * half + text[d.start + half : d.end]
             text = text[: d.start] + masked + text[d.end :]
         return text
+
+
+class _NarrowerThanGoldDetector(Detector):
+    """테스트 전용 — 정답 구간보다 좁게 탐지해 "탐지가 정답보다 좁을 때" 상황을 흉내낸다(#498).
+
+    실제 core NameDetector가 "고객 홍길동양 님"에서 존칭 "양"을 포함한 이름 뒤 글자까지
+    탐지하지 못하는 것과 같은 상황이다 — 감사에서 실측 재현한 케이스를 그대로 옮겼다.
+    """
+
+    kind = "name"
+
+    def __init__(self, narrow_start: int, narrow_end: int):
+        self.narrow_start = narrow_start
+        self.narrow_end = narrow_end
+
+    def detect(self, text: str) -> list[Detection]:
+        return [
+            Detection(
+                kind=self.kind,
+                start=self.narrow_start,
+                end=self.narrow_end,
+                text=text[self.narrow_start : self.narrow_end],
+                confidence=1.0,
+                detector="_NarrowerThanGoldDetector",
+            )
+        ]
 
 
 class _OverExposedAnonymizer(Anonymizer):
@@ -134,6 +161,39 @@ def test_no_leak_with_pseudonym_strategy():
     rows = [{"text": "010-1234-5678로 연락주세요.", "labels": [{"kind": "phone", "start": 0, "end": 13}]}]
     result = evaluate_mask_quality(rows, Pipeline(anonymizer=PseudonymAnonymizer(seed=1)), strategy="pseudonym")
     assert result.leak_count == 0
+
+
+def test_label_strategy_catches_partial_leak_when_detection_is_narrower_than_gold():
+    """#498 — 예전엔 label/pseudonym이 "원문 값 전체가 결과에 통째로 남아있는지"만 봐서,
+    탐지가 정답보다 좁을 때(예: "홍길동양"이 정답인데 "홍길동"까지만 탐지) 뒤의 "양"이 원문
+    그대로 새는데도 유출 0건으로 오판했다("고객 [이름]양 님"). 탐지 구간이 정답 구간을
+    얼마나 덮었는지(_coverage_gap_ratio)로 보게 고친 뒤에는 이 부분 유출이 잡혀야 한다."""
+    text = "고객 홍길동양 님 안녕하세요."
+    gold_start, gold_end = text.index("홍길동양"), text.index("홍길동양") + len("홍길동양")
+    narrow_end = gold_start + len("홍길동")  # "양"만 탐지 밖에 남김
+    rows = [{"text": text, "labels": [{"kind": "name", "start": gold_start, "end": gold_end}]}]
+
+    detector = _NarrowerThanGoldDetector(gold_start, narrow_end)
+    for strategy, anonymizer in (("label", LabelAnonymizer()), ("pseudonym", PseudonymAnonymizer(seed=1))):
+        pipeline = Pipeline(detectors=[detector], anonymizer=anonymizer)
+        result = evaluate_mask_quality(rows, pipeline, strategy=strategy)
+        assert result.leak_count == 1, f"{strategy}: 탐지 밖에 남은 '양'이 유출로 안 잡힘"
+        assert result.partial_leak_count == 1, f"{strategy}: 완전 유출이 아니라 부분 유출이어야 함"
+        leak = result.leaks[0]
+        assert 0 < leak.exposed_ratio < 1.0
+        # 정답 4글자 중 탐지 밖(1글자, "양")만 새므로 노출 비율은 1/4.
+        assert leak.exposed_ratio == 0.25, f"{strategy}: 노출 비율 계산이 틀림: {leak.exposed_ratio}"
+
+
+def test_label_strategy_reports_full_leak_when_nothing_overlaps_gold_span():
+    """탐지가 정답 구간과 아예 안 겹치면(#498 이전에도 이미 맞던 경우) 여전히 완전 유출 1.0이어야
+    한다 — 커버리지 기반 계산으로 바꾼 뒤에도 "탐지 전혀 없음" 케이스의 기존 동작이 유지되는지
+    확인하는 회귀 방지 테스트."""
+    rows = [{"text": "고객 홍길동 님 안녕하세요.", "labels": [{"kind": "name", "start": 3, "end": 6}]}]
+    result = evaluate_mask_quality(rows, Pipeline(detectors=[]), strategy="label")
+    assert result.leak_count == 1
+    assert result.full_leak_count == 1
+    assert result.leaks[0].exposed_ratio == 1.0
 
 
 def test_format_mask_quality_report_shows_strategy_and_adjusts_length_note():
