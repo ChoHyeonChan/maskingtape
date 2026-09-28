@@ -269,11 +269,13 @@ class AddressDetector(Detector):
     kind = "address"
 
     def detect(self, text: str) -> list[Detection]:
-        # 세 앵커의 후보를 모두 모은 뒤 겹치는 것끼리 합친다(#465).
-        # 예전에는 먼저 돈 앵커가 자리를 차지하고 겹치는 후보를 버렸다. 그러면 안쪽에서 시작한 후보가
-        # 앞에서 시작한 더 넓은 후보를 밀어낼 때 앞부분이 원문으로 남는다("영동군 대구중구 …"의 "영동군").
-        # 합치면 어느 앵커가 먼저 잡았든 후보 전체가 가려진다. 정렬 한 번이라 주소가 반복되는
-        # 긴 입력에서도 O(n log n)이다(#426).
+        """시/도·시/도 축약형·시/군 세 앵커의 주소 후보를 모두 모아, 겹치는 것끼리 합쳐 돌려준다(#465).
+
+        예전에는 먼저 돈 앵커가 자리를 차지하고 겹치는 후보를 버렸다. 그러면 안쪽에서 시작한 후보가
+        앞에서 시작한 더 넓은 후보를 밀어낼 때 앞부분이 원문으로 남았다("영동군 대구중구 …"의 "영동군").
+        합치면 어느 앵커가 먼저 잡았든 후보 전체가 가려지고, 합친 구간의 확신도는 가장 높은 후보를
+        따른다. 정렬 한 번이라 주소가 반복되는 긴 입력에서도 O(n log n)이다(#426).
+        """
         candidates: list[tuple[int, int, float]] = []
         # 시/도 앵커 — 확신도 0.5부터 시작.
         for m in _search_every_start(_ADDR_RE, text):
@@ -295,6 +297,7 @@ class AddressDetector(Detector):
         return [self._make(text, start, end, confidence) for start, end, confidence in merged]
 
     def _make(self, text: str, start: int, end: int, confidence: float) -> Detection:
+        """text[start:end]를 주소 탐지 한 건으로 만든다."""
         return Detection(
             kind=self.kind,
             start=start,
