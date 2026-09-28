@@ -29,13 +29,22 @@ from maskingtape.types import Detection
 # 않고 주민등록번호 6-7 표기도 자연히 배제한다. 구분자는 하나로 일관되게 반복돼야 하며
 # (역참조 \1), "4111 - 1111"처럼 공백을 낀 하이픈까지 담도록 자리당 1~3자를 허용한다.
 # 개행은 구분자에 없어 서로 다른 줄의 숫자를 잇지 않는다. 반복·구분자에 상한을 둬 ReDoS를 막는다.
-_CARD_RE = re.compile(
-    r"(?<!\d)(?:"
-    r"\d{4}([ .-]{1,3})\d{4}\1\d{4}\1\d{1,4}"  # 4-4-4-4 계열 (Visa/MC 등 16자리)
-    r"|\d{4}([ .-]{1,3})\d{6}\2\d{5}"  # 4-6-5 (Amex 15자리)
-    r"|\d{13,19}"  # 구분자 없이 붙여 쓴 13~19자리
-    r")(?!\d)"
+# 모양마다 따로 찾는다(#493). 한 정규식의 선택지로 두면 먼저 맞은 모양이 자리를 차지해,
+# 19자리 모양이 "16자리 카드 + 뒤의 숫자 3개"를 삼킨 뒤 체크섬에서 버려지면 16자리 카드를 놓친다.
+_CARD_SHAPES = (
+    r"\d{4}([ .-]{1,3})\d{4}\1\d{4}\1\d{1,4}",  # 4-4-4-4 계열 (Visa/MC 등 16자리)
+    r"\d{4}([ .-]{1,3})\d{6}\1\d{5}",  # 4-6-5 (Amex 15자리)
+    r"\d{13,19}",  # 구분자 없이 붙여 쓴 13~19자리
+    r"\d{4}([ .-]{1,3})\d{4}\1\d{4}\1\d{4}\1\d{1,3}",  # 4-4-4-4-3 (17~19자리, #493)
+    r"\d{4}([ .-]{1,3})\d{6}\1\d{4}",  # 4-6-4 (Diners 14자리, #493)
 )
+_CARD_RES = tuple(re.compile(r"(?<!\d)(?:" + shape + r")(?!\d)") for shape in _CARD_SHAPES)
+# 하이픈·공백을 섞어 쓴 16자리("4111-1111 1111-1111", #493). 연도 목록("2023-2024 2025-2026")도
+# 같은 모양이라 Luhn이 우연히 맞으면 카드가 되므로, 앞에 카드 문맥어가 있을 때만 받는다.
+_MIXED_CARD_RE = re.compile(r"(?<!\d)\d{4}[ -]{1,3}\d{4}[ -]{1,3}\d{4}[ -]{1,3}\d{4}(?!\d)")
+# 신용카드·체크카드는 "카드"로 잡힌다. "신용"·"체크"만 두면 "신용등급"·"체크리스트" 뒤 연도 목록도 받는다.
+_CARD_CUE_RE = re.compile(r"카드|card|결제", re.IGNORECASE)
+_CARD_CUE_WINDOW = 15
 
 
 def _luhn_ok(digits: str) -> bool:
@@ -63,12 +72,20 @@ class CreditCardDetector(Detector):
         체크섬이 우연히 맞을 수도 있어 확신도는 1.0이 아니라 0.95다.
         """
         found: list[Detection] = []
-        for m in _CARD_RE.finditer(text):
+        seen: set[tuple[int, int]] = set()
+        matches = [m for regex in _CARD_RES for m in regex.finditer(text)]
+        matches += [
+            m
+            for m in _MIXED_CARD_RE.finditer(text)
+            if _CARD_CUE_RE.search(text, max(0, m.start() - _CARD_CUE_WINDOW), m.start())
+        ]
+        for m in sorted(matches, key=lambda m: m.span()):
             digits = re.sub(r"\D", "", m.group(0))
             if not (13 <= len(digits) <= 19):
                 continue
-            if not _luhn_ok(digits):
+            if not _luhn_ok(digits) or m.span() in seen:
                 continue
+            seen.add(m.span())
             found.append(
                 Detection(
                     kind=self.kind,
