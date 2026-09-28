@@ -7,9 +7,13 @@
 1. mask 전략은 정답 개인정보 구간([start, end))의 각 글자 위치가 마스킹 후에도 원문 그대로인지
    하나씩 비교한다. MaskAnonymizer는 구간 길이를 보존하는 계약이라, 길이가 같으면 같은 인덱스가
    같은 글자 위치를 가리킨다 — 그래서 위치별 비교로 노출 비율(부분 유출까지)을 정확히 계산할 수 있다.
-2. label/pseudonym 전략은 구간을 통째로 다른 내용(라벨·가짜 값)으로 바꿔치기해 위치 비교 가정이
-   깨지므로(예: 가짜 전화번호가 항상 "010-"로 시작해 우연히 원문과 같은 위치가 겹칠 수 있음),
-   원문이 결과에 통째로 남아있는지만 본다 — 완전 유출/무유출 둘 중 하나로만 판정한다.
+2. label/pseudonym 전략(및 mask인데 길이가 안 맞는 예외 상황)은 구간을 통째로 다른 내용으로
+   바꿔치기해 마스킹 후 텍스트 위치 비교 가정이 깨진다(예: 가짜 전화번호가 항상 "010-"로 시작해
+   우연히 원문과 같은 위치가 겹칠 수 있음). 그래서 마스킹 후 텍스트를 보는 대신, **탐지 구간
+   자체가 정답 구간을 얼마나 덮었는지**를 본다 — 익명화기는 탐지된 구간만 바꿔치기하므로, 정답
+   구간 중 어떤 탐지로도 덮이지 않은 부분은 전략과 무관하게 원문 그대로 결과에 남는다. 예전엔
+   "원문 값 전체가 결과에 통째로 남아있는지"만 봐서, 탐지가 정답보다 좁을 때(예: "홍길동양"이
+   정답인데 "홍길동"까지만 탐지돼 뒤의 "양"이 원문 그대로 새는 경우) 유출 0건으로 오판했다(#498).
 3. 마스킹 후 텍스트 길이가 원본과 같은지도 확인한다 — mask 전략에서만 길이 불일치가 core 회귀
    버그 신호이고, label/pseudonym은 길이가 달라지는 게 정상이라 참고 정보로만 취급한다.
 
@@ -22,6 +26,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from maskingtape.pipeline import Pipeline
+from maskingtape.types import Detection
 
 
 @dataclass(frozen=True)
@@ -51,6 +56,29 @@ def _exposed_ratio(original_text: str, masked_text: str, start: int, end: int, k
         return 0.0
     exposed = sum(1 for i in range(check_start, end) if masked_text[i] == original_text[i])
     return exposed / remaining_len
+
+
+def _coverage_gap_ratio(detections: list[Detection], start: int, end: int, keep_head: int = 0) -> float:
+    """[start, end) 정답 구간 중 어떤 탐지로도 덮이지 않은 부분의 비율(#498).
+
+    익명화기는 탐지된 구간만 바꿔치기하므로, 정답 구간이 탐지 구간보다 넓으면 그 차이는
+    strategy(mask/label/pseudonym)와 무관하게 원문 그대로 남는다. 마스킹 후 텍스트를 보지
+    않고 탐지 구간(원문 기준 위치)만 보므로, label/pseudonym이 길이를 바꿔도 영향받지 않는다.
+    """
+    span_len = end - start
+    if span_len <= 0:
+        return 0.0
+    check_start = start + min(keep_head, span_len)
+    remaining_len = end - check_start
+    if remaining_len <= 0:
+        return 0.0
+    covered = bytearray(remaining_len)
+    for d in detections:
+        overlap_start = max(d.start, check_start)
+        overlap_end = min(d.end, end)
+        for i in range(overlap_start, overlap_end):
+            covered[i - check_start] = 1
+    return covered.count(0) / remaining_len
 
 
 @dataclass
@@ -98,8 +126,9 @@ def evaluate_mask_quality(
     label/pseudonym은 구간을 통째로 다른 내용으로 바꿔치기하므로 이 가정이 깨진다 — 예를 들어
     가짜 전화번호가 항상 "010-"로 시작하면, 원문도 "010-"로 시작할 때 우연히 같은 위치의
     문자가 일치해 실제로는 안 새어나간 값이 "부분 유출"로 오판된다(실측으로 확인한 문제).
-    그래서 "mask"만 위치 비교를 쓰고, 나머지는 원문 전체가 결과에 통째로 남아있는지만 본다
-    (부분 유출 개념 자체가 없음 — label/pseudonym은 구간을 전부 바꾸거나 전혀 안 바꾸거나 둘 중 하나).
+    그래서 "mask"만 위치 비교를 쓰고, 나머지는 탐지 구간이 정답 구간을 얼마나 덮었는지로
+    본다(`_coverage_gap_ratio`) — 이쪽은 마스킹 후 텍스트가 아니라 원문 기준 위치만 비교하므로
+    label/pseudonym이 길이를 바꿔도 영향받지 않고, 부분 유출도 정확히 잡는다(#498).
 
     keep_head: 평가 대상 파이프라인의 MaskAnonymizer가 실제로 쓰는 keep_head 값과 반드시
     맞춰서 넘겨야 한다(#166) — MaskAnonymizer(keep_head=N)로 앞 N글자를 의도적으로 남겼는데
@@ -110,7 +139,9 @@ def evaluate_mask_quality(
     result = MaskQualityResult(strategy=strategy, keep_head=keep_head)
     for row in rows:
         original_text = row["text"]
-        masked_text = pipeline.anonymize(original_text).text
+        anon_result = pipeline.anonymize(original_text)
+        masked_text = anon_result.text
+        detections = anon_result.detections
 
         result.doc_count += 1
         lengths_match = len(masked_text) == len(original_text)
@@ -127,9 +158,9 @@ def evaluate_mask_quality(
             if strategy == "mask" and lengths_match:
                 ratio = _exposed_ratio(original_text, masked_text, start, end, keep_head=keep_head)
             else:
-                # 위치 비교가 성립하지 않는 경우(mask가 아니거나 길이가 다름) — 원문이
-                # 통째로 남아있는지만 본다.
-                ratio = 1.0 if gold_value in masked_text else 0.0
+                # 위치 비교가 성립하지 않는 경우(mask가 아니거나 길이가 다름) — 탐지 구간이
+                # 정답 구간을 얼마나 덮었는지로 유출 비율을 본다.
+                ratio = _coverage_gap_ratio(detections, start, end, keep_head=keep_head)
 
             if ratio > 0:
                 result.leaks.append(Leak(kind=label["kind"], value=gold_value, exposed_ratio=ratio))

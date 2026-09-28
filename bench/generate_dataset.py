@@ -66,7 +66,10 @@ def write_jsonl(rows: list[dict], out_path: Path) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="합성 개인정보 평가 데이터셋 생성")
-    parser.add_argument("--count", type=int, default=200, help="생성할 문서 수")
+    # #498: 기본값이 500이 아니면 인자 없이 그냥 돌렸을 때 500건짜리 synth_v1.jsonl을
+    # 더 적은 건수로 덮어쓴다 — v1의 재현성 보장(test_committed_v1_dataset_is_reproducible_from_seed)이
+    # 깨진다. 기본 옵션만으로 v1이 그대로 재현되게, v1의 실제 건수(500)를 기본값으로 둔다.
+    parser.add_argument("--count", type=int, default=500, help="생성할 문서 수")
     parser.add_argument("--seed", type=int, default=42, help="난수 시드 (재현성 보장)")
     parser.add_argument(
         "--negative-ratio",
@@ -93,6 +96,11 @@ def main() -> None:
         parser.error(
             f"--address-extended는 v1과 다른 데이터셋을 만든다. {V1_DATASET_NAME}을 덮어쓰면 제출 수치의 "
             "근거가 사라지니 --out을 새 파일(예: bench/datasets/synth_v2.jsonl)로 지정할 것"
+        )
+    if args.out.name == V1_DATASET_NAME and args.count != 500:
+        parser.error(
+            f"{V1_DATASET_NAME}은 500건이어야 제출 수치와 일치한다(--count {args.count}로 덮어쓰면 "
+            "재현성 테스트가 깨진다). --count를 생략하거나 500으로 두거나, 다른 --out 경로를 쓸 것"
         )
 
     rows = build_dataset(
