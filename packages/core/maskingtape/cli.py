@@ -41,11 +41,19 @@ def _use_utf8_output() -> None:
     Windows 콘솔 기본값(cp949)이면 한글이 깨지고, cp949로 표현할 수 없는 문자(이모지 등)가
     하나만 있어도 UnicodeEncodeError로 죽어 마스킹 결과를 아예 받지 못한다.
     리다이렉트한 파일도 cp949로 저장돼 UTF-8을 기대하는 다음 단계가 깨진다.
+
+    표준출력은 줄바꿈도 바꾸지 않는다(#494). 입력은 바이트로 읽어 "\\r\\n"이 그대로 남는데,
+    Windows 텍스트 모드 출력이 "\\n"을 다시 "\\r\\n"으로 바꿔 줄마다 "\\r\\r\\n"이 됐다. 데스크톱은
+    이 출력을 그대로 저장해서 CSV의 행 수가 두 배가 됐다.
     """
-    for stream in (sys.stdout, sys.stderr):
+    options = (
+        (sys.stdout, {"encoding": "utf-8", "newline": ""}),
+        (sys.stderr, {"encoding": "utf-8"}),
+    )
+    for stream, settings in options:
         reconfigure = getattr(stream, "reconfigure", None)
         if reconfigure is not None:
-            reconfigure(encoding="utf-8")
+            reconfigure(**settings)
 
 
 def _read_stdin() -> str:
