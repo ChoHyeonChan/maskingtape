@@ -33,6 +33,13 @@ _PASSPORT_RE = re.compile(
     re.IGNORECASE,
 )
 
+# 종류 문자와 숫자 사이를 한 칸 띄우거나 하이픈으로 잇는 표기("M 12345678", "M-12345678", #493).
+# 이런 모양은 사이즈·문서 코드("S 12345678", "D-20260928")와도 겹쳐서 문맥어가 있을 때만 받는다.
+_PASSPORT_SPACED_RE = re.compile(
+    r"(?<![A-Za-z0-9])[MSROD][ -](?:\d{8}|\d{3}[A-Z]\d{4})(?![A-Za-z0-9])",
+    re.IGNORECASE,
+)
+
 # 문맥어가 앞쪽 이 글자수 안에 있으면 여권번호일 확신이 높다.
 _CONTEXT_WINDOW = 15
 
@@ -49,9 +56,9 @@ class PassportDetector(Detector):
         결과에 들어가 기본 파이프라인에서는 가려진다(확신도로 거르는 건 웹 데모의 슬라이더다).
         """
         found: list[Detection] = []
-        for m in _PASSPORT_RE.finditer(text):
-            context = text[max(0, m.start() - _CONTEXT_WINDOW) : m.start()]
-            confidence = 0.9 if "여권" in context else 0.6
+        spaced = [m for m in _PASSPORT_SPACED_RE.finditer(text) if self._has_cue(text, m.start())]
+        for m in sorted([*_PASSPORT_RE.finditer(text), *spaced], key=lambda m: m.start()):
+            confidence = 0.9 if self._has_cue(text, m.start()) else 0.6
             found.append(
                 Detection(
                     kind=self.kind,
@@ -63,3 +70,8 @@ class PassportDetector(Detector):
                 )
             )
         return found
+
+    @staticmethod
+    def _has_cue(text: str, start: int) -> bool:
+        """후보 앞 _CONTEXT_WINDOW(15자) 안에 '여권'이 있는가."""
+        return "여권" in text[max(0, start - _CONTEXT_WINDOW) : start]

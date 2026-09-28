@@ -29,7 +29,8 @@ _SEP = r"[-.\s–—]{0,3}"
 _MOBILE_PREFIX = r"(?:\+82[-.\s]?0?|0)1[016789]"
 # 유선·특수: 서울 02, 광역 지역번호 3자리, 인터넷 전화 070, 평생번호·안심번호 050X.
 # 050\d?는 050(3자리)과 0502~0508(4자리)을 함께 잡는다.
-_LANDLINE_PREFIX = r"0(?:2|3[1-3]|4[1-4]|5[1-5]|6[1-4]|70|50\d?)"
+_AREA = r"(?:2|3[1-3]|4[1-4]|5[1-5]|6[1-4]|70|50\d?)"
+_LANDLINE_PREFIX = r"0" + _AREA
 
 # 뒤 번호 — 국번 뒤의 "3~4자리 + 4자리" 부분. 두 표기가 공유한다.
 _TAIL = _SEP + r"\d{3,4}" + _SEP + r"\d{4}(?!\d)"
@@ -39,6 +40,20 @@ _TAIL = _SEP + r"\d{3,4}" + _SEP + r"\d{4}(?!\d)"
 # 국번 패턴에서 이미 걸리고, 한쪽 괄호만 있는 깨진 표기도 붙잡지 않는다.
 _MOBILE_RE = re.compile(r"(?<!\d)(\()?" + _MOBILE_PREFIX + r"(?(1)\))" + _TAIL)
 _LANDLINE_RE = re.compile(r"(?<!\d)(\()?" + _LANDLINE_PREFIX + r"(?(1)\))" + _TAIL)
+
+# 위 두 정규식이 못 받는 표기(#493). 위 정규식은 그대로 두고 이 표기만 따로 찾아 합친다 — 한 정규식을
+# 넓히면 새 표기가 앞에서 먼저 시작해 뒤 번호를 반쯤 삼키고, finditer가 겹친 뒤 번호를 건너뛰어
+# 끝자리가 샌다("02) 031-1234-5678", #493 독립 검증).
+#  - 여는 괄호 없이 닫는 괄호만 쓴 국번: "02)555-1234", "010) 1234-5678" (명함·간판에서 흔하다)
+#  - 국제 표기: "+82 (0)10-1234-5678", 지역번호의 0을 뺀 유선 "+82-2-555-1234"
+_EXTRA_MOBILE_RE = re.compile(
+    r"(?<![\d(])" + _MOBILE_PREFIX + r"\)" + _TAIL
+    + r"|(?<!\d)\+82[-.\s]?\(0\)\s?1[016789]" + _TAIL
+)
+_EXTRA_LANDLINE_RE = re.compile(
+    r"(?<![\d(])" + _LANDLINE_PREFIX + r"\)" + _TAIL
+    + r"|(?<!\d)\+82[-.\s]?(?:\(0\)\s?)?" + _AREA + r"\)?" + _TAIL
+)
 
 
 def _has_separator(matched: str) -> bool:
@@ -62,7 +77,12 @@ class PhoneDetector(Detector):
         """
         found: list[Detection] = []
         # (정규식, 구분자 있을 때 확신도, 숫자만 붙어 있을 때 확신도)
-        for regex, with_sep, bare in ((_MOBILE_RE, 1.0, 0.9), (_LANDLINE_RE, 0.95, 0.8)):
+        for regex, with_sep, bare in (
+            (_MOBILE_RE, 1.0, 0.9),
+            (_LANDLINE_RE, 0.95, 0.8),
+            (_EXTRA_MOBILE_RE, 1.0, 0.9),
+            (_EXTRA_LANDLINE_RE, 0.95, 0.8),
+        ):
             for m in regex.finditer(text):
                 found.append(
                     Detection(
