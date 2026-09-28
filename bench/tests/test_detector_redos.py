@@ -28,6 +28,7 @@ from maskingtape.detectors import (
     BirthDateDetector,
     BusinessRegistrationDetector,
     CreditCardDetector,
+    DriverLicenseDetector,
     EmailDetector,
     NameDetector,
     PassportDetector,
@@ -65,6 +66,7 @@ _CASES = [
     ("address", AddressDetector(), "가" * _LENGTH),
     ("name", NameDetector(), "김" * _LENGTH),
     ("account", AccountDetector(), "1" * _LENGTH),
+    ("driver_license", DriverLicenseDetector(), "1" * _LENGTH),  # #498 감사 — 11종 중 이 종만 빠져 있었다
     # birthdate는 앵커(생일/생년월일)+공백열이 폭발 입력이다 — 다른 탐지기의 "0"*N 입력으론
     # 트리거되지 않아 이 케이스가 빠져 있었고, 그래서 #289 ReDoS를 회귀 테스트가 못 잡았다.
     ("birth_date", BirthDateDetector(), "생일" + " " * _LENGTH),
