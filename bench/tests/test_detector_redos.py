@@ -99,14 +99,20 @@ def test_detector_handles_adversarial_input_within_time_budget(kind, detector, t
 #
 # detect()를 한 번씩만 재면 OS가 다른 프로세스에 CPU를 뺏는 순간과 겹쳐 흔들리기 쉬워서,
 # 같은 텍스트로 여러 번 반복해 process_time(프로세스가 실제로 쓴 CPU 시간, 다른 프로세스에
-# 뺏긴 시간은 안 잡힘) 누적값을 비교한다. 그래도 로컬에서 20번 연속 실행 중 1번은 이 반복만으로
-# 부족해 흔들렸다(원인 불명 — 인위적으로 CPU 경합을 만들어도 재현은 안 됐다, 순간적인 시스템
-# 지연으로 추정). 그래서 n자·2n자 각각을 3번씩 재고 그중 최솟값을 쓴다 — 노이즈는 시간을
-# 늘리기만 하니, 최솟값이 실제 계산량에 가장 가깝다(마이크로벤치마크의 일반적인 관행).
+# 뺏긴 시간은 안 잡힘) 누적값을 비교한다. 그래도 min-of-3으로도 300번 중 2번(0.67%) 흔들렸다
+# — 두 실패 모두 절대 시간 자체가 평소의 2배 이상으로 길어서(예: 8초→18초), 짧은 노이즈가
+# 아니라 그 구간 전체가 지속적으로 느렸던 것으로 보인다. 이런 "구간 전체가 느려짐"은
+# 반복 횟수를 늘려도 못 걸러낸다 — 5번을 다시 재도 같은 느린 구간 안에서 재면 5번 다 느리다.
+#
+# 그래서 n·2n 두 지점 비교 대신 n·2n·4n **세 지점**을 비교하고, n→2n 비율과 2n→4n 비율이
+# **둘 다** 기준 이내여야 통과시킨다. 진짜 제곱(O(n²)) 회귀는 두 구간 모두에서 일관되게
+# 비율이 커지지만, 한 번의 시스템 지연은 보통 한 구간(예: 2n을 잴 때)에만 걸리고 그 다음
+# 구간(4n)은 지연이 풀린 뒤에 재서 오히려 비율이 낮게 나온다 — 그래서 "두 비율 다 나쁨"을
+# 요구하면 이런 한 번의 우연한 지연이 실패로 이어지지 않는다.
 _FUZZ_SEED = 480
 _FUZZ_BASE_LENGTH = 50_000
 _FUZZ_MAX_RATIO = 3.0
-_FUZZ_TRIALS = 3
+_FUZZ_TRIALS = 5
 
 # 탐지기 어휘로 입력을 조립해야 역추적 경로를 탄다 — 아무 글자나 섞으면 정규식이 금방
 # 포기한다. core의 목록 상수를 그대로 import해서 core가 목록을 바꿔도 따라간다.
@@ -123,9 +129,12 @@ _ACCOUNT_FUZZ_PIECES = (
     + ["-", " ", "계좌", "입금"]
 )
 
+# 반복 횟수(iterations)는 가장 짧은 길이(_FUZZ_BASE_LENGTH)에서도 배치 시간이 Windows
+# 기본 시계 해상도(~15ms)의 5배 이상 되도록 실측으로 골랐다 — 그래야 한 번의 반복이 시계
+# 눈금 하나에 묻히지 않는다. 세 지점(n·2n·4n) × 5회(trials)로 늘면서 필요한 반복 수는 줄었다.
 _RATIO_CASES = [
-    ("address_fuzz", AddressDetector(), _ADDRESS_FUZZ_PIECES, 10),
-    ("account_fuzz", AccountDetector(), _ACCOUNT_FUZZ_PIECES, 30),
+    ("address_fuzz", AddressDetector(), _ADDRESS_FUZZ_PIECES, 5),
+    ("account_fuzz", AccountDetector(), _ACCOUNT_FUZZ_PIECES, 8),
 ]
 
 
@@ -158,14 +167,14 @@ def _min_process_time(detector, text: str, iterations: int, trials: int = _FUZZ_
 
 @pytest.mark.parametrize("kind,detector,pieces,iterations", _RATIO_CASES, ids=[c[0] for c in _RATIO_CASES])
 def test_detector_time_scales_linearly_when_input_doubles(kind, detector, pieces, iterations):
-    text_n = _fuzz_string(pieces, _FUZZ_BASE_LENGTH)
-    text_2n = _fuzz_string(pieces, _FUZZ_BASE_LENGTH * 2)
+    lengths = (_FUZZ_BASE_LENGTH, _FUZZ_BASE_LENGTH * 2, _FUZZ_BASE_LENGTH * 4)
+    times = [_min_process_time(detector, _fuzz_string(pieces, length), iterations) for length in lengths]
 
-    time_n = _min_process_time(detector, text_n, iterations)
-    time_2n = _min_process_time(detector, text_2n, iterations)
-
-    ratio = time_2n / time_n
-    assert ratio < _FUZZ_MAX_RATIO, (
-        f"{kind}: 입력 길이를 2배({_FUZZ_BASE_LENGTH}자→{_FUZZ_BASE_LENGTH * 2}자)로 늘렸더니 "
-        f"시간이 {ratio:.2f}배로 늘어남(선형이면 ~2배) — 정규식 역추적 회귀(ReDoS) 의심"
+    ratio_2n = times[1] / times[0]
+    ratio_4n = times[2] / times[1]
+    bad_ratios = [r for r in (ratio_2n, ratio_4n) if r >= _FUZZ_MAX_RATIO]
+    assert len(bad_ratios) < 2, (
+        f"{kind}: 입력을 {lengths[0]}→{lengths[1]}→{lengths[2]}자로 두 번 늘렸는데 "
+        f"두 구간 모두 비율이 커짐(n→2n {ratio_2n:.2f}배, 2n→4n {ratio_4n:.2f}배, "
+        f"선형이면 각각 ~2배) — 한 번의 시스템 지연이 아니라 일관된 정규식 역추적 회귀(ReDoS)로 의심됨"
     )
