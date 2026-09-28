@@ -30,6 +30,21 @@ def test_counts_all_zero_is_zero_not_divide_error():
     assert c.precision == 0.0
     assert c.recall == 0.0
     assert c.f1 == 0.0
+    assert c.f2 == 0.0
+
+
+def test_counts_f2_weights_recall_more_than_f1():
+    """미탐(FN)이 늘면 F2가 F1보다 더 크게 떨어져야 한다 — F2가 재현율에 가중치를 둔다는 계약."""
+    high_recall_low_precision = Counts(tp=8, fp=8, fn=2)  # precision 0.5, recall 0.8
+    low_recall_high_precision = Counts(tp=8, fp=2, fn=8)  # precision 0.8, recall 0.5
+    assert high_recall_low_precision.f2 > high_recall_low_precision.f1
+    assert low_recall_high_precision.f2 < low_recall_high_precision.f1
+
+
+def test_counts_f2_matches_fbeta_formula():
+    c = Counts(tp=3, fp=1, fn=2)
+    p, r = c.precision, c.recall
+    assert round(c.f2, 6) == round(5 * p * r / (4 * p + r), 6)
 
 
 def test_evaluate_perfect_match_on_known_pattern():

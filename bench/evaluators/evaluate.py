@@ -1,13 +1,18 @@
 # SPDX-FileCopyrightText: 2026 The maskingtape Authors
 # SPDX-License-Identifier: Apache-2.0
 
-"""탐지 결과 vs 정답 라벨 → precision/recall/F1 리포트.
+"""탐지 결과 vs 정답 라벨 → precision/recall/F1/F2 리포트.
 
 동작 원리:
 1. JSONL 데이터셋의 각 문서를 core의 Pipeline.scan()에 통과시켜 예측 span을 얻는다.
 2. 예측 span과 정답 span을 (kind, start, end) 완전 일치(exact match) 기준으로 비교한다.
-3. kind별 + 난이도별(easy/hard/negative) + 전체(micro) precision/recall/F1을 집계해
+3. kind별 + 난이도별(easy/hard/negative) + 전체(micro) precision/recall/F1/F2를 집계해
    표로 출력하고, --report 옵션이 있으면 마크다운 리포트 파일로도 저장한다.
+
+F2(재현율에 F1보다 더 큰 가중치를 두는 Fβ, β=2)를 F1과 나란히 보는 이유: PII 탐지는
+놓친 개인정보(미탐, FN)가 과잉마스킹(오탐, FP)보다 실질적으로 더 위험하다는 게 이 도메인의
+평가 관행이다(Microsoft Presidio 평가 프레임워크가 이 이유로 β=2를 권장). F1만 보면 이
+비대칭을 놓칠 수 있어 F2를 함께 리포트한다.
 """
 
 from __future__ import annotations
@@ -63,8 +68,16 @@ class Counts:
 
     @property
     def f1(self) -> float:
+        return self.fbeta(1.0)
+
+    @property
+    def f2(self) -> float:
+        return self.fbeta(2.0)
+
+    def fbeta(self, beta: float) -> float:
         p, r = self.precision, self.recall
-        return 2 * p * r / (p + r) if (p + r) else 0.0
+        beta2 = beta * beta
+        return (1 + beta2) * p * r / (beta2 * p + r) if (p + r) else 0.0
 
 
 def _totalize(per_group: dict[str, Counts]) -> dict[str, Counts]:
@@ -125,15 +138,18 @@ def _format_table(title: str, results: dict[str, Counts]) -> str:
     lines = [
         title,
         f"{'-' * len(title)}",
-        f"{'group':<10} {'precision':>10} {'recall':>10} {'f1':>10} {'tp':>6} {'fp':>6} {'fn':>6}",
+        f"{'group':<10} {'precision':>10} {'recall':>10} {'f1':>10} {'f2':>10} {'tp':>6} {'fp':>6} {'fn':>6}",
     ]
     for group in sorted(results):
         c = results[group]
-        lines.append(f"{group:<10} {c.precision:>10.3f} {c.recall:>10.3f} {c.f1:>10.3f} {c.tp:>6} {c.fp:>6} {c.fn:>6}")
-    lines.append("-" * 60)
+        lines.append(
+            f"{group:<10} {c.precision:>10.3f} {c.recall:>10.3f} {c.f1:>10.3f} {c.f2:>10.3f} "
+            f"{c.tp:>6} {c.fp:>6} {c.fn:>6}"
+        )
+    lines.append("-" * 70)
     lines.append(
         f"{'overall':<10} {overall.precision:>10.3f} {overall.recall:>10.3f} "
-        f"{overall.f1:>10.3f} {overall.tp:>6} {overall.fp:>6} {overall.fn:>6}"
+        f"{overall.f1:>10.3f} {overall.f2:>10.3f} {overall.tp:>6} {overall.fp:>6} {overall.fn:>6}"
     )
     results["__overall__"] = overall  # 호출자가 재사용할 수 있도록 원복
     return "\n".join(lines)
@@ -148,13 +164,16 @@ def print_report(kind_results: dict[str, Counts], difficulty_results: dict[str, 
 def _markdown_table(results: dict[str, Counts]) -> str:
     results = dict(results)
     overall = results.pop("__overall__")
-    lines = ["| group | precision | recall | f1 | tp | fp | fn |", "|---|---|---|---|---|---|---|"]
+    lines = ["| group | precision | recall | f1 | f2 | tp | fp | fn |", "|---|---|---|---|---|---|---|---|"]
     for group in sorted(results):
         c = results[group]
-        lines.append(f"| {group} | {c.precision:.3f} | {c.recall:.3f} | {c.f1:.3f} | {c.tp} | {c.fp} | {c.fn} |")
+        lines.append(
+            f"| {group} | {c.precision:.3f} | {c.recall:.3f} | {c.f1:.3f} | {c.f2:.3f} | "
+            f"{c.tp} | {c.fp} | {c.fn} |"
+        )
     lines.append(
         f"| **overall** | **{overall.precision:.3f}** | **{overall.recall:.3f}** | "
-        f"**{overall.f1:.3f}** | {overall.tp} | {overall.fp} | {overall.fn} |"
+        f"**{overall.f1:.3f}** | **{overall.f2:.3f}** | {overall.tp} | {overall.fp} | {overall.fn} |"
     )
     return "\n".join(lines)
 
@@ -171,7 +190,9 @@ def write_markdown_report(
 
 - 데이터셋: `{dataset_path}` ({doc_count}건)
 - 생성 시각: {generated_at}
-- 평가 방식: span 완전 일치(exact match) 기준 precision/recall/F1
+- 평가 방식: span 완전 일치(exact match) 기준 precision/recall/F1/F2
+- F2: 재현율에 F1보다 더 큰 가중치를 두는 지표(β=2) — PII 탐지는 미탐(FN)이 오탐(FP)보다
+  위험하므로 F1과 함께 참고한다
 
 ## 종류(kind)별 결과
 
