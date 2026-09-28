@@ -188,10 +188,10 @@ _NAME_RE = re.compile(
     r"(?:\s?(?P<suffix>" + _SUFFIX_ALT + r"))?"
 )
 
-# 후보 판정용: 성씨(복성 포함)로 시작해 한글이 이어지는 자리
-_CANDIDATE_RE = re.compile(r"(?:" + _SURNAME_ALT + r")[가-힣]")
+# LLM에 보낼지 정하는 후보 판정용: 한글 두 글자가 붙은 자리. 한국어 이름은 두 글자 이상이다.
+_HANGUL_PAIR_RE = re.compile(r"[가-힣]{2}")
 
-# 후보 판정에 쓰는 문맥 단서 전체 (역할어 + 존칭 + 직함)
+# 문맥 단서 전체 (역할어 + 존칭 + 직함)
 _ALL_CUES = tuple(dict.fromkeys(_PREFIX_CUES + _SUFFIX_CUES + _TITLE_CUES))
 
 # 이름 후보가 단서 단어(역할어·직함) 자체와 글자까지 같으면 이름이 아니다(#450).
@@ -244,17 +244,13 @@ def _is_label_word_at(text: str, pos: int, *, strong: bool = False) -> bool:
 def has_name_candidate(text: str) -> bool:
     """이 텍스트에 사람 이름이 있을 가능성이 있는지 — LLM에 보낼지 정하는 느슨한 필터.
 
-    성씨(복성 포함) 뒤에 한글이 이어지거나, 역할어·존칭·직함 단서가 있으면 후보로 본다.
-    **느슨하게** 잡는다: 놓치면 이름이 안 가려지므로(유출), 애매하면 후보로 넘긴다.
-    후보가 하나도 없는 텍스트(순수 숫자·코드 등)만 걸러 LLM 호출을 아낀다.
+    한글 두 글자가 붙은 자리가 하나라도 있으면 후보로 본다. 이름이 있을 수 없는 텍스트(숫자·코드·
+    영문)만 걸러 LLM 호출을 아낀다. 놓치면 이름이 안 가려지므로(유출), 애매하면 후보로 넘긴다.
+
+    예전에는 성씨 사전과 역할어·직함 단서로 걸렀다. 그러면 사전 밖 성씨 이름만 있고 단서도 없는
+    문장("어제 탁예린 왔어")은 --llm이어도 LLM을 부르지 않아 이름이 그대로 남았다(#494).
     """
-    if any(cue in text for cue in _ALL_CUES):
-        return True
-    # 성씨로 시작하는 후보가 도메인 라벨 단어("이메일"의 이 등)가 아니면 후보로 본다
-    return any(
-        not any(text.startswith(word, m.start()) for word in _NON_NAME_WORDS)
-        for m in _CANDIDATE_RE.finditer(text)
-    )
+    return _HANGUL_PAIR_RE.search(text) is not None
 
 
 class NameDetector(Detector):
