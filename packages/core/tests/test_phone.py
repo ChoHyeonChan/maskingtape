@@ -120,11 +120,11 @@ def test_open_parenthesis_only_still_detects_the_number_itself():
     assert found[0].text == "010 1234-5678"
 
 
-def test_closing_parenthesis_only_is_a_known_miss():
-    """알려진 한계 — 닫는 괄호만 있는 깨진 표기는 잡지 못한다.
+def test_closing_parenthesis_only_is_detected():
+    """닫는 괄호만 쓴 표기("02)555-1234")도 잡는다(#493). 명함·간판에서 흔하다.
 
-    `)`가 구분자 목록에 없어 국번 뒤에서 매치가 끊긴다. 구분자에 `)`를 넣으면
-    괄호 쌍 검사가 무의미해지므로 넣지 않았다. 실무에서 닫는 괄호만 쓰는 표기는
-    드물다. 현재 동작을 여기 고정한다.
+    예전엔 알려진 한계로 두었다. `)`를 구분자에 넣지 않고, 닫는 괄호만 쓴 표기를 따로 찾는
+    정규식을 더해서 기존 정규식의 괄호 쌍 검사는 그대로 남는다.
     """
-    assert detect("010) 1234-5678") == []
+    found = detect("010) 1234-5678")
+    assert [d.text for d in found] == ["010) 1234-5678"]
