@@ -212,7 +212,7 @@ class LLMNameDetector(Detector):
         self._client = client if client is not None else self._ask_ollama
 
     def detect(self, text: str) -> list[Detection]:
-        """규칙으로 이름 후보가 있는지 먼저 보고, 없으면 LLM을 부르지 않는다.
+        """이름이 있을 수 있는 텍스트인지 먼저 보고, 아니면 LLM을 부르지 않는다.
 
         숫자·코드처럼 이름이 있을 수 없는 입력에서 느린 호출을 아끼려는 것이다. 후보가
         있으면 문장 전체를 로컬 LLM에 보내고, 돌아온 이름을 원문 위치로 바꾼다. 원문에
@@ -220,8 +220,8 @@ class LLMNameDetector(Detector):
         """
         if not text.strip():
             return []
-        # 하이브리드: 규칙으로 이름 후보를 먼저 훑어, 후보가 없는 텍스트는 LLM을 건너뛴다.
-        # 순수 숫자·코드처럼 이름이 있을 수 없는 입력에서 느린 LLM 호출을 아낀다.
+        # 한글 두 글자가 붙은 자리가 없는 텍스트(순수 숫자·코드·영문)는 LLM을 건너뛴다.
+        # 이름이 있을 수 없는 입력에서 느린 LLM 호출을 아낀다(has_name_candidate).
         if not has_name_candidate(text):
             return []
         self.calls += 1
@@ -343,12 +343,26 @@ class LLMNameDetector(Detector):
         return body
 
     def _to_detections(self, text: str, names: list[str]) -> list[Detection]:
-        """이름 문자열을 원문 위치로 바꾼다. 원문에 없으면(환각) 버린다."""
+        """이름 문자열을 원문 위치로 바꾼다. 원문에 없으면(환각) 버린다.
+
+        원소가 문자열이 아니면 멈춘다(#494). 모델이 [{"name": "김철수"}]처럼 답할 때 조용히
+        건너뛰면 LLM이 찾은 이름이 에러 없이 빠진다. names가 목록이 아닐 때(#420)처럼 타입만 알린다.
+        같은 이름은 한 번만 찾는다. 중복을 그대로 두면 중복 수 × 등장 횟수만큼 탐지가 늘어,
+        입력 속 지시문으로 탐지 수를 수만 건으로 부풀릴 수 있다(#494).
+        """
         found: list[Detection] = []
+        seen: set[str] = set()
         for name in names:
-            if not isinstance(name, str) or not name:
-                continue
+            if not isinstance(name, str):
+                raise TypeError(
+                    f"모델 {self.model}의 이름 목록(names)에 문자열이 아닌 값이 있습니다 "
+                    f"(받은 형태: {type(name).__name__}). 응답 본문은 개인정보가 섞일 수 있어 "
+                    "표시하지 않습니다."
+                )
             name = _strip_honorific(name)
+            if not name or name in seen:
+                continue
+            seen.add(name)
             start = text.find(name)
             while start != -1:
                 found.append(

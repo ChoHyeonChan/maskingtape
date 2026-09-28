@@ -22,8 +22,9 @@ import re
 from maskingtape.detectors.base import Detector
 from maskingtape.types import Detection
 
-# 인구 비중이 높은 한글 성씨. 상위 50개면 인구의 99% 이상을 덮는다 — 나머지 200여 개를
-# 다 넣기보다 흔한 것 + 흔한 복성(두 글자)만 둔다. 못 덮는 희귀 성씨는 문맥 단서로 건진다.
+# 인구 비중이 높은 한글 성씨. 나머지 200여 개를 다 넣기보다 흔한 것 + 흔한 복성(두 글자)만
+# 둔다. 사전 밖 성씨(류·변·탁 등)는 이 규칙으로는 못 잡고, 이름 전용 양식 라벨 뒤에 쌍점·
+# 세로줄이 있을 때만 _FORM_NAME_RE가 건진다(#491). 그 밖의 문장에서는 LLM판이 맡는다.
 _SURNAMES = [
     # 복성(두 글자) — 정규식에서 긴 것부터 매칭돼야 "선우예진"을 선+우예진이 아닌 선우+예진으로 본다
     "남궁", "선우", "제갈", "황보", "독고", "서문", "사공",
@@ -134,10 +135,50 @@ _SUFFIX_ALT = "|".join(sorted(dict.fromkeys(_SUFFIX_CUES + _TITLE_CUES), key=len
 # "환자 신성의"는 "신성의"로 한 글자 더 가려진다(안전). 정확한 경계는 LLM판이 처리.
 _NAME_TAIL_STOP = "님씨입는을를과와에께"
 
+# 라벨과 이름 사이 구분자. 예전 규칙(쌍점·공백 두 글자, "성명::홍길동"·줄바꿈 하나 포함)을 그대로
+# 두고, 가로 공백 세 칸과 앞뒤 공백을 둔 쌍점·세로줄(" : ", 표 칸 " | ")을 더한다(#491).
+# 더한 쪽은 줄을 넘지 않는다. 괄호 설명은 여기서 받지 않는다 — 괄호를 통째로 소비하면
+# "담당자(김민수 대리)"처럼 괄호 안에 든 이름을 다시 찾지 않아 샌다(#491 독립 검증).
+_LABEL_SEP = r"(?:[:\s]{1,2}|[ \t]{1,3}|[ \t]{0,3}[:|][ \t]{0,3})"
+
+# 이름 전용 양식 라벨. 이 라벨 뒤에 쌍점·세로줄이 오면 성씨 사전 밖 이름도 받는다(#491).
+# 공백만 있는 문장("이름 표기 규칙")까지 받으면 일반 낱말이 이름으로 잡히므로 쌍점·세로줄을 요구한다.
+_FORM_LABELS = (
+    "성명", "이름", "성함", "실명", "예금주", "명의자", "환자명", "고객명", "회원명",
+    "수취인", "송금인", "입금자", "신청인", "신청자", "보호자", "대표자",
+)
+# 양식 칸에 이름 대신 들어가는 값과 표 머리행에 흔한 열 이름 — 끝의 조사·"입니다"를 뗀 값이
+# 이것과 **완전히 같을 때만** 이름으로 보지 않는다. 앞부분 일치로 거르면 "기재민"처럼 이 말로
+# 시작하는 실명이 샌다(#491 독립 검증).
+_FORM_NOT_NAMES = frozenset({
+    # 자리표시 값
+    "없음", "미기재", "미상", "본인", "해당없음", "비공개", "생략", "미정", "기재", "공란", "빈칸",
+    "상동", "동일", "별첨", "참조", "하단", "상단", "아래", "모름", "익명", "불명", "무기명", "공석",
+    # 작성 안내
+    "필수", "선택", "확인", "작성", "기입", "입력", "한글", "영문", "자필", "서명", "날인", "직인",
+    # 표 머리행의 열 이름
+    "설명", "소속", "직위", "직책", "연락처", "부서", "역할", "비고", "상태", "형식", "경로", "기본값",
+    "버전", "관계", "은행", "학번", "타입", "번호", "주소", "전화", "날짜", "금액", "수량", "내용",
+    "항목", "구분", "법인", "개인", "회사명", "팀명", "부모", "모친", "부친", "배우자", "대리인",
+})
+# 은·이·가·도는 이름 끝 글자로도 흔해서("기재은", "재이") 떼지 않는다 — 떼면 "기재"가 되어 걸러지고 샌다.
+_FORM_VALUE_ENDING_RE = re.compile(r"(?:입니다|이며|이고|님|씨|[는을를의와과])$")
+_FORM_NAME_RE = re.compile(
+    # 라벨 앞에 한글이 붙으면 다른 낱말의 일부다("파일이름: 보고서").
+    r"(?<![가-힣])(?P<label>" + "|".join(sorted(_FORM_LABELS, key=len, reverse=True)) + r")"
+    # 괄호 설명("성명(한글)")·쌍점·세로줄. 가로 공백만 받아 빈 칸 다음 줄의 라벨을 값으로 먹지 않는다.
+    r"(?:\([^()\r\n]{1,12}\))?[ \t]{0,3}[:|][ \t]{0,3}"
+    r"(?<![가-힣])(?P<name>(?:(?![님씨])[가-힣]){2,4})"
+    # 이름 뒤는 낱말 끝이거나 존칭·조사·"입니다"다. 이름 끝 글자가 조사와 같아도("류하은")
+    # 먼저 길게 잡아 떼어내지 않는다 — 떼면 그 글자가 샌다.
+    r"(?=(?:입니다|이며|이고|님|씨|[은는이가을를의와과도])?(?![가-힣]))"
+)
+
 _NAME_RE = re.compile(
     # 역할어·직함 뒤에 조사가 붙은 형태("담당자는 홍길동", "예금주는 김민")도 잇는다 —
     # 서식 문장에서 흔한데 조사 하나 때문에 단서를 통째로 잃고 있었다.
-    r"(?:(?P<prefix>" + _PREFIX_ALT + r")(?:은|는|이|가)?[:\s]{1,2})?"
+    # 라벨 뒤 구분자는 양식에서 흔한 " : "·표 칸 " | "까지 받는다(#491).
+    r"(?:(?P<prefix>" + _PREFIX_ALT + r")(?:은|는|이|가)?" + _LABEL_SEP + r")?"
     # 성씨는 단어(어절) 시작이어야 한다 — 앞에 한글이 붙어 있으면 단어 중간이라 이름이 아니다(#158).
     # 이게 없으면 "감지되어"의 "지"(성씨 사전)부터 "지되어"가 이름으로 잡히고, 뒤 "양빈도"의 "양"을
     # 존칭으로 삼켜 오탐이 된다. 앞이 공백/문장부호/문두면 통과하므로 정상 이름은 그대로 잡힌다.
@@ -147,10 +188,10 @@ _NAME_RE = re.compile(
     r"(?:\s?(?P<suffix>" + _SUFFIX_ALT + r"))?"
 )
 
-# 후보 판정용: 성씨(복성 포함)로 시작해 한글이 이어지는 자리
-_CANDIDATE_RE = re.compile(r"(?:" + _SURNAME_ALT + r")[가-힣]")
+# LLM에 보낼지 정하는 후보 판정용: 한글 두 글자가 붙은 자리. 한국어 이름은 두 글자 이상이다.
+_HANGUL_PAIR_RE = re.compile(r"[가-힣]{2}")
 
-# 후보 판정에 쓰는 문맥 단서 전체 (역할어 + 존칭 + 직함)
+# 문맥 단서 전체 (역할어 + 존칭 + 직함)
 _ALL_CUES = tuple(dict.fromkeys(_PREFIX_CUES + _SUFFIX_CUES + _TITLE_CUES))
 
 # 이름 후보가 단서 단어(역할어·직함) 자체와 글자까지 같으면 이름이 아니다(#450).
@@ -158,6 +199,10 @@ _ALL_CUES = tuple(dict.fromkeys(_PREFIX_CUES + _SUFFIX_CUES + _TITLE_CUES))
 # 읽혀 호칭이 이름으로 잡혔다. 앞부분 일치가 아니라 완전 일치로만 거른다 — "원장훈"처럼
 # 호칭 글자로 시작하는 실명까지 버리면 유출이다.
 _CUE_WORDS = frozenset(_ALL_CUES)
+
+# 역할어·직함 + 조사("원장이", "차장은"). 앞 단서 뒤에서 이걸 이름으로 받아 소비하면, 그 직함이
+# 뒤 이름의 앞 단서가 되지 못해 뒤 이름이 샌다("담당자 : 차장은 김민수", #491 독립 검증).
+_CUE_WITH_JOSA_RE = re.compile(r"(?:" + _PREFIX_ALT + r")(?:은|는|이|가)")
 
 
 def _is_hangul(ch: str) -> bool:
@@ -199,17 +244,13 @@ def _is_label_word_at(text: str, pos: int, *, strong: bool = False) -> bool:
 def has_name_candidate(text: str) -> bool:
     """이 텍스트에 사람 이름이 있을 가능성이 있는지 — LLM에 보낼지 정하는 느슨한 필터.
 
-    성씨(복성 포함) 뒤에 한글이 이어지거나, 역할어·존칭·직함 단서가 있으면 후보로 본다.
-    **느슨하게** 잡는다: 놓치면 이름이 안 가려지므로(유출), 애매하면 후보로 넘긴다.
-    후보가 하나도 없는 텍스트(순수 숫자·코드 등)만 걸러 LLM 호출을 아낀다.
+    한글 두 글자가 붙은 자리가 하나라도 있으면 후보로 본다. 이름이 있을 수 없는 텍스트(숫자·코드·
+    영문)만 걸러 LLM 호출을 아낀다. 놓치면 이름이 안 가려지므로(유출), 애매하면 후보로 넘긴다.
+
+    예전에는 성씨 사전과 역할어·직함 단서로 걸렀다. 그러면 사전 밖 성씨 이름만 있고 단서도 없는
+    문장("어제 탁예린 왔어")은 --llm이어도 LLM을 부르지 않아 이름이 그대로 남았다(#494).
     """
-    if any(cue in text for cue in _ALL_CUES):
-        return True
-    # 성씨로 시작하는 후보가 도메인 라벨 단어("이메일"의 이 등)가 아니면 후보로 본다
-    return any(
-        not any(text.startswith(word, m.start()) for word in _NON_NAME_WORDS)
-        for m in _CANDIDATE_RE.finditer(text)
-    )
+    return _HANGUL_PAIR_RE.search(text) is not None
 
 
 class NameDetector(Detector):
@@ -247,6 +288,9 @@ class NameDetector(Detector):
                 pos = name_start if (m.group("prefix") is not None and name_start > pos) else m.end()
                 continue
             pos = m.end()
+            if name_start > m.start() and _CUE_WITH_JOSA_RE.fullmatch(m.group("name")):
+                # 이 후보는 그대로 가리되(더 가리기), 그 직함부터 다시 찾아 뒤 이름의 단서로 쓴다
+                pos = name_start
 
             prefix = m.group("prefix")
             suffix = m.group("suffix")
@@ -278,4 +322,42 @@ class NameDetector(Detector):
                     detector=self.__class__.__name__,
                 )
             )
+        found.extend(self._form_names(text, found))
         return found
+
+    def _form_names(self, text: str, found: list[Detection]) -> list[Detection]:
+        """양식 라벨(성명·예금주 등)과 쌍점·세로줄 뒤의 이름을 찾는다(#491).
+
+        성씨 사전 밖 이름("성명: 류서윤")도 받는다. 양식 칸의 값은 이름일 가능성이 높아서, 위 규칙이
+        일반명사로 보고 버린 "이하은"·"이상은"도 받고, 위 규칙이 "김가"까지만 잡은 "김가을"은 끝까지
+        넓힌다. 위 규칙이 이미 통째로 덮은 구간은 다시 넣지 않는다.
+        """
+        if self.min_confidence > 0.75:
+            return []
+        covered = bytearray(len(text))  # 위 규칙이 잡은 글자 — 겹침 확인을 선형으로 한다
+        for d in found:
+            covered[d.start : d.end] = b"\x01" * (d.end - d.start)
+        extra: list[Detection] = []
+        pos = 0
+        while (m := _FORM_NAME_RE.search(text, pos)) is not None:
+            start, end = m.span("name")
+            name = m.group("name")
+            value = _FORM_VALUE_ENDING_RE.sub("", name)
+            if name in _FORM_LABELS or value in _FORM_LABELS or _is_label_word_at(text, start, strong=True):
+                # 값 자리에 다른 라벨이 왔다("성명: 예금주: 류서윤") — 그 라벨부터 다시 찾는다
+                pos = start
+                continue
+            pos = end
+            if value in _FORM_NOT_NAMES or all(covered[start:end]):
+                continue
+            extra.append(
+                Detection(
+                    kind=self.kind,
+                    start=start,
+                    end=end,
+                    text=name,
+                    confidence=0.75,
+                    detector=self.__class__.__name__,
+                )
+            )
+        return extra
