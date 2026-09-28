@@ -43,3 +43,14 @@ def test_default_labels_cover_every_default_detector_kind():
     kinds = {d.kind for d in default_detectors()}
     missing = sorted(kinds - DEFAULT_LABELS.keys())
     assert not missing, f"DEFAULT_LABELS에 빠진 kind: {missing}"
+
+
+def test_overlapping_detections_passed_directly_leave_no_raw_text():
+    # Pipeline을 거치지 않고 겹친 탐지를 apply에 바로 넘겨도 원문이 남지 않는다(#494).
+    # 안쪽 탐지를 먼저 긴 라벨로 바꾸면 위치가 밀려, 바깥 탐지의 꼬리("678")가 원문으로 남았다
+    text = "연락처 010-1234-5678 끝"
+    outer = Detection(
+        kind="phone", start=4, end=17, text="010-1234-5678", confidence=1.0, detector="T"
+    )
+    inner = Detection(kind="name", start=13, end=14, text="5", confidence=0.5, detector="T")
+    assert LabelAnonymizer().apply(text, [outer, inner]) == "연락처 [전화번호] 끝"
