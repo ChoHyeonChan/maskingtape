@@ -53,6 +53,11 @@ class RRNDetector(Detector):
     kind = "rrn"
 
     def detect(self, text: str) -> list[Detection]:
+        """앞 6자리와 뒷자리 첫 숫자(성별·세기)로 실제 날짜인지 먼저 거른다.
+
+        체크섬이 맞으면 확신도 1.0, 틀리면 0.85를 준다. 2020년 10월 이후 발급분은
+        뒷자리가 난수라 체크섬이 없으므로, 틀렸다고 버리지 않는다.
+        """
         found: list[Detection] = []
         for m in _RRN_RE.finditer(text):
             front, back = m.group(1), m.group(2)
