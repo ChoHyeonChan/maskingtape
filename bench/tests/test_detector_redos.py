@@ -8,10 +8,17 @@
 1.4초였다). 하지만 이 속성을 지키는 자동 테스트가 없어서, 누군가 정규식을 느슨하게
 고치면(#162) 이 회귀를 아무도 못 잡는다. 각 detector에 적대적 입력(구분자·특수문자 없이
 쭉 이어진 긴 문자열)을 넣고 시간 예산 안에 끝나는지 확인해 이 속성을 고정한다.
+
+아래 두 절: 위쪽(`_CASES`)은 손으로 고른 고정 입력 몇 개로 절대 시간(5초) 안에 끝나는지
+보고, 아래쪽(#480)은 무작위로 조립한 입력으로 "길이를 2배로 늘리면 시간이 몇 배로 느는지"
+비율을 본다. 손으로 고른 입력만으로는 우리가 예상 못 한 글자 조합에서만 역추적이 폭발하는
+정규식 회귀를 놓칠 수 있어서 보강한다(팀장 결정 #480 — hypothesis 대신 표준 라이브러리
+random으로 직접 짜서 새 의존성·SBOM 절차가 필요 없다).
 """
 
 from __future__ import annotations
 
+import random
 import time
 
 import pytest
@@ -27,6 +34,14 @@ from maskingtape.detectors import (
     PhoneDetector,
     RRNDetector,
 )
+from maskingtape.detectors.financial.account import (
+    _BANK_NAMES_ADJACENT,
+    _BANK_NAMES_ADJACENT_LATIN,
+    _BANK_NAMES_LOCAL,
+    _BANK_NAMES_LONG,
+    _BANK_NAMES_NEARBY,
+)
+from maskingtape.detectors.personal.address import _JOSA, _PROVINCE_ABBR, _PROVINCES
 
 # 상한 없는 정규식이 겪는 catastrophic backtracking은 입력 길이의 제곱 이상으로 느려지므로,
 # 정상적인 상한 있는 정규식이라면 40만 자도 수 초 안에 끝나야 한다. 여유 있게 5초로 잡는다
@@ -71,4 +86,86 @@ def test_detector_handles_adversarial_input_within_time_budget(kind, detector, t
     assert elapsed < _TIME_BUDGET_SECONDS, (
         f"{kind} detector가 적대적 입력({len(text)}자)에서 {elapsed:.2f}초 걸림 "
         f"(예산 {_TIME_BUDGET_SECONDS}초) — 정규식 역추적 회귀(ReDoS) 의심"
+    )
+
+
+# --- #480: 무작위(property-based 스타일) 퍼징으로 고정 케이스가 놓치는 조합을 넓힌다 ---
+#
+# 위 _CASES처럼 절대 시간(5초)을 무작위 입력에 걸면 CI 서버 속도 편차로 흔들린다. 대신
+# "입력 길이를 2배로 늘리면 시간이 몇 배로 느는지" 비율을 본다 — 선형이면 대략 2배,
+# 제곱이면 4배, 역추적 폭발이면 훨씬 커진다. 시드를 고정해(_FUZZ_SEED) n자·2n자 입력이
+# 항상 같은 접두사를 갖게 만든다(rng가 매번 같은 순서로 조각을 고르므로) — 그래야 "모양은
+# 같고 길이만 다른" 비교가 되고, CI에서 실패해도 같은 입력을 그대로 재현할 수 있다.
+#
+# detect()를 한 번씩만 재면 OS가 다른 프로세스에 CPU를 뺏는 순간과 겹쳐 흔들리기 쉬워서,
+# 같은 텍스트로 여러 번 반복해 process_time(프로세스가 실제로 쓴 CPU 시간, 다른 프로세스에
+# 뺏긴 시간은 안 잡힘) 누적값을 비교한다. 그래도 로컬에서 20번 연속 실행 중 1번은 이 반복만으로
+# 부족해 흔들렸다(원인 불명 — 인위적으로 CPU 경합을 만들어도 재현은 안 됐다, 순간적인 시스템
+# 지연으로 추정). 그래서 n자·2n자 각각을 3번씩 재고 그중 최솟값을 쓴다 — 노이즈는 시간을
+# 늘리기만 하니, 최솟값이 실제 계산량에 가장 가깝다(마이크로벤치마크의 일반적인 관행).
+_FUZZ_SEED = 480
+_FUZZ_BASE_LENGTH = 50_000
+_FUZZ_MAX_RATIO = 3.0
+_FUZZ_TRIALS = 3
+
+# 탐지기 어휘로 입력을 조립해야 역추적 경로를 탄다 — 아무 글자나 섞으면 정규식이 금방
+# 포기한다. core의 목록 상수를 그대로 import해서 core가 목록을 바꿔도 따라간다.
+_ADDRESS_FUZZ_PIECES = (
+    list(_PROVINCES) + list(_PROVINCE_ABBR) + _JOSA.split("|") + ["시", "군", "구", "동", "읍", "면", "리", " "]
+)
+_ACCOUNT_FUZZ_PIECES = (
+    list(_BANK_NAMES_NEARBY)
+    + list(_BANK_NAMES_LOCAL)
+    + list(_BANK_NAMES_LONG)
+    + list(_BANK_NAMES_ADJACENT)
+    + list(_BANK_NAMES_ADJACENT_LATIN)
+    + [str(d) for d in range(10)]
+    + ["-", " ", "계좌", "입금"]
+)
+
+_RATIO_CASES = [
+    ("address_fuzz", AddressDetector(), _ADDRESS_FUZZ_PIECES, 10),
+    ("account_fuzz", AccountDetector(), _ACCOUNT_FUZZ_PIECES, 30),
+]
+
+
+def _fuzz_string(pieces: list[str], target_len: int) -> str:
+    """항상 같은 시드로 시작해 조각을 이어 붙인다.
+
+    target_len이 다른 두 호출도 짧은 쪽 길이까지는 내용이 완전히 같다 — 매번 새
+    `random.Random(_FUZZ_SEED)`로 시작해 같은 순서로 조각을 고르기 때문이다.
+    """
+    rng = random.Random(_FUZZ_SEED)
+    parts: list[str] = []
+    total = 0
+    while total < target_len:
+        piece = rng.choice(pieces)
+        parts.append(piece)
+        total += len(piece)
+    return "".join(parts)[:target_len]
+
+
+def _total_process_time(detector, text: str, iterations: int) -> float:
+    start = time.process_time()
+    for _ in range(iterations):
+        detector.detect(text)
+    return time.process_time() - start
+
+
+def _min_process_time(detector, text: str, iterations: int, trials: int = _FUZZ_TRIALS) -> float:
+    return min(_total_process_time(detector, text, iterations) for _ in range(trials))
+
+
+@pytest.mark.parametrize("kind,detector,pieces,iterations", _RATIO_CASES, ids=[c[0] for c in _RATIO_CASES])
+def test_detector_time_scales_linearly_when_input_doubles(kind, detector, pieces, iterations):
+    text_n = _fuzz_string(pieces, _FUZZ_BASE_LENGTH)
+    text_2n = _fuzz_string(pieces, _FUZZ_BASE_LENGTH * 2)
+
+    time_n = _min_process_time(detector, text_n, iterations)
+    time_2n = _min_process_time(detector, text_2n, iterations)
+
+    ratio = time_2n / time_n
+    assert ratio < _FUZZ_MAX_RATIO, (
+        f"{kind}: 입력 길이를 2배({_FUZZ_BASE_LENGTH}자→{_FUZZ_BASE_LENGTH * 2}자)로 늘렸더니 "
+        f"시간이 {ratio:.2f}배로 늘어남(선형이면 ~2배) — 정규식 역추적 회귀(ReDoS) 의심"
     )
