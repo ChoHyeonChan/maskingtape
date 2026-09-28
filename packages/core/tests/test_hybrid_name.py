@@ -28,15 +28,23 @@ def test_candidate_true_from_title_cue_even_without_known_surname():
 
 
 def test_candidate_false_for_data_without_korean():
-    # 한글 성씨로 시작하는 뭉치가 없는 입력 — 이름이 있을 수 없으므로 LLM을 건너뛴다
+    # 한글 두 글자가 붙은 자리가 없는 입력 — 이름이 있을 수 없으므로 LLM을 건너뛴다
     assert has_name_candidate("010-1234-5678") is False
     assert has_name_candidate("order@shop.com 20260723 USD 15000") is False
+    assert has_name_candidate("A동 3층") is False
 
 
-def test_candidate_ignores_pure_domain_label_word():
-    # "이메일"은 도메인 라벨 단어라 '이'가 성씨로 오인되지 않는다
-    assert has_name_candidate("이메일") is False
-    assert has_name_candidate("주소") is False
+def test_candidate_true_for_rare_surname_without_any_cue():
+    # 성씨 사전 밖 성씨(탁)에 단서도 없는 문장. 예전엔 후보가 아니라서 --llm이어도 LLM을 부르지
+    # 않았고 이름이 그대로 남았다(#494)
+    assert has_name_candidate("어제 탁예린 왔어") is True
+
+
+def test_candidate_true_for_any_korean_word():
+    # 예전엔 도메인 라벨 단어("이메일", "주소")를 걸렀다. 같은 성씨 사전·단서 방식이 사전 밖 성씨
+    # 이름까지 걸러서(#494), 이제는 한글 두 글자가 붙은 자리가 있으면 모두 LLM에 넘긴다
+    assert has_name_candidate("이메일") is True
+    assert has_name_candidate("주소") is True
 
 
 def test_candidate_stays_loose_on_common_korean_words():
@@ -67,6 +75,13 @@ def test_calls_llm_when_candidate_present():
     detector = LLMNameDetector(client=lambda _t: ["홍길동"])
     found = detector.detect("그래서 홍길동이 어제 왔어")
     assert [d.text for d in found] == ["홍길동"]
+    assert detector.calls == 1
+
+
+def test_calls_llm_for_rare_surname_without_any_cue():
+    detector = LLMNameDetector(client=lambda _t: ["탁예린"])
+    found = detector.detect("어제 탁예린 왔어")
+    assert [d.text for d in found] == ["탁예린"]
     assert detector.calls == 1
 
 
