@@ -36,6 +36,16 @@ describe("App privacy banner (#154)", () => {
     expect(strong).toHaveTextContent("정확한 결과가 필요하면 로컬 설치를 권장합니다");
     expect(strong).not.toHaveTextContent("개인정보");
   });
+
+  it("discloses that input is sent to the server for analysis, not processed locally (#499)", () => {
+    render(<App />);
+
+    // d4f1bb5(2026-08-26)에서 "로컬에서만 처리" 문구가 빠졌는데, 배포판은 실제로
+    // /api/scan 서버 호출을 거치므로 그 문구는 틀린 말이었다 — 실제 동작과 같은
+    // "서버로 전송되며 저장하지 않는다"는 안내가 있어야 한다.
+    const note = screen.getByRole("note", { name: "개인정보 입력 주의 안내" });
+    expect(note).toHaveTextContent("서버로 전송되며 저장하지 않습니다");
+  });
 });
 
 describe("App lets you click the masked-result box to edit and re-scan", () => {
