@@ -283,35 +283,6 @@
   font-weight: 800;
 }
 
-.input-panel__presets {
-  position: relative;
-}
-
-.input-panel__presets-label,
-.input-panel__sample {
-  min-height: 2.25rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.85);
-  color: var(--text-primary);
-  font-size: 0.82rem;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.input-panel__presets-label {
-  gap: 0.65rem;
-  padding: 0 0.72rem;
-  list-style: none;
-}
-
-.input-panel__sample {
-  padding: 0 0.78rem;
-}
-
 /* 예제 불러오기 자리와 달리, "내 파일을 올린다"는 다른 성격의 동작이라 텍스트 알약이
    아니라 아이콘 버튼으로 구분해 둔다 — 대신 툴바 맨 앞으로 옮겨 우선순위를 살렸다. */
 .input-panel__upload {
@@ -408,64 +379,6 @@
   font-size: 0.92rem;
   font-weight: 800;
   pointer-events: none;
-}
-
-/* 시연 영상용 대표 시나리오라 다른 예제 버튼보다 살짝 눈에 띄게 브랜드 컬러로 강조한다(#215). */
-.input-panel__sample--contract {
-  border-color: color-mix(in srgb, var(--brand-blue) 38%, var(--border));
-  background: var(--brand-blue-tint);
-  color: var(--brand-blue);
-}
-
-.input-panel__presets-label::-webkit-details-marker {
-  display: none;
-}
-
-.input-panel__presets-label::after {
-  content: "";
-  width: 0.42rem;
-  height: 0.42rem;
-  border-right: 2px solid var(--text-secondary);
-  border-bottom: 2px solid var(--text-secondary);
-  transform: translateY(-0.12rem) rotate(45deg);
-  transition: transform 160ms ease;
-}
-
-.input-panel__presets[open] .input-panel__presets-label::after {
-  transform: translateY(0.12rem) rotate(225deg);
-}
-
-.input-panel__preset-list {
-  position: absolute;
-  right: 0;
-  z-index: 5;
-  display: flex;
-  align-items: stretch;
-  flex-direction: column;
-  gap: 0.5rem;
-  min-width: 12rem;
-  margin-top: 0.45rem;
-  padding: 0.55rem;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: #ffffff;
-  box-shadow: 0 16px 32px rgba(24, 58, 139, 0.12);
-}
-
-.input-panel__preset {
-  font-size: 0.85rem;
-  font-weight: 700;
-  padding: 0.55rem 0.7rem;
-  border-radius: 8px;
-  border: 0;
-  background: transparent;
-  color: var(--text-primary);
-  text-align: left;
-  cursor: pointer;
-}
-
-.input-panel__preset:hover {
-  background: var(--brand-blue-tint);
 }
 
 .input-panel__actions {

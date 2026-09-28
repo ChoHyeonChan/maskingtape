@@ -19,6 +19,10 @@
    시/군/구 단계가 없는 세종은 "세종 한누리대로 2130"처럼 번지까지 이어질 때만 받는다(#465).
 6. 시/도나 시 바로 뒤에 구를 붙여 써도("서울강남구", "성남시분당구") 구 이름에서 낱말이
    끝나면 받는다. "장군면"·"대구면"처럼 이름 가운데 '군'·'구'가 든 읍·면은 군·구로 읽지 않는다(#465).
+7. 시/도·시 없이 구로 시작하는 주소("주소: 강남구 테헤란로 123")도 잡는다. '구'로 끝나는 낱말이 흔해서
+   ("인구 이동 1.2%") 앞에 주소 단서(주소·배송지·거주지 등)가 있을 때만 받는다(#492).
+8. 조각 사이에 가로 공백이 여러 칸이거나 CRLF·공백 섞인 줄바꿈이면("서울특별시  강남구  테헤란로  123") 줄인 사본에서도
+   찾아 원문 위치로 되돌린다. 원문 후보에 더하기만 하므로 덜 가리는 일은 없다(#492).
 
 구간을 끝까지 넓히는 게 핵심이다. 시/도만 가리고 "월드컵로237길 49 ..."를 남기면
 개인정보 가치가 가장 낮은 부분만 가린 셈이라 사실상 유출이다(이슈 #66).
@@ -27,7 +31,9 @@
 from __future__ import annotations
 
 import re
-from collections.abc import Iterator
+from array import array
+from bisect import bisect_right
+from collections.abc import Callable, Iterator
 
 from maskingtape.detectors.base import Detector
 from maskingtape.types import Detection
@@ -109,11 +115,11 @@ _DONG = r"[가-힣]{1,10}(?:\d{1,2}(?:동|리|가)|동|읍|면|리)"
 # 두 토막짜리 자리.
 # - 읍·면 뒤의 리: 군 지역 지번주소의 표준 형식("양평읍 양근리 123")
 # - 읍·면·동 뒤의 도로명: 군 지역 도로명주소의 표준 형식("해남읍 중앙1로 330")과
-#   도로명주소에 동을 덧붙여 쓰는 표기("역삼동 테헤란로 123")
+#   도로명주소에 동을 덧붙여 쓰는 표기("역삼동 테헤란로 123", "종로1가 새솔로 12" — N가 동은 #492)
 # 도로명은 번지가 뒤따를 때만 붙인다. "역삼동 근처로 이사"의 '근처로'까지 삼키지 않게 하려는 것이다.
 _TWO_PART = (
     r"[가-힣]{1,10}(?:읍|면)\s[가-힣]{1,10}\d{0,2}리" + _END
-    + r"|[가-힣]{1,10}(?:\d{1,2}동|동|읍|면)\s" + _ROAD + _BUNJI_AHEAD
+    + r"|[가-힣]{1,10}(?:\d{1,2}(?:동|가)|동|읍|면)\s" + _ROAD + _BUNJI_AHEAD
 )
 # 위에서부터 먼저 성립하는 해석 하나를 쓴다. 순서가 곧 우선순위다.
 _LOCALITY = (
@@ -230,6 +236,54 @@ _ADDR_ABBR_RE = re.compile(
 )
 
 
+# 시/도·시 없이 구로 시작하는 주소 — "주소: 강남구 테헤란로 123", "배송지 마포구 상암동 1601"(#492).
+# 서울·광역시에서 가장 흔한 줄임 표기인데 시작점이 없어 통째로 샜다. 다만 '구'로 끝나는 낱말은 흔하고
+# ("인구 이동 1.2%", "연구 활동 3, 4단계") 동/리로 끝나는 일반 낱말과 숫자가 뒤따르는 문장도 많아서,
+# 앞에 주소 단서(_GU_CUE_RE)가 있을 때만 받는다. 단서가 있으면 동이나 도로명만 와도 받고 나머지는
+# _TAIL이 번지·건물·동호까지 잇는다("강남구 가온동 새솔로 12 101동 1203호").
+# 붙여 쓴 구(_GLUED_GU_WORD)와 같은 이유로 두 글자 구는 중구·동구·서구·남구·북구만 받는다. 단서가
+# 있어도 "거주 인구 이동 현황", "자택 가구 정리 3개"의 두 글자 낱말을 구로 읽으면 안 된다.
+_ADDR_GU_RE = re.compile(
+    r"(?<![가-힣])(?P<si>[중동서남북]구|[가-힣]{2,9}구)(?=\s(?:" + _DONG + r"|" + _ROAD3 + r"))"
+    + _GU + _GU2 + _TAIL
+)
+_GU_CUE_RE = re.compile(r"주소|거주|소재지|배송|수령|도착지|자택|사업장|위치|사는 곳|본적|등록기준지|우편|배달")
+_GU_CUE_WINDOW = 15
+
+# 조각 사이 공백이 한 칸이 아닌 자리(#492). 위 패턴들은 조각을 공백 한 칸(줄바꿈 하나 포함)으로 잇기
+# 때문에 "서울특별시  강남구  테헤란로  123"은 시/도만 가려지고 나머지가 샜다. 가로 공백 두 칸 이상과,
+# 윈도 줄바꿈(CRLF)·공백이 섞인 줄바꿈 한 번을 대상으로 한다. 빈 줄(줄바꿈 두 번)과 문단 구분 문자
+# (U+2028·U+2029)는 줄이지 않아 문단을 넘어 주소를 잇지 않는다.
+_HSPACE = r"[ \t\u00a0\u1680\u2000-\u200a\u202f\u205f\u3000]"
+_WIDE_SPACE_RE = re.compile(
+    _HSPACE + r"*\r\n" + _HSPACE + r"*|"
+    + _HSPACE + r"+\n" + _HSPACE + r"*|\n" + _HSPACE + r"+|"
+    + _HSPACE + r"{2,}"
+)
+
+
+def _collapse_wide_spaces(text: str) -> tuple[str, Callable[[int], int]]:
+    """조각 사이 공백(여러 칸, 공백이 섞인 줄바꿈)을 한 칸으로 줄인 문자열과, 줄인 위치를 원문 위치로 바꾸는 함수를 돌려준다.
+
+    글자마다 원문 위치를 저장하면 CRLF 문서(줄마다 줄일 자리가 있다)에서 글자 수만큼 정수가 생겨
+    메모리가 수십 배로 는다. 줄인 자리 다음부터 원문과 한 칸씩 나란히 가므로, 그 경계만 저장하고
+    이진 탐색으로 찾는다. 주소 후보는 공백으로 끝나지 않으므로, 후보의 끝은 마지막 글자의 원문 위치 + 1이다.
+    """
+    # 줄인 문자열의 marks[k] 위치부터는 원문 origins[k] 위치부터와 한 글자씩 대응한다.
+    marks = array("q", [0])
+    origins = array("q", [0])
+    for m in _WIDE_SPACE_RE.finditer(text):
+        # 줄인 공백 한 칸은 공백열의 첫 글자에 대응하고, 그 다음 글자부터 새 구간이 시작된다.
+        marks.append(marks[-1] + m.start() - origins[-1] + 1)
+        origins.append(m.end())
+
+    def to_original(index: int) -> int:
+        k = bisect_right(marks, index) - 1
+        return origins[k] + index - marks[k]
+
+    return _WIDE_SPACE_RE.sub(" ", text), to_original
+
+
 def _search_every_start(pattern: re.Pattern[str], text: str) -> Iterator[re.Match[str]]:
     """매칭마다 한 글자만 넘기고 다시 찾는다. 매칭이 글자를 소비하지 않게 하려는 것이다(#465).
 
@@ -245,6 +299,24 @@ def _search_every_start(pattern: re.Pattern[str], text: str) -> Iterator[re.Matc
     while (m := pattern.search(text, pos)) is not None:
         yield m
         pos = m.start() + 1
+
+
+def _candidates(text: str) -> list[tuple[int, int, float]]:
+    """세 앵커(시/도·시/도 축약형·시/군)와 구 앵커의 주소 후보 (시작, 끝, 확신도)를 모은다."""
+    candidates: list[tuple[int, int, float]] = []
+    # 시/도 앵커 — 확신도 0.5부터 시작.
+    for m in _search_every_start(_ADDR_RE, text):
+        candidates.append((m.start(), m.end(), _score(m, 0.5, 1.0)))
+    # 시/도 축약형 앵커(#396)·시/군 앵커(#68)·구 앵커(#492) — 정식 시/도명이 없으니 확신도 0.4부터.
+    # 동/읍/면/리(도로명 포함) 없이 시/군/구까지만이면 지역 언급일 뿐 — 유출 아님("서울 강남구에 산다").
+    for pattern in (_ADDR_ABBR_RE, _ADDR_NO_PROVINCE_RE, _ADDR_GU_RE):
+        for m in _search_every_start(pattern, text):
+            if not m.group("dong"):
+                continue
+            if pattern is _ADDR_GU_RE and not _GU_CUE_RE.search(text, max(0, m.start() - _GU_CUE_WINDOW), m.start()):
+                continue
+            candidates.append((m.start(), m.end(), _score(m, 0.4, 0.9)))
+    return candidates
 
 
 def _score(m: re.Match[str], base: float, cap: float) -> float:
@@ -276,16 +348,12 @@ class AddressDetector(Detector):
         합치면 어느 앵커가 먼저 잡았든 후보 전체가 가려지고, 합친 구간의 확신도는 가장 높은 후보를
         따른다. 정렬 한 번이라 주소가 반복되는 긴 입력에서도 O(n log n)이다(#426).
         """
-        candidates: list[tuple[int, int, float]] = []
-        # 시/도 앵커 — 확신도 0.5부터 시작.
-        for m in _search_every_start(_ADDR_RE, text):
-            candidates.append((m.start(), m.end(), _score(m, 0.5, 1.0)))
-        # 시/도 축약형 앵커(#396)와 시/군 앵커(#68) — 정식 시/도명이 없으니 확신도 0.4부터.
-        # 동/읍/면/리(도로명 포함) 없이 시/군/구까지만이면 지역 언급일 뿐 — 유출 아님("서울 강남구에 산다").
-        for pattern in (_ADDR_ABBR_RE, _ADDR_NO_PROVINCE_RE):
-            for m in _search_every_start(pattern, text):
-                if m.group("dong"):
-                    candidates.append((m.start(), m.end(), _score(m, 0.4, 0.9)))
+        candidates = _candidates(text)
+        # 조각 사이에 공백이 여러 칸이면 한 칸으로 줄인 사본에서도 찾아 원문 위치로 되돌린다(#492).
+        # 원문 후보를 그대로 두고 더하기만 하므로 이 때문에 덜 가리는 일은 없다.
+        if _WIDE_SPACE_RE.search(text):
+            collapsed, to_original = _collapse_wide_spaces(text)
+            candidates += [(to_original(s), to_original(e - 1) + 1, c) for s, e, c in _candidates(collapsed)]
         candidates.sort()
         merged: list[tuple[int, int, float]] = []
         for start, end, confidence in candidates:
