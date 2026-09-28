@@ -43,7 +43,8 @@ export function locateDetections(
     if (detection.start < cursor) continue;
     result += text.slice(cursor, detection.start);
     const outStart = result.length;
-    result += masked ? maskSegment(detection, mode) : text.slice(detection.start, detection.end);
+    const segment = text.slice(detection.start, detection.end);
+    result += masked ? maskSegment(detection, mode, segment) : segment;
     ranges.set(key, [outStart, result.length]);
     cursor = detection.end;
   }
@@ -52,9 +53,10 @@ export function locateDetections(
   return { text: result, ranges };
 }
 
-function maskSegment(detection: Detection, mode: MaskMode): string {
+function maskSegment(detection: Detection, mode: MaskMode, segment: string): string {
   if (mode === "label") {
     return `[${KIND_LABELS[detection.kind] ?? detection.kind}]`;
   }
-  return "*".repeat(detection.end - detection.start);
+  // 별표 개수는 서버처럼 글자(코드포인트) 수로 센다 — 이모지도 한 글자다(#495).
+  return "*".repeat(Array.from(segment).length);
 }

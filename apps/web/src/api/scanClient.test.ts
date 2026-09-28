@@ -32,6 +32,21 @@ describe("scanText", () => {
     );
     expect(result).toEqual({ detections: [{ kind: "phone" }] });
   });
+
+  it("converts server positions to JS string positions when an emoji comes first (#495)", async () => {
+    // 서버는 "😀 연락처 010-1234-5678"에서 전화번호를 코드포인트 6~19로 준다
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse({ detections: [{ kind: "phone", start: 6, end: 19, confidence: 1, detector: "t" }] }),
+      ),
+    );
+    const text = "😀 연락처 010-1234-5678";
+
+    const { detections } = await scanText(text);
+
+    expect(text.slice(detections[0].start, detections[0].end)).toBe("010-1234-5678");
+  });
 });
 
 describe("anonymizeText (#346)", () => {
