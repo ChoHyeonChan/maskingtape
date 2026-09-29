@@ -24,3 +24,15 @@ if (!window.matchMedia) {
 if (!Element.prototype.scrollIntoView) {
   Element.prototype.scrollIntoView = () => {};
 }
+
+// jsdom은 ResizeObserver도 구현하지 않는다 — 하이라이트 오버레이 폭을 textarea에 맞추는
+// 코드(InputPanel.tsx)가 테스트에서 "ResizeObserver is not defined"로 죽지 않도록 아무
+// 것도 관찰하지 않는 최소 스텁을 둔다. 실제 리사이즈 동작 자체는 이 스텁으로 검증하지
+// 않는다 — 그 폭 동기화 로직은 Playwright(실제 브라우저)로 별도 확인한다.
+if (!window.ResizeObserver) {
+  window.ResizeObserver = class ResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+}
