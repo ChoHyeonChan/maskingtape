@@ -64,10 +64,27 @@ def test_returns_nothing_when_model_finds_no_names():
     assert detector([]).detect("이용 안내: 회원 가입 후 사용하세요.") == []
 
 
-def test_skips_empty_or_non_string_entries():
-    found = detector(["", None, "김철수"]).detect("고객 김철수님")  # type: ignore[list-item]
+def test_skips_empty_entries():
+    found = detector(["", "김철수"]).detect("고객 김철수님")
     assert len(found) == 1
     assert found[0].text == "김철수"
+
+
+@pytest.mark.parametrize("entry", [{"name": "김철수"}, None, 3, ["김철수"]])
+def test_non_string_entry_stops_without_leaking_the_response(entry):
+    # 모델이 [{"name": "김철수"}]처럼 답하면 예전엔 조용히 건너뛰어, LLM이 찾은 이름이 에러 없이
+    # 빠졌다(#494). names가 목록이 아닐 때(#420)처럼 타입만 알리고 멈춘다
+    with pytest.raises(TypeError, match=type(entry).__name__) as exc_info:
+        detector([entry, "김철수"]).detect("고객 김철수님")  # type: ignore[list-item]
+    assert "김철수" not in str(exc_info.value)
+
+
+def test_repeated_names_are_counted_once():
+    # 같은 이름이 응답에 여러 번 와도 탐지는 등장 횟수만큼만 생긴다. 예전엔 중복 수 × 등장 횟수로
+    # 곱해져, 입력 속 지시문으로 탐지 수를 수만 건으로 부풀릴 수 있었다(#494)
+    text = "김철수 " * 300
+    found = detector(["김철수"] * 300 + ["김철수님"]).detect(text)
+    assert len(found) == 300
 
 
 def test_blank_text_does_not_call_the_model():
