@@ -66,6 +66,8 @@ export function DetectionList({
 
   return (
     <div className="detect">
+      <section className="detect-folder detect-folder--confidence" aria-label="신뢰도 기준 일괄 조정">
+        <h3 className="detect-folder__label">신뢰도 기준</h3>
       <div className="detect__bulk">
         <div className="detect__bulk-head">
           <span className="detect__bulk-title">일괄 조정</span>
@@ -79,7 +81,11 @@ export function DetectionList({
           onChange={onThresholdChange}
         />
       </div>
+      </section>
 
+      <section className="detect-folder detect-folder--manual" aria-label="항목별 수동 조정">
+        <h3 className="detect-folder__label">수동 조정</h3>
+        <div className="detect-folder__body">
       <div className="detect__list-head">
         <p className="detect__summary" role="status">
           개인정보 {rows.length}건 발견 · {maskedCount}건 가림 · {exposedCount}건 노출
@@ -138,6 +144,8 @@ export function DetectionList({
           );
         })}
       </ul>
+        </div>
+      </section>
     </div>
   );
 }
