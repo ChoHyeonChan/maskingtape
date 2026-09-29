@@ -158,10 +158,13 @@ def test_birthdate_label_with_two_parenthetical_notes():
         ("전화 +82-2-555-1234", "+82-2-555-1234"),
         ("전화 +82 31 123 4567", "+82 31 123 4567"),
         ("휴대폰 +82 (0)10-1234-5678", "+82 (0)10-1234-5678"),
+        ("연락처 (+82) 10-1234-5678", "(+82) 10-1234-5678"),
+        ("연락처 +820212345678", "+820212345678"),
     ],
 )
 def test_phone_forms(text, value):
     assert value in texts(PhoneDetector(), text)
+    assert_masked(text, value)
 
 
 @pytest.mark.parametrize(

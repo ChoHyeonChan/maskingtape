@@ -7,7 +7,7 @@ from fastapi import Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from maskingtape_api.schemas import ErrorResponse, MAX_TEXT_LENGTH
+from maskingtape_api.schemas import MAX_TEXT_LENGTH, ErrorResponse
 
 ERROR_RESPONSES = {
     400: {"model": ErrorResponse, "description": "Invalid request"},

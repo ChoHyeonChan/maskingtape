@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 The maskingtape Authors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type MouseEvent as ReactMouseEvent, type TouchEvent as ReactTouchEvent } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent as ReactMouseEvent, type TouchEvent as ReactTouchEvent } from "react";
 
 interface Props {
   value: number;
@@ -11,24 +11,24 @@ interface Props {
   onChange: (next: number) => void;
 }
 
-function pointFromEvent(event: MouseEvent | TouchEvent): { clientX: number; clientY: number } | null {
+function pointFromEvent(event: MouseEvent | TouchEvent): { clientX: number } | null {
   if ("touches" in event) {
     const touch = event.touches[0] ?? event.changedTouches[0];
-    return touch ? { clientX: touch.clientX, clientY: touch.clientY } : null;
+    return touch ? { clientX: touch.clientX } : null;
   }
-  return { clientX: event.clientX, clientY: event.clientY };
+  return { clientX: event.clientX };
 }
 
 /**
- * 확신도 임계값 조정 컨트롤 — 안1: 원형 링을 직접 드래그(마우스/터치)해서 조정하거나,
- * 화살표 클릭·키보드(방향키)로 step씩 오르내릴 수 있다. 링 위 어디를 눌러도
- * 그 각도에 해당하는 값으로 바로 이동한다(12시 방향=0%, 시계 방향으로 증가).
+ * 확신도 임계값 조정 컨트롤 — 가로 막대를 직접 드래그(마우스/터치)하거나, 막대를 클릭해서
+ * 그 지점의 값으로 바로 이동하거나, 화살표 클릭·키보드(방향키)로 step씩 오르내릴 수 있다.
+ * 원형 다이얼판(#336)보다 먼저 있었던 막대 형태로, 디자인 담당 요청으로 되돌렸다.
  */
 export function ConfidenceControl({ value, min, max, step, onChange }: Props) {
   const atMax = value >= max;
   const atMin = value <= min;
   const fillPct = ((value - min) / (max - min)) * 100;
-  const ringRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
 
   function increase() {
@@ -49,35 +49,32 @@ export function ConfidenceControl({ value, min, max, step, onChange }: Props) {
     }
   }
 
-  function valueFromPoint(clientX: number, clientY: number): number {
-    const ring = ringRef.current;
-    if (!ring) return value;
-    const rect = ring.getBoundingClientRect();
-    const dx = clientX - (rect.left + rect.width / 2);
-    const dy = clientY - (rect.top + rect.height / 2);
-    let angle = Math.atan2(dx, -dy);
-    if (angle < 0) angle += Math.PI * 2;
-    const raw = min + (angle / (Math.PI * 2)) * (max - min);
+  function valueFromPoint(clientX: number): number {
+    const track = trackRef.current;
+    if (!track) return value;
+    const rect = track.getBoundingClientRect();
+    const ratio = rect.width === 0 ? 0 : (clientX - rect.left) / rect.width;
+    const raw = min + Math.min(1, Math.max(0, ratio)) * (max - min);
     const snapped = Math.round(raw / step) * step;
     return Math.min(max, Math.max(min, snapped));
   }
 
-  function startDrag(clientX: number, clientY: number) {
+  function startDrag(clientX: number) {
     setDragging(true);
-    onChange(valueFromPoint(clientX, clientY));
+    onChange(valueFromPoint(clientX));
   }
 
   function handleMouseDown(event: ReactMouseEvent<HTMLDivElement>) {
-    // 드래그 중 안의 "N%" 텍스트가 브라우저 기본 텍스트 선택(파란 하이라이트)으로
+    // 드래그 중 옆의 "N%" 텍스트가 브라우저 기본 텍스트 선택(파란 하이라이트)으로
     // 잡히는 걸 막는다 — 클릭 몇 번만 빠르게 해도 쉽게 발생한다.
     event.preventDefault();
-    startDrag(event.clientX, event.clientY);
+    startDrag(event.clientX);
   }
 
   function handleTouchStart(event: ReactTouchEvent<HTMLDivElement>) {
     const touch = event.touches[0];
     if (!touch) return;
-    startDrag(touch.clientX, touch.clientY);
+    startDrag(touch.clientX);
   }
 
   useEffect(() => {
@@ -85,7 +82,7 @@ export function ConfidenceControl({ value, min, max, step, onChange }: Props) {
 
     function handleMove(event: MouseEvent | TouchEvent) {
       const point = pointFromEvent(event);
-      if (point) onChange(valueFromPoint(point.clientX, point.clientY));
+      if (point) onChange(valueFromPoint(point.clientX));
     }
     function stopDrag() {
       setDragging(false);
@@ -105,10 +102,10 @@ export function ConfidenceControl({ value, min, max, step, onChange }: Props) {
   }, [dragging, min, max, step]);
 
   return (
-    <div className="confidence-dial">
+    <div className="confidence-bar">
       <div
-        ref={ringRef}
-        className={`confidence-dial__ring${dragging ? " is-dragging" : ""}`}
+        ref={trackRef}
+        className={`confidence-bar__track${dragging ? " is-dragging" : ""}`}
         role="spinbutton"
         aria-label="확신도 임계값"
         aria-valuenow={value}
@@ -119,21 +116,15 @@ export function ConfidenceControl({ value, min, max, step, onChange }: Props) {
         onKeyDown={handleKeyDown}
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
-        style={{ "--dial-fill": `${fillPct}%` } as CSSProperties}
       >
-        <div
-          className="confidence-dial__handle-track"
-          style={{ transform: `rotate(${(fillPct / 100) * 360}deg)` } as CSSProperties}
-        >
-          <span className="confidence-dial__handle" aria-hidden="true" />
-        </div>
-        <span className="confidence-dial__value">{value}%</span>
+        <div className="confidence-bar__fill" style={{ width: `${fillPct}%` }} />
+        <span className="confidence-bar__handle" style={{ left: `${fillPct}%` }} aria-hidden="true" />
       </div>
-      {/* 링 양옆에 화살표가 나뉘어 있던 걸 엘리베이터 버튼처럼 오른쪽 한쪽에 세로로 모았다. */}
-      <div className="confidence-dial__btns">
+      <span className="confidence-bar__value">{value}%</span>
+      <div className="confidence-bar__btns">
         <button
           type="button"
-          className="confidence-dial__btn"
+          className="confidence-bar__btn"
           onClick={increase}
           disabled={atMax}
           aria-label="확신도 임계값 올리기"
@@ -142,7 +133,7 @@ export function ConfidenceControl({ value, min, max, step, onChange }: Props) {
         </button>
         <button
           type="button"
-          className="confidence-dial__btn"
+          className="confidence-bar__btn"
           onClick={decrease}
           disabled={atMin}
           aria-label="확신도 임계값 내리기"
