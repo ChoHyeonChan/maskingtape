@@ -191,7 +191,7 @@ _NAME_RE = re.compile(
 # LLM에 보낼지 정하는 후보 판정용: 한글 두 글자가 붙은 자리. 한국어 이름은 두 글자 이상이다.
 _HANGUL_PAIR_RE = re.compile(r"[가-힣]{2}")
 
-# 문맥 단서 전체 (역할어 + 존칭 + 직함)
+# 문맥 단서 전체 (역할어 + 존칭 + 직함). LLM 후보 판정(has_name_candidate)에도 쓴다.
 _ALL_CUES = tuple(dict.fromkeys(_PREFIX_CUES + _SUFFIX_CUES + _TITLE_CUES))
 
 # 이름 후보가 단서 단어(역할어·직함) 자체와 글자까지 같으면 이름이 아니다(#450).
@@ -244,13 +244,16 @@ def _is_label_word_at(text: str, pos: int, *, strong: bool = False) -> bool:
 def has_name_candidate(text: str) -> bool:
     """이 텍스트에 사람 이름이 있을 가능성이 있는지 — LLM에 보낼지 정하는 느슨한 필터.
 
-    한글 두 글자가 붙은 자리가 하나라도 있으면 후보로 본다. 이름이 있을 수 없는 텍스트(숫자·코드·
-    영문)만 걸러 LLM 호출을 아낀다. 놓치면 이름이 안 가려지므로(유출), 애매하면 후보로 넘긴다.
+    한글 두 글자가 붙은 자리가 있거나 인명 단서(역할어·존칭·직함)가 있으면 후보로 본다. 둘 다
+    없는 텍스트(숫자·코드·영문)만 걸러 LLM 호출을 아낀다. 놓치면 이름이 안 가려지므로(유출),
+    애매하면 후보로 넘긴다.
 
-    예전에는 성씨 사전과 역할어·직함 단서로 걸렀다. 그러면 사전 밖 성씨 이름만 있고 단서도 없는
-    문장("어제 탁예린 왔어")은 --llm이어도 LLM을 부르지 않아 이름이 그대로 남았다(#494).
+    예전에는 성씨 사전과 단서로 걸렀다. 그러면 사전 밖 성씨 이름만 있고 단서도 없는 문장
+    ("어제 탁예린 왔어")은 --llm이어도 LLM을 부르지 않아 이름이 그대로 남았다(#494). 단서는
+    그대로 본다. 한글이 한 글자씩 떨어진 이름과 한 글자 단서만 있는 문장("Name: 홍 길 동 님")은
+    두 글자 기준만으로는 걸러져 이름이 남았다(#521). 예전 필터가 후보로 보던 입력은 모두 받는다.
     """
-    return _HANGUL_PAIR_RE.search(text) is not None
+    return _HANGUL_PAIR_RE.search(text) is not None or any(cue in text for cue in _ALL_CUES)
 
 
 class NameDetector(Detector):

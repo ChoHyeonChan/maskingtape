@@ -153,13 +153,22 @@
    않는다. */
 .input-panel__highlight-overlay {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  /* width는 CSS가 아니라 JS(ResizeObserver, InputPanel.tsx)가 인라인 스타일로 정한다 —
+     textarea가 실측한 clientWidth(네이티브 스크롤바를 뺀 실제 값)를 그대로 강제해야
+     줄바꿈 폭이 항상 픽셀 단위로 일치한다. 예전엔 두 요소가 각자 "스크롤바 폭을 뺀
+     100%"를 따로 계산하게 뒀는데(같은 값이라고 가정한 10px 하드코딩), 실제 스크롤바
+     렌더링 폭은 브라우저·OS·화면 배율마다 미묘하게 달라(테스트 환경에서는 안 보이다가
+     실제 사용자 환경에서만 드러났다) 문서가 길어질수록 오차가 누적돼 형광펜이 점점
+     더 엉뚱한 자리를 칠했다. 이 오버레이는 스크롤바가 필요 없다(overflow:hidden) —
+     보이는 부분은 textarea의 scroll 이벤트로 scrollTop만 맞춰서 옮긴다. */
   z-index: 0;
   margin: 0;
   padding: 0.35rem 0.25rem 0.6rem;
   /* border-box라 border 두께가 곧 콘텐츠 폭에 영향을 준다 — 실제 결과 textarea(1.5px,
-     색만 투명하게 바뀜)와 여기 두께가 다르면(예전엔 1px) 두 요소의 줄바꿈 위치가
-     미묘하게 갈라져, 문서가 길어질수록 형광펜(mark)이 실제 글자와 어긋나 보였다. */
+     색만 투명하게 바뀜)와 여기 두께가 다르면 두 요소의 줄바꿈 위치가 갈라진다. */
   border: 1.5px solid transparent;
   color: transparent;
   font: inherit;
@@ -167,25 +176,7 @@
   white-space: pre-wrap;
   word-break: break-word;
   pointer-events: none;
-  overflow-y: auto;
-  overflow-x: hidden;
-  /* 실제 textarea는 스크롤이 생기면 네이티브 스크롤바만큼 안쪽 너비가 줄어드는데,
-     스크롤바를 그냥 안 보이게만(display:none 등) 하면 이 오버레이는 그 너비를 안
-     뺏겨서 둘의 줄바꿈 폭이 달라지고, 스크롤할수록 하이라이트가 점점 어긋났다
-     (scrollbar-gutter로 자리만 예약해도 스크롤바 자체를 숨기면 반영되지 않았다).
-     그래서 두 요소 모두에 같은 값(10px)의 스크롤바 폭을 명시해 항상 똑같은 너비를
-     갖게 하고, 이쪽 것만 색을 투명하게 지워서 안 보이게 한다. */
-  scrollbar-width: thin;
-  scrollbar-color: transparent transparent;
-}
-
-.input-panel__highlight-overlay::-webkit-scrollbar {
-  width: 10px;
-}
-
-.input-panel__highlight-overlay::-webkit-scrollbar-thumb,
-.input-panel__highlight-overlay::-webkit-scrollbar-track {
-  background: transparent;
+  overflow: hidden;
 }
 
 .input-panel__highlight-overlay mark {
@@ -220,8 +211,9 @@
   /* readOnly라 실제로 타이핑은 안 되지만, 클릭하면 편집 가능한 입력 상태로 되돌아가므로
      (onRequestEdit) "여기 눌러서 고칠 수 있다"는 걸 암시하는 텍스트 커서로 둔다. */
   cursor: text;
-  /* 하이라이트 오버레이(.input-panel__highlight-overlay)와 스크롤바 폭을 정확히
-     맞춰야(10px) 줄바꿈이 어긋나지 않는다 — 위 오버레이 규칙 참고. */
+  /* 스크롤바 모양만 담당한다 — 오버레이와의 줄바꿈 정렬은 이제 JS가 실측한 폭으로
+     강제하므로(InputPanel.tsx, 위 오버레이 규칙 참고) 이 폭 자체는 더 이상 정렬에
+     영향을 주지 않는다. */
   scrollbar-width: thin;
   scrollbar-color: rgba(24, 58, 139, 0.32) transparent;
 }
