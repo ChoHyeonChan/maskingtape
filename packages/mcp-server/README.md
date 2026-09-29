@@ -16,6 +16,10 @@ AI 에이전트가 한국어 데이터를 다루기 전에 거치는 **프라이
 **파일 접근 안전**: `anonymize_file`은 **허용 루트 안의 경로만** 읽고 쓴다(기본=서버 작업 디렉터리,
 환경변수 `MASKINGTAPE_MCP_ROOT`로 재정의). 조작된 에이전트가 `~/.ssh/id_rsa` 같은 임의 경로를
 넘겨도 거부한다. 심볼릭 링크·덮어쓰기·10MB 초과·비UTF-8도 막는다(`safe_file.py`).
+네트워크(UNC)·장치 경로(`\\서버\공유\…`, `\\?\…`, `\??\…`, `CON`·`COM1` 같은 장치 이름)는
+파일시스템에 접근하기 전에 거부한다.
+환경변수 없이 드라이브 루트나 홈 폴더에서 서버가 떴다면 허용 범위가 사실상 전체라서 파일을 처리하지
+않는다. 이때는 아래 등록 예시처럼 `MASKINGTAPE_MCP_ROOT`로 처리할 폴더를 지정한다.
 
 ## 설치·실행
 
@@ -45,14 +49,21 @@ Claude Code:
 ```bash
 claude mcp add maskingtape -- maskingtape-mcp          # 규칙 전용
 claude mcp add maskingtape -- maskingtape-mcp --llm    # 하이브리드 (Ollama 필요)
+
+# anonymize_file이 처리할 폴더를 직접 정할 때 (기본은 서버가 뜬 작업 폴더)
+claude mcp add maskingtape -e MASKINGTAPE_MCP_ROOT=/path/to/documents -- maskingtape-mcp
 ```
 
-Claude Desktop (`claude_desktop_config.json`):
+Claude Desktop (`claude_desktop_config.json`): 서버가 어느 폴더에서 뜰지 정해져 있지 않아
+`MASKINGTAPE_MCP_ROOT`를 함께 적는다.
 
 ```json
 {
   "mcpServers": {
-    "maskingtape": { "command": "maskingtape-mcp" }
+    "maskingtape": {
+      "command": "maskingtape-mcp",
+      "env": { "MASKINGTAPE_MCP_ROOT": "/path/to/documents" }
+    }
   }
 }
 ```

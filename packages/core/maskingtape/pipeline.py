@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 
 from maskingtape.anonymizers import Anonymizer, MaskAnonymizer
 from maskingtape.detectors import Detector, default_detectors
 from maskingtape.normalize import normalize
+from maskingtape.overlaps import resolve_overlaps as _resolve_overlaps  # 옛 이름(벤치 테스트, #494)
 from maskingtape.types import Detection
 
 
@@ -62,38 +63,3 @@ class Pipeline:
         """탐지 후 마스킹까지 수행한다."""
         detections = self.scan(text)
         return AnonymizeResult(text=self.anonymizer.apply(text, detections), detections=detections)
-
-
-def _resolve_overlaps(detections: list[Detection], text: str) -> list[Detection]:
-    """겹치는 탐지 구간을 **합친다**. 어느 쪽도 버리지 않는다.
-
-    비식별화에서 '덜 가리는 것'은 개인정보 유출이고, '더 가리는 것'은 안전한 실패다.
-    그래서 겹치면 넓은 쪽(합집합)으로 가리고, 종류(kind)만 확신도가 높은 쪽을 따른다.
-
-    예전에는 겹치는 탐지를 통째로 버렸는데, 주소 탐지기가 뒤따르는 주민등록번호의 앞자리를
-    번지로 삼켜 구간이 겹치면 **주민번호 탐지(확신도 1.0)가 사라져 뒷자리가 그대로 노출**됐다:
-        "서울특별시 강남구 역삼동 800101-1234560" → "******************01-1234560"
-    게다가 그때 scan()은 rrn을 보고하지 않아, 호출자는 주민번호가 없다고 통보받았다.
-    """
-    ordered = sorted(detections, key=lambda d: (d.start, -(d.end - d.start), -d.confidence))
-    result: list[Detection] = []
-    for d in ordered:
-        if not result or d.start >= result[-1].end:
-            result.append(d)
-            continue
-
-        previous = result[-1]
-        if d.end <= previous.end:
-            # 완전 포함 — 넓은 쪽(previous) 구간을 유지한다(더 가리기=안전). 종류(kind)는
-            # 부분 겹침과 동일하게 확신도 높은 쪽을 따라, 더 민감한 종류가 감춰져 보고되지
-            # 않게 한다(예: address 안에 완전히 든 rrn을 address가 아니라 rrn으로 보고). (#172)
-            if d.confidence > previous.confidence:
-                result[-1] = replace(previous, kind=d.kind, confidence=d.confidence)
-            continue
-
-        # 부분적으로 겹친다 — 가리는 범위는 합집합, 종류는 확신도가 높은 쪽을 남긴다
-        winner = d if d.confidence > previous.confidence else previous
-        result[-1] = replace(
-            winner, start=previous.start, end=d.end, text=text[previous.start : d.end]
-        )
-    return result
