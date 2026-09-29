@@ -60,6 +60,32 @@ export function InputPanel({
     return () => window.clearTimeout(timeout);
   }, [hasResult, resultVersion, text]);
 
+  // 하이라이트 오버레이(<pre>)가 textarea와 정확히 같은 폭에서 줄바꿈돼야 형광펜이
+  // 실제 글자와 어긋나지 않는다. 두 요소가 각자 CSS로 "스크롤바 폭을 뺀 100%"를 따로
+  // 계산하게 두면, 실제 스크롤바 렌더링 폭이 브라우저·OS·화면 배율마다 미묘하게 달라
+  // 문서가 길어질수록 오차가 누적된다 — textarea가 실측한 clientWidth(스크롤바를 뺀
+  // 실제 값)를 오버레이에 그대로 강제해 원천적으로 갈라질 수 없게 한다.
+  useEffect(() => {
+    if (!hasResult) return;
+    const textarea = textareaRef.current;
+    const overlay = highlightOverlayRef.current;
+    if (!textarea || !overlay) return;
+
+    function syncWidth() {
+      // clientWidth는 콘텐츠+패딩 폭(border 제외)이다. CSS width는 border-box 전체
+      // 폭이라, 오버레이의 border 두께를 더해 보정하지 않으면 그만큼(여기서는 3px)
+      // 콘텐츠 폭이 textarea보다 좁아져 줄바꿈이 다시 갈라진다.
+      const style = getComputedStyle(overlay!);
+      const borderX = parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth);
+      overlay!.style.width = `${textarea!.clientWidth + borderX}px`;
+    }
+    syncWidth();
+
+    const observer = new ResizeObserver(syncWidth);
+    observer.observe(textarea);
+    return () => observer.disconnect();
+  }, [hasResult]);
+
   // 강조 범위가 새로 생기면(항목에 마우스를 올리면), 그 부분이 지금 스크롤 밖에 있을 때만
   // 가운데로 스크롤해서 보여준다 — 이미 보이는데도 매번 움직이면 오히려 산만하다.
   useEffect(() => {
