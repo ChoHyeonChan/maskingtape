@@ -42,13 +42,15 @@ describe("SampleTabs (스캔 전 결과 자리를 샘플 서랍으로)", () => {
     expect(tabs[0]).toHaveAttribute("aria-selected", "true");
   });
 
-  it("takes the results panel's place only before a scan", () => {
+  it("takes the results panel's place, titled 샘플 선택하기, only before a scan", () => {
     const { rerender } = render(<ResultsPanel scanned={null} scanRun={0} onMaskedTextChange={() => {}} />);
     expect(screen.getByRole("tablist", { name: "샘플 문서" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "샘플 선택하기" })).toBeInTheDocument();
 
     rerender(
       <ResultsPanel scanned={{ text: "샘플", detections: [] }} scanRun={1} onMaskedTextChange={() => {}} />,
     );
     expect(screen.queryByRole("tablist", { name: "샘플 문서" })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "탐지 결과 조정" })).toBeInTheDocument();
   });
 });

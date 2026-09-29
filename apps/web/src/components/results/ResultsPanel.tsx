@@ -181,13 +181,16 @@ export function ResultsPanel({
     });
   }
 
+  // 스캔 전엔 이 자리가 샘플 서랍(SampleTabs)이라 제목도 그 역할에 맞춘다.
+  const title = scanned ? "탐지 결과 조정" : "샘플 선택하기";
+
   return (
-    <section className="panel panel--results" aria-label="탐지 결과 조정" ref={resultsRef} tabIndex={-1}>
+    <section className="panel panel--results" aria-label={title} ref={resultsRef} tabIndex={-1}>
       <div className="panel__header">
         <div>
           <h2 data-coach="analysis-result">
             <span aria-hidden="true">▱</span>
-            탐지 결과 조정
+            {title}
           </h2>
         </div>
         {scanned && scanned.detections.length > 0 && (
