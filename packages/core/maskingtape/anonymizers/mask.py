@@ -9,6 +9,7 @@ from collections.abc import Sequence
 
 from maskingtape.anonymizers.base import Anonymizer
 from maskingtape.normalize import normalize
+from maskingtape.overlaps import resolve_overlaps
 from maskingtape.types import Detection
 
 
@@ -32,7 +33,11 @@ class MaskAnonymizer(Anonymizer):
         self.keep_head = keep_head
 
     def apply(self, text: str, detections: Sequence[Detection]) -> str:
-        """구간마다 앞 keep_head 글자(최대 절반)만 남기고 나머지를 마스킹 문자로 바꾼다."""
+        """구간마다 앞 keep_head 글자(최대 절반)만 남기고 나머지를 마스킹 문자로 바꾼다.
+
+        겹친 탐지는 먼저 합친다. 구간마다 앞글자를 남기면 뒤 구간의 앞글자가 원문으로 남는다(#520).
+        """
+        detections = resolve_overlaps(list(detections), text)
         # 뒤에서부터 치환해야 앞쪽 구간의 위치(start/end)가 밀리지 않는다
         for d in sorted(detections, key=lambda d: d.start, reverse=True):
             span_len = d.end - d.start

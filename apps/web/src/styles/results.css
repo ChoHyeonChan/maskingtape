@@ -127,10 +127,10 @@
   display: flex;
   flex-direction: column;
   gap: 0.55rem;
-  margin-bottom: 0.85rem;
+  margin-bottom: 0;
   padding: 0.68rem 0.8rem;
   border: 1px solid rgba(24, 58, 139, 0.16);
-  border-radius: 8px;
+  border-radius: 0 12px 12px 12px;
   background: #f8faff;
 }
 
@@ -201,6 +201,70 @@
   flex-direction: column;
   flex: 1 1 auto;
   min-height: 0;
+  gap: 1rem;
+}
+
+/* Raised index labels connect each control group to its own file-like sheet. */
+.detect-folder {
+  --folder-accent: var(--brand-blue);
+  --folder-paper: #f8faff;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 0 0 auto;
+}
+
+.detect-folder__label {
+  position: relative;
+  z-index: 1;
+  align-self: flex-start;
+  margin: 0 0 -1px;
+  padding: 0.42rem 1.25rem 0.42rem 0.8rem;
+  border: 1px solid rgba(24, 58, 139, 0.16);
+  border-bottom-color: var(--folder-paper);
+  border-radius: 10px 16px 0 0;
+  background: var(--folder-paper);
+  color: var(--folder-accent);
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.detect-folder__label::before {
+  content: "";
+  display: inline-block;
+  width: 0.35rem;
+  height: 0.75rem;
+  margin-right: 0.45rem;
+  border-radius: 2px;
+  background: var(--folder-accent);
+  vertical-align: -0.08rem;
+}
+
+.detect-folder--manual {
+  --folder-accent: var(--brand-cyan);
+  --folder-paper: #f5fafb;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.detect-folder__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 0.75rem;
+  border: 1px solid rgba(24, 58, 139, 0.16);
+  border-radius: 0 12px 12px 12px;
+  background: var(--folder-paper);
+}
+
+.detect-folder__body .detect__list {
+  margin-bottom: 0;
+}
+
+.detect-folder__body .detect__list-head {
+  flex-shrink: 0;
 }
 
 /* 목록이 패널 바닥까지 꽉 채우도록(#4) flex로 남는 공간을 전부 가져간다 — 예전엔
