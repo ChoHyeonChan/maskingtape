@@ -5,7 +5,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { ConfidenceControl } from "./ConfidenceControl";
 
-describe("ConfidenceControl (원형 링 드래그 + 화살표)", () => {
+describe("ConfidenceControl (가로 막대 드래그 + 화살표)", () => {
   it("shows the current value as plain text", () => {
     render(<ConfidenceControl value={80} min={0} max={100} step={5} onChange={() => {}} />);
     expect(screen.getByText("80%")).toBeInTheDocument();
@@ -55,57 +55,73 @@ describe("ConfidenceControl (원형 링 드래그 + 화살표)", () => {
   });
 });
 
-function mockRingRect(ring: HTMLElement) {
-  vi.spyOn(ring, "getBoundingClientRect").mockReturnValue({
+function mockTrackRect(track: HTMLElement) {
+  vi.spyOn(track, "getBoundingClientRect").mockReturnValue({
     left: 0,
     top: 0,
     width: 100,
-    height: 100,
+    height: 10,
     right: 100,
-    bottom: 100,
+    bottom: 10,
     x: 0,
     y: 0,
     toJSON: () => ({}),
   } as DOMRect);
 }
 
-describe("ConfidenceControl drag-to-adjust ring", () => {
-  it("jumps to the value at the clicked angle (12시 방향 = 최솟값, 3시 방향 = 1/4바퀴)", () => {
+describe("ConfidenceControl drag-to-adjust bar", () => {
+  it("jumps to the value at the clicked point (왼쪽 끝 = 최솟값, 오른쪽 끝 = 최댓값)", () => {
     const onChange = vi.fn();
     render(<ConfidenceControl value={50} min={0} max={100} step={5} onChange={onChange} />);
-    const ring = screen.getByRole("spinbutton");
-    mockRingRect(ring);
+    const track = screen.getByRole("spinbutton");
+    mockTrackRect(track);
 
-    fireEvent.mouseDown(ring, { clientX: 50, clientY: 0 });
+    fireEvent.mouseDown(track, { clientX: 0 });
     expect(onChange).toHaveBeenLastCalledWith(0);
 
-    fireEvent.mouseDown(ring, { clientX: 100, clientY: 50 });
+    fireEvent.mouseDown(track, { clientX: 25 });
     expect(onChange).toHaveBeenLastCalledWith(25);
+
+    fireEvent.mouseDown(track, { clientX: 100 });
+    expect(onChange).toHaveBeenLastCalledWith(100);
   });
 
   it("keeps updating the value while dragging across the window, and stops reacting after mouseup", () => {
     const onChange = vi.fn();
     render(<ConfidenceControl value={0} min={0} max={100} step={5} onChange={onChange} />);
-    const ring = screen.getByRole("spinbutton");
-    mockRingRect(ring);
+    const track = screen.getByRole("spinbutton");
+    mockTrackRect(track);
 
-    fireEvent.mouseDown(ring, { clientX: 50, clientY: 0 });
-    fireEvent.mouseMove(window, { clientX: 100, clientY: 50 });
+    fireEvent.mouseDown(track, { clientX: 0 });
+    fireEvent.mouseMove(window, { clientX: 25 });
     expect(onChange).toHaveBeenLastCalledWith(25);
 
     fireEvent.mouseUp(window);
     onChange.mockClear();
-    fireEvent.mouseMove(window, { clientX: 0, clientY: 50 });
+    fireEvent.mouseMove(window, { clientX: 100 });
     expect(onChange).not.toHaveBeenCalled();
   });
 
   it("also starts a drag from a touch point", () => {
     const onChange = vi.fn();
     render(<ConfidenceControl value={50} min={0} max={100} step={5} onChange={onChange} />);
-    const ring = screen.getByRole("spinbutton");
-    mockRingRect(ring);
+    const track = screen.getByRole("spinbutton");
+    mockTrackRect(track);
 
-    fireEvent.touchStart(ring, { touches: [{ clientX: 50, clientY: 100 }] });
-    expect(onChange).toHaveBeenLastCalledWith(50);
+    fireEvent.touchStart(track, { touches: [{ clientX: 75 }] });
+    expect(onChange).toHaveBeenLastCalledWith(75);
+  });
+
+  it("clamps to min/max when dragged past either end of the track", () => {
+    const onChange = vi.fn();
+    render(<ConfidenceControl value={50} min={0} max={100} step={5} onChange={onChange} />);
+    const track = screen.getByRole("spinbutton");
+    mockTrackRect(track);
+
+    fireEvent.mouseDown(track, { clientX: -40 });
+    expect(onChange).toHaveBeenLastCalledWith(0);
+
+    fireEvent.mouseDown(track, { clientX: 140 });
+    expect(onChange).toHaveBeenLastCalledWith(100);
   });
 });

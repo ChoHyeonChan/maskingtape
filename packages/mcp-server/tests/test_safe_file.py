@@ -7,11 +7,105 @@ MCP 도구는 AI 에이전트가 호출하므로, 여기 막아둔 것들이 실
 테스트 파일은 tmp_path(작업 디렉터리 밖)에 만들므로, 허용 루트를 tmp_path로 지정해 호출한다.
 """
 
+import os
+from pathlib import Path
+
 import pytest
 
+from maskingtape_mcp import safe_file
 from maskingtape_mcp.safe_file import read_text_file, write_masked_copy
 
 SYNTHETIC = "고객 연락처 010-1234-5678"
+BS = chr(92)  # 백슬래시. 윈도 경로를 소스에 그대로 적지 않고 조립한다
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        BS * 2 + "attacker" + BS + "share" + BS + "x.txt",  # UNC
+        "//attacker/share/x.txt",  # 슬래시로 쓴 UNC
+        "/" + BS + "attacker" + BS + "share" + BS + "x.txt",  # 구분자를 섞어 쓴 UNC
+        BS * 2 + "?" + BS + "C:" + BS + "x.txt",  # 장치 경로
+        BS * 2 + "." + BS + "PhysicalDrive0",  # 장치 경로
+        BS + "??" + BS + "UNC" + BS + "attacker" + BS + "share" + BS + "x.txt",  # NT 경로 접두
+        "/??/UNC/attacker/share/x.txt",  # 슬래시로 쓴 NT 경로 접두
+    ],
+)
+def test_rejects_network_and_device_paths_before_touching_the_filesystem(
+    tmp_path, monkeypatch, path
+):
+    """UNC·장치 경로는 파일시스템을 건드리기 전에 문자열만 보고 거부한다(#494).
+
+    is_symlink()·resolve()가 먼저 불리면 거부하기 전에 SMB 접속이 일어나고, 윈도에서는 이때
+    로그인 인증 정보가 상대 서버로 나갈 수 있다.
+    """
+
+    def must_not_touch(*_args, **_kwargs):
+        raise AssertionError("경로 검사 전에 파일시스템에 접근했다")
+
+    # safe_file이 만드는 경로만 감시한다. pathlib 전체를 바꾸면 pytest 자신의 보고까지 깨진다.
+    guarded = type(
+        "GuardedPath",
+        (type(Path()),),
+        {name: must_not_touch for name in ("is_symlink", "resolve", "is_file", "stat", "exists")},
+    )
+    monkeypatch.setattr(safe_file, "Path", guarded)
+    with pytest.raises(ValueError, match="네트워크"):
+        read_text_file(path, root=tmp_path)
+
+
+@pytest.mark.skipif(os.name != "nt", reason="CON·COM1은 Windows에서만 장치 이름이다")
+def test_rejects_windows_device_names(tmp_path):
+    # 장치 이름은 절대 경로로 바꾸면 장치 경로(\\.\CON)가 된다. 거부 전에 장치를 열지 않는다(#494)
+    for name in ("CON", "COM1"):
+        with pytest.raises(ValueError, match="네트워크"):
+            read_text_file(name, root=tmp_path)
+
+
+def test_blank_root_setting_is_treated_as_unset(tmp_path, monkeypatch):
+    # 공백만 있는 환경변수가 작업 폴더로 풀려 드라이브 루트 검사를 비껴가지 않는다(#494)
+    monkeypatch.setenv("MASKINGTAPE_MCP_ROOT", " ")
+    monkeypatch.chdir(tmp_path.anchor)
+    with pytest.raises(ValueError, match="MASKINGTAPE_MCP_ROOT"):
+        read_text_file("문서.txt")
+
+
+def test_default_root_refuses_a_drive_root(tmp_path, monkeypatch):
+    """환경변수 없이 드라이브 루트에서 서버를 띄우면 경로 제한이 사라지므로 처리하지 않는다(#494)."""
+    monkeypatch.delenv("MASKINGTAPE_MCP_ROOT", raising=False)
+    monkeypatch.chdir(tmp_path.anchor)
+    with pytest.raises(ValueError, match="MASKINGTAPE_MCP_ROOT"):
+        read_text_file("문서.txt")
+
+
+def test_default_root_refuses_the_home_folder(tmp_path, monkeypatch):
+    monkeypatch.delenv("MASKINGTAPE_MCP_ROOT", raising=False)
+    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setenv("USERPROFILE", str(tmp_path))
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "문서.txt").write_text(SYNTHETIC, encoding="utf-8")
+    with pytest.raises(ValueError, match="MASKINGTAPE_MCP_ROOT"):
+        read_text_file("문서.txt")
+
+
+def test_default_root_still_works_in_a_project_folder(tmp_path, monkeypatch):
+    """평범한 작업 폴더에서는 환경변수 없이도 지금처럼 동작한다."""
+    monkeypatch.delenv("MASKINGTAPE_MCP_ROOT", raising=False)
+    project = tmp_path / "project"
+    project.mkdir()
+    (project / "문서.txt").write_text(SYNTHETIC, encoding="utf-8")
+    monkeypatch.chdir(project)
+    _, text = read_text_file("문서.txt")
+    assert text == SYNTHETIC
+
+
+def test_explicit_root_is_respected_even_at_a_drive_root(tmp_path, monkeypatch):
+    """환경변수로 직접 정한 루트는 드라이브 루트여도 따른다(설정한 사람의 선택)."""
+    monkeypatch.setenv("MASKINGTAPE_MCP_ROOT", tmp_path.anchor)
+    (tmp_path / "문서.txt").write_text(SYNTHETIC, encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    _, text = read_text_file(os.path.join(str(tmp_path), "문서.txt"))
+    assert text == SYNTHETIC
 
 
 def test_reads_a_normal_utf8_file(tmp_path):
