@@ -6,6 +6,7 @@ import 'dart:io';
 
 import '../models/detection.dart';
 import 'anonymizer.dart';
+import 'code_point_offsets.dart';
 
 /// apps/api REST 백엔드(`POST /anonymize`)를 호출하는 구현.
 ///
@@ -53,9 +54,12 @@ class RestAnonymizer implements Anonymizer {
 
     return AnonymizeResult(
       maskedText: body['text'] as String,
-      detections: (body['detections'] as List<dynamic>)
-          .map((e) => Detection.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      // API도 core 위치(코드포인트)를 그대로 준다 — Dart(UTF-16) 기준으로 바꾼다(#496).
+      detections: CodePointOffsets(text).convert(
+        (body['detections'] as List<dynamic>)
+            .map((e) => Detection.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      ),
     );
   }
 
