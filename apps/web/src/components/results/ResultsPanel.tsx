@@ -3,6 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { DetectionList } from "./DetectionList";
+import { SampleTabs } from "./SampleTabs";
 import type { DetectionRow } from "./DetectionList";
 import { anonymizeText } from "../../api/scanClient";
 import { locateDetections, type MaskMode } from "../../lib/masking";
@@ -15,6 +16,8 @@ interface Props {
   maskMode?: MaskMode;
   onMaskedTextChange: (text: string) => void;
   onHighlightChange?: (highlight: HighlightRange | null) => void;
+  /** 스캔 전 빈 자리에 띄우는 샘플 탭에서 샘플을 고르면 입력창에 채운다. */
+  onSamplePick?: (text: string) => void;
 }
 
 const THRESHOLD_STEP = 5;
@@ -38,6 +41,7 @@ export function ResultsPanel({
   maskMode = "mask",
   onMaskedTextChange,
   onHighlightChange = () => {},
+  onSamplePick = () => {},
 }: Props) {
   // 컨트롤에 보이는 숫자가 곧 확신도 임계값이다(더 이상 반전 없음) — 이 값 이상인 항목만
   // 기본으로 가려진다. 고정값(예: 50%) 대신 이번 스캔에서 가장 낮은 확신도로 시작하면,
@@ -225,9 +229,7 @@ export function ResultsPanel({
           onRowHover={handleRowHover}
         />
       ) : (
-        <div className="empty-state">
-          <p>왼쪽에 텍스트를 입력하고 개인정보 탐지 및 마스킹을 실행하면 결과가 여기에 표시됩니다.</p>
-        </div>
+        <SampleTabs onPick={onSamplePick} />
       )}
     </section>
   );

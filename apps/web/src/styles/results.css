@@ -352,3 +352,118 @@
   .detect-row__snippet { grid-area: snippet; white-space: normal; }
   .detect-row__toggle { grid-area: toggle; justify-self: end; }
 }
+
+/* 스캔 전 "탐지 결과 조정" 자리에 들어가는 샘플 문서 서랍 — 서류철 인덱스 모양이다.
+   탭 줄을 본문 위로 1px 겹쳐 올리고, 고른 탭만 아래 테두리를 본문 배경색으로 칠해
+   탭과 본문이 한 장처럼 이어져 보이게 한다. */
+.sample-tabs {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sample-tabs__lead {
+  margin: 0 0 0.75rem;
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.sample-tabs__list {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.25rem;
+  margin-bottom: -1px;
+  padding: 0 0.5rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  /* 스크롤바를 숨긴 대신 오른쪽 끝을 흐리게 해 탭이 더 있다는 걸 알린다. */
+  mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent);
+}
+
+.sample-tabs__list::-webkit-scrollbar {
+  display: none;
+}
+
+.sample-tabs__tab {
+  flex: none;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 10px 10px 0 0;
+  background: var(--brand-blue-soft);
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.sample-tabs__tab:hover {
+  color: var(--text-primary);
+}
+
+.sample-tabs__tab[aria-selected="true"] {
+  padding-top: 0.6rem;
+  border-bottom-color: var(--brand-blue-tint);
+  background: var(--brand-blue-tint);
+  color: var(--brand-blue);
+}
+
+.sample-tabs__tab:focus-visible,
+.sample-tabs__use:focus-visible {
+  outline: 2px solid var(--brand-blue);
+  outline-offset: -2px;
+}
+
+.sample-tabs__panel {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--brand-blue-tint);
+}
+
+.sample-tabs__kinds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.32rem;
+}
+
+.sample-tabs__preview {
+  flex: 1 1 auto;
+  min-height: 3rem;
+  margin: 0;
+  overflow-y: auto;
+  color: var(--text-primary);
+  font-size: 0.88rem;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.sample-tabs__use {
+  flex: none;
+  align-self: flex-end;
+  padding: 0.6rem 1.1rem;
+  border: none;
+  border-radius: 8px;
+  background: #0b55f0;
+  color: #ffffff;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.sample-tabs__use:hover {
+  filter: brightness(1.08);
+}
