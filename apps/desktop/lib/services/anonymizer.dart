@@ -60,6 +60,9 @@ abstract interface class Anonymizer {
 }
 
 /// 백엔드 호출 실패 (비정상 종료, Ollama 미실행, API가 준 에러 등).
+/// 예상 밖 오류일 때 화면에 보여줄 고정 문구. 예외 문자열은 원문 조각을 담을 수 있어 쓰지 않는다.
+const unexpectedErrorMessage = '처리 중 예상하지 못한 오류가 발생했습니다. 다시 시도해 주세요.';
+
 class AnonymizerException implements Exception {
   const AnonymizerException(this.message);
 

@@ -238,6 +238,30 @@ void main() {
     expect(find.text('보임'), findsNothing);
   });
 
+  testWidgets('예상 밖 오류도 고정 문구로 알리고 원문 조각은 보여주지 않는다 (#497)', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(_host(const UnexpectedErrorAnonymizer()));
+    await tester.enterText(find.byType(TextField), _sentence);
+    await tester.pump();
+    await tester.tap(find.text('개인정보 탐지 및 마스킹 하기'));
+    await tester.pumpAndSettle();
+
+    // 예전엔 결과도 오류도 없이 끝났다.
+    expect(find.text(unexpectedErrorMessage), findsOneWidget);
+    // 예외 메시지에 든 원문 조각은 화면 어디에도 없다(입력 상자 속 원문은 제외하고 셈).
+    expect(
+      find.descendant(
+        of: find.byType(Text),
+        matching: find.textContaining(UnexpectedErrorAnonymizer.leakedFragment),
+      ),
+      findsNothing,
+    );
+    // 입력은 남아 다시 시도할 수 있고, 버튼도 다시 눌린다.
+    expect(find.byType(TextField), findsOneWidget);
+    expect(find.text('개인정보 탐지 및 마스킹 하기'), findsOneWidget);
+  });
+
   testWidgets('홈 화면 툴바에서 텍스트 입력 모드로 전환된다', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(

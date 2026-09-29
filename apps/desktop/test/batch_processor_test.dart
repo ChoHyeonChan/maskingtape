@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:maskingtape_desktop/models/detection.dart';
 import 'package:maskingtape_desktop/models/file_task.dart';
+import 'package:maskingtape_desktop/services/anonymizer.dart';
 import 'package:maskingtape_desktop/services/batch_processor.dart';
 
 import 'fakes.dart';
@@ -94,5 +95,24 @@ void main() {
 
     expect(task.status, FileTaskStatus.failed);
     expect(task.error, '테스트용 실패');
+  });
+
+  test('processAll: 예상 밖 오류도 그 파일만 실패로 두고 다음 파일로 간다 (#497)', () async {
+    final dir = await Directory.systemTemp.createTemp('maskingtape_test');
+    addTearDown(() => dir.delete(recursive: true));
+    final first = File('${dir.path}${Platform.pathSeparator}첫째.txt');
+    final second = File('${dir.path}${Platform.pathSeparator}둘째.txt');
+    await first.writeAsString('내용');
+    await second.writeAsString('내용');
+
+    final tasks = [FileTask(first.path), FileTask(second.path)];
+    // 예전엔 TypeError·FormatException이 루프 밖으로 빠져 첫 파일이 「처리 중」에 멈췄다.
+    await const BatchProcessor(UnexpectedErrorAnonymizer()).processAll(tasks, () {});
+
+    for (final task in tasks) {
+      expect(task.status, FileTaskStatus.failed);
+      expect(task.error, unexpectedErrorMessage);
+      expect(task.error, isNot(contains(UnexpectedErrorAnonymizer.leakedFragment)));
+    }
   });
 }
