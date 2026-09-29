@@ -1,9 +1,8 @@
 # SPDX-FileCopyrightText: 2026 The maskingtape Authors
 # SPDX-License-Identifier: Apache-2.0
 
-from maskingtape.types import Detection
 from maskingtape.pipeline import AnonymizeResult
-
+from maskingtape.types import Detection
 from maskingtape_api.schemas import AnonymizeStrategy, DetectionKind
 from maskingtape_api.services.core_adapter import CoreEngineAdapter, CoreEngineError
 

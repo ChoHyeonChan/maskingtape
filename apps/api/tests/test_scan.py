@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from fastapi.testclient import TestClient
-
 from maskingtape.pipeline import AnonymizeResult
 from maskingtape.types import Detection
 from maskingtape_api.main import create_app
