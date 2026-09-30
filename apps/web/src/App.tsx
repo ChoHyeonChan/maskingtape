@@ -3,7 +3,6 @@
 
 import { useRef, useState } from "react";
 import { CoachMark } from "./components/help/CoachMark";
-import { AccuracySection } from "./components/intro/AccuracySection";
 import { CoverageSection } from "./components/intro/CoverageSection";
 import { ExampleGallery } from "./components/intro/ExampleGallery";
 import { ServiceIntro } from "./components/intro/ServiceIntro";
@@ -94,7 +93,6 @@ export function App() {
       <div className="app-shell">
         <ServiceIntro />
         <CoverageSection />
-        <AccuracySection />
         <ExampleGallery onPick={handleGalleryPick} />
 
         <div className="experience" id="demo" ref={experienceRef}>
