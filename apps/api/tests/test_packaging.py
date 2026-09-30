@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import re
-import tomllib
 from pathlib import Path
 
+import tomllib
 
 API_PROJECT = Path(__file__).resolve().parents[1] / "pyproject.toml"
 

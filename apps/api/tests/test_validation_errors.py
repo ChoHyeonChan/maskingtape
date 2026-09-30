@@ -5,7 +5,6 @@ import asyncio
 import json
 
 from fastapi.testclient import TestClient
-
 from maskingtape_api.main import create_app
 from maskingtape_api.schemas import MAX_TEXT_LENGTH
 from maskingtape_api.settings import ApiSettings
