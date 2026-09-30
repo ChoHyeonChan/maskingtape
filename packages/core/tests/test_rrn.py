@@ -63,3 +63,57 @@ def test_rejects_impossible_birthdate():
 def test_rejects_longer_digit_runs():
     # 앞뒤로 숫자가 더 붙은 긴 수열(계좌번호 등)은 주민번호가 아니다
     assert RRNDetector().detect("98001011234560123") == []
+
+
+# ── 뒷자리를 가린 표기(#528) ────────────────────────────────────────
+# 문서에는 주민등록번호 뒷자리 일부만 가려 적는 경우가 많다("800101-1******"). 뒷자리가
+# 숫자 7개일 때만 잡던 예전 정규식은 이 표기를 통째로 놓쳤다 — 남은 앞 6(또는 8)자리와
+# 성별 숫자만으로도 생년월일·성별이 드러나므로 미탐은 곧 유출이다.
+
+
+def test_masked_tail_with_asterisks_is_still_an_rrn():
+    found = RRNDetector().detect("주민번호 800101-1******")
+    assert len(found) == 1
+    assert found[0].kind == "rrn"
+    assert found[0].text == "800101-1******"
+    assert found[0].confidence == 0.85  # 뒷자리가 가려져 체크섬을 계산할 수 없다
+
+
+def test_masked_tail_with_capital_x_is_still_an_rrn():
+    found = RRNDetector().detect("주민번호 800101-1XXXXXX")
+    assert len(found) == 1
+    assert found[0].text == "800101-1XXXXXX"
+
+
+def test_masked_tail_with_circle_char_and_different_gender_code():
+    found = RRNDetector().detect("주민등록번호: 800101-2●●●●●●")
+    assert len(found) == 1
+    assert found[0].text == "800101-2●●●●●●"
+
+
+def test_eight_digit_front_with_masked_tail_is_still_an_rrn():
+    # 8자리 앞자리(#508)와 가려진 뒷자리(#528)가 함께 와도 잡아야 한다
+    found = RRNDetector().detect("생년월일 19800101-1******")
+    assert len(found) == 1
+    assert found[0].text == "19800101-1******"
+    assert found[0].kind == "rrn"
+
+
+def test_gender_digit_alone_with_no_tail_is_still_an_rrn():
+    # 뒷자리를 아예 안 적고 성별 숫자만 남은 표기도 앞자리(생년월일)가 새는 걸 막아야 한다
+    found = RRNDetector().detect("생년월일 19800101-1")
+    assert len(found) == 1
+    assert found[0].text == "19800101-1"
+
+
+def test_gender_digit_alone_does_not_swallow_a_longer_number():
+    # 성별 숫자 뒤에 진짜 숫자·영문이 더 붙으면(다른 번호의 일부일 수 있으므로) "성별 숫자만
+    # 남은 표기"로 오인해 앞부분만 잘라 잡으면 안 된다 — 뒤에 뭐가 더 있으면 형태가 안 맞는
+    # 것이므로 통째로 버린다(오탐 방지). 7자리(가짜 뒷자리 자리수)가 아니면 온전한 RRN도 아니다.
+    assert RRNDetector().detect("생년월일 19800101-12") == []
+
+
+def test_bare_gender_digit_without_any_separator_context_is_not_falsely_grabbed():
+    # 구분자 없이 붙여 쓴 "800101" 뒤에 성별 숫자로 보일 법한 숫자 하나만 있고 더 이어지면
+    # (예: 전화번호 뒷자리 일부) 오탐하지 않는다 — 뒤에 숫자가 더 있으므로 경계에서 걸러진다
+    assert RRNDetector().detect("800101 1234") == []
