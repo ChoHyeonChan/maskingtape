@@ -26,7 +26,7 @@ function goHome() {
 export function AccuracyPage() {
   return (
     <>
-      <SiteNav variant="page" onHelpClick={goHome} />
+      <SiteNav variant="accuracy" onHelpClick={goHome} />
       <div className="accuracy-page">
         <section className="accuracy-hero" aria-label="전체 정확도">
           <div className="accuracy-hero__eyebrow">정확도, 숨기지 않고 다 보여드려요</div>

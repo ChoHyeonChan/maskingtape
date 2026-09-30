@@ -17,7 +17,7 @@ export function ServiceIntro() {
       </p>
 
       <div className="service-intro__actions">
-        <a className="service-intro__btn service-intro__btn--primary" href="#demo">
+        <a className="service-intro__btn service-intro__btn--primary" href="/demo">
           지금 체험하기 <span aria-hidden="true">→</span>
         </a>
         <a
