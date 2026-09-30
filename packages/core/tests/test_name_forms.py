@@ -141,6 +141,24 @@ def test_title_with_particle_does_not_eat_the_next_name(text, name):
     assert name not in masked, masked
 
 
+@pytest.mark.parametrize(
+    "text, name, title",
+    [
+        ("신청자 : 차장은 이도현입니다", "이도현", "차장은"),
+        ("담당자 원장이 김민수에게 연락", "김민수", "원장이"),
+        ("고객 : 원장이 김민수", "김민수", "원장이"),
+        ("| 담당자 | 주임이 박서준 |", "박서준", "주임이"),
+        ("신청자 : 원장은 최하준입니다", "최하준", "원장은"),
+    ],
+)
+def test_title_with_particle_is_not_reported_as_a_name(text, name, title):
+    # 직함+조사는 뒤 이름의 단서로만 쓰고 이름으로 보고하지 않는다(#533). 뒤 이름은 계속 가린다
+    found = [d.text for d in Pipeline().scan(text) if d.kind == "name"]
+    assert title not in found, found
+    assert name in found, found
+    assert title in Pipeline().anonymize(text).text
+
+
 def test_label_glued_to_another_word_is_not_a_form_label():
     assert names("파일이름: 보고서") == []
     assert names("프로젝트이름: 테이프") == []
