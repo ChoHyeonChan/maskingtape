@@ -3,6 +3,8 @@
 
 """이름 탐지기 테스트 — 모든 이름은 합성(가짜)이다."""
 
+import pytest
+
 from maskingtape.detectors import NameDetector
 
 
@@ -254,3 +256,37 @@ def test_real_names_that_start_like_a_cue_word_are_still_detected():
     assert [d.text for d in detect("원장 김철수님께 보고드립니다.")] == ["김철수"]
     # 호칭이 버려져도 바로 뒤의 실명은 놓치지 않는다.
     assert [d.text for d in detect("고객님 김철수 씨 확인 바랍니다.")] == ["김철수"]
+
+
+# ── 0.5짜리(약한 단서) 오탐 — 저장소 문서 실측(#484) ─────────────────
+# 규칙 모드는 앞뒤 단서 중 한쪽만 있어도 확신도 0.5로 이름을 잡는다. 합성 벤치에서는 이
+# 0.5짜리가 대부분 실명이었지만, 저장소 문서 같은 평범한 글에서는 40건 중 22건이 이름이
+# 아니었다 — 아래 4가지 패턴이 원인이었다.
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "이름 정밀 탐지는 로컬 LLM을 켜야 한다.",  # "이름" 단서 뒤 일반 낱말
+        "이름은 문맥 판단이 필요하다.",
+        "이름은 전혀 안 가린다.",
+        "이름 하이브리드 모드",  # 낱말 중간에서 끊김("하이브"만 잘라 잡음)
+        "050 정규식 양쪽에 경계를 둔다.",  # 호칭 "양"으로 시작하는 낱말("양쪽")
+        "SBOM 공식 양식과 같다.",  # 호칭 "양"으로 시작하는 낱말("양식")
+        "이전엔 팀장이 결정했다.",  # 직함 앞 부사("이전"+조사 "엔")
+    ],
+)
+def test_weak_cue_false_positives_from_plain_documents_are_not_names(text):
+    assert detect(text) == [], f"오탐: {text!r} -> {detect(text)}"
+
+
+def test_weak_cue_false_positive_fixes_do_not_drop_real_names():
+    # 위 4가지 원인을 고치면서 진짜 이름까지 놓치면 그게 더 큰 문제다(미탐=유출).
+    assert [d.text for d in detect("담당자 박서연 확인 부탁드립니다.")] == ["박서연"]
+    assert [d.text for d in detect("담당자는 서정호입니다.")] == ["서정호"]
+    assert [d.text for d in detect("서명자는 임진입니다.")] == ["임진"]
+    assert [d.text for d in detect("김민지 양이 접수했습니다.")] == ["김민지"]
+    assert [d.text for d in detect("고객 김철수님 010-1234-5678로 연락주세요")] == ["김철수"]
+    # "에게"·"에서"처럼 "에"로 시작하는 두 글자 조사 뒤의 이름도 그대로 잡혀야 한다 —
+    # 낱말 경계 확인(#484)을 더하면서 단일 글자 조사 목록만 참고하면 이런 조사를 놓친다.
+    assert [d.text for d in detect("담당자가 손인은에서 변경되었습니다")] == ["손인은"]

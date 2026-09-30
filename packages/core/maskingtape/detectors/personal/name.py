@@ -106,6 +106,9 @@ _COMMON_WORDS = frozenset({
     # 흔한 시간·정도 부사(최·이 성씨와 겹친다)
     "최근", "최고", "최종", "최대", "최소", "이전", "이후", "이상", "이내", "이하", "이번",
     "오전", "오후", "한국", "서울",
+    # "이름" 단서 뒤에 흔히 오는 일반 명사·부사(#484) — "이름 정밀 탐지"의 "정밀"처럼
+    # 서식·기술 문서에서 "이름"이라는 단서 바로 뒤에 자주 등장해 이름으로 오탐됐다.
+    "정밀", "문맥", "전혀", "공식",
 })
 
 # 직함 전용 단서(존칭 '님' 제외). 이것만으로(다른 단서 없이) 이름을 잡을 땐 성+2자 풀네임을
@@ -114,16 +117,36 @@ _COMMON_WORDS = frozenset({
 _TITLE_ONLY_CUES = frozenset(_TITLE_CUES) - frozenset(_SUFFIX_CUES)
 
 # 이름 뒤에 붙는 단일 음절 조사 — 일반명사 뒤에 붙어 단어 경계를 흐리는지 판별에 쓴다(#247).
-_JOSA_CHARS = frozenset("이가은는을를도만의에로과와")
+# "엔"("~에는"의 준말, "이전엔")도 조사로 본다(#484) — 없으면 "이전"(정지어) 뒤에 "엔"이 붙은
+# "이전엔"이 조사 경계로 안 잡혀 3글자 이름("이+전+엔")처럼 보여 "이전엔 팀장"이 오탐됐다.
+_JOSA_CHARS = frozenset("이가은는을를도만의에로과와엔")
 
 _SURNAME_ALT = "|".join(sorted(_SURNAMES, key=len, reverse=True))
 # 이름 앞 단서 = 역할어 + 직함. 직함이 이름 앞에 오는 형태("대표 홍길동")도 잡는다(#239).
 _PREFIX_ALT = "|".join(
     sorted(dict.fromkeys(_PREFIX_CUES + sorted(_TITLE_ONLY_CUES)), key=len, reverse=True)
 )
+# "양"·"군"은 실명 끝 글자로도 흔하면서(#340) 한 글자라 "양쪽"·"양식"·"군것질" 같은 흔한
+# 낱말의 첫 글자와 겹친다 — 뒤가 조사 한 글자 이내이거나 낱말 끝일 때만 존칭으로 받는다
+# (#484). 나머지 존칭·직함은 여러 글자라 이런 오탐이 없어 기존대로 둔다.
+_AMBIGUOUS_SUFFIX_TITLES = frozenset({"양", "군"})
+_JOSA_CHARS_STR = "".join(sorted(_JOSA_CHARS))
+_SUFFIX_ALT_PLAIN = "|".join(
+    sorted(
+        dict.fromkeys(c for c in (_SUFFIX_CUES + _TITLE_CUES) if c not in _AMBIGUOUS_SUFFIX_TITLES),
+        key=len,
+        reverse=True,
+    )
+)
+_AMBIGUOUS_SUFFIX_ALT = "|".join(sorted(_AMBIGUOUS_SUFFIX_TITLES, key=len, reverse=True))
 # 이름 뒤 단서 = 존칭·역할어 + 직함. 직함도 규칙 매칭 단서로 편입한다(#213). "님"은 양쪽에
 # 있으므로 dict.fromkeys로 중복을 없앤 뒤 긴 것부터 매칭한다.
-_SUFFIX_ALT = "|".join(sorted(dict.fromkeys(_SUFFIX_CUES + _TITLE_CUES), key=len, reverse=True))
+_SUFFIX_ALT = (
+    _SUFFIX_ALT_PLAIN
+    + r"|(?:"
+    + _AMBIGUOUS_SUFFIX_ALT
+    + r")(?=[" + _JOSA_CHARS_STR + r"]?(?![가-힣]))"
+)
 
 # 이름의 2번째 글자로 삼키면 안 되는 글자 — 뒤 suffix 그룹이 잡거나 이름 밖으로 남긴다(#147).
 # 탐욕적 매칭이 "고객 심진님"의 "심진님"을 통째로 삼켜 gold("심진")와 어긋나던 문제.
@@ -186,6 +209,13 @@ _NAME_RE = re.compile(
     # 성씨 + 1글자, 2번째 글자는 이름 끝에 올 수 없는 글자가 아닐 때만 붙인다(#147).
     r"(?P<name>(?:" + _SURNAME_ALT + r")[가-힣](?:(?![" + _NAME_TAIL_STOP + r"])[가-힣])?)"
     r"(?:\s?(?P<suffix>" + _SUFFIX_ALT + r"))?"
+    # suffix가 없으면(뒤 단서를 못 찾았으면) 이름이 낱말 끝에서 끝나야 한다 — 없으면 "하이
+    # 브리드"의 "하이브"처럼 더 긴 낱말의 앞부분만 잘라 이름으로 오탐한다(#484). suffix가
+    # 있으면(예: "님께"처럼 존칭 뒤에 조사가 더 붙는 경우) 이 조건을 걸지 않는다 — 그 경계는
+    # 이미 suffix 매칭 자체가 보장한다. _FORM_NAME_RE와 같은 종결어미·조사 목록을 쓴다.
+    # "에게"·"에서"처럼 "에"로 시작하는 두 글자 조사는 단일 글자 조사 목록(_JOSA_CHARS)만으로
+    # 못 잡는다 — 처음엔 "에"만 클래스에 있어 "손인은에서"·"김민수에게"의 이름이 새로 놓쳤다.
+    r"(?(suffix)|(?=(?:입니다|이며|이고|에게|에서|[" + _JOSA_CHARS_STR + r"])?(?![가-힣])))"
 )
 
 # LLM에 보낼지 정하는 후보 판정용: 한글 두 글자가 붙은 자리. 한국어 이름은 두 글자 이상이다.
