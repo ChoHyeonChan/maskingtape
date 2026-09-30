@@ -15,7 +15,9 @@ import 'anonymizer.dart';
 /// 모든 코드(결과·복사·하이라이트·파일 미리보기)가 Dart 기준 위치를 쓰므로, 쓰는 곳마다
 /// 따로 바꾸다 한 군데를 빠뜨리는 일이 생기지 않는다.
 class CodePointOffsets {
-  CodePointOffsets(String text) : _utf16At = _build(text);
+  CodePointOffsets(this._text) : _utf16At = _build(_text);
+
+  final String _text;
 
   /// `_utf16At[i]` = i번째 코드포인트가 시작하는 UTF-16 위치. 끝 위치(코드포인트 개수)도
   /// 담아 두어 구간 끝(`end`)을 바로 찾을 수 있다.
@@ -46,8 +48,20 @@ class CodePointOffsets {
   }
 
   /// 탐지 목록의 위치를 모두 UTF-16으로 바꾼 새 목록.
+  ///
+  /// 탐지 값(`text`)이 비어 있으면 원문에서 잘라 채운다 — API는 원문 반향을 막으려고 값을
+  /// 보내지 않는다(#497). 원문은 이미 이 PC에 있으니 네트워크로 되돌려 받을 필요가 없다.
   List<Detection> convert(List<Detection> detections) => [
-    for (final d in detections)
-      d.withOffsets(start: toUtf16(d.start), end: toUtf16(d.end)),
+    for (final d in detections) _convertOne(d),
   ];
+
+  Detection _convertOne(Detection d) {
+    final start = toUtf16(d.start);
+    final end = toUtf16(d.end);
+    return d.withOffsets(
+      start: start,
+      end: end,
+      text: d.text.isEmpty ? _text.substring(start, end) : null,
+    );
+  }
 }

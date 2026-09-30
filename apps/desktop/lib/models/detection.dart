@@ -20,17 +20,23 @@ class Detection {
         kind: json['kind'] as String,
         start: json['start'] as int,
         end: json['end'] as int,
-        text: json['text'] as String,
+        // API는 원문 반향을 막으려고 `text`를 보내지 않는다(a376736) — 없으면 빈 값으로 두고,
+        // 백엔드가 이 PC의 원문에서 잘라 채운다(`CodePointOffsets.convert`, #497).
+        // API는 원문 반향을 막으려고 `text`를 보내지 않는다(a376736) — 없으면 빈 값으로 두고,
+        // 백엔드가 이 PC의 원문에서 잘라 채운다(`CodePointOffsets.convert`, #497).
+        text: json['text'] as String? ?? '',
         confidence: (json['confidence'] as num?)?.toDouble() ?? 1.0,
         detector: json['detector'] as String? ?? '',
       );
 
   /// 같은 탐지를 위치만 바꿔 복사한다 — 코드포인트 → UTF-16 변환용.
-  Detection withOffsets({required int start, required int end}) => Detection(
+  /// [text]를 주면 탐지 값도 바꾼다(API가 값을 보내지 않을 때 원문에서 채우는 용도).
+  Detection withOffsets({required int start, required int end, String? text}) =>
+      Detection(
         kind: kind,
         start: start,
         end: end,
-        text: text,
+        text: text ?? this.text,
         confidence: confidence,
         detector: detector,
       );

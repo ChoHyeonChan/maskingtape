@@ -67,3 +67,18 @@ class FailingAnonymizer implements Anonymizer {
   }) async =>
       throw AnonymizerException(message);
 }
+
+/// 예상 밖 예외(AnonymizerException이 아닌 것)를 던지는 백엔드 — #497 회귀 검증용.
+/// 예외 메시지에 원문 조각이 든 상황을 흉내 낸다(합성 값). 화면에 이 문자열이 나오면 안 된다.
+class UnexpectedErrorAnonymizer implements Anonymizer {
+  const UnexpectedErrorAnonymizer();
+
+  static const leakedFragment = '800101-1234560';
+
+  @override
+  Future<AnonymizeResult> anonymize(
+    String text, {
+    AnonymizeOptions options = const AnonymizeOptions(),
+  }) async =>
+      throw FormatException('Unexpected character', '주민 $leakedFragment');
+}
