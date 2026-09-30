@@ -17,6 +17,7 @@
 
 from __future__ import annotations
 
+import csv
 import re
 
 from maskingtape.detectors.base import Detector
@@ -163,6 +164,19 @@ _FORM_NOT_NAMES = frozenset({
 })
 # 은·이·가·도는 이름 끝 글자로도 흔해서("기재은", "재이") 떼지 않는다 — 떼면 "기재"가 되어 걸러지고 샌다.
 _FORM_VALUE_ENDING_RE = re.compile(r"(?:입니다|이며|이고|님|씨|[는을를의와과])$")
+
+# 표(CSV·TSV·마크다운)의 구분자. 쉼표를 먼저 시도한다 — 마크다운 표에 쉼표가 포함된 값이
+# 들어 있어도(드묾) 세로줄이 없으면 쉼표 판정으로 못 넘어가므로 순서가 결과에 영향을 주지
+# 않는다(#526).
+_TABLE_SEPS = (",", "\t", "|")
+
+# 표 값 칸에 들어갈 수 있는 이름 모양 — _FORM_NAME_RE의 name 그룹과 같은 글자 제약(2~4자
+# 순한글, 님·씨로 시작 금지)이다. 표 칸은 라벨이 따로 없어 성씨 사전 밖 이름도 받는다(#526).
+_TABLE_NAME_VALUE_RE = re.compile(r"(?:(?![님씨])[가-힣]){2,4}")
+
+# 마크다운 구분행("|---|:--:|--:|")의 칸 — 대시·콜론·공백만으로 이뤄진다. 적어도 한 칸은
+# 비어 있지 않아야 진짜 구분행이다(전부 빈 칸인 데이터 행과 헷갈리지 않기 위해).
+_TABLE_SEPARATOR_CELL_RE = re.compile(r"[-:\s]*")
 _FORM_NAME_RE = re.compile(
     # 라벨 앞에 한글이 붙으면 다른 낱말의 일부다("파일이름: 보고서").
     r"(?<![가-힣])(?P<label>" + "|".join(sorted(_FORM_LABELS, key=len, reverse=True)) + r")"
@@ -327,7 +341,10 @@ class NameDetector(Detector):
                     detector=self.__class__.__name__,
                 )
             )
-        found.extend(self._form_names(text, found))
+        form_extra = self._form_names(text, found)
+        table_extra = self._table_names(text, found + form_extra)
+        found.extend(form_extra)
+        found.extend(table_extra)
         return found
 
     def _form_names(self, text: str, found: list[Detection]) -> list[Detection]:
@@ -367,3 +384,122 @@ class NameDetector(Detector):
                 )
             )
         return extra
+
+    def _table_names(self, text: str, found: list[Detection]) -> list[Detection]:
+        """표(CSV·TSV·마크다운) 머리행에 이름 열 라벨이 있으면 아래 행의 같은 열 값을 찾는다(#526).
+
+        같은 줄 라벨(`_form_names`)은 라벨과 값이 한 줄에 있을 때만 본다 — 고객 명단처럼
+        머리행에 열 이름만 있고 값은 아래 행에 나열되는 표는 놓친다. 한 줄씩만 훑어 선형
+        시간을 유지한다(수만 행 CSV도 문서 길이에 비례).
+        """
+        if self.min_confidence > 0.75:
+            return []
+        covered = bytearray(len(text))
+        for d in found:
+            covered[d.start : d.end] = b"\x01" * (d.end - d.start)
+
+        extra: list[Detection] = []
+        lines = text.splitlines(keepends=True)
+        offset = 0
+        i = 0
+        n_lines = len(lines)
+        while i < n_lines:
+            line = lines[i]
+            header = self._table_header(line.rstrip("\r\n"))
+            if header is None:
+                offset += len(line)
+                i += 1
+                continue
+
+            sep, name_col, n_cols = header
+            offset += len(line)
+            i += 1
+            while i < n_lines:
+                row = lines[i]
+                row_text = row.rstrip("\r\n")
+                if row_text.strip() == "":
+                    break  # 빈 줄 — 표가 끝났다
+                cells = self._table_cells(row_text, sep)
+                if cells is None or len(cells) != n_cols:
+                    break  # 칸 수가 달라졌거나(#526) 따옴표가 안 닫혔다 — 표가 끝났다
+                if self._is_table_separator_row(cells):
+                    offset += len(row)
+                    i += 1
+                    continue  # 마크다운 구분행("|---|")은 건너뛰고 계속한다
+                value, v_start, v_end = cells[name_col]
+                start, end = offset + v_start, offset + v_end
+                if self._looks_like_table_name(value) and not all(covered[start:end]):
+                    extra.append(
+                        Detection(
+                            kind=self.kind,
+                            start=start,
+                            end=end,
+                            text=value,
+                            confidence=0.75,
+                            detector=self.__class__.__name__,
+                        )
+                    )
+                offset += len(row)
+                i += 1
+        return extra
+
+    @staticmethod
+    def _table_header(line: str) -> tuple[str, int, int] | None:
+        """이 줄이 표 머리행이면 (구분자, 이름 열 인덱스, 전체 칸 수)를 돌려준다."""
+        for sep in _TABLE_SEPS:
+            if sep not in line:
+                continue
+            cells = NameDetector._table_cells(line, sep)
+            if cells is None or len(cells) < 2:
+                continue
+            for idx, (value, _start, _end) in enumerate(cells):
+                if value in _FORM_LABELS:
+                    return sep, idx, len(cells)
+        return None
+
+    @staticmethod
+    def _table_cells(line: str, sep: str) -> list[tuple[str, int, int]] | None:
+        """구분자로 줄을 셀로 나눠 (표시할 값, 줄 안에서의 시작, 끝) 목록을 돌려준다.
+
+        `csv` 표준 모듈로 나눈다 — 쉼표 구분 칸이 따옴표로 통째로 감싸여 있으면("김민수",
+        "인사팀, 신규") 안쪽에 구분자가 있어도 한 칸으로 보고 따옴표를 벗긴 값을 쓴다(#526).
+        파싱할 수 없는 줄(따옴표가 안 닫힘 등)은 None을 돌려준다. 값의 원래 위치는 줄에서
+        순서대로 찾아나간다 — 실제 이름 값에는 따옴표 이스케이프(`""`)가 거의 없어 안전하다.
+        """
+        try:
+            raw_values = next(csv.reader([line], delimiter=sep), [])
+        except csv.Error:
+            return None
+        cells: list[tuple[str, int, int]] = []
+        pos = 0
+        for raw in raw_values:
+            value = raw.strip()
+            idx = line.find(value, pos)
+            if idx == -1:
+                idx = pos
+            cells.append((value, idx, idx + len(value)))
+            pos = idx + len(value)
+        return cells
+
+    @staticmethod
+    def _is_table_separator_row(cells: list[tuple[str, int, int]]) -> bool:
+        """마크다운 구분행("|---|:--:|--:|")인지 — 모든 칸이 대시·콜론·공백뿐이고, 적어도
+        한 칸은 비어 있지 않을 때만 그렇다(전부 빈 칸인 데이터 행과 구분하기 위해)."""
+        has_content = False
+        for value, _start, _end in cells:
+            if not _TABLE_SEPARATOR_CELL_RE.fullmatch(value):
+                return False
+            if value:
+                has_content = True
+        return has_content
+
+    @staticmethod
+    def _looks_like_table_name(value: str) -> bool:
+        """표 값 칸의 문자열이 이름으로 볼 만한지 — 양식 칸(_form_names)과 같은 기준이다."""
+        if not _TABLE_NAME_VALUE_RE.fullmatch(value):
+            return False
+        if value in _FORM_LABELS or value in _FORM_NOT_NAMES:
+            return False
+        if _CUE_WITH_JOSA_RE.fullmatch(value):
+            return False
+        return not _is_label_word_at(value, 0, strong=True)
