@@ -36,11 +36,12 @@ React 계열은 빌드 과정에서 파일 안의 라이선스 주석이 빠지�
 - `apps/desktop/windows/`의 18개 파일은 `flutter create`로 만들었다. 변수가 없는 템플릿 파일 11개(`runner/`의 C++·CMake·manifest,
   `flutter/CMakeLists.txt`, `.gitignore`)는 원본과 같다. 변수가 있는 템플릿 3개(`runner/main.cpp`, `runner/Runner.rc`,
   `CMakeLists.txt`)는 템플릿 변수(프로젝트 이름·조직·연도)가 채워진 것과, 생성 당시와 지금 원본의 Flutter 버전 차이
-  (`CMakeLists.txt`의 컴파일 옵션 따옴표 한 곳)만 다르다. 팀이 바꾼 것은 `main.cpp`의 창 제목(한글) 한 줄이다.
+  (`CMakeLists.txt`의 컴파일 옵션 따옴표 한 곳)만 다르다. 팀이 바꾼 것은 `main.cpp`의 창 제목(한글) 한 줄과
+  `Runner.rc`의 저작권·회사 표기 두 줄이다.
 - `apps/desktop/windows/flutter/generated_plugin*` 3개는 Flutter 도구가 플러그인 목록으로 생성하는 파일이다.
 - 앱 아이콘(`apps/desktop/windows/runner/resources/app_icon.ico`)은 템플릿 기본 아이콘을 팀이 새로 만든 것으로 바꿨다(2026-08-14).
-- `apps/desktop/windows/runner/Runner.rc`의 `LegalCopyright` 문구("All rights reserved")는 템플릿 기본값이 남은 것이다.
-  팀 명의로 고친다([#454](https://github.com/ChoHyeonChan/maskingtape/issues/454)).
+- `apps/desktop/windows/runner/Runner.rc`의 `LegalCopyright`·`CompanyName`은 템플릿 기본값(조직 식별자 명의의 저작권 문구)을
+  팀 명의("The maskingtape Authors")로 고쳤다([#454](https://github.com/ChoHyeonChan/maskingtape/issues/454)). 빌드한 exe의 속성 창에 이 문구가 보인다.
 - `apps/web/tsconfig.json`은 create-vite `react-ts` 템플릿과 같다. 나머지 웹 설정 파일은 템플릿과 다르다.
 
 ## 라이선스 전문
