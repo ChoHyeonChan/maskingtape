@@ -35,6 +35,7 @@ class Span:
 
 
 def load_dataset(path: Path) -> list[dict]:
+    """JSONL을 줄 단위로 읽는다 — 파일 끝 개행 등으로 생기는 빈 줄은 조용히 건너뛴다."""
     rows = []
     with path.open(encoding="utf-8") as f:
         for line in f:
@@ -45,10 +46,12 @@ def load_dataset(path: Path) -> list[dict]:
 
 
 def gold_spans(row: dict) -> set[Span]:
+    """정답 라벨을 Span 집합으로 바꾼다 — 집합이라 순서와 무관하게 교집합/차집합으로 tp/fp/fn을 셀 수 있다."""
     return {Span(kind=lb["kind"], start=lb["start"], end=lb["end"]) for lb in row["labels"]}
 
 
 def predicted_spans(pipeline: Pipeline, text: str) -> set[Span]:
+    """core의 탐지 결과를 gold_spans와 같은 Span 집합 형태로 맞춰, 곧바로 집합 연산으로 비교할 수 있게 한다."""
     return {Span(kind=d.kind, start=d.start, end=d.end) for d in pipeline.scan(text)}
 
 
@@ -60,27 +63,35 @@ class Counts:
 
     @property
     def precision(self) -> float:
+        """탐지가 하나도 없으면(tp+fp=0) ZeroDivisionError 대신 0.0 — negative 난이도 등에서 발생(#498)."""
         return self.tp / (self.tp + self.fp) if (self.tp + self.fp) else 0.0
 
     @property
     def recall(self) -> float:
+        """정답이 하나도 없으면(tp+fn=0) 0.0 — "탐지 실패"가 아니라 "계산이 성립하지 않음"을 뜻한다(#498)."""
         return self.tp / (self.tp + self.fn) if (self.tp + self.fn) else 0.0
 
     @property
     def f1(self) -> float:
+        """fbeta(1.0)의 별칭 — precision과 recall을 동일 가중치로 조합."""
         return self.fbeta(1.0)
 
     @property
     def f2(self) -> float:
+        """fbeta(2.0)의 별칭 — PII 탐지는 미탐이 오탐보다 위험하다는 도메인 관행대로 recall에
+        F1보다 더 큰 가중치를 준다(근거는 모듈 docstring 참고)."""
         return self.fbeta(2.0)
 
     def fbeta(self, beta: float) -> float:
+        """Fβ 스코어. precision·recall이 둘 다 0이면(분모 0) 예외 대신 0.0을 반환한다."""
         p, r = self.precision, self.recall
         beta2 = beta * beta
         return (1 + beta2) * p * r / (beta2 * p + r) if (p + r) else 0.0
 
 
 def _totalize(per_group: dict[str, Counts]) -> dict[str, Counts]:
+    """그룹별 Counts를 합산해 `__overall__` 키로 끼워 넣는다 — 전체(micro) 지표를 그룹별 지표와
+    같은 딕셔너리 하나로 들고 다니기 위한 것으로, 호출자가 반복문 하나로 표를 그릴 수 있게 한다."""
     total = Counts()
     for c in per_group.values():
         total.tp += c.tp
@@ -95,6 +106,7 @@ def evaluate(rows: list[dict], pipeline: Pipeline) -> dict[str, Counts]:
     per_kind: dict[str, Counts] = {}
 
     def counts_for(kind: str) -> Counts:
+        """kind가 처음 나오면 빈 Counts를 만들고, 이후로는 같은 인스턴스를 재사용한다(defaultdict 대용)."""
         return per_kind.setdefault(kind, Counts())
 
     for row in rows:
@@ -133,6 +145,8 @@ def evaluate_by_difficulty(rows: list[dict], pipeline: Pipeline) -> dict[str, Co
 
 
 def _format_table(title: str, results: dict[str, Counts]) -> str:
+    """콘솔 출력용 고정폭 표 — `__overall__`을 먼저 빼서 그룹들을 이름순으로 정렬해 찍고,
+    맨 아래에 overall 합계 줄을 따로 고정한다(정렬에 섞이면 항상 맨 위/아래로 튀어 찾기 어렵다)."""
     results = dict(results)
     overall = results.pop("__overall__")
     lines = [
@@ -156,12 +170,16 @@ def _format_table(title: str, results: dict[str, Counts]) -> str:
 
 
 def print_report(kind_results: dict[str, Counts], difficulty_results: dict[str, Counts]) -> None:
+    """kind별 표와 difficulty별 표를 이 순서로 출력한다 — kind가 "무엇을 놓쳤는지", difficulty가
+    "어떤 표기 난이도에서 놓쳤는지"를 보여줘서 둘을 나란히 봐야 원인 진단이 된다."""
     print(_format_table("종류(kind)별 결과", kind_results))
     print()
     print(_format_table("난이도(difficulty)별 결과", difficulty_results))
 
 
 def _markdown_table(results: dict[str, Counts]) -> str:
+    """_format_table과 같은 데이터를 마크다운 표 문법으로 바꾼다 — 결과보고서(`reports/`)에
+    그대로 붙여넣거나 GitHub에서 바로 렌더링되도록 콘솔용과 별도로 만든다."""
     results = dict(results)
     overall = results.pop("__overall__")
     lines = ["| group | precision | recall | f1 | f2 | tp | fp | fn |", "|---|---|---|---|---|---|---|---|"]
@@ -185,6 +203,8 @@ def write_markdown_report(
     kind_results: dict[str, Counts],
     difficulty_results: dict[str, Counts],
 ) -> None:
+    """결과보고서 첨부·회의 공유용 마크다운 파일을 만든다 — 생성 시각·데이터셋 경로를 같이
+    박아둬서, 나중에 수치만 보고도 "이게 언제 뭘로 잰 결과인지" 재현 조건을 알 수 있게 한다."""
     generated_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     content = f"""# maskingtape 합성 벤치마크 정확도 리포트
 
@@ -214,6 +234,8 @@ def write_markdown_report(
 
 
 def main() -> None:
+    """CLI 진입점 — 데이터셋을 읽어 kind별·difficulty별로 평가하고, 콘솔에 표로 찍은 뒤
+    --report가 있으면 같은 결과를 마크다운으로도 저장한다."""
     # #317: Windows 콘솔 기본 코드페이지(cp949)는 리포트 문구에 쓰일 수 있는 em dash(—) 등
     # 일부 구두점을 인코딩 못 해 print에서 크래시한다 — 플랫폼 기본 설정과 무관하게 항상
     # 성공하도록 stdout을 UTF-8로 강제한다.

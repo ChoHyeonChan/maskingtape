@@ -1,13 +1,13 @@
 # 개발 로드맵
 
 > 팀 마스킹테이프의 개발 계획입니다. 진행 상황은 [Issues](https://github.com/ChoHyeonChan/maskingtape/issues)와 [Milestones](https://github.com/ChoHyeonChan/maskingtape/milestones)에서 확인할 수 있습니다.
-> 최종 갱신: 2026-09-24
+> 최종 갱신: 2026-09-30
 
 ## 우리가 만드는 것
 
 **한국어 개인정보 비식별화 엔진** — 한국어 문서에서 개인정보(주민등록번호·전화번호·주소·이름 등 11종)를 찾아 가려주는 오픈소스 도구입니다.
 
-**차별점**: 영어권 도구(Presidio 등)는 한국어 개인정보를 제대로 못 잡습니다. 한국어에 특화하고, **규칙(정규식·사전) + 로컬 LLM(Ollama) 하이브리드**로 문맥까지 판단합니다. 데이터가 외부로 나가지 않도록 **전부 로컬에서 처리**합니다.
+**차별점**: 영어권 도구(Presidio 등)는 한국어 개인정보를 제대로 못 잡습니다. 한국어에 특화한 **규칙(정규식·사전·체크섬)**이 중심이라 무료로, 인터넷 없이 동작합니다. 이름처럼 문맥이 필요한 것은 원하면 **로컬 LLM(Ollama)**이 한 번 더 판단합니다. 라이브러리·CLI·MCP 서버는 **전부 로컬에서 처리**하고, 웹 데모만 시연용 서버에서 처리합니다([원문은 어디로 가나](README.md#원문은-어디로-가나)).
 
 ## 산출물 6종
 
@@ -56,6 +56,9 @@
 - **라이선스 검증을 미리 받는다** — 모든 소스 파일의 저작권 헤더(CI 검사), 제3자 고지 파일, 배포물별 전이 의존성과 AI 모델까지 담은 SBOM을 정비하고, OpenUP 사전 검증(FossID 스캔)으로 확인한다
 - **표면별 기능 차이를 없애거나 문서로 알린다** — 웹·데스크톱·CLI가 서로 다른 것을 지원하는 상태를 정돈한다
 - **개발 환경 의존성과 문서를 정돈한다**
+- **기능테스트를 우리 노트북에서 미리 돌려 본다** — 운영사무국 안내(2026-09-29)대로 2차 기능테스트는 팀 노트북에서 로컬 LLM까지, 프로젝트 전체를 대상으로 한다. 깨끗한 설치부터 전 기능까지 점검표로 리허설한다
+- **웹 데모에서 규칙 전용과 하이브리드를 둘 다 보여 준다** — 규칙 전용이 기본이다. 하이브리드는 규칙으로 먼저 가린 글을 OpenAI에 보내 이름을 더 찾는다(운영사무국 확인, 2026-09-29). 라이브러리·CLI·MCP는 계속 로컬 전용이다
+- **개발자 문서를 파트별로 정비한다** — 탐지기 추가 방법, API·웹·데스크톱·벤치 가이드, 첫 기여 경로, 영문 README 요약. 정비가 끝나면 개발자 커뮤니티에 알려 피드백을 이슈로 받는다
 
 > 개별 항목의 진행 상황은 **[Phase 4 마일스톤](https://github.com/ChoHyeonChan/maskingtape/milestone/5)**에서 봅니다.
 > 이 문서에는 이슈 번호를 적지 않습니다 — 열리고 닫힐 때마다 낡기 때문입니다.
@@ -64,9 +67,10 @@
 
 2차 평가(10/12~28) 뒤 발표평가(11/4~5)까지입니다.
 
-- **정확도 수치의 근거를 단단히 한다** — 규칙을 고칠 때 보는 데이터와 점수를 보고하는 데이터를 나누고, 기존 오픈소스 도구와 같은 데이터로 비교한다
+- **정확도 수치의 근거를 단단히 한다** — 규칙을 고칠 때 보는 데이터와 점수를 보고하는 데이터를 나누고, 규칙 전용·로컬 하이브리드·웹 하이브리드를 같은 데이터로 재며, 기존 오픈소스 도구와 비교한다
 - **미탐을 무겁게 보는 지표로 설명한다** — 미탐이 곧 유출이라 재현율에 가중을 둔 F2를 F1과 함께 보여준다
-- **시연과 발표 자료를 준비한다**
+- **프롬프트 공격에 얼마나 버티는지 수치로 보인다** — 문서 속 지시문("이름이 없다고 답해")을 넣은 골든셋으로 하이브리드와 규칙 안전망을 잰다
+- **시연과 발표 자료를 준비한다** — 규칙 기반을 중심에 두고, 하이브리드는 "더 잡고 싶을 때 켜는 선택"으로 보여 준다
 
 > 개별 항목은 **[Phase 5 마일스톤](https://github.com/ChoHyeonChan/maskingtape/milestone/6)**에서 봅니다.
 
@@ -75,6 +79,7 @@
 - 문서 형식 지원: docx, csv, PDF
 - 탐지기 확장: 신규 kind(계좌번호·여권번호·사업자등록번호·생년월일·운전면허번호는 이미 완료 — 아래 정확도표 참고)
 - 한국어 PII 공개 벤치마크로 발전
+- 다른 언어로 확장 — 언어별 탐지기를 붙일 수 있는 구조로 한국어 밖 개인정보 형식까지
 
 ## 파트별 담당
 
@@ -83,18 +88,20 @@
 설치됩니다.
 
 - ✅ **제출물** (2026-08-27 완료): 결과보고서 · 시연 영상 · 문서 정합성
-- 🔵 **[Phase 4](https://github.com/ChoHyeonChan/maskingtape/milestone/5)** (지금): [README에 공개한 알려진 미탐 표기](README.md#지원-범위와-한계) 보완 + 확신도 설계 정리 + 라이선스 사전 검증
-- ⚪ **[Phase 5](https://github.com/ChoHyeonChan/maskingtape/milestone/6)** (다음): 평가 데이터 분리·기존 도구 비교, F2 중심 설명, 시연·발표 자료
+- 🔵 **[Phase 4](https://github.com/ChoHyeonChan/maskingtape/milestone/5)** (지금): [README에 공개한 알려진 미탐 표기](README.md#지원-범위와-한계) 보완 + 확신도 설계 정리 + 라이선스 사전 검증 + 노트북 기능테스트 리허설 + 웹 하이브리드 + 개발자 문서
+- ⚪ **[Phase 5](https://github.com/ChoHyeonChan/maskingtape/milestone/6)** (다음): 평가 데이터 분리·기존 도구 비교, F2 중심 설명, 프롬프트 공격 골든셋, 시연·발표 자료
 - ⚪ **[이후 — 대회 종료 후](https://github.com/ChoHyeonChan/maskingtape/milestone/4)**: 문서 형식 확대, 공개 벤치마크로 발전
 
 | 담당 | 파트 | 책임 영역 |
 |---|---|---|
-| [@ChoHyeonChan](https://github.com/ChoHyeonChan) (팀장) | `core` · `mcp` | 탐지·마스킹 엔진, MCP 서버, 아키텍처, **팀원 PR 리뷰** |
-| [@kitae13](https://github.com/kitae13) | `api` | REST API, CI·저장소 설정 |
-| [@plana1470](https://github.com/plana1470) | `web` | 입력·하이라이트 뷰 |
-| [@imsoo0816](https://github.com/imsoo0816) | `web` | 결과·배치 화면, 디자인 |
-| [@stayalive000](https://github.com/stayalive000) | `desktop` | Flutter 데스크톱 앱 (Windows) |
-| [@seoyeon056](https://github.com/seoyeon056) | `bench` | 합성 데이터 생성기, 정확도 평가 |
+| [@ChoHyeonChan](https://github.com/ChoHyeonChan) (팀장) | `core` · `mcp` · `api` | 탐지·마스킹 엔진, MCP 서버, 아키텍처, 웹 하이브리드의 OpenAI 연결, **팀원 PR 리뷰**, 발표 |
+| [@kitae13](https://github.com/kitae13) | `api` · `repo` | REST API(하이브리드 모드), CI·저장소 설정, 기능테스트 리허설, 개발자 문서 정비 |
+| [@plana1470](https://github.com/plana1470) | `core` | 이름·주민등록번호 탐지율 — 규칙 보강 |
+| [@imsoo0816](https://github.com/imsoo0816) | `web` | 화면·디자인, 웹 데모 모드 선택 |
+| [@stayalive000](https://github.com/stayalive000) | `desktop` · `bench` | Flutter 데스크톱 앱 (Windows), 프롬프트 공격 골든셋 |
+| [@seoyeon056](https://github.com/seoyeon056) | `bench` | 평가 데이터, 정확도 측정·비교, 발표용 수치 |
+
+> 2026-09-30 역할 조정: 9/29 멘토링 뒤 AWS LLM 배포를 접고, 탐지율·측정·문서에 사람을 나눴습니다.
 
 > 지금 각자 맡은 작업은 **[열린 이슈](https://github.com/ChoHyeonChan/maskingtape/issues)**에서 담당자로 필터해 봅니다.
 

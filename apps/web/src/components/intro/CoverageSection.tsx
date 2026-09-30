@@ -21,10 +21,10 @@ const COVERAGE_KINDS = [
 
 export function CoverageSection() {
   return (
-    <section className="coverage-section" aria-label="탐지 범위">
+    <section className="coverage-section" id="coverage" aria-label="탐지 범위">
       <h2>무엇을 잡나요</h2>
-      <p className="coverage-section__lead">
-        규칙(정규식·사전) + 로컬 LLM 하이브리드로 한국어 문서 속 개인정보 11종을 탐지합니다.
+      <p className="coverage-section__lead coverage-section__lead--emphasis">
+        규칙 + 로컬 LLM 하이브리드로 11종을 놓치지 않고 잡습니다
       </p>
       <ul className="coverage-section__list">
         {COVERAGE_KINDS.map((kind) => (
@@ -33,6 +33,23 @@ export function CoverageSection() {
           </li>
         ))}
       </ul>
+
+      {/* README·AccuracySection과 같은 수치(#455) — 전체/이름-하이브리드 F1은
+          AccuracySection의 OVERALL·ROWS와 함께 갱신한다. */}
+      <div className="coverage-section__stats" id="accuracy">
+        <div className="coverage-section__stat">
+          <div className="coverage-section__stat-value">0.966</div>
+          <div className="coverage-section__stat-label">전체 F1 (공개 벤치마크)</div>
+        </div>
+        <div className="coverage-section__stat">
+          <div className="coverage-section__stat-value">0.923</div>
+          <div className="coverage-section__stat-label">이름 F1 (--llm 하이브리드)</div>
+        </div>
+        <div className="coverage-section__stat">
+          <div className="coverage-section__stat-value">Apache-2.0</div>
+          <div className="coverage-section__stat-label">오픈소스 라이선스</div>
+        </div>
+      </div>
     </section>
   );
 }
