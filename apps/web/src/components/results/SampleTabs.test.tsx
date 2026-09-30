@@ -14,7 +14,8 @@ describe("SampleTabs (스캔 전 결과 자리를 샘플 서랍으로)", () => {
     const tabs = screen.getAllByRole("tab");
     expect(tabs.map((tab) => tab.textContent)).toEqual(PRESETS.map((preset) => preset.label));
     expect(tabs[0]).toHaveAttribute("aria-selected", "true");
-    expect(screen.getByRole("tabpanel")).toHaveTextContent(PRESETS[0].text);
+    // 긴 예제는 줄바꿈이 있어, 공백을 접지 않고 원문 그대로 들어 있는지 본다.
+    expect(screen.getByRole("tabpanel")).toHaveTextContent(PRESETS[0].text, { normalizeWhitespace: false });
   });
 
   it("previews the clicked tab without touching the input until the use button is pressed", () => {
