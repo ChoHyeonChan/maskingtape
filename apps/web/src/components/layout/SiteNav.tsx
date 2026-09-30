@@ -22,6 +22,9 @@ export function SiteNav({ onHelpClick, hasResult = false, coachMarkActive = fals
   const isHome = variant === "home";
   const brandHref = isHome ? "#intro" : "/";
   const introHref = isHome ? "#intro" : "/#intro";
+  // 탐지 범위(무엇을 잡나요)는 랜딩 페이지에 있다 — 랜딩 안에서는 그냥 앵커, 다른
+  // 페이지에서는 랜딩으로 돌아가는 절대경로다.
+  const coverageHref = isHome ? "#coverage" : "/#coverage";
   // 체험하기(입력·결과 패널)만 /demo 페이지에 있다(#553 후속) — 어디서 보든 항상 그
   // 실제 경로로 이동한다.
   const demoHref = "/demo";
@@ -65,6 +68,9 @@ export function SiteNav({ onHelpClick, hasResult = false, coachMarkActive = fals
         <div className="site-nav__links">
           <a className="site-nav__link" href={introHref}>
             소개
+          </a>
+          <a className="site-nav__link" href={coverageHref}>
+            탐지 범위
           </a>
           <a
             className={variant === "accuracy" ? "site-nav__link site-nav__link--active" : "site-nav__link"}
