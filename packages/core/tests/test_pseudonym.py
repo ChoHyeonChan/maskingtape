@@ -7,10 +7,11 @@
 """
 
 import re
+import time
 
 import pytest
 
-from maskingtape.anonymizers.pseudonym import PseudonymAnonymizer
+from maskingtape.anonymizers.pseudonym import _GIVEN_NAMES, _SURNAMES, PseudonymAnonymizer
 from maskingtape.detectors.financial.creditcard import _luhn_ok
 from maskingtape.detectors.identity.rrn import _checksum_ok
 from maskingtape.types import Detection
@@ -131,3 +132,42 @@ def test_different_people_get_different_pseudonyms():
     dets = [make("name", 4 * i, 4 * i + 3, name) for i, name in enumerate(names)]
     for seed in range(300):
         assert len(set(anonymize(text, dets, seed=seed).split(" "))) == len(names)
+
+
+def _distinct_values(kind: str, n: int) -> tuple[str, list[Detection]]:
+    # 서로 다른 합성 값 n개를 공백으로 이은 문장과 그 탐지. 이름은 가명 어휘 400개를 먼저 넣어,
+    # 뽑는 가명마다 원본과 같아 거부되는 가장 느린 경우를 만든다
+    if kind == "phone":
+        values = [f"010-{i // 10000:04d}-{i % 10000:04d}" for i in range(n)]
+    else:
+        vocabulary = [s + g for s in _SURNAMES for g in _GIVEN_NAMES]
+        values = (vocabulary + ["탁" + chr(0xAC00 + i) for i in range(n)])[:n]
+    dets, pos = [], 0
+    for value in values:
+        dets.append(make(kind, pos, pos + len(value), value))
+        pos += len(value) + 1
+    return " ".join(values), dets
+
+
+def _seconds(kind: str, n: int) -> float:
+    text, dets = _distinct_values(kind, n)
+    start = time.perf_counter()
+    anonymize(text, dets)
+    return time.perf_counter() - start
+
+
+@pytest.mark.parametrize("kind", ["phone", "name"])
+def test_pseudonym_time_grows_linearly(kind):
+    # 원본을 드러내지 않게 다시 뽑는 검사가 원본 전체를 훑어, 서로 다른 값 수의 제곱으로
+    # 느려졌다(API 한 요청 0.16초 → 73초, #520). 4배 입력에서 선형이면 약 4배, 제곱이면 약 16배다
+    _seconds(kind, 300)  # 첫 호출의 준비 비용을 뺀다
+    small, large = _seconds(kind, 1500), _seconds(kind, 6000)
+    assert large < 8 * small + 0.05, (small, large)
+
+
+def test_names_beyond_the_pseudonym_vocabulary_become_labels_without_leaking():
+    # 가명 어휘(400개)보다 이름이 많으면 나머지는 라벨로 가린다. 원본은 남지 않는다
+    text, dets = _distinct_values("name", 600)
+    out = anonymize(text, dets)
+    assert not any(d.text in out for d in dets)
+    assert "[이름]" in out

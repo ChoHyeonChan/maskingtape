@@ -343,7 +343,7 @@ docstring/주석에 명시하고 있다(`email.py`는 상한이 없던 시절 40
 - **주민번호**: 하이픈/공백/점(`.`)/구분자 없음([#209](https://github.com/ChoHyeonChan/maskingtape/issues/209)),
   1900·2000년대 성별코드를 모두 커버. **외국인등록번호**
   (성별코드 5~8)도 15% 확률로 섞는다([#148](https://github.com/ChoHyeonChan/maskingtape/issues/148)) —
-  core `RRNDetector`의 `_CENTURY` 매핑이 이미 5~8을 내국인과 동일한 정규식·체크섬으로 처리하는데
+  core `RRNDetector`가 이미 5~8을 내국인과 동일한 정규식·체크섬으로 처리하는데
   bench가 1~4만 만들어서 한 번도 실측된 적이 없었다. **체크섬 없는(2020-10 이후 발급분) 케이스**도
   15% 확률로 섞는다([#159](https://github.com/ChoHyeonChan/maskingtape/issues/159)) — core는 생년월일만
   유효하면 체크섬이 틀려도 confidence 0.85로 여전히 탐지하는데, bench가 지금까지 항상 유효한

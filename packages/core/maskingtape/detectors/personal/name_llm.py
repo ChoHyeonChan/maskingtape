@@ -220,7 +220,7 @@ class LLMNameDetector(Detector):
         """
         if not text.strip():
             return []
-        # 한글 두 글자가 붙은 자리가 없는 텍스트(순수 숫자·코드·영문)는 LLM을 건너뛴다.
+        # 한글 두 글자가 붙은 자리도 인명 단서도 없는 텍스트(순수 숫자·코드·영문)는 LLM을 건너뛴다.
         # 이름이 있을 수 없는 입력에서 느린 LLM 호출을 아낀다(has_name_candidate).
         if not has_name_candidate(text):
             return []

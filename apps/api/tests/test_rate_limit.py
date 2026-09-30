@@ -3,7 +3,6 @@
 
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-
 from maskingtape_api.main import create_app
 from maskingtape_api.rate_limit import InMemoryRateLimiter
 from maskingtape_api.settings import (
