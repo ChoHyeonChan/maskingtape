@@ -17,3 +17,4 @@
 - [ ] 남이 만든 코드·폰트·아이콘·이미지를 배포물에 넣지 않았다 (넣었다면 팀장에게 알리고 `THIRD_PARTY_NOTICES.md`에 고지)
 - [ ] 내 파트 폴더 밖은 수정하지 않았다 (공용 수정은 팀장 승인 받음)
 - [ ] 진짜 개인정보(실명·실번호·실주소)가 없다 — 테스트 데이터는 전부 합성
+- [ ] 동작·수치·의존성·원문이 가는 곳이 바뀌었다면 [CONTRIBUTING 「동작이 바뀌면 서류도 같은 PR에서 고친다」](https://github.com/ChoHyeonChan/maskingtape/blob/main/CONTRIBUTING.md#동작이-바뀌면-서류도-같은-pr에서-고친다) 표대로 README·SBOM·로드맵을 같이 고쳤다

@@ -2,7 +2,7 @@
 
 **담당: seoyeon ([@seoyeon056](https://github.com/seoyeon056))** · 상태: ✅ 시작 가능 (스켈레톤 머지 완료)
 
-저작권·개인정보 걱정 없는 **자체 합성 평가 데이터셋**과 정확도(F1) 측정 스크립트. 공개 벤치마크는 이 프로젝트의 핵심 차별화 포인트다.
+저작권·개인정보 걱정 없는 **자체 합성 평가 데이터셋**과 정확도(F1·F2) 측정 스크립트. 공개 벤치마크는 이 프로젝트의 핵심 차별화 포인트다.
 
 ## 규칙 (실격 사유와 직결 — 예외 없음)
 
@@ -19,7 +19,7 @@ generator/
   documents.py    # 문장 템플릿에 값을 심어 문서 + 라벨(span) 생성
 generate_dataset.py  # CLI — JSONL 데이터셋 생성
 evaluators/           # 평가 도구 모음 — "무엇을 평가하는가"별로 파일 하나
-  evaluate.py            # CLI — core Pipeline.scan() 결과 vs 정답 → precision/recall/F1 리포트 (종류별+난이도별)
+  evaluate.py            # CLI — core Pipeline.scan() 결과 vs 정답 → precision/recall/F1/F2 리포트 (종류별+난이도별)
   mask_quality.py        # 마스킹 결과물 자체의 개인정보 유출(완전/부분) 여부 검증 로직
   evaluate_masking.py    # CLI — 마스킹 결과에 개인정보가 실제로 남아있는지(유출률) 평가 (--strategy로 mask/label/pseudonym 선택)
   confidence_analysis.py # CLI — confidence 임계값별 precision/recall/F1 변화 분석
@@ -764,5 +764,7 @@ JSONL — 한 줄에 문서 하나:
 - `start`/`end`는 파이썬 슬라이스 규약 (`text[start:end]` == 개인정보 원문)
 - `kind`는 core의 `Detection.kind`와 동일한 문자열: `rrn`, `phone`, `email`, `name`, `address`, `card`, `biz_reg`, `passport`, `account`, `birth_date`, `driver_license`
 - `difficulty`는 `easy`/`hard`/`negative` 중 하나 (없으면 evaluate.py가 `unknown`으로 취급 — 하위 호환)
-- 평가 기준: span 완전 일치(exact match)로 precision / recall / F1 산출
+- 평가 기준: span 완전 일치(exact match)로 precision / recall / F1 / F2 산출
+  (F2는 재현율에 F1보다 더 큰 가중치를 두는 Fβ, β=2 — PII 탐지는 미탐(FN)이 오탐(FP)보다
+  위험하다는 게 이 도메인의 평가 관행이라 F1과 나란히 본다. 근거: `evaluate.py` 모듈 docstring)
 - 포맷 변경은 팀장 승인 후 이 문서부터 갱신한다
