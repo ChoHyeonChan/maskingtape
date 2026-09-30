@@ -7,18 +7,17 @@ interface Props {
   onHelpClick: () => void;
   hasResult?: boolean;
   coachMarkActive?: boolean;
+  /** "page"는 /accuracy처럼 랜딩과 분리된 하위 페이지에서 쓴다 — 소개·탐지 범위·체험하기
+   * 링크가 앵커(#id)가 아니라 랜딩으로 돌아가는 절대경로(/#id)를 가리키게 된다. */
+  variant?: "home" | "page";
 }
 
 const ACCURACY_BUBBLE_TIMEOUT_MS = 30_000;
 
-const SECTION_LINKS = [
-  { href: "#intro", label: "소개" },
-  { href: "#coverage", label: "탐지 범위" },
-  { href: "#accuracy", label: "정확도" },
-  { href: "#demo", label: "체험하기" },
-];
-
-export function SiteNav({ onHelpClick, hasResult = false, coachMarkActive = false }: Props) {
+export function SiteNav({ onHelpClick, hasResult = false, coachMarkActive = false, variant = "home" }: Props) {
+  const isPage = variant === "page";
+  const brandHref = isPage ? "/" : "#intro";
+  const hashHref = (id: string) => (isPage ? `/#${id}` : `#${id}`);
   // 정확도 안내(예전엔 맨 아래 footer에만 있었다)를 도움말 버튼 옆에도 잠깐 띄워서, 처음
   // 쓰는 사람이 스크롤해서 맨 아래까지 안 내려도 "규칙 기반이라 이름을 놓칠 수 있다"는 걸
   // 바로 알게 한다. 예전엔 아무 데나 클릭해도 닫혔는데, 그러면 텍스트를 입력하거나 탐지
@@ -46,7 +45,7 @@ export function SiteNav({ onHelpClick, hasResult = false, coachMarkActive = fals
   return (
     <nav className="site-nav" aria-label="주요 섹션 이동">
       <div className="site-nav__inner">
-        <a className="site-nav__brand" href="#intro" aria-label="맨 위로">
+        <a className="site-nav__brand" href={brandHref} aria-label="맨 위로">
           <img
             src="/maskingtape-logo-blue.png"
             alt="MaskingTape"
@@ -56,11 +55,21 @@ export function SiteNav({ onHelpClick, hasResult = false, coachMarkActive = fals
         </a>
 
         <div className="site-nav__links">
-          {SECTION_LINKS.map((link) => (
-            <a key={link.href} className="site-nav__link" href={link.href}>
-              {link.label}
-            </a>
-          ))}
+          <a className="site-nav__link" href={hashHref("intro")}>
+            소개
+          </a>
+          <a className="site-nav__link" href={hashHref("coverage")}>
+            탐지 범위
+          </a>
+          <a
+            className={isPage ? "site-nav__link site-nav__link--active" : "site-nav__link"}
+            href="/accuracy"
+          >
+            정확도
+          </a>
+          <a className="site-nav__link" href={hashHref("demo")}>
+            체험하기
+          </a>
           <a
             className="site-nav__link"
             href="https://github.com/ChoHyeonChan/maskingtape"
@@ -113,7 +122,7 @@ export function SiteNav({ onHelpClick, hasResult = false, coachMarkActive = fals
             )}
           </div>
 
-          <a className="site-nav__cta" href="#demo">
+          <a className="site-nav__cta" href={hashHref("demo")}>
             웹에서 체험하기
           </a>
         </div>

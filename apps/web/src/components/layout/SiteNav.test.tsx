@@ -45,14 +45,35 @@ describe("SiteNav 오픈소스 고지 링크 (#439)", () => {
 });
 
 describe("SiteNav section links", () => {
-  it("links to every landing page section by id", () => {
+  it("links to every landing page section by id, and 정확도 to its own page", () => {
     render(<SiteNav onHelpClick={() => {}} />);
 
     expect(screen.getByRole("link", { name: "소개" })).toHaveAttribute("href", "#intro");
     expect(screen.getByRole("link", { name: "탐지 범위" })).toHaveAttribute("href", "#coverage");
-    expect(screen.getByRole("link", { name: "정확도" })).toHaveAttribute("href", "#accuracy");
+    // 정확도는 랜딩 안의 앵커가 아니라 별도 페이지(/accuracy)로 이동한다(#553 후속).
+    expect(screen.getByRole("link", { name: "정확도" })).toHaveAttribute("href", "/accuracy");
     expect(screen.getByRole("link", { name: "체험하기" })).toHaveAttribute("href", "#demo");
     expect(screen.getByRole("link", { name: "웹에서 체험하기" })).toHaveAttribute("href", "#demo");
+  });
+});
+
+describe("SiteNav variant='page' (예: /accuracy에서 쓰는 랜딩 복귀용 nav)", () => {
+  it("points section links back to the landing page instead of bare anchors", () => {
+    render(<SiteNav onHelpClick={() => {}} variant="page" />);
+
+    expect(screen.getByRole("link", { name: "소개" })).toHaveAttribute("href", "/#intro");
+    expect(screen.getByRole("link", { name: "탐지 범위" })).toHaveAttribute("href", "/#coverage");
+    expect(screen.getByRole("link", { name: "체험하기" })).toHaveAttribute("href", "/#demo");
+    expect(screen.getByRole("link", { name: "웹에서 체험하기" })).toHaveAttribute("href", "/#demo");
+    expect(screen.getByRole("link", { name: "맨 위로" })).toHaveAttribute("href", "/");
+  });
+
+  it("marks 정확도 as the current page", () => {
+    render(<SiteNav onHelpClick={() => {}} variant="page" />);
+
+    const link = screen.getByRole("link", { name: "정확도" });
+    expect(link).toHaveAttribute("href", "/accuracy");
+    expect(link.className).toContain("site-nav__link--active");
   });
 });
 

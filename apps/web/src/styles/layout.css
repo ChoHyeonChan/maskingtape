@@ -66,6 +66,11 @@
   color: var(--brand-blue);
 }
 
+.site-nav__link--active {
+  color: var(--brand-blue);
+  font-weight: 800;
+}
+
 .site-nav__actions {
   display: flex;
   align-items: center;
