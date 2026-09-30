@@ -3,7 +3,6 @@
 
 import { useRef, useState } from "react";
 import { CoachMark } from "../components/help/CoachMark";
-import { CoverageSection } from "../components/intro/CoverageSection";
 import { InputPanel } from "../components/input/InputPanel";
 import { SiteNav } from "../components/layout/SiteNav";
 import { ResultsPanel } from "../components/results/ResultsPanel";
@@ -12,9 +11,9 @@ import type { Detection, HighlightRange } from "../types/detection";
 
 type CoachMarkVariant = "intro" | "result";
 
-// 탐지 범위(무엇을 잡나요) + 입력·결과 체험이 랜딩 페이지에서 이 별도 페이지로 옮겨왔다
-// (#553 후속) — 실제 도구를 쓰는 상호작용은 여기서만 일어나므로 스캔 상태·코치마크도
-// App.tsx가 아니라 여기서 들고 있는다.
+// 실제 입력·결과 체험이 랜딩 페이지에서 이 별도 페이지로 옮겨왔다(#553 후속) — 탐지
+// 범위(무엇을 잡나요)는 다시 랜딩으로 돌아갔다. 상호작용은 여기서만 일어나므로 스캔
+// 상태·코치마크도 App.tsx가 아니라 여기서 들고 있는다.
 export function DemoPage() {
   const [inputText, setInputText] = useState("");
   const [scanned, setScanned] = useState<{ text: string; detections: Detection[] } | null>(null);
@@ -84,8 +83,6 @@ export function DemoPage() {
         coachMarkActive={coachMarkVariant !== null}
       />
       <div className="app-shell">
-        <CoverageSection />
-
         <div className="experience" id="demo">
           <div className="privacy-note" role="note" aria-label="개인정보 입력 주의 안내">
             <span className="privacy-note__icon" aria-hidden="true">▣</span>

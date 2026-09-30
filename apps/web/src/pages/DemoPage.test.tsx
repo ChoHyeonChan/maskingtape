@@ -133,11 +133,3 @@ describe("DemoPage result coachmark (#299)", () => {
     expect(screen.getByRole("dialog", { name: "사용 방법 안내" })).toHaveTextContent("완료!");
   });
 });
-
-describe("DemoPage shows what it detects (탐지 범위가 이 페이지로 이동, #553 후속)", () => {
-  it("renders the coverage section listing all 11 kinds", () => {
-    render(<DemoPage />);
-
-    expect(screen.getByRole("region", { name: "탐지 범위" })).toHaveTextContent("이름");
-  });
-});

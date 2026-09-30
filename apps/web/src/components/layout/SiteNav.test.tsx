@@ -45,13 +45,13 @@ describe("SiteNav 오픈소스 고지 링크 (#439)", () => {
 });
 
 describe("SiteNav section links", () => {
-  it("links 소개 to the home anchor, and 탐지 범위·정확도·체험하기 to their own real pages", () => {
+  it("links 소개·탐지 범위 to landing anchors, and 정확도·체험하기 to their own real pages", () => {
     render(<SiteNav onHelpClick={() => {}} />);
 
+    // 탐지 범위(무엇을 잡나요)는 랜딩 페이지 자체에 있다 — 앵커로 스크롤한다.
     expect(screen.getByRole("link", { name: "소개" })).toHaveAttribute("href", "#intro");
-    // 탐지 범위·체험하기·정확도는 랜딩 안의 앵커가 아니라 각자 별도 페이지로
-    // 이동한다(#553 후속 — 탐지 범위·입력/결과 체험이 /demo로 옮겨갔다).
-    expect(screen.getByRole("link", { name: "탐지 범위" })).toHaveAttribute("href", "/demo#coverage");
+    expect(screen.getByRole("link", { name: "탐지 범위" })).toHaveAttribute("href", "#coverage");
+    // 정확도·체험하기(입력/결과 체험)만 랜딩 밖 별도 페이지로 이동한다(#553 후속).
     expect(screen.getByRole("link", { name: "정확도" })).toHaveAttribute("href", "/accuracy");
     expect(screen.getByRole("link", { name: "체험하기" })).toHaveAttribute("href", "/demo");
     expect(screen.getByRole("link", { name: "웹에서 체험하기" })).toHaveAttribute("href", "/demo");
@@ -59,11 +59,11 @@ describe("SiteNav section links", () => {
 });
 
 describe("SiteNav variant='accuracy' (예: /accuracy에서 쓰는 랜딩 복귀용 nav)", () => {
-  it("points 소개 back to the landing page instead of a bare anchor", () => {
+  it("points 소개·탐지 범위 back to the landing page instead of bare anchors", () => {
     render(<SiteNav onHelpClick={() => {}} variant="accuracy" />);
 
     expect(screen.getByRole("link", { name: "소개" })).toHaveAttribute("href", "/#intro");
-    expect(screen.getByRole("link", { name: "탐지 범위" })).toHaveAttribute("href", "/demo#coverage");
+    expect(screen.getByRole("link", { name: "탐지 범위" })).toHaveAttribute("href", "/#coverage");
     expect(screen.getByRole("link", { name: "체험하기" })).toHaveAttribute("href", "/demo");
     expect(screen.getByRole("link", { name: "웹에서 체험하기" })).toHaveAttribute("href", "/demo");
     expect(screen.getByRole("link", { name: "맨 위로" })).toHaveAttribute("href", "/");
@@ -79,10 +79,11 @@ describe("SiteNav variant='accuracy' (예: /accuracy에서 쓰는 랜딩 복귀�
 });
 
 describe("SiteNav variant='demo' (/demo 페이지 자신의 nav)", () => {
-  it("marks 탐지 범위 and 체험하기 as the current page, not 정확도", () => {
+  it("marks 체험하기 as the current page, not 탐지 범위 or 정확도", () => {
     render(<SiteNav onHelpClick={() => {}} variant="demo" />);
 
-    expect(screen.getByRole("link", { name: "탐지 범위" }).className).toContain("site-nav__link--active");
+    // 탐지 범위(무엇을 잡나요)는 랜딩에 있으므로 /demo에서는 강조하지 않는다.
+    expect(screen.getByRole("link", { name: "탐지 범위" }).className).not.toContain("site-nav__link--active");
     expect(screen.getByRole("link", { name: "체험하기" }).className).toContain("site-nav__link--active");
     expect(screen.getByRole("link", { name: "정확도" }).className).not.toContain("site-nav__link--active");
   });
