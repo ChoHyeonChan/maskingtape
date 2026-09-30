@@ -4,7 +4,6 @@
 import { useRef, useState } from "react";
 import { CoachMark } from "./components/help/CoachMark";
 import { CoverageSection } from "./components/intro/CoverageSection";
-import { ExampleGallery } from "./components/intro/ExampleGallery";
 import { ServiceIntro } from "./components/intro/ServiceIntro";
 import { InputPanel } from "./components/input/InputPanel";
 import { ClosingCta } from "./components/layout/ClosingCta";
@@ -30,9 +29,6 @@ export function App() {
   const [highlight, setHighlight] = useState<HighlightRange | null>(null);
   // 결과 코치마크는 첫 스캔 직후 딱 한 번만 자동으로 뜬다 — 재스캔마다 다시 뜨면 방해가 된다(#299).
   const hasAutoShownResultCoachMark = useRef(false);
-  // 예제 갤러리는 페이지 위쪽 섹션이라, 카드를 고르면 실제 입력·결과가 있는 체험 영역까지
-  // 스크롤해서 보여준다 — 그러지 않으면 뭘 골랐는지 화면에 아무 변화가 없어 보인다(#455).
-  const experienceRef = useRef<HTMLDivElement>(null);
 
   const displayText = scanned ? maskedResultText : inputText;
 
@@ -74,11 +70,6 @@ export function App() {
     setCoachMarkVariant(null);
   }
 
-  function handleGalleryPick(text: string) {
-    handleTextChange(text);
-    experienceRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-
   function openCoachMark() {
     setCoachMarkVariant(scanned ? "result" : "intro");
   }
@@ -93,9 +84,8 @@ export function App() {
       <div className="app-shell">
         <ServiceIntro />
         <CoverageSection />
-        <ExampleGallery onPick={handleGalleryPick} />
 
-        <div className="experience" id="demo" ref={experienceRef}>
+        <div className="experience" id="demo">
           <div className="privacy-note" role="note" aria-label="개인정보 입력 주의 안내">
             <span className="privacy-note__icon" aria-hidden="true">▣</span>
             <span>

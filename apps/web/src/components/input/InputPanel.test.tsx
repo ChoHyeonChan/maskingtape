@@ -138,6 +138,46 @@ describe("InputPanel file upload (#263)", () => {
   });
 });
 
+describe("InputPanel sample picker popup (예제 갤러리가 페이지 섹션에서 팝업으로 이동, #553 후속)", () => {
+  it("does not show the sample gallery inline — only a button that opens it in a popup", () => {
+    renderPanel("");
+
+    expect(screen.getByRole("button", { name: "샘플 문서 넣기" })).toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("opens a dialog with the sample cards when the sample button is clicked", () => {
+    renderPanel("");
+
+    fireEvent.click(screen.getByRole("button", { name: "샘플 문서 넣기" }));
+
+    const dialog = screen.getByRole("dialog", { name: "샘플 문서 고르기" });
+    expect(dialog).toHaveTextContent("고객 상담 기록");
+  });
+
+  it("fills the input and closes the popup when a sample card is picked", () => {
+    const onTextChange = vi.fn();
+    renderPanelWithChange(onTextChange);
+
+    fireEvent.click(screen.getByRole("button", { name: "샘플 문서 넣기" }));
+    fireEvent.click(screen.getByRole("button", { name: /고객 상담 기록/ }));
+
+    expect(onTextChange).toHaveBeenCalledWith(expect.stringContaining("홍길동"));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("closes the popup on Escape without picking anything", () => {
+    const onTextChange = vi.fn();
+    renderPanelWithChange(onTextChange);
+
+    fireEvent.click(screen.getByRole("button", { name: "샘플 문서 넣기" }));
+    fireEvent.keyDown(window, { key: "Escape" });
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(onTextChange).not.toHaveBeenCalled();
+  });
+});
+
 describe("InputPanel supports the same plain-text formats as desktop (#407)", () => {
   it.each([
     ["csv", "text/csv"],
