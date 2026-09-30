@@ -63,6 +63,13 @@ class BatchProcessor {
         task
           ..error = '파일 읽기/쓰기 실패: ${e.osError?.message ?? e.message}'
           ..status = FileTaskStatus.failed;
+      } catch (_) {
+        // 예상 밖 오류(응답 형식이 달라진 경우 등)도 이 파일만 실패로 두고 다음 파일로 간다.
+        // 예전엔 여기서 빠져나가 파일이 「처리 중」에 멈추고 앱 전체가 갇혔다(#497).
+        // 예외 문자열은 화면에 넣지 않는다 — 형식 오류 메시지에 원문 조각이 담길 수 있다.
+        task
+          ..error = unexpectedErrorMessage
+          ..status = FileTaskStatus.failed;
       }
       onUpdate();
     }

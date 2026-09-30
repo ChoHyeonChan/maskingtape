@@ -117,6 +117,10 @@ class _TextScreenState extends State<TextScreen> {
     } on AnonymizerException catch (e) {
       // 백엔드가 준 안내(Ollama 미실행 등)를 그대로 보여준다 — 덮어쓰면 원인이 가려진다.
       if (mounted) setState(() => _error = e.message);
+    } catch (_) {
+      // 예상 밖 오류도 화면에 알린다(예전엔 결과도 오류도 없이 끝났다, #497). 예외 문자열에는
+      // 원문 조각이 담길 수 있어 고정 문구만 보여준다.
+      if (mounted) setState(() => _error = unexpectedErrorMessage);
     } finally {
       if (mounted) setState(() => _running = false);
     }
