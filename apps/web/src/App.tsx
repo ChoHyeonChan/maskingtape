@@ -3,12 +3,12 @@
 
 import { useRef, useState } from "react";
 import { CoachMark } from "./components/help/CoachMark";
-import { AccuracySection } from "./components/intro/AccuracySection";
 import { CoverageSection } from "./components/intro/CoverageSection";
 import { ExampleGallery } from "./components/intro/ExampleGallery";
 import { ServiceIntro } from "./components/intro/ServiceIntro";
 import { InputPanel } from "./components/input/InputPanel";
-import { AppHeader } from "./components/layout/AppHeader";
+import { ClosingCta } from "./components/layout/ClosingCta";
+import { SiteNav } from "./components/layout/SiteNav";
 import { ResultsPanel } from "./components/results/ResultsPanel";
 import type { MaskMode } from "./lib/masking";
 import type { Detection, HighlightRange } from "./types/detection";
@@ -30,8 +30,8 @@ export function App() {
   const [highlight, setHighlight] = useState<HighlightRange | null>(null);
   // 결과 코치마크는 첫 스캔 직후 딱 한 번만 자동으로 뜬다 — 재스캔마다 다시 뜨면 방해가 된다(#299).
   const hasAutoShownResultCoachMark = useRef(false);
-  // 예제 갤러리는 체험 영역 아래쪽 소개 섹션에 있어서, 카드를 고르면 페이지 맨 위의 입력·결과
-  // 체험 영역으로 다시 스크롤해 보여준다 — 그러지 않으면 뭘 골랐는지 화면에 아무 변화가 없어 보인다(#455).
+  // 예제 갤러리는 체험 영역보다 위쪽 소개 섹션에 있어서, 카드를 고르면 실제 입력·결과가 있는
+  // 체험 영역까지 스크롤해서 보여준다 — 그러지 않으면 뭘 골랐는지 화면에 아무 변화가 없어 보인다(#455).
   const experienceRef = useRef<HTMLDivElement>(null);
 
   const displayText = scanned ? maskedResultText : inputText;
@@ -84,56 +84,58 @@ export function App() {
   }
 
   return (
-    <div className="app-shell">
-      <AppHeader
+    <>
+      <SiteNav
         onHelpClick={openCoachMark}
         hasResult={Boolean(scanned)}
         coachMarkActive={coachMarkVariant !== null}
       />
+      <div className="app-shell">
+        <ServiceIntro />
+        <CoverageSection />
+        <ExampleGallery onPick={handleGalleryPick} />
 
-      <div className="experience" ref={experienceRef}>
-        <div className="privacy-note" role="note" aria-label="개인정보 입력 주의 안내">
-          <span className="privacy-note__icon" aria-hidden="true">▣</span>
-          <span>
-            이 데모는 시연·학습용입니다. 실제 개인정보는 입력하지 마세요 — 입력한 글은 분석을 위해 서버로
-            전송되며 저장하지 않습니다.{" "}
-            <strong>정확한 결과가 필요하면 로컬 설치를 권장합니다.</strong>
-          </span>
+        <div className="experience" id="demo" ref={experienceRef}>
+          <div className="privacy-note" role="note" aria-label="개인정보 입력 주의 안내">
+            <span className="privacy-note__icon" aria-hidden="true">▣</span>
+            <span>
+              이 데모는 시연·학습용입니다. 실제 개인정보는 입력하지 마세요 — 입력한 글은 분석을 위해 서버로
+              전송되며 저장하지 않습니다.{" "}
+              <strong>정확한 결과가 필요하면 로컬 설치를 권장합니다.</strong>
+            </span>
+          </div>
+
+          <main className="app-grid">
+            <section className="panel panel--main">
+              <InputPanel
+                text={displayText}
+                hasResult={Boolean(scanned)}
+                resultVersion={scanRun}
+                maskMode={maskMode}
+                onMaskModeChange={setMaskMode}
+                onTextChange={handleTextChange}
+                onClear={handleClear}
+                onResult={handleResult}
+                onRequestEdit={handleRequestEdit}
+                highlight={highlight}
+              />
+            </section>
+
+            <ResultsPanel
+              scanned={scanned}
+              scanRun={scanRun}
+              maskMode={maskMode}
+              onMaskedTextChange={setMaskedResultText}
+              onHighlightChange={setHighlight}
+              onSamplePick={handleTextChange}
+            />
+          </main>
         </div>
 
-        <main className="app-grid">
-          <section className="panel panel--main">
-            <InputPanel
-              text={displayText}
-              hasResult={Boolean(scanned)}
-              resultVersion={scanRun}
-              maskMode={maskMode}
-              onMaskModeChange={setMaskMode}
-              onTextChange={handleTextChange}
-              onClear={handleClear}
-              onResult={handleResult}
-              onRequestEdit={handleRequestEdit}
-              highlight={highlight}
-            />
-          </section>
+        <ClosingCta />
 
-          <ResultsPanel
-            scanned={scanned}
-            scanRun={scanRun}
-            maskMode={maskMode}
-            onMaskedTextChange={setMaskedResultText}
-            onHighlightChange={setHighlight}
-            onSamplePick={handleTextChange}
-          />
-        </main>
+        {coachMarkVariant && <CoachMark variant={coachMarkVariant} onDismiss={dismissCoachMark} />}
       </div>
-
-      <ServiceIntro />
-      <CoverageSection />
-      <AccuracySection />
-      <ExampleGallery onPick={handleGalleryPick} />
-
-      {coachMarkVariant && <CoachMark variant={coachMarkVariant} onDismiss={dismissCoachMark} />}
-    </div>
+    </>
   );
 }

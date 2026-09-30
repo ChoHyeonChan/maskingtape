@@ -19,7 +19,7 @@ export function ExampleGallery({ onPick }: Props) {
     <section className="example-gallery" aria-label="예제 문서로 체험하기">
       <h2>예제로 바로 체험해보기</h2>
       <p className="example-gallery__lead">
-        문서 유형을 하나 골라 클릭하면 위 입력창에 바로 채워집니다 — 실제 개인정보가 아닌 합성 데이터입니다.
+        문서 유형을 하나 골라 클릭하면 아래 입력창에 바로 채워집니다 — 실제 개인정보가 아닌 합성 데이터입니다.
       </p>
       <div className="example-gallery__grid">
         {PRESETS.map((preset) => (

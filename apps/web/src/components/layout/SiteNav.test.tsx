@@ -3,25 +3,22 @@
 
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { AppHeader } from "./AppHeader";
+import { SiteNav } from "./SiteNav";
 
-describe("AppHeader help button tooltip", () => {
+describe("SiteNav help button tooltip", () => {
   it("carries a data-tooltip so its label shows immediately on hover, not the browser's delayed title tooltip", () => {
-    render(<AppHeader onHelpClick={() => {}} />);
+    render(<SiteNav onHelpClick={() => {}} />);
     const helpButton = screen.getByRole("button", { name: "사용 안내 다시 보기" });
     expect(helpButton).toHaveAttribute("data-tooltip", "도움말");
   });
 });
 
-describe("AppHeader logo (layout-shift regression)", () => {
+describe("SiteNav logo (layout-shift regression)", () => {
   it("declares explicit width/height so the browser reserves space before the image loads", () => {
     // 로고에 width/height(또는 CSS aspect-ratio)가 없으면, 이미지가 로드되기 전엔 높이가
-    // 0이었다가 로드 후 실제 크기(약 62px)만큼 아래 레이아웃이 밀려난다. 첫 진입 때 이
-    // 밀림이 코치마크가 측정해둔 좌표보다 늦게 일어나면(느린 네트워크·캐시 없음),
-    // 코치마크 하이라이트가 실제 버튼 위치와 어긋난 채로 남는다 — 새로고침하면 이미지가
-    // 캐시돼 있어 재현되지 않아서 원인 파악이 어려웠다. width/height 속성을 주면 브라우저가
+    // 0이었다가 로드 후 실제 크기만큼 레이아웃이 밀려난다. width/height 속성을 주면 브라우저가
     // 이미지 도착 전부터 최종 공간을 미리 잡아 둬 로드 후에도 레이아웃이 움직이지 않는다.
-    render(<AppHeader onHelpClick={() => {}} />);
+    render(<SiteNav onHelpClick={() => {}} />);
     const logo = screen.getByRole("img", { name: "MaskingTape" });
     expect(logo).toHaveAttribute("width");
     expect(logo).toHaveAttribute("height");
@@ -33,9 +30,9 @@ describe("AppHeader logo (layout-shift regression)", () => {
   });
 });
 
-describe("AppHeader 오픈소스 고지 링크 (#439)", () => {
+describe("SiteNav 오픈소스 고지 링크 (#439)", () => {
   it("links to THIRD_PARTY_NOTICES.md and opens it in a new tab", () => {
-    render(<AppHeader onHelpClick={() => {}} />);
+    render(<SiteNav onHelpClick={() => {}} />);
     const link = screen.getByRole("link", { name: "오픈소스 라이선스" });
 
     expect(link).toHaveAttribute(
@@ -47,7 +44,40 @@ describe("AppHeader 오픈소스 고지 링크 (#439)", () => {
   });
 });
 
-describe("AppHeader accuracy bubble (도움말 옆에 잠깐 뜨는 정확도 안내)", () => {
+describe("SiteNav section links", () => {
+  it("links to every landing page section by id, and 정확도 to its own page", () => {
+    render(<SiteNav onHelpClick={() => {}} />);
+
+    expect(screen.getByRole("link", { name: "소개" })).toHaveAttribute("href", "#intro");
+    expect(screen.getByRole("link", { name: "탐지 범위" })).toHaveAttribute("href", "#coverage");
+    // 정확도는 랜딩 안의 앵커가 아니라 별도 페이지(/accuracy)로 이동한다(#553 후속).
+    expect(screen.getByRole("link", { name: "정확도" })).toHaveAttribute("href", "/accuracy");
+    expect(screen.getByRole("link", { name: "체험하기" })).toHaveAttribute("href", "#demo");
+    expect(screen.getByRole("link", { name: "웹에서 체험하기" })).toHaveAttribute("href", "#demo");
+  });
+});
+
+describe("SiteNav variant='page' (예: /accuracy에서 쓰는 랜딩 복귀용 nav)", () => {
+  it("points section links back to the landing page instead of bare anchors", () => {
+    render(<SiteNav onHelpClick={() => {}} variant="page" />);
+
+    expect(screen.getByRole("link", { name: "소개" })).toHaveAttribute("href", "/#intro");
+    expect(screen.getByRole("link", { name: "탐지 범위" })).toHaveAttribute("href", "/#coverage");
+    expect(screen.getByRole("link", { name: "체험하기" })).toHaveAttribute("href", "/#demo");
+    expect(screen.getByRole("link", { name: "웹에서 체험하기" })).toHaveAttribute("href", "/#demo");
+    expect(screen.getByRole("link", { name: "맨 위로" })).toHaveAttribute("href", "/");
+  });
+
+  it("marks 정확도 as the current page", () => {
+    render(<SiteNav onHelpClick={() => {}} variant="page" />);
+
+    const link = screen.getByRole("link", { name: "정확도" });
+    expect(link).toHaveAttribute("href", "/accuracy");
+    expect(link.className).toContain("site-nav__link--active");
+  });
+});
+
+describe("SiteNav accuracy bubble (도움말 옆에 잠깐 뜨는 정확도 안내)", () => {
   beforeEach(() => {
     vi.useFakeTimers();
   });
@@ -57,12 +87,12 @@ describe("AppHeader accuracy bubble (도움말 옆에 잠깐 뜨는 정확도 �
   });
 
   it("shows the rule-based-detection caveat next to the help button on mount", () => {
-    render(<AppHeader onHelpClick={() => {}} />);
+    render(<SiteNav onHelpClick={() => {}} />);
     expect(screen.getByRole("status")).toHaveTextContent("로컬 설치를 권장합니다");
   });
 
   it("does not dismiss just because the page was clicked elsewhere", () => {
-    render(<AppHeader onHelpClick={() => {}} />);
+    render(<SiteNav onHelpClick={() => {}} />);
     expect(screen.getByRole("status")).toBeInTheDocument();
 
     fireEvent.click(document.body);
@@ -71,7 +101,7 @@ describe("AppHeader accuracy bubble (도움말 옆에 잠깐 뜨는 정확도 �
   });
 
   it("dismisses when its own X (close) button is clicked", () => {
-    render(<AppHeader onHelpClick={() => {}} />);
+    render(<SiteNav onHelpClick={() => {}} />);
     expect(screen.getByRole("status")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "정확도 안내 닫기" }));
@@ -80,7 +110,7 @@ describe("AppHeader accuracy bubble (도움말 옆에 잠깐 뜨는 정확도 �
   });
 
   it("auto-dismisses after 30 seconds even without a click", () => {
-    render(<AppHeader onHelpClick={() => {}} />);
+    render(<SiteNav onHelpClick={() => {}} />);
     expect(screen.getByRole("status")).toBeInTheDocument();
 
     act(() => {
@@ -91,34 +121,34 @@ describe("AppHeader accuracy bubble (도움말 옆에 잠깐 뜨는 정확도 �
   });
 
   it("shows again when a scan result first appears, even if it already timed out on the first page", () => {
-    const { rerender } = render(<AppHeader onHelpClick={() => {}} hasResult={false} />);
+    const { rerender } = render(<SiteNav onHelpClick={() => {}} hasResult={false} />);
 
     act(() => {
       vi.advanceTimersByTime(30_000);
     });
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
 
-    rerender(<AppHeader onHelpClick={() => {}} hasResult={true} />);
+    rerender(<SiteNav onHelpClick={() => {}} hasResult={true} />);
 
     expect(screen.getByRole("status")).toBeInTheDocument();
   });
 
   it("does not re-show on every re-render while a result is already displayed", () => {
-    const { rerender } = render(<AppHeader onHelpClick={() => {}} hasResult={true} />);
+    const { rerender } = render(<SiteNav onHelpClick={() => {}} hasResult={true} />);
 
     fireEvent.click(screen.getByRole("button", { name: "정확도 안내 닫기" }));
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
 
-    rerender(<AppHeader onHelpClick={() => {}} hasResult={true} />);
+    rerender(<SiteNav onHelpClick={() => {}} hasResult={true} />);
 
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
 
   it("hides while the coachmark overlay is active, since both use the same red dismiss-hint styling and clash", () => {
-    const { rerender } = render(<AppHeader onHelpClick={() => {}} coachMarkActive={true} />);
+    const { rerender } = render(<SiteNav onHelpClick={() => {}} coachMarkActive={true} />);
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
 
-    rerender(<AppHeader onHelpClick={() => {}} coachMarkActive={false} />);
+    rerender(<SiteNav onHelpClick={() => {}} coachMarkActive={false} />);
     expect(screen.getByRole("status")).toBeInTheDocument();
   });
 });
