@@ -119,7 +119,9 @@ _TITLE_ONLY_CUES = frozenset(_TITLE_CUES) - frozenset(_SUFFIX_CUES)
 # 이름 뒤에 붙는 단일 음절 조사 — 일반명사 뒤에 붙어 단어 경계를 흐리는지 판별에 쓴다(#247).
 # "엔"("~에는"의 준말, "이전엔")도 조사로 본다(#484) — 없으면 "이전"(정지어) 뒤에 "엔"이 붙은
 # "이전엔"이 조사 경계로 안 잡혀 3글자 이름("이+전+엔")처럼 보여 "이전엔 팀장"이 오탐됐다.
-_JOSA_CHARS = frozenset("이가은는을를도만의에로과와엔")
+# "랑"·"께"도 흔한 단일 음절 조사다(#484 리뷰 — "김민수랑", "박서준께"가 낱말 경계 확인
+# 때문에 놓치고 있었다).
+_JOSA_CHARS = frozenset("이가은는을를도만의에로과와엔랑께")
 
 _SURNAME_ALT = "|".join(sorted(_SURNAMES, key=len, reverse=True))
 # 이름 앞 단서 = 역할어 + 직함. 직함이 이름 앞에 오는 형태("대표 홍길동")도 잡는다(#239).
@@ -170,6 +172,15 @@ _FORM_LABELS = (
     "성명", "이름", "성함", "실명", "예금주", "명의자", "환자명", "고객명", "회원명",
     "수취인", "송금인", "입금자", "신청인", "신청자", "보호자", "대표자",
 )
+
+# "이름"은 사람 이름 그 자체를 가리키는 범용 메타 단서라 비인명 문맥("이름 정밀 탐지",
+# "파일 이름")과 자주 겹친다 — 정지어(_COMMON_WORDS) 필터를 면제하는 "강한 라벨"에서
+# 뺀다(#484 리뷰). 나머지 _FORM_LABELS(명의자·예금주·환자명 등, 좁은 양식 라벨)는 그
+# 자체로 이미 사람 자리를 가리키는 문맥이 뚜렷해 강한 단서로 인정한다 — "명의자 공식"
+# 처럼 라벨 뒤에 흔한 낱말이 와도 실명일 수 있다. "고객"·"담당자"처럼 훨씬 흔하고 범용인
+# _PREFIX_CUES 나머지는 여기 포함하지 않는다 — 포함하면 "담당자 최근 변경"·"고객 문의
+# 접수" 같은 기존에 걸러야 했던 오탐까지 강한 단서로 승격돼 버린다(#446 회귀 테스트).
+_STRONG_LABEL_PREFIXES = frozenset(_FORM_LABELS) - {"이름"}
 # 양식 칸에 이름 대신 들어가는 값과 표 머리행에 흔한 열 이름 — 끝의 조사·"입니다"를 뗀 값이
 # 이것과 **완전히 같을 때만** 이름으로 보지 않는다. 앞부분 일치로 거르면 "기재민"처럼 이 말로
 # 시작하는 실명이 샌다(#491 독립 검증).
@@ -200,8 +211,10 @@ _FORM_NAME_RE = re.compile(
 _NAME_RE = re.compile(
     # 역할어·직함 뒤에 조사가 붙은 형태("담당자는 홍길동", "예금주는 김민")도 잇는다 —
     # 서식 문장에서 흔한데 조사 하나 때문에 단서를 통째로 잃고 있었다.
-    # 라벨 뒤 구분자는 양식에서 흔한 " : "·표 칸 " | "까지 받는다(#491).
-    r"(?:(?P<prefix>" + _PREFIX_ALT + r")(?:은|는|이|가)?" + _LABEL_SEP + r")?"
+    # 라벨 뒤 구분자는 양식에서 흔한 " : "·표 칸 " | "까지 받는다(#491). 구분자를
+    # named group으로 잡아두는 이유는 #484 참고 — 콜론·세로줄처럼 명시적인 구분자가
+    # 있으면(공백뿐인 경우와 달리) prefix가 좁은 양식 라벨이 아니어도 강한 단서로 본다.
+    r"(?:(?P<prefix>" + _PREFIX_ALT + r")(?:은|는|이|가)?(?P<label_sep>" + _LABEL_SEP + r"))?"
     # 성씨는 단어(어절) 시작이어야 한다 — 앞에 한글이 붙어 있으면 단어 중간이라 이름이 아니다(#158).
     # 이게 없으면 "감지되어"의 "지"(성씨 사전)부터 "지되어"가 이름으로 잡히고, 뒤 "양빈도"의 "양"을
     # 존칭으로 삼켜 오탐이 된다. 앞이 공백/문장부호/문두면 통과하므로 정상 이름은 그대로 잡힌다.
@@ -215,7 +228,11 @@ _NAME_RE = re.compile(
     # 이미 suffix 매칭 자체가 보장한다. _FORM_NAME_RE와 같은 종결어미·조사 목록을 쓴다.
     # "에게"·"에서"처럼 "에"로 시작하는 두 글자 조사는 단일 글자 조사 목록(_JOSA_CHARS)만으로
     # 못 잡는다 — 처음엔 "에"만 클래스에 있어 "손인은에서"·"김민수에게"의 이름이 새로 놓쳤다.
-    r"(?(suffix)|(?=(?:입니다|이며|이고|에게|에서|[" + _JOSA_CHARS_STR + r"])?(?![가-힣])))"
+    # 리뷰(팀장, PR #571)에서 "한테"·"하고"·"처럼"·"부터"·"까지" 등 두 글자 이상 조사도
+    # 빠져 있어 "김민수한테"·"이도현하고" 같은 정상 이름을 대거 놓치는 걸 확인했다 —
+    # 완전한 목록은 아니지만 실제 지적된 조사를 전부 추가한다.
+    r"(?(suffix)|(?=(?:입니다|이며|이고|에게서|에게|에서|한테|께서|이랑|하고|처럼|부터"
+    r"|까지|보다|으로|로서|[" + _JOSA_CHARS_STR + r"])?(?![가-힣])))"
 )
 
 # LLM에 보낼지 정하는 후보 판정용: 한글 두 글자가 붙은 자리. 한국어 이름은 두 글자 이상이다.
@@ -313,12 +330,26 @@ class NameDetector(Detector):
         # 통째로 소비하고 지나가 "김하늘"이 단서 없는 이름이 돼 새어나갔다.
         while (m := _NAME_RE.search(text, pos)) is not None:
             name_start = m.start("name")
-            # 앞뒤 단서가 둘 다 있으면 확신도 0.75짜리 강한 근거다(아래 confidence와 같은 조건).
-            strong = m.group("prefix") is not None and m.group("suffix") is not None
+            prefix = m.group("prefix")
+            suffix = m.group("suffix")
+            label_sep = m.group("label_sep")
+            # 앞뒤 단서가 둘 다 있거나, 앞 단서가 좁은 양식 라벨(명의자·예금주 등, "이름"
+            # 류 범용 메타 단서는 제외)이거나, 구분자에 콜론·세로줄처럼 명시적인 표시가
+            # 있으면 강한 근거로 본다(#484 리뷰) — "명의자 공식"(라벨 자체가 강함)·"담당자:
+            # 문맥"(콜론이 강한 신호)처럼 라벨 뒤에 흔한 낱말(_COMMON_WORDS)이 와도 그
+            # 이름인 사람일 수 있어 정지어 필터를 면제한다. 반면 "담당자 최근 변경"처럼
+            # 흔한 역할어 뒤에 공백만 있는 경우는 여전히 약한 단서로 남겨 기존 오탐 방지
+            # (#446)를 지킨다.
+            has_explicit_sep = label_sep is not None and (":" in label_sep or "|" in label_sep)
+            strong = (
+                (prefix is not None and suffix is not None)
+                or prefix in _STRONG_LABEL_PREFIXES
+                or (prefix is not None and has_explicit_sep)
+            )
             if m.group("name") in _CUE_WORDS or _is_label_word_at(text, name_start, strong=strong):
                 # 라벨 단어는 이름이 아니다. 앞 단서를 달고 잡혔다면 그 단어 자리에서 다시 찾아
                 # 그 단어가 다음 이름의 단서가 되게 한다. 같은 자리를 또 잡으면(단서 없이) 넘긴다.
-                pos = name_start if (m.group("prefix") is not None and name_start > pos) else m.end()
+                pos = name_start if (prefix is not None and name_start > pos) else m.end()
                 continue
             pos = m.end()
             if name_start > m.start() and _CUE_WITH_JOSA_RE.fullmatch(m.group("name")):
@@ -327,8 +358,6 @@ class NameDetector(Detector):
                 pos = name_start
                 continue
 
-            prefix = m.group("prefix")
-            suffix = m.group("suffix")
             has_prefix = prefix is not None
             has_suffix = suffix is not None
             if not has_prefix and not has_suffix:

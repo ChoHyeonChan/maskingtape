@@ -290,3 +290,49 @@ def test_weak_cue_false_positive_fixes_do_not_drop_real_names():
     # "에게"·"에서"처럼 "에"로 시작하는 두 글자 조사 뒤의 이름도 그대로 잡혀야 한다 —
     # 낱말 경계 확인(#484)을 더하면서 단일 글자 조사 목록만 참고하면 이런 조사를 놓친다.
     assert [d.text for d in detect("담당자가 손인은에서 변경되었습니다")] == ["손인은"]
+
+
+# ── 리뷰(팀장, PR #571)에서 찾은 대량 미탐 — 조사 목록·라벨 필터 보강(#484 후속) ──
+# 첫 구현이 core 테스트는 통과했지만, main 대비 21만 건 차등 비교에서 이름 탐지가
+# 통째로 사라진 경우가 1,064건이었다. 두 가지 원인이 있었다.
+
+
+@pytest.mark.parametrize(
+    "text, name",
+    [
+        ("담당자 김민수한테 연락해 주세요", "김민수"),  # 한테
+        ("고객 김민수랑 통화했습니다", "김민수"),  # 랑
+        ("대표 박서준께 전달드렸습니다", "박서준"),  # 께
+        ("담당자 이도현하고 회의", "이도현"),  # 하고
+        ("팀장 최유진처럼 처리", "최유진"),  # 처럼
+        ("신청인 정수빈부터 순서대로", "정수빈"),  # 부터
+    ],
+)
+def test_previously_missing_particles_after_a_name_are_recognized(text, name):
+    # suffix가 없을 때 "이름 뒤가 낱말 끝이어야 한다"는 조건(#484)이 실제 한국어 조사를
+    # 너무 좁게(단일 글자·"에게"·"에서"만) 받아, 훨씬 흔한 조사 뒤의 정상 이름을 대거
+    # 놓쳤다. 조사 목록을 넓혀 해결한다.
+    assert name in [d.text for d in detect(text)]
+
+
+@pytest.mark.parametrize(
+    "text, name",
+    [
+        ("명의자 공식", "공식"),  # 좁은 양식 라벨(_FORM_LABELS) 뒤 — 공백만 있어도 강한 단서
+        ("예금주: 정밀", "정밀"),  # 좁은 양식 라벨 + 콜론
+        ("담당자: 문맥 |", "문맥"),  # 범용 역할어라도 콜론·세로줄이 있으면 강한 단서
+    ],
+)
+def test_common_word_stopwords_are_exempt_after_a_strong_label(text, name):
+    # #484가 추가한 정지어(_COMMON_WORDS: 정밀·문맥·전혀·공식)가, 라벨이 이름 자리를
+    # 강하게 알려주는 상황에서도 적용돼 실명을 지웠다. 라벨 자체가 좁은 양식 라벨이거나
+    # 구분자가 명시적(콜론·세로줄)이면 정지어 필터를 면제해야 한다.
+    assert name in [d.text for d in detect(text)]
+
+
+def test_common_prefix_role_words_without_a_colon_still_drop_stopwords():
+    # 대조군(#446 회귀) — "담당자"·"고객"처럼 아주 흔한 역할어는 공백만 있으면(콜론 없이)
+    # 여전히 약한 단서로 남는다. 안 그러면 "담당자 최근 변경"의 "최근"이 다시 이름으로
+    # 오탐된다 — 위 "담당자: 문맥"과 구분자(콜론 유무)만 다르다.
+    assert detect("담당자 최근 변경") == []
+    assert detect("고객 문의 접수") == []
