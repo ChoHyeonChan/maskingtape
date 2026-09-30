@@ -292,8 +292,10 @@ class NameDetector(Detector):
                 continue
             pos = m.end()
             if name_start > m.start() and _CUE_WITH_JOSA_RE.fullmatch(m.group("name")):
-                # 이 후보는 그대로 가리되(더 가리기), 그 직함부터 다시 찾아 뒤 이름의 단서로 쓴다
+                # 직함+조사는 이름이 아니다. 결과에 남기지 않고, 그 직함부터 다시 찾아 뒤 이름의 단서로
+                # 쓴다. 예전에는 "더 가리기"로 남겨 "차장은"이 이름으로 보고됐다(#533).
                 pos = name_start
+                continue
 
             prefix = m.group("prefix")
             suffix = m.group("suffix")
@@ -351,7 +353,8 @@ class NameDetector(Detector):
                 pos = start
                 continue
             pos = end
-            if value in _FORM_NOT_NAMES or all(covered[start:end]):
+            # 직함+조사("신청자 : 차장은 …")도 값이 아니다. 뒤 이름은 위 규칙이 직함을 단서로 잡는다(#533)
+            if value in _FORM_NOT_NAMES or _CUE_WITH_JOSA_RE.fullmatch(name) or all(covered[start:end]):
                 continue
             extra.append(
                 Detection(

@@ -132,9 +132,9 @@ describe("InputPanel file upload (#263)", () => {
     await waitFor(() => expect(onTextChange).toHaveBeenCalledWith("드래그로 넣은 텍스트"));
   });
 
-  it("shows an instant tooltip on the icon-only upload button, and switches it while extracting", () => {
+  it("labels the upload button with visible \"파일 업로드\" text, not just an icon", () => {
     renderPanel("");
-    expect(screen.getByRole("button", { name: "파일 업로드" })).toHaveAttribute("data-tooltip", "파일 업로드");
+    expect(screen.getByRole("button", { name: "파일 업로드" })).toHaveTextContent("파일 업로드");
   });
 });
 
