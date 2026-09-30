@@ -4,13 +4,17 @@
 /* #455 전엔 페이지 전체가 한 화면(100vh)에 갇힌 도구였다 — 위에 소개·탐지범위·정확도·예제
    섹션이 붙으면서 이제 페이지 자체는 자연스럽게 스크롤돼야 한다. 예전처럼 화면 하나에 담긴
    "체험" 영역(.experience)만 자체 높이를 유지한다(layout.css 참고). */
+/* overflow는 일부러 지정하지 않는다 — html/body/#root에 overflow:auto를 주면 각자
+   스크롤 컨테이너가 돼버려서(내용이 정확히 맞아 실제로는 안에서 스크롤되지 않아도)
+   .site-nav의 position:sticky가 문서 스크롤이 아니라 그 컨테이너 기준으로 계산되며
+   깨진다(#root가 통째로 스크롤을 따라 밀려나면서 nav도 같이 사라짐) — 기본 문서
+   스크롤에 맡기면 sticky가 정상 동작한다. */
 html,
 body,
 #root {
   width: 100%;
   height: auto;
   min-height: 100%;
-  overflow: auto;
 }
 
 * {

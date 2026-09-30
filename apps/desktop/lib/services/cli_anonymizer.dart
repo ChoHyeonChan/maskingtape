@@ -6,6 +6,7 @@ import 'dart:io';
 
 import '../models/detection.dart';
 import 'anonymizer.dart';
+import 'code_point_offsets.dart';
 
 /// core CLI(`maskingtape`)를 서브프로세스로 호출하는 구현.
 /// 탐지 로직은 전부 core에 있고, 여기는 stdin으로 텍스트를 넘기고 stdout을 읽기만 한다.
@@ -32,9 +33,12 @@ class CliAnonymizer implements Anonymizer {
     // (LLM 모드에서는 모델 호출도 두 번이라 그만큼 느리다 — core에 한 번에
     //  둘 다 주는 출력 모드가 생기면 한 번으로 줄일 수 있다.)
     final scanOut = await _run(argsFor(options, scan: true), text);
-    final detections = (jsonDecode(scanOut) as List<dynamic>)
-        .map((e) => Detection.fromJson(e as Map<String, dynamic>))
-        .toList();
+    // core 위치는 코드포인트 기준이라 Dart(UTF-16) 기준으로 바꿔 둔다(#496).
+    final detections = CodePointOffsets(text).convert(
+      (jsonDecode(scanOut) as List<dynamic>)
+          .map((e) => Detection.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
     final masked = await _run(argsFor(options, scan: false), text);
     return AnonymizeResult(
       // print()가 붙인 마지막 줄바꿈 하나만 떼어낸다.

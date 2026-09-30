@@ -53,18 +53,19 @@ abstract final class MaskApplier {
     for (final d in ordered) {
       if (d.start < cursor || d.end > text.length || d.start > d.end) continue;
       out.write(text.substring(cursor, d.start));
-      out.write(
-        isMasked(d) ? _segment(d, strategy) : text.substring(d.start, d.end),
-      );
+      final original = text.substring(d.start, d.end);
+      out.write(isMasked(d) ? _segment(d.kind, original, strategy) : original);
       cursor = d.end;
     }
     out.write(text.substring(cursor));
     return out.toString();
   }
 
-  static String _segment(Detection d, MaskStrategy strategy) =>
+  /// 별표 개수는 core와 같게 **글자(코드포인트) 수**로 센다 — UTF-16 길이로 세면 이모지가
+  /// 든 구간에서 core보다 별표가 늘어난다(#496).
+  static String _segment(String kind, String original, MaskStrategy strategy) =>
       switch (strategy) {
-        MaskStrategy.label => '[${_labels[d.kind] ?? d.kind}]',
-        _ => '*' * (d.end - d.start),
+        MaskStrategy.label => '[${_labels[kind] ?? kind}]',
+        _ => '*' * original.runes.length,
       };
 }
