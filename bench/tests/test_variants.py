@@ -60,15 +60,15 @@ def test_current_core_detects_every_variant_shape(tag_fn_name):
         assert gold & pred, f"{tag_fn_name}: {doc.text!r} 미탐 -> {[(d.kind, d.text) for d in pipeline.scan(doc.text)]}"
 
 
-def test_name_title_particle_also_leaks_as_a_false_positive_known_bug_core_533():
-    """알려진 회귀(core #533) 핀 — `test_current_core_detects_every_variant_shape`는
-    정답 span이 pred에 포함되는지만 보기 때문에 이 오탐을 못 잡는다. #491(commit b3c3293)이
-    "라벨: 직함+조사 이름"에서 뒤 이름을 놓치지 않게 고치면서, 직함+조사 자체("차장은" 등)가
-    별도의 name 오탐으로 결과에 남는 부작용이 생겼다.
+def test_name_title_particle_is_not_reported_as_a_name_core_533():
+    """core #533 회귀 테스트 — PR #552로 고쳐졌다(2026-09-30, main `e1e3ea9`).
 
-    이 테스트는 그 현재(버그가 있는) 동작을 그대로 고정해둔다 — core #533이 고쳐지면
-    `extra`가 빈 집합이 돼 이 assert가 실패할 것이다. 그때는 이 테스트를
-    `assert pred == gold`로 뒤집어 정상 회귀 테스트로 갱신한다.
+    #491(commit b3c3293)이 "라벨: 직함+조사 이름"에서 뒤 이름을 놓치지 않게 고치면서,
+    직함+조사 자체("차장은" 등)가 별도의 name 오탐으로 결과에 남는 부작용이 생겼었다
+    (`test_current_core_detects_every_variant_shape`는 정답 span이 pred에 포함되는지만
+    보기 때문에 이 오탐을 못 잡는다). 이 테스트는 원래 그 버그를 캐너리로 고정해뒀던
+    것을, #552 머지 후 정상 동작(정답 span만 나옴)을 확인하는 회귀 테스트로 뒤집은
+    것이다.
     """
     rng = random.Random("canary:core-533")
     pipeline = Pipeline()
@@ -76,16 +76,7 @@ def test_name_title_particle_also_leaks_as_a_false_positive_known_bug_core_533()
         doc = gen_name_title_particle(rng)
         gold = {(lb["kind"], lb["start"], lb["end"]) for lb in doc.labels}
         pred = {(d.kind, d.start, d.end) for d in pipeline.scan(doc.text)}
-        extra = pred - gold
-        assert extra, (
-            f"{doc.text!r}: core #533이 이미 고쳐진 것 같습니다 — "
-            "이 테스트를 `assert pred == gold`로 갱신하세요"
-        )
-        assert len(extra) == 1, f"{doc.text!r}: 예상 밖의 추가 오탐 {extra}"
-        (extra_kind, extra_start, extra_end) = next(iter(extra))
-        (gold_kind, gold_start, _gold_end) = next(iter(gold))
-        assert extra_kind == "name"
-        assert extra_end <= gold_start, f"{doc.text!r}: 오탐 span이 정답보다 뒤에 있음 {extra}"
+        assert pred == gold, f"{doc.text!r}: 직함+조사가 다시 오탐으로 새고 있음 (core #533 회귀) -> {pred}"
 
 
 def test_committed_variants_v1_dataset_is_reproducible_from_seed():
