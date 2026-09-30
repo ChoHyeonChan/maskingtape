@@ -258,13 +258,8 @@ export function InputPanel({
           </div>
         )}
         <div className={hasResult ? "input-panel__tools input-panel__tools--hidden" : "input-panel__tools"}>
-          <button
-            type="button"
-            className="input-panel__upload"
-            onClick={() => setShowSamplePicker(true)}
-            aria-label="샘플 문서 넣기"
-            data-tooltip="샘플 넣기"
-          >
+          <button type="button" className="input-panel__upload" onClick={() => setShowSamplePicker(true)}>
+            <span>샘플 넣기</span>
             <span aria-hidden="true">▦</span>
           </button>
           <button
@@ -272,9 +267,8 @@ export function InputPanel({
             className="input-panel__upload"
             onClick={() => fileInputRef.current?.click()}
             disabled={extracting}
-            aria-label={extracting ? "추출 중..." : "파일 업로드"}
-            data-tooltip={extracting ? "추출 중..." : "파일 업로드"}
           >
+            <span>{extracting ? "추출 중..." : "파일 업로드"}</span>
             <span className="upload-icon" aria-hidden="true" />
           </button>
           <input

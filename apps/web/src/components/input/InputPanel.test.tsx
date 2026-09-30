@@ -132,9 +132,9 @@ describe("InputPanel file upload (#263)", () => {
     await waitFor(() => expect(onTextChange).toHaveBeenCalledWith("드래그로 넣은 텍스트"));
   });
 
-  it("shows an instant tooltip on the icon-only upload button, and switches it while extracting", () => {
+  it("labels the upload button with visible \"파일 업로드\" text, not just an icon", () => {
     renderPanel("");
-    expect(screen.getByRole("button", { name: "파일 업로드" })).toHaveAttribute("data-tooltip", "파일 업로드");
+    expect(screen.getByRole("button", { name: "파일 업로드" })).toHaveTextContent("파일 업로드");
   });
 });
 
@@ -142,14 +142,14 @@ describe("InputPanel sample picker popup (예제 갤러리가 페이지 섹션�
   it("does not show the sample gallery inline — only a button that opens it in a popup", () => {
     renderPanel("");
 
-    expect(screen.getByRole("button", { name: "샘플 문서 넣기" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "샘플 넣기" })).toBeInTheDocument();
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
   it("opens a dialog with the sample cards when the sample button is clicked", () => {
     renderPanel("");
 
-    fireEvent.click(screen.getByRole("button", { name: "샘플 문서 넣기" }));
+    fireEvent.click(screen.getByRole("button", { name: "샘플 넣기" }));
 
     const dialog = screen.getByRole("dialog", { name: "샘플 문서 고르기" });
     expect(dialog).toHaveTextContent("고객 상담 기록");
@@ -159,7 +159,7 @@ describe("InputPanel sample picker popup (예제 갤러리가 페이지 섹션�
     const onTextChange = vi.fn();
     renderPanelWithChange(onTextChange);
 
-    fireEvent.click(screen.getByRole("button", { name: "샘플 문서 넣기" }));
+    fireEvent.click(screen.getByRole("button", { name: "샘플 넣기" }));
     fireEvent.click(screen.getByRole("button", { name: /고객 상담 기록/ }));
 
     expect(onTextChange).toHaveBeenCalledWith(expect.stringContaining("홍길동"));
@@ -170,7 +170,7 @@ describe("InputPanel sample picker popup (예제 갤러리가 페이지 섹션�
     const onTextChange = vi.fn();
     renderPanelWithChange(onTextChange);
 
-    fireEvent.click(screen.getByRole("button", { name: "샘플 문서 넣기" }));
+    fireEvent.click(screen.getByRole("button", { name: "샘플 넣기" }));
     fireEvent.keyDown(window, { key: "Escape" });
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();

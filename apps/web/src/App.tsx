@@ -117,6 +117,7 @@ export function App() {
               maskMode={maskMode}
               onMaskedTextChange={setMaskedResultText}
               onHighlightChange={setHighlight}
+              onSamplePick={handleTextChange}
             />
           </main>
         </div>

@@ -3,6 +3,9 @@
 
 /// core의 Detection 타입(JSON)과 1:1 대응하는 데이터 클래스.
 /// apps/api README의 API 계약 v1과 같은 스키마라 REST 전환 후에도 그대로 쓴다.
+///
+/// **위치 기준**: JSON에서 막 읽은 [start]·[end]는 core 기준(코드포인트)이다. 앱 안에서는
+/// 백엔드가 `CodePointOffsets`로 Dart 기준(UTF-16)으로 바꾼 뒤에만 쓴다(#496).
 class Detection {
   const Detection({
     required this.kind,
@@ -20,6 +23,16 @@ class Detection {
         text: json['text'] as String,
         confidence: (json['confidence'] as num?)?.toDouble() ?? 1.0,
         detector: json['detector'] as String? ?? '',
+      );
+
+  /// 같은 탐지를 위치만 바꿔 복사한다 — 코드포인트 → UTF-16 변환용.
+  Detection withOffsets({required int start, required int end}) => Detection(
+        kind: kind,
+        start: start,
+        end: end,
+        text: text,
+        confidence: confidence,
+        detector: detector,
       );
 
   final String kind;

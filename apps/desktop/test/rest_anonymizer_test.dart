@@ -87,6 +87,32 @@ void main() {
       expect(result.detections.single.kindLabel, '전화번호');
     });
 
+    test('API가 준 코드포인트 위치를 Dart(UTF-16) 위치로 바꾼다 (#496)', () async {
+      // 실제 API처럼 파이썬 기준(코드포인트) 위치를 준다: 이모지 3개 + 공백 + "주민 " = 7글자.
+      // 합성 주민번호(체크섬만 맞춘 가짜 값)다.
+      const input = '😀😀😀 주민 800101-1234560';
+      final server = await _serve((request) async {
+        await utf8.decoder.bind(request).join();
+        request.response
+          ..statusCode = HttpStatus.ok
+          ..headers.contentType = ContentType.json
+          ..add(utf8.encode(jsonEncode({
+            'text': '😀😀😀 주민 **************',
+            'detections': [
+              {'kind': 'rrn', 'start': 7, 'end': 21, 'text': '800101-1234560'},
+            ],
+          })));
+      });
+      addTearDown(() => server.close(force: true));
+
+      final result =
+          await RestAnonymizer(baseUrl: _baseOf(server)).anonymize(input);
+
+      final d = result.detections.single;
+      // 바꾸지 않았다면 input.substring(7, 21)은 '주민 800101-1234'라 끝 3자가 남는다.
+      expect(input.substring(d.start, d.end), '800101-1234560');
+    });
+
     test('한글이 UTF-8로 온전히 왕복한다', () async {
       final server = await _serve((request) async {
         final body = jsonDecode(await utf8.decoder.bind(request).join())
