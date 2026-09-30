@@ -5,13 +5,13 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 
 from maskingtape_api.errors import ERROR_RESPONSES, server_error
+from maskingtape_api.rate_limit import enforce_rate_limit
 from maskingtape_api.schemas import (
     AnonymizeRequest,
     AnonymizeResponse,
     ScanRequest,
     ScanResponse,
 )
-from maskingtape_api.rate_limit import enforce_rate_limit
 from maskingtape_api.services.core_adapter import (
     CoreEngineAdapter,
     CoreEngineError,

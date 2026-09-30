@@ -2,8 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import pytest
-from pydantic import ValidationError
-
 from maskingtape.detectors import default_detectors
 from maskingtape_api.schemas import (
     AnonymizeRequest,
@@ -12,6 +10,7 @@ from maskingtape_api.schemas import (
     DetectionResponse,
     ScanRequest,
 )
+from pydantic import ValidationError
 
 
 def test_scan_request_accepts_text() -> None:

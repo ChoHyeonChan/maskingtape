@@ -34,3 +34,18 @@ def test_keep_head_masks_single_char_value_fully():
     # 1글자 값은 절반 상한이 0이라 완전히 가려진다
     out = MaskAnonymizer(keep_head=2).apply("등급 A 확인", [_det(3, 4)])
     assert out == "등급 * 확인"
+
+
+def test_overlapping_detections_with_keep_head_leave_no_raw_text():
+    # 겹친 탐지를 apply에 바로 넘기면 구간마다 앞글자를 남겨, 뒤 구간의 앞글자("01")가 원문으로
+    # 남았다(#520). label·pseudonym처럼 먼저 합친 뒤 가린다
+    text = "서울특별시 강남구 역삼동 800101-1234560"
+    start = text.index("800101")
+    address = Detection(
+        kind="address", start=0, end=start + 2, text=text[: start + 2], confidence=0.9, detector="T"
+    )
+    rrn = Detection(
+        kind="rrn", start=start, end=len(text), text=text[start:], confidence=1.0, detector="T"
+    )
+    out = MaskAnonymizer(keep_head=4).apply(text, [address, rrn])
+    assert out == "서울특별" + "*" * (len(text) - 4)
