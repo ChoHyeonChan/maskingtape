@@ -1,0 +1,458 @@
+/* SPDX-FileCopyrightText: 2026 The maskingtape Authors */
+/* SPDX-License-Identifier: Apache-2.0 */
+
+.accuracy-page {
+  color: var(--text-primary);
+}
+
+.accuracy-section-title {
+  margin: 0 0 10px;
+  text-align: center;
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--text-primary);
+}
+
+.accuracy-section-lead {
+  margin: 0 0 36px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* ===== 히어로 ===== */
+.accuracy-hero {
+  padding: 64px 48px 56px;
+  text-align: center;
+  background: linear-gradient(180deg, var(--brand-blue-tint) 0%, var(--surface-strong) 100%);
+}
+
+.accuracy-hero__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 16px;
+  border-radius: 999px;
+  background: var(--brand-blue-soft);
+  color: var(--brand-blue);
+  font-size: 13px;
+  font-weight: 800;
+  margin-bottom: 22px;
+}
+
+.accuracy-hero__title {
+  margin: 0 auto 40px;
+  max-width: 640px;
+  font-size: 40px;
+  font-weight: 900;
+  line-height: 1.28;
+  color: var(--text-primary);
+}
+
+.accuracy-hero__card {
+  display: inline-flex;
+  align-items: center;
+  background: var(--surface-strong);
+  border: 1.5px solid rgba(24, 58, 139, 0.16);
+  border-radius: 22px;
+  padding: 30px 12px;
+  box-shadow: 0 18px 44px rgba(16, 32, 61, 0.1);
+}
+
+.accuracy-hero__stat {
+  padding: 0 40px;
+  text-align: center;
+}
+
+.accuracy-hero__stat--wide {
+  max-width: 280px;
+}
+
+.accuracy-hero__stat-value {
+  font-size: 46px;
+  font-weight: 900;
+  color: var(--brand-blue);
+  line-height: 1;
+}
+
+.accuracy-hero__stat-value span {
+  font-size: 22px;
+}
+
+.accuracy-hero__stat-label {
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-secondary);
+}
+
+.accuracy-hero__stat-plain {
+  font-size: 19px;
+  font-weight: 900;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.accuracy-hero__stat-sub {
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--brand-blue);
+}
+
+.accuracy-hero__divider {
+  width: 1px;
+  height: 58px;
+  background: var(--border);
+}
+
+/* ===== 왜 더 정확한가 ===== */
+.accuracy-why {
+  padding: 64px 48px;
+  background: var(--surface);
+}
+
+.accuracy-callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  max-width: 760px;
+  margin: 0 auto 40px;
+  padding: 22px 26px;
+  border-radius: 16px;
+  background: var(--surface-strong);
+  border: 1.5px solid rgba(24, 58, 139, 0.16);
+  box-shadow: 0 10px 28px rgba(16, 32, 61, 0.08);
+  text-align: left;
+}
+
+.accuracy-callout__icon {
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: var(--brand-blue-soft);
+  color: var(--brand-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 19px;
+  font-weight: 900;
+}
+
+.accuracy-callout__body {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--text-secondary);
+}
+
+.accuracy-callout__body strong {
+  color: var(--brand-blue);
+}
+
+.accuracy-steps {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 18px;
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.accuracy-step {
+  flex: 1 1 0;
+  padding: 26px 24px;
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface-strong);
+}
+
+.accuracy-step__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: var(--brand-blue);
+  color: #ffffff;
+  font-weight: 900;
+  font-size: 16px;
+  margin-bottom: 14px;
+}
+
+.accuracy-step__title {
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.accuracy-step__body {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.accuracy-step__body strong {
+  color: var(--text-primary);
+}
+
+.accuracy-step__arrow {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  color: var(--text-secondary);
+  font-size: 22px;
+  font-weight: 900;
+}
+
+/* ===== 쉬운 용어 설명 ===== */
+.accuracy-glossary {
+  padding: 56px 48px;
+  background: var(--surface);
+}
+
+.accuracy-glossary__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+.accuracy-glossary__card {
+  padding: 22px 22px 24px;
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface-strong);
+}
+
+.accuracy-glossary__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: var(--brand-blue-soft);
+  color: var(--brand-blue);
+  font-weight: 900;
+  font-size: 15px;
+  margin-bottom: 12px;
+}
+
+.accuracy-glossary__term {
+  font-size: 15px;
+  font-weight: 900;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.accuracy-glossary__body {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.accuracy-glossary__body strong {
+  color: var(--text-primary);
+}
+
+/* ===== 종류별 정확도 ===== */
+.accuracy-breakdown {
+  padding: 64px 48px;
+  background: var(--surface);
+  border-top: 1px solid rgba(24, 58, 139, 0.12);
+}
+
+.accuracy-breakdown__list {
+  max-width: 920px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.accuracy-row {
+  display: grid;
+  grid-template-columns: 200px 1fr 74px;
+  align-items: center;
+  gap: 18px;
+  padding: 14px 20px;
+  background: var(--surface-strong);
+  border: 1px solid rgba(24, 58, 139, 0.12);
+  border-radius: 10px;
+}
+
+.accuracy-row--compact {
+  grid-template-columns: 130px 1fr 74px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  margin-bottom: 10px;
+}
+
+.accuracy-row__label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.accuracy-row__sublabel {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.accuracy-row__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+
+.accuracy-row__track {
+  position: relative;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--brand-blue-soft);
+}
+
+.accuracy-row__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 999px;
+}
+
+.accuracy-row__fill--muted {
+  background: color-mix(in srgb, var(--text-secondary) 45%, #ffffff);
+}
+
+.accuracy-row__value {
+  text-align: right;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.accuracy-row__value--muted {
+  color: var(--text-secondary);
+}
+
+.accuracy-name-card {
+  margin-top: 8px;
+  padding: 20px 22px 22px;
+  background: var(--surface-strong);
+  border: 1.5px solid var(--brand-blue);
+  border-radius: 12px;
+}
+
+.accuracy-name-card__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.accuracy-name-card__title {
+  font-size: 14.5px;
+  font-weight: 900;
+  color: var(--text-primary);
+}
+
+.accuracy-name-card__badge {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--brand-blue-soft);
+  color: var(--brand-blue);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.accuracy-name-card__note {
+  margin: 16px 0 0;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.accuracy-name-card__note strong {
+  color: var(--kind-name);
+}
+
+/* ===== 측정 방법 안내 ===== */
+.accuracy-footnote {
+  padding: 48px 48px 72px;
+  text-align: center;
+}
+
+.accuracy-footnote p {
+  margin: 0 auto;
+  max-width: 640px;
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+.accuracy-footnote a {
+  color: var(--brand-blue);
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .accuracy-steps {
+    flex-direction: column;
+  }
+
+  .accuracy-step__arrow {
+    width: auto;
+    height: 32px;
+    transform: rotate(90deg);
+  }
+
+  .accuracy-glossary__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .accuracy-row,
+  .accuracy-row--compact {
+    grid-template-columns: 1fr;
+    gap: 6px;
+    text-align: left;
+  }
+
+  .accuracy-row__value {
+    text-align: left;
+  }
+}
+
+@media (max-width: 640px) {
+  .accuracy-hero,
+  .accuracy-why,
+  .accuracy-glossary,
+  .accuracy-breakdown {
+    padding: 40px 20px;
+  }
+
+  .accuracy-hero__title {
+    font-size: 28px;
+  }
+
+  .accuracy-hero__card {
+    flex-direction: column;
+    gap: 16px;
+    padding: 24px 20px;
+  }
+
+  .accuracy-hero__divider {
+    width: 100%;
+    height: 1px;
+  }
+}

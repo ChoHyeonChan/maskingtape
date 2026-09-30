@@ -1,0 +1,26 @@
+<!doctype html>
+<!-- SPDX-FileCopyrightText: 2026 The maskingtape Authors -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<html lang="ko">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MaskingTape 로딩 미리보기</title>
+<link rel="stylesheet" href="./loading.css"></head>
+<body><main class="preview"><section class="card"><div class="brand">MASKINGTAPE</div><h2>개인정보를 탐지하고 있어요</h2><p>테이프가 지나가면, 더 안전한 문서로.</p>
+<svg class="tape" viewBox="0 -20 420 132" role="progressbar" aria-label="미리보기 진행률" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+<defs>
+<linearGradient id="strip" x2="0" y2="1"><stop stop-color="#2850a6"/><stop offset="1" stop-color="#183a8b"/></linearGradient>
+<linearGradient id="body" x2="0" y2="1"><stop stop-color="#365db2"/><stop offset=".55" stop-color="#234798"/><stop offset="1" stop-color="#183a8b"/></linearGradient>
+<linearGradient id="face" x2="1" y2="1"><stop stop-color="#153377"/><stop offset="1" stop-color="#102a68"/></linearGradient>
+</defs>
+<path d="M4 67H405" stroke="#edf1f9" stroke-width="36"/>
+<path id="strip-shape" fill="url(#strip)" d="M4 49H4V85H4Z"/>
+<path id="strip-seam" stroke="#102a68" stroke-opacity=".24" stroke-width="2" stroke-dasharray="5 6" fill="none"/>
+<g id="roll" transform="translate(0 0)">
+<!-- A broad curved outer surface joins the raised back rim to the front face. -->
+<path d="M-48 33 C-48 15 -26 4 0 4 C26 4 48 15 48 33 L48 69 C48 87 26 100 0 100 C-26 100 -48 87 -48 69Z" fill="url(#body)"/>
+<path id="roll-seam" d="M-47 43 C-35 17 35 17 47 43" stroke="#153377" stroke-opacity=".35" stroke-width="2" stroke-dasharray="5 6" fill="none"/>
+<ellipse cx="0" cy="69" rx="48" ry="31" fill="url(#face)"/>
+<ellipse cx="0" cy="69" rx="22" ry="13" fill="#dce4f3"/>
+<path d="M-21 65 C-14 55 14 55 21 65 C11 62 -11 62 -21 65Z" fill="#a4b5d5"/>
+<path d="M-46 32 C-46 16 -24 6 0 6 C24 6 45 16 46 31" stroke="#ffffff" stroke-opacity=".3" fill="none"/>
+</g></svg><div class="values"><span>예상 진행률 · 미리보기</span><strong><span id="number">0</span><small>%</small></strong></div><p class="remaining">100% 남음</p></section><nav class="controls" aria-label="미리보기 제어"><button data-progress="40">40% 보기</button><button data-progress="70">70% 보기</button><button data-progress="">다시 재생</button></nav></main>
+<script src="./loading.js"></script></body></html>

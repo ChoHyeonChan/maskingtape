@@ -2,7 +2,7 @@
 
 **담당: seoyeon ([@seoyeon056](https://github.com/seoyeon056))** · 상태: ✅ 시작 가능 (스켈레톤 머지 완료)
 
-저작권·개인정보 걱정 없는 **자체 합성 평가 데이터셋**과 정확도(F1) 측정 스크립트. 공개 벤치마크는 이 프로젝트의 핵심 차별화 포인트다.
+저작권·개인정보 걱정 없는 **자체 합성 평가 데이터셋**과 정확도(F1·F2) 측정 스크립트. 공개 벤치마크는 이 프로젝트의 핵심 차별화 포인트다.
 
 ## 규칙 (실격 사유와 직결 — 예외 없음)
 
@@ -19,7 +19,7 @@ generator/
   documents.py    # 문장 템플릿에 값을 심어 문서 + 라벨(span) 생성
 generate_dataset.py  # CLI — JSONL 데이터셋 생성
 evaluators/           # 평가 도구 모음 — "무엇을 평가하는가"별로 파일 하나
-  evaluate.py            # CLI — core Pipeline.scan() 결과 vs 정답 → precision/recall/F1 리포트 (종류별+난이도별)
+  evaluate.py            # CLI — core Pipeline.scan() 결과 vs 정답 → precision/recall/F1/F2 리포트 (종류별+난이도별)
   mask_quality.py        # 마스킹 결과물 자체의 개인정보 유출(완전/부분) 여부 검증 로직
   evaluate_masking.py    # CLI — 마스킹 결과에 개인정보가 실제로 남아있는지(유출률) 평가 (--strategy로 mask/label/pseudonym 선택)
   confidence_analysis.py # CLI — confidence 임계값별 precision/recall/F1 변화 분석
@@ -343,7 +343,7 @@ docstring/주석에 명시하고 있다(`email.py`는 상한이 없던 시절 40
 - **주민번호**: 하이픈/공백/점(`.`)/구분자 없음([#209](https://github.com/ChoHyeonChan/maskingtape/issues/209)),
   1900·2000년대 성별코드를 모두 커버. **외국인등록번호**
   (성별코드 5~8)도 15% 확률로 섞는다([#148](https://github.com/ChoHyeonChan/maskingtape/issues/148)) —
-  core `RRNDetector`의 `_CENTURY` 매핑이 이미 5~8을 내국인과 동일한 정규식·체크섬으로 처리하는데
+  core `RRNDetector`가 이미 5~8을 내국인과 동일한 정규식·체크섬으로 처리하는데
   bench가 1~4만 만들어서 한 번도 실측된 적이 없었다. **체크섬 없는(2020-10 이후 발급분) 케이스**도
   15% 확률로 섞는다([#159](https://github.com/ChoHyeonChan/maskingtape/issues/159)) — core는 생년월일만
   유효하면 체크섬이 틀려도 confidence 0.85로 여전히 탐지하는데, bench가 지금까지 항상 유효한
@@ -565,12 +565,18 @@ python -m bench.evaluators.compare_name_detectors bench/datasets/synth_v1.jsonl
 로컬 Ollama가 안 떠 있으면 하이브리드 쪽은 "LLM 사용 불가"로 표시되고 규칙판 결과만 나온다 —
 CI 등 Ollama 없는 환경에서도 도구 자체는 안 죽는다.
 
-500건 기준 실측 결과(#476 재측정, 로컬 Ollama `qwen2.5:7b`):
+500건 기준 실측 결과(#548 재측정, 2026-09-30, 로컬 Ollama `qwen2.5:7b`):
 
 | 방식 | precision | recall | F1 | 오탐 | 미탐 |
 |---|---|---|---|---|---|
 | 규칙판 | 0.954 | 0.869 | 0.910 | 16 | 50 |
-| 하이브리드(LLM) | 0.928 | 0.945 | **0.937** | 28 | 21 |
+| 하이브리드(LLM) | 0.943 | 0.945 | **0.944** | 22 | 21 |
+
+※ 규칙판 미탐 50건 중 16건은 실제로는 이름 전체를 놓친 게 아니라 경계 한 글자 차이로 한
+글자 더(또는 덜) 가린 부분 매칭이다(예: 정답 `임혜`를 `임혜이`로 가림) — exact-match 기준
+평가에서는 미탐으로 잡히지만 개인정보가 실제로 새지는 않는다. "가려졌는지" 기준(경계
+차이는 누출로 안 셈)으로 다시 보면 규칙판 recall은 0.869가 아니라 **0.911**이다(#548).
+오탐 16건도 전부 같은 경계 차이라, 마스킹 결과 기준으로는 이 역시 실질적 오탐이 아니다.
 
 ※ #476에서 하이브리드의 규칙 안전망을 `min_confidence=0.75`(앞뒤 단서가 다 있는 이름만)에서
 **제한 없음**으로 바꿨다. 0.75로 자르면 규칙이 0.5로 잡던 단서 한쪽짜리 이름을 LLM이 놓칠 때
@@ -591,7 +597,7 @@ IPv4(`127.0.0.1`)에만 리스닝하고 있어 연결이 `SYN_SENT`에서 멈추
 규칙판은 앞뒤에 역할어·존칭 같은 문맥 단서가 없으면 아예 탐지하지 않도록 설계돼 오탐은
 적지만(precision 高), 그만큼 단서 없는 이름은 다 놓친다(recall 低). 하이브리드는 LLM이 문맥을
 직접 판단해 단서 없는 이름까지 잡아내 recall을 0.869 → 0.945로 올린다. 대신 precision은 규칙판
-(0.954)보다 조금 낮다(0.928) — #394/#399 정비로 규칙판의 오탐이 크게 줄면서(42 → 16건) 이제는
+(0.954)보다 조금 낮다(0.943) — #394/#399 정비로 규칙판의 오탐이 크게 줄면서(42 → 16건) 이제는
 LLM이 보태는 오탐이 더 눈에 띈다(아래 참고). 정비 전에는 반대로 하이브리드가 precision도 높았다
 (규칙판 0.859 vs 하이브리드 0.920).
 
@@ -687,6 +693,66 @@ v2 주소 59건 중 37건이 새 형태이고 형태별로는 2~8건이다(500�
 커밋된 v1·v2를 시드로 재생성해 한 줄이라도 다르면 CI에서 실패시킨다. 생성기를 바꾸는 후속 작업은 v2처럼
 옵션 뒤로 옮기거나, v1을 일부러 갱신할 땐 수치를 함께 갱신해야 한다.
 
+## 표기 변형 평가 세트 — 9/28 이후 막은 누출을 숫자로 보이기 ([#531](https://github.com/ChoHyeonChan/maskingtape/issues/531))
+
+**⚠️ 이 세트는 일반 정확도가 아니라 "알려진 누출을 막았는지 보는 회귀 지표"다.** 9/28
+전수 감사 뒤로 core가 많이 고쳤는데(띄어 쓴 주소, `성명 : 홍길동`, 전각 숫자·NFD 자모,
+8자리 생년월일 등), v1·v2는 이미 대부분 종류가 1.000이고 이 표기들 자체가 데이터에 없어서
+점수가 전혀 움직이지 않았다. `bench/datasets/variants_v1.jsonl`은 core 테스트
+(`test_address_spacing.py`/`test_name_forms.py`/`test_normalize.py`/`test_common_forms.py`)와
+**같은 모양**으로 새로 쓴 합성 문장 300건(17개 표기 태그 × 15건 안팎)이다 — 테스트 문장을
+그대로 복사하지 않고 값만 새로 뽑았다. **이 세트는 우리가 찾아서 고친 표기로 만들어
+우리에게 유리하다.** 공정한 정확도는 [#456](https://github.com/ChoHyeonChan/maskingtape/issues/456)
+보고용 데이터와 [#457](https://github.com/ChoHyeonChan/maskingtape/issues/457) 외부 도구
+비교가 맡는다.
+
+```bash
+python -m bench.generate_variants --out bench/datasets/variants_v1.jsonl
+python -m bench.evaluators.evaluate_variants bench/datasets/variants_v1.jsonl
+# 두 커밋 비교(예: 9/28 오전 main과 지금)를 한 명령으로 재현:
+python -m bench.evaluators.compare_variants_across_commits bench/datasets/variants_v1.jsonl --before 1086044 --after HEAD
+```
+
+`compare_variants_across_commits.py`는 두 커밋의 `packages/core`를 각각 **격리된 임시
+가상환경**에 설치해 실행한다 — 같은 프로세스에서 `PYTHONPATH`만 바꾸는 방식은 이 저장소의
+editable install이 새 파일도 옛 커밋 환경에서 찾아내 버려서 신뢰할 수 없었다(직접 확인).
+
+### 결과 (2026-09-29, `1086044` → `56d6b91` 이후 main)
+
+| 표기 태그 | 9/28 오전 재현율 | 지금 재현율 |
+|---|---|---|
+| account_attached_hyphen | 0.000 | 1.000 |
+| address_gu_start | 0.000 | 1.000 |
+| address_wide_spaces | 0.133 | 1.000 |
+| birthdate_forms | 0.000 | 1.000 |
+| card_forms | 0.200 | 1.000 |
+| dash_variants | 0.000 | 1.000 |
+| fullwidth | 0.000 | 1.000 |
+| hangul_filler | 0.000 | 1.000 |
+| invisible_chars | 0.000 | 1.000 |
+| name_form_colon | 0.267 | 1.000 |
+| name_form_paren_label | 0.000 | 1.000 |
+| name_form_table | 0.000 | 1.000 |
+| name_paren_after_label | 1.000 | 1.000 |
+| name_title_particle | 1.000 | 1.000 |
+| nfd_hangul | 0.000 | 1.000 |
+| passport_forms | 0.000 | 1.000 |
+| phone_forms | 0.000 | 1.000 |
+| **전체 오탐(fp)** | **28건** | **15건** |
+
+`name_paren_after_label`·`name_title_particle`이 9/28 오전에 이미 1.000인 이유: 이름 양식
+표기 수정([#491](https://github.com/ChoHyeonChan/maskingtape/issues/491))이 비교 기준
+커밋(`1086044`)보다 먼저 main에 들어가 있었다 — 두 태그는 "9/28 낮에 새로 고친 것"이
+아니라 "이미 고쳐져 있던 것"의 재확인이다.
+
+**오탐 28→15건 감소는 새 오탐이 늘지 않았다는 뜻이 아니다.** 남은 15건을 뜯어보니 전부
+"차장은"·"원장이"·"주임이" 같은 직함+조사 자체가 이름으로 오탐되는 **새로 생긴 회귀**였다
+(`1086044`에서는 같은 문장에 이 오탐이 없었다 — 직접 재현 확인). [#491](https://github.com/ChoHyeonChan/maskingtape/issues/491)이
+"직함+조사를 이름으로 오인해 뒤 이름을 놓치는" 문제는 고쳤지만, 그 과정에서 임시로 잡은
+직함+조사 후보 자체가 최종 결과에 남는 부작용이 생긴 것으로 보인다 — core 이슈
+[#533](https://github.com/ChoHyeonChan/maskingtape/issues/533)으로 남겼다(bench 소관이
+아니라 코드는 고치지 않았다).
+
 ## 데이터셋 포맷 (생성기·평가기가 공유하는 계약)
 
 JSONL — 한 줄에 문서 하나:
@@ -698,5 +764,7 @@ JSONL — 한 줄에 문서 하나:
 - `start`/`end`는 파이썬 슬라이스 규약 (`text[start:end]` == 개인정보 원문)
 - `kind`는 core의 `Detection.kind`와 동일한 문자열: `rrn`, `phone`, `email`, `name`, `address`, `card`, `biz_reg`, `passport`, `account`, `birth_date`, `driver_license`
 - `difficulty`는 `easy`/`hard`/`negative` 중 하나 (없으면 evaluate.py가 `unknown`으로 취급 — 하위 호환)
-- 평가 기준: span 완전 일치(exact match)로 precision / recall / F1 산출
+- 평가 기준: span 완전 일치(exact match)로 precision / recall / F1 / F2 산출
+  (F2는 재현율에 F1보다 더 큰 가중치를 두는 Fβ, β=2 — PII 탐지는 미탐(FN)이 오탐(FP)보다
+  위험하다는 게 이 도메인의 평가 관행이라 F1과 나란히 본다. 근거: `evaluate.py` 모듈 docstring)
 - 포맷 변경은 팀장 승인 후 이 문서부터 갱신한다
