@@ -125,15 +125,6 @@
   font-size: 0.76rem;
 }
 
-.service-intro p.service-intro__disclosure {
-  max-width: 36rem;
-  margin: 1.8rem auto 0;
-  padding-top: 1.2rem;
-  border-top: 1px solid var(--border);
-  font-size: 0.78rem;
-  line-height: 1.55;
-}
-
 .coverage-section__lead,
 .example-gallery__lead {
   margin: 0 0 0.9rem;
