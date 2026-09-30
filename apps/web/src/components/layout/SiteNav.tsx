@@ -4,7 +4,9 @@
 import { useEffect, useRef, useState } from "react";
 
 interface Props {
-  onHelpClick: () => void;
+  /** 도움말 버튼(정확도 안내 말풍선 포함)은 /demo 페이지에만 있다 — 코치마크·스캔 상태
+   * 자체가 그 페이지에만 있어서다. 다른 페이지에서는 이 prop 자체가 쓰이지 않는다. */
+  onHelpClick?: () => void;
   hasResult?: boolean;
   coachMarkActive?: boolean;
   /** "accuracy"/"demo"는 /accuracy·/demo처럼 랜딩과 분리된 하위 페이지에서 쓴다 — 소개
@@ -16,6 +18,7 @@ interface Props {
 const ACCURACY_BUBBLE_TIMEOUT_MS = 30_000;
 
 export function SiteNav({ onHelpClick, hasResult = false, coachMarkActive = false, variant = "home" }: Props) {
+  const isDemo = variant === "demo";
   const isHome = variant === "home";
   const brandHref = isHome ? "#intro" : "/";
   const introHref = isHome ? "#intro" : "/#intro";
@@ -95,37 +98,42 @@ export function SiteNav({ onHelpClick, hasResult = false, coachMarkActive = fals
             오픈소스 라이선스
           </a>
 
-          <div className="help-button-wrap">
-            <button
-              type="button"
-              className="help-button"
-              aria-label="사용 안내 다시 보기"
-              data-tooltip="도움말"
-              onClick={onHelpClick}
-            >
-              i
-            </button>
+          {/* 도움말 버튼(정확도 안내 말풍선 포함)은 체험하기(/demo) 페이지에서만 뜬다 —
+              코치마크·스캔 상태가 그 페이지에만 있어서, 다른 페이지에서는 눌러도 안내할
+              게 없다. */}
+          {isDemo && (
+            <div className="help-button-wrap">
+              <button
+                type="button"
+                className="help-button"
+                aria-label="사용 안내 다시 보기"
+                data-tooltip="도움말"
+                onClick={onHelpClick}
+              >
+                i
+              </button>
 
-            {/* 코치마크 오버레이가 떠 있는 동안엔 숨긴다 — 코치마크의 빨간 "아무 데나 누르면
-                닫힙니다" 힌트와 이 말풍선이 같은 배색이라 겹쳐 보이면 서로 다른 안내인지
-                구분이 안 된다. 코치마크가 닫히면 남은 타이머·닫기 상태 그대로 다시 보인다. */}
-            {showAccuracyBubble && !coachMarkActive && (
-              <div className="accuracy-bubble" role="status">
-                <button
-                  type="button"
-                  className="accuracy-bubble__close"
-                  aria-label="정확도 안내 닫기"
-                  onClick={() => setShowAccuracyBubble(false)}
-                >
-                  ×
-                </button>
-                <p>
-                  규칙 기반 탐지라 이름 일부를 놓칠 수 있어요 — <strong>정확한 결과가 필요하면 로컬 설치를
-                  권장합니다.</strong>
-                </p>
-              </div>
-            )}
-          </div>
+              {/* 코치마크 오버레이가 떠 있는 동안엔 숨긴다 — 코치마크의 빨간 "아무 데나 누르면
+                  닫힙니다" 힌트와 이 말풍선이 같은 배색이라 겹쳐 보이면 서로 다른 안내인지
+                  구분이 안 된다. 코치마크가 닫히면 남은 타이머·닫기 상태 그대로 다시 보인다. */}
+              {showAccuracyBubble && !coachMarkActive && (
+                <div className="accuracy-bubble" role="status">
+                  <button
+                    type="button"
+                    className="accuracy-bubble__close"
+                    aria-label="정확도 안내 닫기"
+                    onClick={() => setShowAccuracyBubble(false)}
+                  >
+                    ×
+                  </button>
+                  <p>
+                    규칙 기반 탐지라 이름 일부를 놓칠 수 있어요 — <strong>정확한 결과가 필요하면 로컬 설치를
+                    권장합니다.</strong>
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
 
           <a className="site-nav__cta" href={demoHref}>
             웹에서 체험하기

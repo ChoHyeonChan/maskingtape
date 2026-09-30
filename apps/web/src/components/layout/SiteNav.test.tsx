@@ -5,11 +5,19 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SiteNav } from "./SiteNav";
 
-describe("SiteNav help button tooltip", () => {
+describe("SiteNav help button (체험하기/demo 페이지에서만 뜬다)", () => {
   it("carries a data-tooltip so its label shows immediately on hover, not the browser's delayed title tooltip", () => {
-    render(<SiteNav onHelpClick={() => {}} />);
+    render(<SiteNav onHelpClick={() => {}} variant="demo" />);
     const helpButton = screen.getByRole("button", { name: "사용 안내 다시 보기" });
     expect(helpButton).toHaveAttribute("data-tooltip", "도움말");
+  });
+
+  it("is not shown on the landing page or the /accuracy page — there is no coachmark there", () => {
+    const { rerender } = render(<SiteNav onHelpClick={() => {}} />);
+    expect(screen.queryByRole("button", { name: "사용 안내 다시 보기" })).not.toBeInTheDocument();
+
+    rerender(<SiteNav onHelpClick={() => {}} variant="accuracy" />);
+    expect(screen.queryByRole("button", { name: "사용 안내 다시 보기" })).not.toBeInTheDocument();
   });
 });
 
@@ -101,12 +109,12 @@ describe("SiteNav accuracy bubble (도움말 옆에 잠깐 뜨는 정확도 안�
   });
 
   it("shows the rule-based-detection caveat next to the help button on mount", () => {
-    render(<SiteNav onHelpClick={() => {}} />);
+    render(<SiteNav onHelpClick={() => {}} variant="demo" />);
     expect(screen.getByRole("status")).toHaveTextContent("로컬 설치를 권장합니다");
   });
 
   it("does not dismiss just because the page was clicked elsewhere", () => {
-    render(<SiteNav onHelpClick={() => {}} />);
+    render(<SiteNav onHelpClick={() => {}} variant="demo" />);
     expect(screen.getByRole("status")).toBeInTheDocument();
 
     fireEvent.click(document.body);
@@ -115,7 +123,7 @@ describe("SiteNav accuracy bubble (도움말 옆에 잠깐 뜨는 정확도 안�
   });
 
   it("dismisses when its own X (close) button is clicked", () => {
-    render(<SiteNav onHelpClick={() => {}} />);
+    render(<SiteNav onHelpClick={() => {}} variant="demo" />);
     expect(screen.getByRole("status")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "정확도 안내 닫기" }));
@@ -124,7 +132,7 @@ describe("SiteNav accuracy bubble (도움말 옆에 잠깐 뜨는 정확도 안�
   });
 
   it("auto-dismisses after 30 seconds even without a click", () => {
-    render(<SiteNav onHelpClick={() => {}} />);
+    render(<SiteNav onHelpClick={() => {}} variant="demo" />);
     expect(screen.getByRole("status")).toBeInTheDocument();
 
     act(() => {
@@ -135,34 +143,34 @@ describe("SiteNav accuracy bubble (도움말 옆에 잠깐 뜨는 정확도 안�
   });
 
   it("shows again when a scan result first appears, even if it already timed out on the first page", () => {
-    const { rerender } = render(<SiteNav onHelpClick={() => {}} hasResult={false} />);
+    const { rerender } = render(<SiteNav onHelpClick={() => {}} variant="demo" hasResult={false} />);
 
     act(() => {
       vi.advanceTimersByTime(30_000);
     });
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
 
-    rerender(<SiteNav onHelpClick={() => {}} hasResult={true} />);
+    rerender(<SiteNav onHelpClick={() => {}} variant="demo" hasResult={true} />);
 
     expect(screen.getByRole("status")).toBeInTheDocument();
   });
 
   it("does not re-show on every re-render while a result is already displayed", () => {
-    const { rerender } = render(<SiteNav onHelpClick={() => {}} hasResult={true} />);
+    const { rerender } = render(<SiteNav onHelpClick={() => {}} variant="demo" hasResult={true} />);
 
     fireEvent.click(screen.getByRole("button", { name: "정확도 안내 닫기" }));
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
 
-    rerender(<SiteNav onHelpClick={() => {}} hasResult={true} />);
+    rerender(<SiteNav onHelpClick={() => {}} variant="demo" hasResult={true} />);
 
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
 
   it("hides while the coachmark overlay is active, since both use the same red dismiss-hint styling and clash", () => {
-    const { rerender } = render(<SiteNav onHelpClick={() => {}} coachMarkActive={true} />);
+    const { rerender } = render(<SiteNav onHelpClick={() => {}} variant="demo" coachMarkActive={true} />);
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
 
-    rerender(<SiteNav onHelpClick={() => {}} coachMarkActive={false} />);
+    rerender(<SiteNav onHelpClick={() => {}} variant="demo" coachMarkActive={false} />);
     expect(screen.getByRole("status")).toBeInTheDocument();
   });
 });

@@ -17,28 +17,12 @@ describe("App (landing page)", () => {
     expect(screen.getByRole("link", { name: /웹 데모 열기/ })).toHaveAttribute("href", "/demo");
   });
 
-  it("does not render the interactive scan tool or the coverage section", () => {
+  it("does not render the interactive scan tool, the coverage section, or the nav help button", () => {
     render(<App />);
 
     expect(screen.queryByLabelText("탐지할 텍스트 입력")).not.toBeInTheDocument();
     expect(screen.queryByRole("region", { name: "탐지 범위" })).not.toBeInTheDocument();
-  });
-
-  it("sends the nav help button to /demo, since there is no coachmark on the landing page", () => {
-    const originalLocation = window.location;
-    // jsdom의 navigation은 assign만 허용하니, href 대입을 가로채려고 location 객체를
-    // 통째로 바꿔치기한다 — App.tsx의 goToDemo()가 window.location.href = "/demo"로
-    // 이동시키는지 확인하기 위해서다.
-    Object.defineProperty(window, "location", {
-      configurable: true,
-      value: { ...originalLocation, href: "" },
-    });
-
-    render(<App />);
-    screen.getByRole("button", { name: "사용 안내 다시 보기" }).click();
-
-    expect(window.location.href).toBe("/demo");
-
-    Object.defineProperty(window, "location", { configurable: true, value: originalLocation });
+    // 도움말 버튼(코치마크 안내)은 /demo 페이지에만 있다 — 여기엔 안내할 코치마크가 없다.
+    expect(screen.queryByRole("button", { name: "사용 안내 다시 보기" })).not.toBeInTheDocument();
   });
 });

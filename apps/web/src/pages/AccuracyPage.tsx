@@ -19,14 +19,10 @@ const PERFECT_KINDS: { label: string; color: string }[] = [
   { label: "운전면허번호", color: "var(--kind-fallback)" },
 ];
 
-function goHome() {
-  window.location.href = "/";
-}
-
 export function AccuracyPage() {
   return (
     <>
-      <SiteNav variant="accuracy" onHelpClick={goHome} />
+      <SiteNav variant="accuracy" />
       <div className="accuracy-page">
         <section className="accuracy-hero" aria-label="전체 정확도">
           <div className="accuracy-hero__eyebrow">정확도, 숨기지 않고 다 보여드려요</div>

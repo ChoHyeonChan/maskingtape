@@ -6,16 +6,12 @@ import { ClosingCta } from "./components/layout/ClosingCta";
 import { SiteNav } from "./components/layout/SiteNav";
 
 // 랜딩 페이지는 소개(히어로) + 클로징 CTA뿐이다 — 실제 입력·결과 체험은 /demo 페이지로
-// 옮겨갔다(#553 후속). 그래서 도움말 버튼은 코치마크 대신 /demo로 안내한다: 지금
-// 탐지·마스킹을 시연해줄 상태(scanned 등)나 코치마크 자체가 이 페이지엔 없다.
-function goToDemo() {
-  window.location.href = "/demo";
-}
-
+// 옮겨갔다(#553 후속). 도움말 버튼(코치마크 안내)은 그 페이지에만 있어 여기서는 SiteNav가
+// 아예 렌더링하지 않는다.
 export function App() {
   return (
     <>
-      <SiteNav onHelpClick={goToDemo} />
+      <SiteNav />
       <div className="app-shell">
         <ServiceIntro />
         <ClosingCta />
