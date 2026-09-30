@@ -57,9 +57,13 @@ class _TextScreenState extends State<TextScreen> {
 
   bool _isMasked(Detection d) => !_exposed.contains(d);
 
-  /// 화면에 보이는 마스킹 결과. mask/label은 항목별 선택을 반영해 앱에서 치환하고,
-  /// pseudonym은 코어가 준 결과를 그대로 쓴다. 전부 가림이면 코어 출력과 같다.
-  String _displayText(AnonymizeResult result) => _canAdjust
+  /// 화면에 보이는 마스킹 결과.
+  ///
+  /// 전부 가림(기본 상태)이거나 pseudonym이면 **core가 만든 결과를 그대로** 쓴다 — 앱이
+  /// 다시 만들지 않으니 위치 계산이 어긋나도 기본 결과·복사 내용은 core와 어긋날 수 없다
+  /// (#496의 이중 안전장치). 사용자가 항목을 「보임」으로 바꿨을 때만 mask/label을 앱에서
+  /// 다시 치환한다.
+  String _displayText(AnonymizeResult result) => _canAdjust && _exposed.isNotEmpty
       ? MaskApplier.apply(
           _controller.text,
           result.detections,
