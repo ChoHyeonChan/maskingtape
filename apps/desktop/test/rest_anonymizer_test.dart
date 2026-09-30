@@ -64,11 +64,11 @@ void main() {
           ..add(utf8.encode(jsonEncode({
             'text': '연락처 [전화번호]',
             'detections': [
+              // 실제 API 형식 — 원문 반향을 막으려고 탐지 값(text)을 보내지 않는다(#497).
               {
                 'kind': 'phone',
                 'start': 4,
                 'end': 17,
-                'text': '010-1234-5678',
                 'confidence': 1.0,
                 'detector': 'PhoneDetector',
               }
@@ -85,6 +85,8 @@ void main() {
       expect(received, {'text': '연락처 010-1234-5678', 'strategy': 'label'});
       expect(result.maskedText, '연락처 [전화번호]');
       expect(result.detections.single.kindLabel, '전화번호');
+      // API가 보내지 않은 탐지 값은 이 PC의 원문에서 채운다(#497).
+      expect(result.detections.single.text, '010-1234-5678');
     });
 
     test('API가 준 코드포인트 위치를 Dart(UTF-16) 위치로 바꾼다 (#496)', () async {
@@ -99,7 +101,7 @@ void main() {
           ..add(utf8.encode(jsonEncode({
             'text': '😀😀😀 주민 **************',
             'detections': [
-              {'kind': 'rrn', 'start': 7, 'end': 21, 'text': '800101-1234560'},
+              {'kind': 'rrn', 'start': 7, 'end': 21},
             ],
           })));
       });
@@ -111,6 +113,7 @@ void main() {
       final d = result.detections.single;
       // 바꾸지 않았다면 input.substring(7, 21)은 '주민 800101-1234'라 끝 3자가 남는다.
       expect(input.substring(d.start, d.end), '800101-1234560');
+      expect(d.text, '800101-1234560');
     });
 
     test('한글이 UTF-8로 온전히 왕복한다', () async {

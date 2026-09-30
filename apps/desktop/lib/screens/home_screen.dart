@@ -112,16 +112,18 @@ class _HomeScreenState extends State<HomeScreen> {
       _running = true;
       _cancelRequested = false;
     });
-    await BatchProcessor(_anonymizer).processAll(
-      _tasks,
-      () {
-        if (mounted) setState(() {});
-      },
-      options: _options,
-      isCancelled: () => _cancelRequested,
-    );
-    if (mounted) {
-      setState(() => _running = false);
+    try {
+      await BatchProcessor(_anonymizer).processAll(
+        _tasks,
+        () {
+          if (mounted) setState(() {});
+        },
+        options: _options,
+        isCancelled: () => _cancelRequested,
+      );
+    } finally {
+      // 무슨 일이 있어도 실행 상태는 풀어 준다 — 안 그러면 버튼이 잠긴 채 앱이 갇힌다(#497).
+      if (mounted) setState(() => _running = false);
     }
   }
 
