@@ -6,18 +6,22 @@ import { describe, expect, it } from "vitest";
 import { ServiceIntro } from "./ServiceIntro";
 
 describe("ServiceIntro (#455)", () => {
-  it("explains the rule + local LLM hybrid approach without overclaiming pure-browser processing", () => {
+  it("discloses that input is sent to the server for analysis, without overclaiming pure-browser processing", () => {
     render(<ServiceIntro />);
     const section = screen.getByRole("region", { name: "서비스 소개" });
 
-    expect(section).toHaveTextContent("로컬 LLM");
     // 탐지는 실제로 API 서버를 거치므로("브라우저 안에서만 처리"라고 하면 사실과 다르다),
     // 무엇이 브라우저에 남고 무엇이 서버로 가는지 정확히 구분해 설명해야 한다.
     expect(section).toHaveTextContent("저장·기록하지 않습니다");
   });
 
-  it("pairs the intro copy with a live masking preview on the right (#455 2단 구성)", () => {
+  it("links the primary CTA to the demo section and the download button to GitHub Releases", () => {
     render(<ServiceIntro />);
-    expect(screen.getByLabelText("실제 마스킹 결과 미리보기")).toBeInTheDocument();
+
+    expect(screen.getByRole("link", { name: /지금 체험하기/ })).toHaveAttribute("href", "#demo");
+    expect(screen.getByRole("link", { name: /다운로드/ })).toHaveAttribute(
+      "href",
+      "https://github.com/ChoHyeonChan/maskingtape/releases",
+    );
   });
 });

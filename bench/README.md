@@ -2,7 +2,7 @@
 
 **담당: seoyeon ([@seoyeon056](https://github.com/seoyeon056))** · 상태: ✅ 시작 가능 (스켈레톤 머지 완료)
 
-저작권·개인정보 걱정 없는 **자체 합성 평가 데이터셋**과 정확도(F1) 측정 스크립트. 공개 벤치마크는 이 프로젝트의 핵심 차별화 포인트다.
+저작권·개인정보 걱정 없는 **자체 합성 평가 데이터셋**과 정확도(F1·F2) 측정 스크립트. 공개 벤치마크는 이 프로젝트의 핵심 차별화 포인트다.
 
 ## 규칙 (실격 사유와 직결 — 예외 없음)
 
@@ -19,7 +19,7 @@ generator/
   documents.py    # 문장 템플릿에 값을 심어 문서 + 라벨(span) 생성
 generate_dataset.py  # CLI — JSONL 데이터셋 생성
 evaluators/           # 평가 도구 모음 — "무엇을 평가하는가"별로 파일 하나
-  evaluate.py            # CLI — core Pipeline.scan() 결과 vs 정답 → precision/recall/F1 리포트 (종류별+난이도별)
+  evaluate.py            # CLI — core Pipeline.scan() 결과 vs 정답 → precision/recall/F1/F2 리포트 (종류별+난이도별)
   mask_quality.py        # 마스킹 결과물 자체의 개인정보 유출(완전/부분) 여부 검증 로직
   evaluate_masking.py    # CLI — 마스킹 결과에 개인정보가 실제로 남아있는지(유출률) 평가 (--strategy로 mask/label/pseudonym 선택)
   confidence_analysis.py # CLI — confidence 임계값별 precision/recall/F1 변화 분석
@@ -565,12 +565,18 @@ python -m bench.evaluators.compare_name_detectors bench/datasets/synth_v1.jsonl
 로컬 Ollama가 안 떠 있으면 하이브리드 쪽은 "LLM 사용 불가"로 표시되고 규칙판 결과만 나온다 —
 CI 등 Ollama 없는 환경에서도 도구 자체는 안 죽는다.
 
-500건 기준 실측 결과(#476 재측정, 로컬 Ollama `qwen2.5:7b`):
+500건 기준 실측 결과(#548 재측정, 2026-09-30, 로컬 Ollama `qwen2.5:7b`):
 
 | 방식 | precision | recall | F1 | 오탐 | 미탐 |
 |---|---|---|---|---|---|
 | 규칙판 | 0.954 | 0.869 | 0.910 | 16 | 50 |
-| 하이브리드(LLM) | 0.928 | 0.945 | **0.937** | 28 | 21 |
+| 하이브리드(LLM) | 0.943 | 0.945 | **0.944** | 22 | 21 |
+
+※ 규칙판 미탐 50건 중 16건은 실제로는 이름 전체를 놓친 게 아니라 경계 한 글자 차이로 한
+글자 더(또는 덜) 가린 부분 매칭이다(예: 정답 `임혜`를 `임혜이`로 가림) — exact-match 기준
+평가에서는 미탐으로 잡히지만 개인정보가 실제로 새지는 않는다. "가려졌는지" 기준(경계
+차이는 누출로 안 셈)으로 다시 보면 규칙판 recall은 0.869가 아니라 **0.911**이다(#548).
+오탐 16건도 전부 같은 경계 차이라, 마스킹 결과 기준으로는 이 역시 실질적 오탐이 아니다.
 
 ※ #476에서 하이브리드의 규칙 안전망을 `min_confidence=0.75`(앞뒤 단서가 다 있는 이름만)에서
 **제한 없음**으로 바꿨다. 0.75로 자르면 규칙이 0.5로 잡던 단서 한쪽짜리 이름을 LLM이 놓칠 때
@@ -591,7 +597,7 @@ IPv4(`127.0.0.1`)에만 리스닝하고 있어 연결이 `SYN_SENT`에서 멈추
 규칙판은 앞뒤에 역할어·존칭 같은 문맥 단서가 없으면 아예 탐지하지 않도록 설계돼 오탐은
 적지만(precision 高), 그만큼 단서 없는 이름은 다 놓친다(recall 低). 하이브리드는 LLM이 문맥을
 직접 판단해 단서 없는 이름까지 잡아내 recall을 0.869 → 0.945로 올린다. 대신 precision은 규칙판
-(0.954)보다 조금 낮다(0.928) — #394/#399 정비로 규칙판의 오탐이 크게 줄면서(42 → 16건) 이제는
+(0.954)보다 조금 낮다(0.943) — #394/#399 정비로 규칙판의 오탐이 크게 줄면서(42 → 16건) 이제는
 LLM이 보태는 오탐이 더 눈에 띈다(아래 참고). 정비 전에는 반대로 하이브리드가 precision도 높았다
 (규칙판 0.859 vs 하이브리드 0.920).
 
@@ -758,5 +764,7 @@ JSONL — 한 줄에 문서 하나:
 - `start`/`end`는 파이썬 슬라이스 규약 (`text[start:end]` == 개인정보 원문)
 - `kind`는 core의 `Detection.kind`와 동일한 문자열: `rrn`, `phone`, `email`, `name`, `address`, `card`, `biz_reg`, `passport`, `account`, `birth_date`, `driver_license`
 - `difficulty`는 `easy`/`hard`/`negative` 중 하나 (없으면 evaluate.py가 `unknown`으로 취급 — 하위 호환)
-- 평가 기준: span 완전 일치(exact match)로 precision / recall / F1 산출
+- 평가 기준: span 완전 일치(exact match)로 precision / recall / F1 / F2 산출
+  (F2는 재현율에 F1보다 더 큰 가중치를 두는 Fβ, β=2 — PII 탐지는 미탐(FN)이 오탐(FP)보다
+  위험하다는 게 이 도메인의 평가 관행이라 F1과 나란히 본다. 근거: `evaluate.py` 모듈 docstring)
 - 포맷 변경은 팀장 승인 후 이 문서부터 갱신한다

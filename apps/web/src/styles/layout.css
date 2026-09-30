@@ -11,6 +11,138 @@
   gap: 1.75rem;
 }
 
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(244, 247, 252, 0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+
+.site-nav__inner {
+  max-width: 1440px;
+  height: 4.25rem;
+  margin: 0 auto;
+  padding: 0 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.site-nav__brand {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+}
+
+.site-nav__brand img {
+  display: block;
+  height: 2.15rem;
+  width: auto;
+  object-fit: contain;
+  object-position: left center;
+  mix-blend-mode: multiply;
+}
+
+.site-nav__links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
+  gap: 1.6rem;
+}
+
+.site-nav__link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.86rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.site-nav__link:hover {
+  color: var(--brand-blue);
+}
+
+.site-nav__link--active {
+  color: var(--brand-blue);
+  font-weight: 800;
+}
+
+.site-nav__actions {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 1rem;
+}
+
+.site-nav__doc-link {
+  color: var(--text-secondary);
+  text-decoration: underline;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.site-nav__doc-link:hover {
+  color: var(--brand-blue);
+}
+
+.site-nav__cta {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  height: 2.15rem;
+  padding: 0 1.15rem;
+  border-radius: 999px;
+  background: var(--brand-blue);
+  color: #ffffff;
+  font-size: 0.84rem;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.site-nav__cta:hover {
+  filter: brightness(1.08);
+}
+
+@media (max-width: 780px) {
+  .site-nav__links {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .site-nav__inner {
+    padding: 0 0.85rem;
+  }
+
+  .site-nav__doc-link {
+    display: none;
+  }
+
+  .site-nav__brand img {
+    height: 1.7rem;
+  }
+
+  .site-nav__actions {
+    gap: 0.6rem;
+  }
+
+  .site-nav__cta {
+    padding: 0 0.85rem;
+    font-size: 0.78rem;
+  }
+
+  .help-button {
+    width: 1.9rem;
+    height: 1.9rem;
+  }
+}
+
 /* 입력·결과 "체험" 영역만 예전처럼 화면 하나에 담긴 고정 높이를 유지한다 — 목록이 길어져도
    패널 안에서만 스크롤되던 동작(DetectionList 등)을 그대로 지키기 위해서다. 그 안에서는
    app-shell 대신 이 컨테이너가 옛 100vh 그리드 역할을 이어받는다. */
@@ -20,62 +152,6 @@
   gap: 0.9rem;
   height: min(46rem, 78vh);
   min-height: 26rem;
-}
-
-.app-header {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.25rem;
-  margin-bottom: 0.9rem;
-  padding: 0 0.25rem;
-}
-
-.app-header__content {
-  min-width: 0;
-}
-
-.license-link {
-  display: inline-block;
-  margin-top: 0.2rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--text-secondary);
-  text-decoration: underline;
-}
-
-.license-link:hover {
-  color: var(--brand-blue);
-}
-
-.app-header__eyebrow,
-.eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.76rem;
-  font-weight: 800;
-  color: var(--brand-blue);
-}
-
-.brand-logo {
-  display: block;
-  width: min(100%, 21rem);
-  height: auto;
-  max-width: 100%;
-  margin: 0 0 0.35rem -0.36rem;
-  mix-blend-mode: multiply;
-  object-fit: contain;
-  object-position: left center;
-}
-
-.app-header p {
-  max-width: 46rem;
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: 0.92rem;
-  line-height: 1.45;
 }
 
 .help-button-wrap {
@@ -310,10 +386,6 @@
 }
 
 @media (max-width: 900px) {
-  .app-header {
-    align-items: flex-start;
-  }
-
   /* 좁은 화면에선 "체험" 영역도 고정 높이를 버리고 페이지 흐름에 맡긴다 — 입력·결과 두
      패널을 가로로 나란히 둘 공간이 없어 세로로 쌓이므로, 안에서 또 스크롤을 가두면 결과
      목록이 손바닥만 한 상자 안에 갇힌다. */
@@ -338,16 +410,44 @@
   .app-shell {
     padding: 1rem 0.85rem;
   }
+}
 
-  .app-header {
-    padding: 0.2rem 0.15rem 0.8rem;
-  }
+.closing-cta {
+  margin: 0.5rem -1.75rem -2.5rem;
+  padding: 3.4rem 1.75rem;
+  border-radius: 0;
+  text-align: center;
+  background: var(--brand-blue-deep);
+}
 
-  .brand-logo {
-    width: min(100%, 20rem);
-  }
+.closing-cta__title {
+  margin: 0 0 1.3rem;
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 900;
+}
 
-  .app-header p {
-    font-size: 0.95rem;
+.closing-cta__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 2.9rem;
+  padding: 0 1.6rem;
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--brand-blue-deep);
+  font-size: 0.92rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.closing-cta__btn:hover {
+  filter: brightness(0.96);
+}
+
+@media (max-width: 640px) {
+  .closing-cta {
+    margin: 0.5rem -0.85rem -2.5rem;
+    padding: 2.6rem 1rem;
   }
 }
