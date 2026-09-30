@@ -5,8 +5,8 @@ from typing import Any
 
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
-from fastapi.openapi.utils import get_openapi
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.openapi.utils import get_openapi
 
 from maskingtape_api.body_limit import (
     BodySizeLimitMiddleware,

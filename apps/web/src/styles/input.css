@@ -275,15 +275,19 @@
   font-weight: 800;
 }
 
-/* 예제 불러오기 자리와 달리, "내 파일을 올린다"는 다른 성격의 동작이라 텍스트 알약이
-   아니라 아이콘 버튼으로 구분해 둔다 — 대신 툴바 맨 앞으로 옮겨 우선순위를 살렸다. */
+/* 아이콘만으로는 무슨 버튼인지 바로 알기 어렵다는 피드백에 따라, 아이콘 앞에
+   "파일 업로드" 글자를 함께 적는다. 툴바 맨 앞 자리는 그대로 유지한다. */
 .input-panel__upload {
   flex: 0 0 auto;
-  width: 2.25rem;
   height: 2.25rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.45rem;
+  padding: 0 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 800;
+  white-space: nowrap;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.85);

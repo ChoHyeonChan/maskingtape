@@ -101,8 +101,9 @@ python -m pytest
 CI에서 루트 기준 실행:
 
 ```bash
-python -m pip install -e packages/core
+python -m pip install -e "packages/core[dev]"  # ruff>=0.16
 python -m pip install -e "apps/api[dev]"
+ruff check apps/api
 python -m pytest apps/api -q
 ```
 

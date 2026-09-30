@@ -40,6 +40,13 @@ def test_candidate_true_for_rare_surname_without_any_cue():
     assert has_name_candidate("어제 탁예린 왔어") is True
 
 
+def test_candidate_true_for_one_letter_cue_and_spaced_name():
+    # 한글 두 글자가 붙은 자리가 없어도 인명 단서(님·씨)가 있으면 후보다. #516에서 두 글자 기준만
+    # 남겨 이런 문장이 LLM을 건너뛰고 이름이 남았다(#521)
+    assert has_name_candidate("Name: 홍 길 동 님, Tel: 010-1234-5678") is True
+    assert has_name_candidate("김 씨") is True
+
+
 def test_candidate_true_for_any_korean_word():
     # 예전엔 도메인 라벨 단어("이메일", "주소")를 걸렀다. 같은 성씨 사전·단서 방식이 사전 밖 성씨
     # 이름까지 걸러서(#494), 이제는 한글 두 글자가 붙은 자리가 있으면 모두 LLM에 넘긴다
@@ -75,6 +82,13 @@ def test_calls_llm_when_candidate_present():
     detector = LLMNameDetector(client=lambda _t: ["홍길동"])
     found = detector.detect("그래서 홍길동이 어제 왔어")
     assert [d.text for d in found] == ["홍길동"]
+    assert detector.calls == 1
+
+
+def test_calls_llm_for_spaced_name_with_one_letter_cue():
+    detector = LLMNameDetector(client=lambda _t: ["홍 길 동"])
+    found = detector.detect("Name: 홍 길 동 님, Tel: 010-1234-5678")
+    assert [d.text for d in found] == ["홍 길 동"]
     assert detector.calls == 1
 
 

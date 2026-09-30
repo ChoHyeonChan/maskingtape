@@ -15,13 +15,14 @@ mask(****)·label([전화번호])와 달리 문장 구조가 살아 있어, LLM�
    테스트에서만 seed를 준다.)
 2. 주민등록번호·카드번호는 형식만 유지하고 **체크섬을 일부러 통과하지 않게** 만든다.
    유효한 번호를 생성하면 실존 인물의 것과 겹치거나 유효한 개인정보로 악용될 수 있다.
-   진짜 탐지기의 검증 함수를 재사용해 "검증하면 가짜"임을 보장한다. 실제 카드번호는 모두
-   Luhn을 통과하므로 가짜 카드번호는 실존 번호와 겹치지 않는다. 주민등록번호는 2020년 10월
+   진짜 탐지기의 검증 함수를 재사용해 "검증하면 가짜"임을 보장한다. 그래서 가짜 카드번호는
+   Luhn을 따르는 실제 카드번호와 겹치지 않는다. 주민등록번호는 2020년 10월
    이후 발급분의 뒷자리가 난수라 체크섬이 없어서, 그 번호들과는 우연히 겹칠 수 있다(#494).
 3. 탐지된 구간은 종류를 불문하고 전부 치환한다. 생성기가 없는 종류도 라벨로 가려
    원본이 남지 않게 한다("덜 가리기"는 유출).
 4. 가명은 원본값과 같거나 원본을 품지 않게, 같은 호출의 다른 가명과도 겹치지 않게 뽑는다(#494).
    원본이 가명 안에 남으면 원본이 드러나고, 두 사람이 같은 가명을 받으면 문맥이 섞인다.
+   이름이 수백 개라 가명 어휘(400개)가 바닥나면 나머지 이름은 [이름] 라벨로 가린다.
 
 ※ 생성된 값은 가짜지만 형식이 그럴듯해 실제 정보와 우연히 겹칠 수 있다. 반드시
   '가짜 데이터'로만 취급한다.
@@ -31,7 +32,7 @@ from __future__ import annotations
 
 import random
 import string
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 
 from maskingtape.anonymizers.base import Anonymizer
 from maskingtape.anonymizers.label import DEFAULT_LABELS
@@ -80,39 +81,16 @@ class PseudonymAnonymizer(Anonymizer):
         # 같은 (종류, 원본값)에는 같은 가명을 배정한다(문맥 일관성). 배정은 등장 순서로,
         # 치환은 위치가 밀리지 않게 뒤→앞으로 한다. 가명은 원본값·이미 쓴 가명과 겹치지 않게 뽑는다.
         mapping: dict[tuple[str, str], str] = {}
-        originals = {d.text for d in detections}
-        used: set[str] = set()
+        drawer = _FakeDrawer(detections, rng, self._fake_value)
         for d in sorted(detections, key=lambda d: d.start):
             key = (d.kind, d.text)
             if key not in mapping:
-                mapping[key] = self._fresh_fake_value(d.kind, rng, originals, used)
+                mapping[key] = drawer.draw(d.kind)
 
         for d in sorted(detections, key=lambda d: d.start, reverse=True):
             fake = mapping[(d.kind, d.text)]
             text = text[: d.start] + fake + text[d.end :]
         return text
-
-    def _fresh_fake_value(
-        self, kind: str, rng: random.Random, originals: set[str], used: set[str]
-    ) -> str:
-        """원본값을 드러내지 않고, 이 호출에서 이미 쓴 가명과도 다른 가짜 값을 뽑는다(#494).
-
-        가명이 원본과 같거나 원본을 품으면 원본이 드러난다. 이름 어휘 400개 안의 흔한 이름은
-        1/400 확률로 자기 자신이 나왔고, 두 글자 이름 "임하"는 "임하은"으로, 시/도만 탐지된
-        주소 "대구광역시"는 "대구광역시 서초구 …"로 바뀌기도 했다. 서로 다른 원본이 같은 가명을
-        받으면 "그 사람" 문맥이 섞인다.
-        _MAX_DRAWS번 안에 못 찾으면(어휘가 바닥나면) 라벨로 가린다. 원본은 남기지 않는다.
-        라벨로 가리는 종류는 같은 라벨이 여러 번 나와도 되므로 따지지 않는다.
-        """
-        if kind not in _GENERATORS:
-            return self._fake_value(kind, rng)
-        for _ in range(_MAX_DRAWS):
-            fake = self._fake_value(kind, rng)
-            if fake in used or any(o in fake or fake in o for o in originals):
-                continue
-            used.add(fake)
-            return fake
-        return f"[{DEFAULT_LABELS.get(kind, kind)}]"
 
     def _fake_value(self, kind: str, rng: random.Random) -> str:
         """종류에 맞는 가짜 값 생성기를 고른다. 생성기가 없는 종류는 라벨로 가린다
@@ -123,6 +101,69 @@ class PseudonymAnonymizer(Anonymizer):
             # 생성기가 없는 종류도 반드시 가린다 — 원본을 남기면 유출이다.
             return f"[{DEFAULT_LABELS.get(kind, kind)}]"
         return generator(rng)
+
+
+class _FakeDrawer:
+    """한 번의 apply 안에서 원본을 드러내지 않고, 이미 쓴 가명과도 다른 가짜 값을 뽑는다(#494).
+
+    가명이 원본과 같거나 원본을 품으면 원본이 드러난다. 이름 어휘 400개 안의 흔한 이름은
+    1/400 확률로 자기 자신이 나왔고, 두 글자 이름 "임하"는 "임하은"으로, 시/도만 탐지된
+    주소 "대구광역시"는 "대구광역시 서초구 …"로 바뀌기도 했다. 서로 다른 원본이 같은 가명을
+    받으면 "그 사람" 문맥이 섞인다.
+
+    검사는 원본 수와 상관없이 끝나야 한다. 뽑을 때마다 원본 전체를 훑으면 서로 다른 값 수의
+    제곱으로 느려져, API 한 요청이 0.16초에서 73초가 됐다(#520). 그래서
+    - 가명 안에 원본이 들어 있는지는 가명의 부분 문자열을 원본 집합에서 찾는다.
+    - 가명이 더 긴 원본의 일부인지는 이름만 본다. 3글자 가명이 4글자 실명 안에 들어갈 수
+      있어서다. 형식이 정해진 다른 종류가 더 긴 실제 값 안에 그대로 들어갈 확률은 무시할 만하다.
+    - 한 번 뽑은 값(쓴 것·거부된 것)은 다시 검사하지 않는다.
+    _MAX_DRAWS번 연속 못 찾은 종류(어휘가 바닥남)는 그 뒤로 바로 라벨로 가린다. 원본은 남기지
+    않는다. 라벨로 가리는 종류는 같은 라벨이 여러 번 나와도 되므로 따지지 않는다.
+    """
+
+    def __init__(
+        self,
+        detections: Sequence[Detection],
+        rng: random.Random,
+        fake_value: Callable[[str, random.Random], str],
+    ) -> None:
+        self._rng = rng
+        self._fake_value = fake_value
+        self._originals = {d.text for d in detections}
+        self._shortest = min((len(o) for o in self._originals), default=1)
+        self._names = [d.text for d in detections if d.kind == "name"]
+        self._name_pieces: dict[int, set[str]] = {}  # 길이별 실명 조각(필요할 때 만든다)
+        self._tried: set[str] = set()
+        self._exhausted: set[str] = set()
+
+    def draw(self, kind: str) -> str:
+        """kind의 새 가명을 뽑는다. 못 뽑으면 라벨을 돌려준다."""
+        if kind not in _GENERATORS:
+            return self._fake_value(kind, self._rng)
+        if kind not in self._exhausted:
+            for _ in range(_MAX_DRAWS):
+                fake = self._fake_value(kind, self._rng)
+                if fake in self._tried:
+                    continue
+                self._tried.add(fake)
+                if not self._reveals_original(kind, fake):
+                    return fake
+            self._exhausted.add(kind)
+        return f"[{DEFAULT_LABELS.get(kind, kind)}]"
+
+    def _reveals_original(self, kind: str, fake: str) -> bool:
+        n = len(fake)
+        for size in range(self._shortest, n + 1):
+            if any(fake[i : i + size] in self._originals for i in range(n - size + 1)):
+                return True
+        return kind == "name" and fake in self._name_pieces_of(n)
+
+    def _name_pieces_of(self, size: int) -> set[str]:
+        if size not in self._name_pieces:
+            self._name_pieces[size] = {
+                name[i : i + size] for name in self._names for i in range(len(name) - size + 1)
+            }
+        return self._name_pieces[size]
 
 
 def _fake_name(rng: random.Random) -> str:

@@ -80,6 +80,73 @@ def test_compact_date_before_the_rrn_back_is_the_rrn_front(separator):
     assert kinds == {"rrn"}
 
 
+@pytest.mark.parametrize(
+    "text, value",
+    [
+        ("생년월일 19800101-1234567", "19800101-1234567"),
+        ("주민번호 19800101-1234567", "19800101-1234567"),  # 라벨과 상관없이 샌다
+        ("19800101-1234567", "19800101-1234567"),
+        ("주민등록번호: 19800101-1234560", "19800101-1234560"),  # 체크섬이 맞는 번호
+        ("생년월일 20050101-3234567", "20050101-3234567"),  # 2000년대 출생
+    ],
+)
+def test_eight_digit_front_with_the_rrn_back_is_an_rrn(text, value):
+    # 8자리 생년월일 뒤에 뒷자리 7개가 붙으면 주민등록번호다. 구간 전체를 가리고 종류는 rrn으로 보고한다(#508)
+    assert_masked(text, value)
+    assert {d.kind for d in Pipeline().scan(text)} == {"rrn"}
+
+
+@pytest.mark.parametrize("separator", [" ", ".", "  ", chr(0x2013), " - ", "\t"])
+def test_eight_digit_front_is_not_taken_as_a_birthdate_before_the_rrn_back(separator):
+    # 공백·점으로 나누면 8자리를 생년월일로 먼저 잡고 뒷자리 7개가 샜다. 6자리 앞자리와 같은 이유로
+    # 생년월일로 잡으면 안 된다(#493 test_compact_date_before_the_rrn_back_is_the_rrn_front, #508)
+    text = "생년월일 19800101" + separator + "1234567"
+    assert_masked(text, "19800101" + separator + "1234567")
+    assert {d.kind for d in Pipeline().scan(text)} == {"rrn"}
+
+
+def test_eight_digit_front_is_kept_even_when_the_century_does_not_match():
+    # 앞 두 자리(19)와 성별코드(3 = 2000년대)가 안 맞아도 버리지 않는다. 버리면 덜 가리게 된다(#508)
+    assert_masked("주민번호 19050101-3234567", "19050101-3234567")
+
+
+@pytest.mark.parametrize(
+    "text, value",
+    [
+        ("생년월일 20000229 1234567", "20000229 1234567"),
+        ("생년월일 000229 1234567", "000229 1234567"),  # 6자리도 같은 이유로 통째로 샜다
+    ],
+)
+def test_leap_day_front_is_masked_whatever_the_gender_code_says(text, value):
+    # 생년월일 탐지기는 뒤에 뒷자리가 오는 날짜를 주민번호에 넘긴다. 주민번호가 성별코드 1을 1900년대로만
+    # 보고 1900년 2월 29일(없는 날짜)이라며 버리면 두 탐지기 모두 버려서 통째로 샌다(#508)
+    assert_masked(text, value)
+
+
+@pytest.mark.parametrize(
+    "text, date",
+    [
+        ("생년월일 18991231 1234567", "18991231"),
+        ("생년월일 21000101 1234567", "21000101"),
+        ("생일 18800515.2345678", "18800515"),
+    ],
+)
+def test_eight_digit_date_outside_19xx_20xx_is_still_masked_before_a_back(text, date):
+    # 주민번호 탐지기는 19·20으로 시작하는 8자리만 받는다. 생년월일 탐지기가 다른 연도까지 넘기면 둘 다
+    # 버려서, main이 가리던 날짜가 통째로 샜다(#508 독립 검증)
+    assert_masked(text, date)
+
+
+def test_eight_digit_birthdate_alone_is_still_a_birthdate():
+    # 뒷자리가 없으면 지금처럼 생년월일이다(#508 대조군)
+    assert {d.kind for d in Pipeline().scan("생년월일 19800101")} == {"birth_date"}
+
+
+def test_birthdate_label_with_two_parenthetical_notes():
+    # 라벨 뒤 괄호 설명을 두 개까지 받는다(#508). 괄호 안 숫자 금지는 그대로다(위 괄호 회귀 테스트)
+    assert "1999-07-21" in texts(BirthDateDetector(), "생년월일(만 나이)(한국식) 1999-07-21")
+
+
 # ── 전화 ────────────────────────────────────────────────────────────
 
 
@@ -91,10 +158,13 @@ def test_compact_date_before_the_rrn_back_is_the_rrn_front(separator):
         ("전화 +82-2-555-1234", "+82-2-555-1234"),
         ("전화 +82 31 123 4567", "+82 31 123 4567"),
         ("휴대폰 +82 (0)10-1234-5678", "+82 (0)10-1234-5678"),
+        ("연락처 (+82) 10-1234-5678", "(+82) 10-1234-5678"),
+        ("연락처 +820212345678", "+820212345678"),
     ],
 )
 def test_phone_forms(text, value):
     assert value in texts(PhoneDetector(), text)
+    assert_masked(text, value)
 
 
 @pytest.mark.parametrize(

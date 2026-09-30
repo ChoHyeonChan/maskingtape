@@ -163,6 +163,39 @@ def test_no_leak_with_pseudonym_strategy():
     assert result.leak_count == 0
 
 
+def test_label_and_pseudonym_merge_overlapping_detections_before_substituting_directly():
+    """core#494(PR #517)가 고친 속성을 bench가 독립적으로 재검증한다 — core 자체 단위테스트와
+    별개로, 실제 detector 출력과 bench가 평소에 쓰는 호출 경로로도 안전한지 확인한다.
+
+    치환형 전략(label/pseudonym)은 구간을 뒤에서부터 다른 길이의 문자열로 바꾸는데, 겹친
+    탐지를 Pipeline 없이 anonymizer.apply()에 그대로 넘기면 먼저 바뀐 안쪽 구간 때문에 위치가
+    밀려 바깥 구간의 꼬리가 원문 그대로 남을 수 있었다("연락처 010-1234-5678 끝"에서 바깥
+    전화번호와 안쪽 마지막 세 글자가 겹치면 "[전화번호]678 끝"처럼 새는 식). 지금은 apply()
+    자체가 resolve_overlaps로 먼저 합친 뒤 바꾸므로, Pipeline을 거치지 않고 직접 호출해도
+    안전해야 한다."""
+    text = "연락처 010-1234-5678 끝"
+    outer = PhoneDetector().detect(text)[0]
+    assert outer.text == "010-1234-5678"
+    # 바깥 탐지의 마지막 세 글자와 겹치는 가짜 탐지를 끼워 넣는다 — 다른 kind, 더 낮은 confidence.
+    inner = Detection(
+        kind="account",
+        start=outer.end - 3,
+        end=outer.end,
+        text=text[outer.end - 3 : outer.end],
+        confidence=0.6,
+        detector="fake",
+    )
+    detections = [outer, inner]
+
+    for anonymizer in (LabelAnonymizer(), PseudonymAnonymizer(seed=1)):
+        result = anonymizer.apply(text, detections)
+        assert "678" not in result, (
+            f"{type(anonymizer).__name__}: 겹친 탐지를 Pipeline 없이 직접 넘겼을 때 "
+            f"전화번호 뒷자리가 원문 그대로 샘: {result!r}"
+        )
+        assert "끝" in result, f"{type(anonymizer).__name__}: 겹침 병합이 탐지 밖 텍스트까지 건드림: {result!r}"
+
+
 def test_label_strategy_catches_partial_leak_when_detection_is_narrower_than_gold():
     """#498 — 예전엔 label/pseudonym이 "원문 값 전체가 결과에 통째로 남아있는지"만 봐서,
     탐지가 정답보다 좁을 때(예: "홍길동양"이 정답인데 "홍길동"까지만 탐지) 뒤의 "양"이 원문
