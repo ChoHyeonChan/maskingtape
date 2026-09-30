@@ -336,3 +336,18 @@ def test_common_prefix_role_words_without_a_colon_still_drop_stopwords():
     # 오탐된다 — 위 "담당자: 문맥"과 구분자(콜론 유무)만 다르다.
     assert detect("담당자 최근 변경") == []
     assert detect("고객 문의 접수") == []
+
+
+@pytest.mark.parametrize(
+    "text, name",
+    [
+        ("담당자 김가을님 확인", "김가"),
+        ("고객 김가을이 방문", "김가"),
+    ],
+)
+def test_name_ending_in_a_particle_looking_syllable_is_still_masked_up_to_main(text, name):
+    # 리뷰(팀장, PR #571) — "을"이 _NAME_TAIL_STOP이라 "김가을"의 "을"이 이름에서 잘리고
+    # "김가"만 남는데, 뒤에 남은 "을님"(조사+존칭)·"을이"(조사 두 개)가 종결어미 목록의
+    # 어떤 옵션과도 안 맞아 통째로 놓쳤다. main도 "김가"까지만 가려 완전하지는 않았지만,
+    # 적어도 그만큼은 가리도록 조사를 1~2개 반복하고 뒤에 존칭이 더 붙어도 받는다.
+    assert name in [d.text for d in detect(text)]
