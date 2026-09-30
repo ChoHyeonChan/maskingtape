@@ -5,9 +5,9 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { App } from "./App";
 
-// 입력·결과 체험만 /demo 페이지로 옮겨갔다(#553 후속) — 탐지 범위(무엇을 잡나요)는
-// 다시 랜딩으로 돌아왔다. 랜딩(App)은 이제 소개(히어로)+탐지 범위+클로징 CTA로 된
-// 정적인 마케팅 페이지다. 입력·결과 체험 관련 테스트들은 DemoPage.test.tsx에 있다.
+// 입력·결과 체험은 /demo 페이지로 옮겨갔고(#553 후속), 탐지 범위(무엇을 잡나요)
+// 섹션은 완전히 없앴다. 랜딩(App)은 이제 소개(히어로)+클로징 CTA로 된 정적인
+// 마케팅 페이지다. 입력·결과 체험 관련 테스트들은 DemoPage.test.tsx에 있다.
 describe("App (landing page)", () => {
   it("renders the hero and closing CTA, both pointing to the /demo page", () => {
     render(<App />);
@@ -17,16 +17,11 @@ describe("App (landing page)", () => {
     expect(screen.getByRole("link", { name: /웹 데모 열기/ })).toHaveAttribute("href", "/demo");
   });
 
-  it("renders the coverage section listing all 11 kinds", () => {
-    render(<App />);
-
-    expect(screen.getByRole("region", { name: "탐지 범위" })).toHaveTextContent("이름");
-  });
-
-  it("does not render the interactive scan tool — that lives on /demo now", () => {
+  it("does not render the interactive scan tool or the coverage section", () => {
     render(<App />);
 
     expect(screen.queryByLabelText("탐지할 텍스트 입력")).not.toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "탐지 범위" })).not.toBeInTheDocument();
   });
 
   it("sends the nav help button to /demo, since there is no coachmark on the landing page", () => {
