@@ -115,7 +115,6 @@ export function DemoPage() {
               maskMode={maskMode}
               onMaskedTextChange={setMaskedResultText}
               onHighlightChange={setHighlight}
-              onSamplePick={handleTextChange}
             />
           </main>
         </div>
