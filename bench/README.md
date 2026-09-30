@@ -2,7 +2,7 @@
 
 **담당: seoyeon ([@seoyeon056](https://github.com/seoyeon056))** · 상태: ✅ 시작 가능 (스켈레톤 머지 완료)
 
-저작권·개인정보 걱정 없는 **자체 합성 평가 데이터셋**과 정확도(F1) 측정 스크립트. 공개 벤치마크는 이 프로젝트의 핵심 차별화 포인트다.
+저작권·개인정보 걱정 없는 **자체 합성 평가 데이터셋**과 정확도(F1·F2) 측정 스크립트. 공개 벤치마크는 이 프로젝트의 핵심 차별화 포인트다.
 
 ## 규칙 (실격 사유와 직결 — 예외 없음)
 
@@ -19,7 +19,7 @@ generator/
   documents.py    # 문장 템플릿에 값을 심어 문서 + 라벨(span) 생성
 generate_dataset.py  # CLI — JSONL 데이터셋 생성
 evaluators/           # 평가 도구 모음 — "무엇을 평가하는가"별로 파일 하나
-  evaluate.py            # CLI — core Pipeline.scan() 결과 vs 정답 → precision/recall/F1 리포트 (종류별+난이도별)
+  evaluate.py            # CLI — core Pipeline.scan() 결과 vs 정답 → precision/recall/F1/F2 리포트 (종류별+난이도별)
   mask_quality.py        # 마스킹 결과물 자체의 개인정보 유출(완전/부분) 여부 검증 로직
   evaluate_masking.py    # CLI — 마스킹 결과에 개인정보가 실제로 남아있는지(유출률) 평가 (--strategy로 mask/label/pseudonym 선택)
   confidence_analysis.py # CLI — confidence 임계값별 precision/recall/F1 변화 분석
@@ -687,6 +687,66 @@ v2 주소 59건 중 37건이 새 형태이고 형태별로는 2~8건이다(500�
 커밋된 v1·v2를 시드로 재생성해 한 줄이라도 다르면 CI에서 실패시킨다. 생성기를 바꾸는 후속 작업은 v2처럼
 옵션 뒤로 옮기거나, v1을 일부러 갱신할 땐 수치를 함께 갱신해야 한다.
 
+## 표기 변형 평가 세트 — 9/28 이후 막은 누출을 숫자로 보이기 ([#531](https://github.com/ChoHyeonChan/maskingtape/issues/531))
+
+**⚠️ 이 세트는 일반 정확도가 아니라 "알려진 누출을 막았는지 보는 회귀 지표"다.** 9/28
+전수 감사 뒤로 core가 많이 고쳤는데(띄어 쓴 주소, `성명 : 홍길동`, 전각 숫자·NFD 자모,
+8자리 생년월일 등), v1·v2는 이미 대부분 종류가 1.000이고 이 표기들 자체가 데이터에 없어서
+점수가 전혀 움직이지 않았다. `bench/datasets/variants_v1.jsonl`은 core 테스트
+(`test_address_spacing.py`/`test_name_forms.py`/`test_normalize.py`/`test_common_forms.py`)와
+**같은 모양**으로 새로 쓴 합성 문장 300건(17개 표기 태그 × 15건 안팎)이다 — 테스트 문장을
+그대로 복사하지 않고 값만 새로 뽑았다. **이 세트는 우리가 찾아서 고친 표기로 만들어
+우리에게 유리하다.** 공정한 정확도는 [#456](https://github.com/ChoHyeonChan/maskingtape/issues/456)
+보고용 데이터와 [#457](https://github.com/ChoHyeonChan/maskingtape/issues/457) 외부 도구
+비교가 맡는다.
+
+```bash
+python -m bench.generate_variants --out bench/datasets/variants_v1.jsonl
+python -m bench.evaluators.evaluate_variants bench/datasets/variants_v1.jsonl
+# 두 커밋 비교(예: 9/28 오전 main과 지금)를 한 명령으로 재현:
+python -m bench.evaluators.compare_variants_across_commits bench/datasets/variants_v1.jsonl --before 1086044 --after HEAD
+```
+
+`compare_variants_across_commits.py`는 두 커밋의 `packages/core`를 각각 **격리된 임시
+가상환경**에 설치해 실행한다 — 같은 프로세스에서 `PYTHONPATH`만 바꾸는 방식은 이 저장소의
+editable install이 새 파일도 옛 커밋 환경에서 찾아내 버려서 신뢰할 수 없었다(직접 확인).
+
+### 결과 (2026-09-29, `1086044` → `56d6b91` 이후 main)
+
+| 표기 태그 | 9/28 오전 재현율 | 지금 재현율 |
+|---|---|---|
+| account_attached_hyphen | 0.000 | 1.000 |
+| address_gu_start | 0.000 | 1.000 |
+| address_wide_spaces | 0.133 | 1.000 |
+| birthdate_forms | 0.000 | 1.000 |
+| card_forms | 0.200 | 1.000 |
+| dash_variants | 0.000 | 1.000 |
+| fullwidth | 0.000 | 1.000 |
+| hangul_filler | 0.000 | 1.000 |
+| invisible_chars | 0.000 | 1.000 |
+| name_form_colon | 0.267 | 1.000 |
+| name_form_paren_label | 0.000 | 1.000 |
+| name_form_table | 0.000 | 1.000 |
+| name_paren_after_label | 1.000 | 1.000 |
+| name_title_particle | 1.000 | 1.000 |
+| nfd_hangul | 0.000 | 1.000 |
+| passport_forms | 0.000 | 1.000 |
+| phone_forms | 0.000 | 1.000 |
+| **전체 오탐(fp)** | **28건** | **15건** |
+
+`name_paren_after_label`·`name_title_particle`이 9/28 오전에 이미 1.000인 이유: 이름 양식
+표기 수정([#491](https://github.com/ChoHyeonChan/maskingtape/issues/491))이 비교 기준
+커밋(`1086044`)보다 먼저 main에 들어가 있었다 — 두 태그는 "9/28 낮에 새로 고친 것"이
+아니라 "이미 고쳐져 있던 것"의 재확인이다.
+
+**오탐 28→15건 감소는 새 오탐이 늘지 않았다는 뜻이 아니다.** 남은 15건을 뜯어보니 전부
+"차장은"·"원장이"·"주임이" 같은 직함+조사 자체가 이름으로 오탐되는 **새로 생긴 회귀**였다
+(`1086044`에서는 같은 문장에 이 오탐이 없었다 — 직접 재현 확인). [#491](https://github.com/ChoHyeonChan/maskingtape/issues/491)이
+"직함+조사를 이름으로 오인해 뒤 이름을 놓치는" 문제는 고쳤지만, 그 과정에서 임시로 잡은
+직함+조사 후보 자체가 최종 결과에 남는 부작용이 생긴 것으로 보인다 — core 이슈
+[#533](https://github.com/ChoHyeonChan/maskingtape/issues/533)으로 남겼다(bench 소관이
+아니라 코드는 고치지 않았다).
+
 ## 데이터셋 포맷 (생성기·평가기가 공유하는 계약)
 
 JSONL — 한 줄에 문서 하나:
@@ -698,5 +758,7 @@ JSONL — 한 줄에 문서 하나:
 - `start`/`end`는 파이썬 슬라이스 규약 (`text[start:end]` == 개인정보 원문)
 - `kind`는 core의 `Detection.kind`와 동일한 문자열: `rrn`, `phone`, `email`, `name`, `address`, `card`, `biz_reg`, `passport`, `account`, `birth_date`, `driver_license`
 - `difficulty`는 `easy`/`hard`/`negative` 중 하나 (없으면 evaluate.py가 `unknown`으로 취급 — 하위 호환)
-- 평가 기준: span 완전 일치(exact match)로 precision / recall / F1 산출
+- 평가 기준: span 완전 일치(exact match)로 precision / recall / F1 / F2 산출
+  (F2는 재현율에 F1보다 더 큰 가중치를 두는 Fβ, β=2 — PII 탐지는 미탐(FN)이 오탐(FP)보다
+  위험하다는 게 이 도메인의 평가 관행이라 F1과 나란히 본다. 근거: `evaluate.py` 모듈 docstring)
 - 포맷 변경은 팀장 승인 후 이 문서부터 갱신한다

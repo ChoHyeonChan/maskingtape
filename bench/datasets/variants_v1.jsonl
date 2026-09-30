@@ -1,0 +1,300 @@
+{"text": "입금계좌-487-875-151457", "labels": [{"kind": "account", "start": 5, "end": 19}], "difficulty": "variant", "variant_tag": "account_attached_hyphen"}
+{"text": "입금계좌-495-497-553844", "labels": [{"kind": "account", "start": 5, "end": 19}], "difficulty": "variant", "variant_tag": "account_attached_hyphen"}
+{"text": "입금계좌-678-165-292661", "labels": [{"kind": "account", "start": 5, "end": 19}], "difficulty": "variant", "variant_tag": "account_attached_hyphen"}
+{"text": "입금계좌-754-723-645206", "labels": [{"kind": "account", "start": 5, "end": 19}], "difficulty": "variant", "variant_tag": "account_attached_hyphen"}
+{"text": "입금계좌-919-581-583216", "labels": [{"kind": "account", "start": 5, "end": 19}], "difficulty": "variant", "variant_tag": "account_attached_hyphen"}
+{"text": "입금계좌-044-082-802583", "labels": [{"kind": "account", "start": 5, "end": 19}], "difficulty": "variant", "variant_tag": "account_attached_hyphen"}
+{"text": "입금계좌-402-719-016520", "labels": [{"kind": "account", "start": 5, "end": 19}], "difficulty": "variant", "variant_tag": "account_attached_hyphen"}
+{"text": "입금계좌-940-979-285297", "labels": [{"kind": "account", "start": 5, "end": 19}], "difficulty": "variant", "variant_tag": "account_attached_hyphen"}
+{"text": "입금계좌-992-993-905809", "labels": [{"kind": "account", "start": 5, "end": 19}], "difficulty": "variant", "variant_tag": "account_attached_hyphen"}
+{"text": "입금계좌-856-981-617285", "labels": [{"kind": "account", "start": 5, "end": 19}], "difficulty": "variant", "variant_tag": "account_attached_hyphen"}
+{"text": "입금계좌-965-477-935975", "labels": [{"kind": "account", "start": 5, "end": 19}], "difficulty": "variant", "variant_tag": "account_attached_hyphen"}
+{"text": "입금계좌-305-652-980659", "labels": [{"kind": "account", "start": 5, "end": 19}], "difficulty": "variant", "variant_tag": "account_attached_hyphen"}
+{"text": "입금계좌-896-211-229566", "labels": [{"kind": "account", "start": 5, "end": 19}], "difficulty": "variant", "variant_tag": "account_attached_hyphen"}
+{"text": "입금계좌-215-181-424248", "labels": [{"kind": "account", "start": 5, "end": 19}], "difficulty": "variant", "variant_tag": "account_attached_hyphen"}
+{"text": "입금계좌-415-879-330155", "labels": [{"kind": "account", "start": 5, "end": 19}], "difficulty": "variant", "variant_tag": "account_attached_hyphen"}
+{"text": "사업장 소재지 강남구 센텀중앙로 14입니다.", "labels": [{"kind": "address", "start": 8, "end": 20}], "difficulty": "variant", "variant_tag": "address_gu_start"}
+{"text": "거주지: 노원구 센텀중앙로 142입니다.", "labels": [{"kind": "address", "start": 5, "end": 18}], "difficulty": "variant", "variant_tag": "address_gu_start"}
+{"text": "사업장 소재지 유성구 판교역로 198입니다.", "labels": [{"kind": "address", "start": 8, "end": 20}], "difficulty": "variant", "variant_tag": "address_gu_start"}
+{"text": "주소: 광진구 월드컵로 183입니다.", "labels": [{"kind": "address", "start": 4, "end": 16}], "difficulty": "variant", "variant_tag": "address_gu_start"}
+{"text": "사업장 소재지 수영구 동성로 195입니다.", "labels": [{"kind": "address", "start": 8, "end": 19}], "difficulty": "variant", "variant_tag": "address_gu_start"}
+{"text": "배송지 수영구 판교역로 176입니다.", "labels": [{"kind": "address", "start": 4, "end": 16}], "difficulty": "variant", "variant_tag": "address_gu_start"}
+{"text": "배송지 해운대구 월드컵로 33입니다.", "labels": [{"kind": "address", "start": 4, "end": 16}], "difficulty": "variant", "variant_tag": "address_gu_start"}
+{"text": "거주지: 수영구 센텀중앙로 79입니다.", "labels": [{"kind": "address", "start": 5, "end": 17}], "difficulty": "variant", "variant_tag": "address_gu_start"}
+{"text": "거주지: 유성구 판교역로 195입니다.", "labels": [{"kind": "address", "start": 5, "end": 17}], "difficulty": "variant", "variant_tag": "address_gu_start"}
+{"text": "거주지: 노원구 센텀중앙로 72입니다.", "labels": [{"kind": "address", "start": 5, "end": 17}], "difficulty": "variant", "variant_tag": "address_gu_start"}
+{"text": "배송지 광진구 테헤란로 132입니다.", "labels": [{"kind": "address", "start": 4, "end": 16}], "difficulty": "variant", "variant_tag": "address_gu_start"}
+{"text": "사업장 소재지 유성구 센텀중앙로 163입니다.", "labels": [{"kind": "address", "start": 8, "end": 21}], "difficulty": "variant", "variant_tag": "address_gu_start"}
+{"text": "배송지 유성구 센텀중앙로 6입니다.", "labels": [{"kind": "address", "start": 4, "end": 15}], "difficulty": "variant", "variant_tag": "address_gu_start"}
+{"text": "배송지 광진구 센텀중앙로 48입니다.", "labels": [{"kind": "address", "start": 4, "end": 16}], "difficulty": "variant", "variant_tag": "address_gu_start"}
+{"text": "배송지 강남구 테헤란로 177입니다.", "labels": [{"kind": "address", "start": 4, "end": 16}], "difficulty": "variant", "variant_tag": "address_gu_start"}
+{"text": "주소: 인천광역시  강남구  판교역로  98 입니다.", "labels": [{"kind": "address", "start": 4, "end": 24}], "difficulty": "variant", "variant_tag": "address_wide_spaces"}
+{"text": "주소: 대구광역시   해운대구   센텀중앙로   166 입니다.", "labels": [{"kind": "address", "start": 4, "end": 30}], "difficulty": "variant", "variant_tag": "address_wide_spaces"}
+{"text": "주소: 서울특별시  광진구  센텀중앙로  50 입니다.", "labels": [{"kind": "address", "start": 4, "end": 25}], "difficulty": "variant", "variant_tag": "address_wide_spaces"}
+{"text": "주소: 울산광역시\t\t종로구\t\t동성로\t\t70 입니다.", "labels": [{"kind": "address", "start": 4, "end": 23}], "difficulty": "variant", "variant_tag": "address_wide_spaces"}
+{"text": "주소: 부산광역시  유성구  판교역로  56 입니다.", "labels": [{"kind": "address", "start": 4, "end": 24}], "difficulty": "variant", "variant_tag": "address_wide_spaces"}
+{"text": "주소: 대구광역시\t\t유성구\t\t월드컵로\t\t27 입니다.", "labels": [{"kind": "address", "start": 4, "end": 24}], "difficulty": "variant", "variant_tag": "address_wide_spaces"}
+{"text": "주소: 부산광역시   종로구   판교역로   104 입니다.", "labels": [{"kind": "address", "start": 4, "end": 28}], "difficulty": "variant", "variant_tag": "address_wide_spaces"}
+{"text": "주소: 대전광역시   수영구   센텀중앙로   160 입니다.", "labels": [{"kind": "address", "start": 4, "end": 29}], "difficulty": "variant", "variant_tag": "address_wide_spaces"}
+{"text": "주소: 대구광역시\t\t유성구\t\t센텀중앙로\t\t77 입니다.", "labels": [{"kind": "address", "start": 4, "end": 25}], "difficulty": "variant", "variant_tag": "address_wide_spaces"}
+{"text": "주소: 인천광역시\t수원시\t동성로\t18 입니다.", "labels": [{"kind": "address", "start": 4, "end": 20}], "difficulty": "variant", "variant_tag": "address_wide_spaces"}
+{"text": "주소: 광주광역시\t\t강남구\t\t월드컵로\t\t88 입니다.", "labels": [{"kind": "address", "start": 4, "end": 24}], "difficulty": "variant", "variant_tag": "address_wide_spaces"}
+{"text": "주소: 인천광역시\t노원구\t월드컵로\t48 입니다.", "labels": [{"kind": "address", "start": 4, "end": 21}], "difficulty": "variant", "variant_tag": "address_wide_spaces"}
+{"text": "주소: 대구광역시\t\t수원시\t\t판교역로\t\t186 입니다.", "labels": [{"kind": "address", "start": 4, "end": 25}], "difficulty": "variant", "variant_tag": "address_wide_spaces"}
+{"text": "주소: 대구광역시\t\t강남구\t\t월드컵로\t\t199 입니다.", "labels": [{"kind": "address", "start": 4, "end": 25}], "difficulty": "variant", "variant_tag": "address_wide_spaces"}
+{"text": "주소: 서울특별시\t\t유성구\t\t센텀중앙로\t\t77 입니다.", "labels": [{"kind": "address", "start": 4, "end": 25}], "difficulty": "variant", "variant_tag": "address_wide_spaces"}
+{"text": "생년월일: 19840827", "labels": [{"kind": "birth_date", "start": 6, "end": 14}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 19710818", "labels": [{"kind": "birth_date", "start": 6, "end": 14}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 19620719", "labels": [{"kind": "birth_date", "start": 6, "end": 14}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 19910408", "labels": [{"kind": "birth_date", "start": 6, "end": 14}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 19601203", "labels": [{"kind": "birth_date", "start": 6, "end": 14}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 19820610", "labels": [{"kind": "birth_date", "start": 6, "end": 14}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 19800503", "labels": [{"kind": "birth_date", "start": 6, "end": 14}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 20100302", "labels": [{"kind": "birth_date", "start": 6, "end": 14}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 20020706", "labels": [{"kind": "birth_date", "start": 6, "end": 14}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 19640424", "labels": [{"kind": "birth_date", "start": 6, "end": 14}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 19930702", "labels": [{"kind": "birth_date", "start": 6, "end": 14}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 19910822", "labels": [{"kind": "birth_date", "start": 6, "end": 14}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 19511009", "labels": [{"kind": "birth_date", "start": 6, "end": 14}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 19740314", "labels": [{"kind": "birth_date", "start": 6, "end": 14}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 19641227", "labels": [{"kind": "birth_date", "start": 6, "end": 14}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 1983. 5. 19.", "labels": [{"kind": "birth_date", "start": 6, "end": 18}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 2009. 3. 16.", "labels": [{"kind": "birth_date", "start": 6, "end": 18}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 2004. 11. 27.", "labels": [{"kind": "birth_date", "start": 6, "end": 19}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 1993. 9. 8.", "labels": [{"kind": "birth_date", "start": 6, "end": 17}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 2008. 9. 22.", "labels": [{"kind": "birth_date", "start": 6, "end": 18}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 1961. 9. 6.", "labels": [{"kind": "birth_date", "start": 6, "end": 17}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 1998. 12. 5.", "labels": [{"kind": "birth_date", "start": 6, "end": 18}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 1951. 6. 26.", "labels": [{"kind": "birth_date", "start": 6, "end": 18}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 1982. 11. 24.", "labels": [{"kind": "birth_date", "start": 6, "end": 19}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 1973. 6. 13.", "labels": [{"kind": "birth_date", "start": 6, "end": 18}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 1979. 2. 9.", "labels": [{"kind": "birth_date", "start": 6, "end": 17}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 2009. 11. 8.", "labels": [{"kind": "birth_date", "start": 6, "end": 18}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 1979. 7. 28.", "labels": [{"kind": "birth_date", "start": 6, "end": 18}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 1961. 6. 28.", "labels": [{"kind": "birth_date", "start": 6, "end": 18}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 1960. 11. 9.", "labels": [{"kind": "birth_date", "start": 6, "end": 18}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 71년 12월 19일", "labels": [{"kind": "birth_date", "start": 6, "end": 17}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 75년 2월 13일", "labels": [{"kind": "birth_date", "start": 6, "end": 16}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 06년 11월 6일", "labels": [{"kind": "birth_date", "start": 6, "end": 16}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 95년 9월 26일", "labels": [{"kind": "birth_date", "start": 6, "end": 16}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 86년 2월 20일", "labels": [{"kind": "birth_date", "start": 6, "end": 16}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 84년 7월 11일", "labels": [{"kind": "birth_date", "start": 6, "end": 16}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 30년 2월 1일", "labels": [{"kind": "birth_date", "start": 6, "end": 15}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 68년 7월 16일", "labels": [{"kind": "birth_date", "start": 6, "end": 16}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 04년 7월 14일", "labels": [{"kind": "birth_date", "start": 6, "end": 16}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 97년 2월 13일", "labels": [{"kind": "birth_date", "start": 6, "end": 16}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 60년 10월 26일", "labels": [{"kind": "birth_date", "start": 6, "end": 17}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 31년 4월 9일", "labels": [{"kind": "birth_date", "start": 6, "end": 15}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 35년 11월 3일", "labels": [{"kind": "birth_date", "start": 6, "end": 16}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 69년 6월 23일", "labels": [{"kind": "birth_date", "start": 6, "end": 16}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "생년월일: 15년 1월 3일", "labels": [{"kind": "birth_date", "start": 6, "end": 15}], "difficulty": "variant", "variant_tag": "birthdate_forms"}
+{"text": "카드 6858-6390 3068 8597", "labels": [{"kind": "card", "start": 3, "end": 22}], "difficulty": "variant", "variant_tag": "card_forms"}
+{"text": "카드 7137-8419 7807-5172", "labels": [{"kind": "card", "start": 3, "end": 22}], "difficulty": "variant", "variant_tag": "card_forms"}
+{"text": "카드 1552-0889-2920 3953", "labels": [{"kind": "card", "start": 3, "end": 22}], "difficulty": "variant", "variant_tag": "card_forms"}
+{"text": "카드 3622-7510-4694-1936", "labels": [{"kind": "card", "start": 3, "end": 22}], "difficulty": "variant", "variant_tag": "card_forms"}
+{"text": "카드 0023 9687-9964-0876", "labels": [{"kind": "card", "start": 3, "end": 22}], "difficulty": "variant", "variant_tag": "card_forms"}
+{"text": "카드 8095-3851 7743-3699", "labels": [{"kind": "card", "start": 3, "end": 22}], "difficulty": "variant", "variant_tag": "card_forms"}
+{"text": "카드 1097 5999 9306-9601", "labels": [{"kind": "card", "start": 3, "end": 22}], "difficulty": "variant", "variant_tag": "card_forms"}
+{"text": "카드 3295-5479-0020 8529", "labels": [{"kind": "card", "start": 3, "end": 22}], "difficulty": "variant", "variant_tag": "card_forms"}
+{"text": "카드 7308-7984-7172 9676", "labels": [{"kind": "card", "start": 3, "end": 22}], "difficulty": "variant", "variant_tag": "card_forms"}
+{"text": "카드 0777-6725-8846 9244", "labels": [{"kind": "card", "start": 3, "end": 22}], "difficulty": "variant", "variant_tag": "card_forms"}
+{"text": "카드 0827 9674 8160 2366", "labels": [{"kind": "card", "start": 3, "end": 22}], "difficulty": "variant", "variant_tag": "card_forms"}
+{"text": "카드 3909-8663-8692 2538", "labels": [{"kind": "card", "start": 3, "end": 22}], "difficulty": "variant", "variant_tag": "card_forms"}
+{"text": "카드 4128-2283 4976 7661", "labels": [{"kind": "card", "start": 3, "end": 22}], "difficulty": "variant", "variant_tag": "card_forms"}
+{"text": "카드 3516-9540-6564-5581", "labels": [{"kind": "card", "start": 3, "end": 22}], "difficulty": "variant", "variant_tag": "card_forms"}
+{"text": "카드 0387 0450-6085 7156", "labels": [{"kind": "card", "start": 3, "end": 22}], "difficulty": "variant", "variant_tag": "card_forms"}
+{"text": "입금 계좌 669−010−296476", "labels": [{"kind": "account", "start": 6, "end": 20}], "difficulty": "variant", "variant_tag": "dash_variants"}
+{"text": "입금 계좌 747−107−121835", "labels": [{"kind": "account", "start": 6, "end": 20}], "difficulty": "variant", "variant_tag": "dash_variants"}
+{"text": "입금 계좌 033–086–847543", "labels": [{"kind": "account", "start": 6, "end": 20}], "difficulty": "variant", "variant_tag": "dash_variants"}
+{"text": "입금 계좌 149–041–607039", "labels": [{"kind": "account", "start": 6, "end": 20}], "difficulty": "variant", "variant_tag": "dash_variants"}
+{"text": "입금 계좌 586−540−194540", "labels": [{"kind": "account", "start": 6, "end": 20}], "difficulty": "variant", "variant_tag": "dash_variants"}
+{"text": "입금 계좌 062－032－832453", "labels": [{"kind": "account", "start": 6, "end": 20}], "difficulty": "variant", "variant_tag": "dash_variants"}
+{"text": "입금 계좌 370−910−243102", "labels": [{"kind": "account", "start": 6, "end": 20}], "difficulty": "variant", "variant_tag": "dash_variants"}
+{"text": "입금 계좌 881－831－179892", "labels": [{"kind": "account", "start": 6, "end": 20}], "difficulty": "variant", "variant_tag": "dash_variants"}
+{"text": "입금 계좌 924–781–472275", "labels": [{"kind": "account", "start": 6, "end": 20}], "difficulty": "variant", "variant_tag": "dash_variants"}
+{"text": "입금 계좌 734–720–997010", "labels": [{"kind": "account", "start": 6, "end": 20}], "difficulty": "variant", "variant_tag": "dash_variants"}
+{"text": "입금 계좌 044−030−223843", "labels": [{"kind": "account", "start": 6, "end": 20}], "difficulty": "variant", "variant_tag": "dash_variants"}
+{"text": "입금 계좌 793–577–019343", "labels": [{"kind": "account", "start": 6, "end": 20}], "difficulty": "variant", "variant_tag": "dash_variants"}
+{"text": "입금 계좌 760–211–034611", "labels": [{"kind": "account", "start": 6, "end": 20}], "difficulty": "variant", "variant_tag": "dash_variants"}
+{"text": "입금 계좌 883－177－568794", "labels": [{"kind": "account", "start": 6, "end": 20}], "difficulty": "variant", "variant_tag": "dash_variants"}
+{"text": "입금 계좌 446－738－575202", "labels": [{"kind": "account", "start": 6, "end": 20}], "difficulty": "variant", "variant_tag": "dash_variants"}
+{"text": "주민번호 ２４０２０７－２９３９４００", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "variant", "variant_tag": "fullwidth"}
+{"text": "주민번호 ２１１１０５－３２９９２０８", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "variant", "variant_tag": "fullwidth"}
+{"text": "주민번호 ６０１０１７－４２１３０２１", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "variant", "variant_tag": "fullwidth"}
+{"text": "주민번호 ３９１２１５－３４３５１０３", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "variant", "variant_tag": "fullwidth"}
+{"text": "주민번호 ０１０５２２－２２６００００", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "variant", "variant_tag": "fullwidth"}
+{"text": "주민번호 ７９１１１３－３３９７９０６", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "variant", "variant_tag": "fullwidth"}
+{"text": "주민번호 ７８１１０６－２５８６８０４", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "variant", "variant_tag": "fullwidth"}
+{"text": "주민번호 ９７０２０３－４９８３５８７", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "variant", "variant_tag": "fullwidth"}
+{"text": "주민번호 ７５０２０９－３１８５４９４", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "variant", "variant_tag": "fullwidth"}
+{"text": "주민번호 ６５０４０２－２３３５１６６", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "variant", "variant_tag": "fullwidth"}
+{"text": "주민번호 １９０４１７－１９１７９５９", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "variant", "variant_tag": "fullwidth"}
+{"text": "주민번호 ３３０２０１－３２２１５４１", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "variant", "variant_tag": "fullwidth"}
+{"text": "주민번호 ０６０９０６－５１４３９０２", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "variant", "variant_tag": "fullwidth"}
+{"text": "주민번호 ０８０９０１－２０７８２３１", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "variant", "variant_tag": "fullwidth"}
+{"text": "주민번호 １８０７０２－８２４１７７１", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "variant", "variant_tag": "fullwidth"}
+{"text": "주소ㅤ서울특별시ㅤ광진구ㅤ자양동ㅤ86", "labels": [{"kind": "address", "start": 3, "end": 19}], "difficulty": "variant", "variant_tag": "hangul_filler"}
+{"text": "주소ㅤ울산광역시ㅤ해운대구ㅤ우동ㅤ84", "labels": [{"kind": "address", "start": 3, "end": 19}], "difficulty": "variant", "variant_tag": "hangul_filler"}
+{"text": "주소ㅤ대전광역시ㅤ강남구ㅤ역삼동ㅤ34", "labels": [{"kind": "address", "start": 3, "end": 19}], "difficulty": "variant", "variant_tag": "hangul_filler"}
+{"text": "주소ㅤ광주광역시ㅤ종로구ㅤ청운동ㅤ150", "labels": [{"kind": "address", "start": 3, "end": 20}], "difficulty": "variant", "variant_tag": "hangul_filler"}
+{"text": "주소ㅤ울산광역시ㅤ마포구ㅤ합정동ㅤ3", "labels": [{"kind": "address", "start": 3, "end": 18}], "difficulty": "variant", "variant_tag": "hangul_filler"}
+{"text": "주소ㅤ서울특별시ㅤ종로구ㅤ청운동ㅤ21", "labels": [{"kind": "address", "start": 3, "end": 19}], "difficulty": "variant", "variant_tag": "hangul_filler"}
+{"text": "주소ㅤ대전광역시ㅤ수원시ㅤ영통구ㅤ153", "labels": [{"kind": "address", "start": 3, "end": 20}], "difficulty": "variant", "variant_tag": "hangul_filler"}
+{"text": "주소ㅤ울산광역시ㅤ해운대구ㅤ우동ㅤ71", "labels": [{"kind": "address", "start": 3, "end": 19}], "difficulty": "variant", "variant_tag": "hangul_filler"}
+{"text": "주소ㅤ대전광역시ㅤ유성구ㅤ봉명동ㅤ128", "labels": [{"kind": "address", "start": 3, "end": 20}], "difficulty": "variant", "variant_tag": "hangul_filler"}
+{"text": "주소ㅤ울산광역시ㅤ광진구ㅤ자양동ㅤ105", "labels": [{"kind": "address", "start": 3, "end": 20}], "difficulty": "variant", "variant_tag": "hangul_filler"}
+{"text": "주소ㅤ대구광역시ㅤ수원시ㅤ영통구ㅤ30", "labels": [{"kind": "address", "start": 3, "end": 19}], "difficulty": "variant", "variant_tag": "hangul_filler"}
+{"text": "주소ㅤ울산광역시ㅤ마포구ㅤ합정동ㅤ193", "labels": [{"kind": "address", "start": 3, "end": 20}], "difficulty": "variant", "variant_tag": "hangul_filler"}
+{"text": "주소ㅤ대전광역시ㅤ노원구ㅤ상계동ㅤ126", "labels": [{"kind": "address", "start": 3, "end": 20}], "difficulty": "variant", "variant_tag": "hangul_filler"}
+{"text": "주소ㅤ울산광역시ㅤ수원시ㅤ영통구ㅤ148", "labels": [{"kind": "address", "start": 3, "end": 20}], "difficulty": "variant", "variant_tag": "hangul_filler"}
+{"text": "주소ㅤ대구광역시ㅤ마포구ㅤ합정동ㅤ143", "labels": [{"kind": "address", "start": 3, "end": 20}], "difficulty": "variant", "variant_tag": "hangul_filler"}
+{"text": "전화 010-7260​-4916", "labels": [{"kind": "phone", "start": 3, "end": 17}], "difficulty": "variant", "variant_tag": "invisible_chars"}
+{"text": "전화 010-1408​-2641", "labels": [{"kind": "phone", "start": 3, "end": 17}], "difficulty": "variant", "variant_tag": "invisible_chars"}
+{"text": "전화 010-6890​-4177", "labels": [{"kind": "phone", "start": 3, "end": 17}], "difficulty": "variant", "variant_tag": "invisible_chars"}
+{"text": "전화 010-4460​-6245", "labels": [{"kind": "phone", "start": 3, "end": 17}], "difficulty": "variant", "variant_tag": "invisible_chars"}
+{"text": "전화 010-1410​-3542", "labels": [{"kind": "phone", "start": 3, "end": 17}], "difficulty": "variant", "variant_tag": "invisible_chars"}
+{"text": "전화 010-8163​-5497", "labels": [{"kind": "phone", "start": 3, "end": 17}], "difficulty": "variant", "variant_tag": "invisible_chars"}
+{"text": "전화 010-6309​-4763", "labels": [{"kind": "phone", "start": 3, "end": 17}], "difficulty": "variant", "variant_tag": "invisible_chars"}
+{"text": "전화 010-3687​-1797", "labels": [{"kind": "phone", "start": 3, "end": 17}], "difficulty": "variant", "variant_tag": "invisible_chars"}
+{"text": "전화 010-6608​-2765", "labels": [{"kind": "phone", "start": 3, "end": 17}], "difficulty": "variant", "variant_tag": "invisible_chars"}
+{"text": "전화 010-8595​-4893", "labels": [{"kind": "phone", "start": 3, "end": 17}], "difficulty": "variant", "variant_tag": "invisible_chars"}
+{"text": "전화 010-7416​-7477", "labels": [{"kind": "phone", "start": 3, "end": 17}], "difficulty": "variant", "variant_tag": "invisible_chars"}
+{"text": "전화 010-7355​-7631", "labels": [{"kind": "phone", "start": 3, "end": 17}], "difficulty": "variant", "variant_tag": "invisible_chars"}
+{"text": "전화 010-5832​-6995", "labels": [{"kind": "phone", "start": 3, "end": 17}], "difficulty": "variant", "variant_tag": "invisible_chars"}
+{"text": "전화 010-8768​-1330", "labels": [{"kind": "phone", "start": 3, "end": 17}], "difficulty": "variant", "variant_tag": "invisible_chars"}
+{"text": "전화 010-5101​-4123", "labels": [{"kind": "phone", "start": 3, "end": 17}], "difficulty": "variant", "variant_tag": "invisible_chars"}
+{"text": "예금주 :  심혜", "labels": [{"kind": "name", "start": 7, "end": 9}], "difficulty": "variant", "variant_tag": "name_form_colon"}
+{"text": "성명\t:\t강지정", "labels": [{"kind": "name", "start": 5, "end": 8}], "difficulty": "variant", "variant_tag": "name_form_colon"}
+{"text": "이름 :  백준석", "labels": [{"kind": "name", "start": 6, "end": 9}], "difficulty": "variant", "variant_tag": "name_form_colon"}
+{"text": "성함: 최수정", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_form_colon"}
+{"text": "이름: 안은우", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_form_colon"}
+{"text": "예금주\t:\t심석", "labels": [{"kind": "name", "start": 6, "end": 8}], "difficulty": "variant", "variant_tag": "name_form_colon"}
+{"text": "이름\t:\t황하", "labels": [{"kind": "name", "start": 5, "end": 7}], "difficulty": "variant", "variant_tag": "name_form_colon"}
+{"text": "성명: 손찬예", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_form_colon"}
+{"text": "성함 : 강인서", "labels": [{"kind": "name", "start": 5, "end": 8}], "difficulty": "variant", "variant_tag": "name_form_colon"}
+{"text": "예금주\t:\t장빈", "labels": [{"kind": "name", "start": 6, "end": 8}], "difficulty": "variant", "variant_tag": "name_form_colon"}
+{"text": "이름: 심재경", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_form_colon"}
+{"text": "성명 : 윤규", "labels": [{"kind": "name", "start": 5, "end": 7}], "difficulty": "variant", "variant_tag": "name_form_colon"}
+{"text": "성명\t:\t조원서", "labels": [{"kind": "name", "start": 5, "end": 8}], "difficulty": "variant", "variant_tag": "name_form_colon"}
+{"text": "예금주 : 최진서", "labels": [{"kind": "name", "start": 6, "end": 9}], "difficulty": "variant", "variant_tag": "name_form_colon"}
+{"text": "성함 : 허준혜", "labels": [{"kind": "name", "start": 5, "end": 8}], "difficulty": "variant", "variant_tag": "name_form_colon"}
+{"text": "성명(한글): 장연", "labels": [{"kind": "name", "start": 8, "end": 10}], "difficulty": "variant", "variant_tag": "name_form_paren_label"}
+{"text": "성명(한글): 한서찬", "labels": [{"kind": "name", "start": 8, "end": 11}], "difficulty": "variant", "variant_tag": "name_form_paren_label"}
+{"text": "성명(한글): 황석", "labels": [{"kind": "name", "start": 8, "end": 10}], "difficulty": "variant", "variant_tag": "name_form_paren_label"}
+{"text": "성명(한글): 배인수", "labels": [{"kind": "name", "start": 8, "end": 11}], "difficulty": "variant", "variant_tag": "name_form_paren_label"}
+{"text": "성명(한글): 신찬현", "labels": [{"kind": "name", "start": 8, "end": 11}], "difficulty": "variant", "variant_tag": "name_form_paren_label"}
+{"text": "성명(한글): 전수영", "labels": [{"kind": "name", "start": 8, "end": 11}], "difficulty": "variant", "variant_tag": "name_form_paren_label"}
+{"text": "신청인(대표자): 홍진", "labels": [{"kind": "name", "start": 10, "end": 12}], "difficulty": "variant", "variant_tag": "name_form_paren_label"}
+{"text": "신청인(대표자): 오윤", "labels": [{"kind": "name", "start": 10, "end": 12}], "difficulty": "variant", "variant_tag": "name_form_paren_label"}
+{"text": "신청인(대표자): 권민우", "labels": [{"kind": "name", "start": 10, "end": 13}], "difficulty": "variant", "variant_tag": "name_form_paren_label"}
+{"text": "신청인(대표자): 유정", "labels": [{"kind": "name", "start": 10, "end": 12}], "difficulty": "variant", "variant_tag": "name_form_paren_label"}
+{"text": "성명(한글): 강은군", "labels": [{"kind": "name", "start": 8, "end": 11}], "difficulty": "variant", "variant_tag": "name_form_paren_label"}
+{"text": "성명(한글): 송우영", "labels": [{"kind": "name", "start": 8, "end": 11}], "difficulty": "variant", "variant_tag": "name_form_paren_label"}
+{"text": "성명(한글): 윤진", "labels": [{"kind": "name", "start": 8, "end": 10}], "difficulty": "variant", "variant_tag": "name_form_paren_label"}
+{"text": "신청인(대표자): 홍도지", "labels": [{"kind": "name", "start": 10, "end": 13}], "difficulty": "variant", "variant_tag": "name_form_paren_label"}
+{"text": "성명(한글): 송혜", "labels": [{"kind": "name", "start": 8, "end": 10}], "difficulty": "variant", "variant_tag": "name_form_paren_label"}
+{"text": "| 이름 | 신하영 |", "labels": [{"kind": "name", "start": 7, "end": 10}], "difficulty": "variant", "variant_tag": "name_form_table"}
+{"text": "| 성명 | 손윤 |", "labels": [{"kind": "name", "start": 7, "end": 9}], "difficulty": "variant", "variant_tag": "name_form_table"}
+{"text": "| 고객 | 안서 |", "labels": [{"kind": "name", "start": 7, "end": 9}], "difficulty": "variant", "variant_tag": "name_form_table"}
+{"text": "| 이름 | 송율 |", "labels": [{"kind": "name", "start": 7, "end": 9}], "difficulty": "variant", "variant_tag": "name_form_table"}
+{"text": "| 고객 | 안인 |", "labels": [{"kind": "name", "start": 7, "end": 9}], "difficulty": "variant", "variant_tag": "name_form_table"}
+{"text": "| 고객 | 박현 |", "labels": [{"kind": "name", "start": 7, "end": 9}], "difficulty": "variant", "variant_tag": "name_form_table"}
+{"text": "| 성명 | 한영 |", "labels": [{"kind": "name", "start": 7, "end": 9}], "difficulty": "variant", "variant_tag": "name_form_table"}
+{"text": "| 고객 | 문율 |", "labels": [{"kind": "name", "start": 7, "end": 9}], "difficulty": "variant", "variant_tag": "name_form_table"}
+{"text": "| 성명 | 양재하 |", "labels": [{"kind": "name", "start": 7, "end": 10}], "difficulty": "variant", "variant_tag": "name_form_table"}
+{"text": "| 성명 | 조군율 |", "labels": [{"kind": "name", "start": 7, "end": 10}], "difficulty": "variant", "variant_tag": "name_form_table"}
+{"text": "| 성명 | 김윤은 |", "labels": [{"kind": "name", "start": 7, "end": 10}], "difficulty": "variant", "variant_tag": "name_form_table"}
+{"text": "| 고객 | 윤예 |", "labels": [{"kind": "name", "start": 7, "end": 9}], "difficulty": "variant", "variant_tag": "name_form_table"}
+{"text": "| 성명 | 백은석 |", "labels": [{"kind": "name", "start": 7, "end": 10}], "difficulty": "variant", "variant_tag": "name_form_table"}
+{"text": "| 이름 | 심율 |", "labels": [{"kind": "name", "start": 7, "end": 9}], "difficulty": "variant", "variant_tag": "name_form_table"}
+{"text": "| 성명 | 장호 |", "labels": [{"kind": "name", "start": 7, "end": 9}], "difficulty": "variant", "variant_tag": "name_form_table"}
+{"text": "담당자(전경준 군) 문의", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_paren_after_label"}
+{"text": "신청인(허현아 님) 문의", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_paren_after_label"}
+{"text": "담당자(장찬인 님) 문의", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_paren_after_label"}
+{"text": "신청인(황지재 군) 문의", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_paren_after_label"}
+{"text": "고객(정규훈 대리) 문의", "labels": [{"kind": "name", "start": 3, "end": 6}], "difficulty": "variant", "variant_tag": "name_paren_after_label"}
+{"text": "담당자(배정민 군) 문의", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_paren_after_label"}
+{"text": "학생(백영준 대리) 문의", "labels": [{"kind": "name", "start": 3, "end": 6}], "difficulty": "variant", "variant_tag": "name_paren_after_label"}
+{"text": "담당자(김경지 님) 문의", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_paren_after_label"}
+{"text": "고객(서도호 대리) 문의", "labels": [{"kind": "name", "start": 3, "end": 6}], "difficulty": "variant", "variant_tag": "name_paren_after_label"}
+{"text": "담당자(임훈하 군) 문의", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_paren_after_label"}
+{"text": "학생(백지성 과장) 문의", "labels": [{"kind": "name", "start": 3, "end": 6}], "difficulty": "variant", "variant_tag": "name_paren_after_label"}
+{"text": "신청인(문우양 군) 문의", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_paren_after_label"}
+{"text": "담당자(임준재 과장) 문의", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_paren_after_label"}
+{"text": "신청인(이원도 님) 문의", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_paren_after_label"}
+{"text": "담당자(신경율 님) 문의", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_paren_after_label"}
+{"text": "신청자 : 차장은 고영율입니다", "labels": [{"kind": "name", "start": 10, "end": 13}], "difficulty": "variant", "variant_tag": "name_title_particle"}
+{"text": "신청자 : 원장은 심석도입니다", "labels": [{"kind": "name", "start": 10, "end": 13}], "difficulty": "variant", "variant_tag": "name_title_particle"}
+{"text": "담당자 : 차장은 허예아입니다", "labels": [{"kind": "name", "start": 10, "end": 13}], "difficulty": "variant", "variant_tag": "name_title_particle"}
+{"text": "담당자 : 주임이 최군양입니다", "labels": [{"kind": "name", "start": 10, "end": 13}], "difficulty": "variant", "variant_tag": "name_title_particle"}
+{"text": "신청자 : 차장은 배진빈입니다", "labels": [{"kind": "name", "start": 10, "end": 13}], "difficulty": "variant", "variant_tag": "name_title_particle"}
+{"text": "환자 : 차장은 최은훈입니다", "labels": [{"kind": "name", "start": 9, "end": 12}], "difficulty": "variant", "variant_tag": "name_title_particle"}
+{"text": "환자 : 차장은 서윤도입니다", "labels": [{"kind": "name", "start": 9, "end": 12}], "difficulty": "variant", "variant_tag": "name_title_particle"}
+{"text": "고객 : 원장이 최훈수입니다", "labels": [{"kind": "name", "start": 9, "end": 12}], "difficulty": "variant", "variant_tag": "name_title_particle"}
+{"text": "신청자 : 주임이 황인아입니다", "labels": [{"kind": "name", "start": 10, "end": 13}], "difficulty": "variant", "variant_tag": "name_title_particle"}
+{"text": "환자 : 원장은 홍군호입니다", "labels": [{"kind": "name", "start": 9, "end": 12}], "difficulty": "variant", "variant_tag": "name_title_particle"}
+{"text": "환자 : 주임이 윤진석입니다", "labels": [{"kind": "name", "start": 9, "end": 12}], "difficulty": "variant", "variant_tag": "name_title_particle"}
+{"text": "환자 : 주임이 심윤서입니다", "labels": [{"kind": "name", "start": 9, "end": 12}], "difficulty": "variant", "variant_tag": "name_title_particle"}
+{"text": "환자 : 원장이 백예현입니다", "labels": [{"kind": "name", "start": 9, "end": 12}], "difficulty": "variant", "variant_tag": "name_title_particle"}
+{"text": "담당자 : 주임이 권율우입니다", "labels": [{"kind": "name", "start": 10, "end": 13}], "difficulty": "variant", "variant_tag": "name_title_particle"}
+{"text": "환자 : 원장은 양윤우입니다", "labels": [{"kind": "name", "start": 9, "end": 12}], "difficulty": "variant", "variant_tag": "name_title_particle"}
+{"text": "고객 허진님 문의", "labels": [{"kind": "name", "start": 3, "end": 8}], "difficulty": "variant", "variant_tag": "nfd_hangul"}
+{"text": "고객 강현빈님 문의", "labels": [{"kind": "name", "start": 3, "end": 12}], "difficulty": "variant", "variant_tag": "nfd_hangul"}
+{"text": "고객 임진님 문의", "labels": [{"kind": "name", "start": 3, "end": 9}], "difficulty": "variant", "variant_tag": "nfd_hangul"}
+{"text": "고객 윤우님 문의", "labels": [{"kind": "name", "start": 3, "end": 8}], "difficulty": "variant", "variant_tag": "nfd_hangul"}
+{"text": "고객 윤준님 문의", "labels": [{"kind": "name", "start": 3, "end": 9}], "difficulty": "variant", "variant_tag": "nfd_hangul"}
+{"text": "고객 장도빈님 문의", "labels": [{"kind": "name", "start": 3, "end": 11}], "difficulty": "variant", "variant_tag": "nfd_hangul"}
+{"text": "고객 심빈인님 문의", "labels": [{"kind": "name", "start": 3, "end": 12}], "difficulty": "variant", "variant_tag": "nfd_hangul"}
+{"text": "고객 유인님 문의", "labels": [{"kind": "name", "start": 3, "end": 8}], "difficulty": "variant", "variant_tag": "nfd_hangul"}
+{"text": "고객 이호아님 문의", "labels": [{"kind": "name", "start": 3, "end": 9}], "difficulty": "variant", "variant_tag": "nfd_hangul"}
+{"text": "고객 강양님 문의", "labels": [{"kind": "name", "start": 3, "end": 9}], "difficulty": "variant", "variant_tag": "nfd_hangul"}
+{"text": "고객 신예님 문의", "labels": [{"kind": "name", "start": 3, "end": 8}], "difficulty": "variant", "variant_tag": "nfd_hangul"}
+{"text": "고객 임진양님 문의", "labels": [{"kind": "name", "start": 3, "end": 12}], "difficulty": "variant", "variant_tag": "nfd_hangul"}
+{"text": "고객 최찬님 문의", "labels": [{"kind": "name", "start": 3, "end": 8}], "difficulty": "variant", "variant_tag": "nfd_hangul"}
+{"text": "고객 박군인님 문의", "labels": [{"kind": "name", "start": 3, "end": 12}], "difficulty": "variant", "variant_tag": "nfd_hangul"}
+{"text": "고객 심호님 문의", "labels": [{"kind": "name", "start": 3, "end": 8}], "difficulty": "variant", "variant_tag": "nfd_hangul"}
+{"text": "여권번호 R 60896891", "labels": [{"kind": "passport", "start": 5, "end": 15}], "difficulty": "variant", "variant_tag": "passport_forms"}
+{"text": "여권번호 R 89972488", "labels": [{"kind": "passport", "start": 5, "end": 15}], "difficulty": "variant", "variant_tag": "passport_forms"}
+{"text": "여권번호 R 22514620", "labels": [{"kind": "passport", "start": 5, "end": 15}], "difficulty": "variant", "variant_tag": "passport_forms"}
+{"text": "여권번호 M 27712089", "labels": [{"kind": "passport", "start": 5, "end": 15}], "difficulty": "variant", "variant_tag": "passport_forms"}
+{"text": "여권번호 R 53669978", "labels": [{"kind": "passport", "start": 5, "end": 15}], "difficulty": "variant", "variant_tag": "passport_forms"}
+{"text": "여권번호 D 10341486", "labels": [{"kind": "passport", "start": 5, "end": 15}], "difficulty": "variant", "variant_tag": "passport_forms"}
+{"text": "여권번호 M 34755344", "labels": [{"kind": "passport", "start": 5, "end": 15}], "difficulty": "variant", "variant_tag": "passport_forms"}
+{"text": "여권번호 D 28024798", "labels": [{"kind": "passport", "start": 5, "end": 15}], "difficulty": "variant", "variant_tag": "passport_forms"}
+{"text": "여권번호 M 51938313", "labels": [{"kind": "passport", "start": 5, "end": 15}], "difficulty": "variant", "variant_tag": "passport_forms"}
+{"text": "여권번호 D 46244525", "labels": [{"kind": "passport", "start": 5, "end": 15}], "difficulty": "variant", "variant_tag": "passport_forms"}
+{"text": "여권번호 R 71041645", "labels": [{"kind": "passport", "start": 5, "end": 15}], "difficulty": "variant", "variant_tag": "passport_forms"}
+{"text": "여권번호 M 29652078", "labels": [{"kind": "passport", "start": 5, "end": 15}], "difficulty": "variant", "variant_tag": "passport_forms"}
+{"text": "여권번호 M 53364605", "labels": [{"kind": "passport", "start": 5, "end": 15}], "difficulty": "variant", "variant_tag": "passport_forms"}
+{"text": "여권번호 D 60482955", "labels": [{"kind": "passport", "start": 5, "end": 15}], "difficulty": "variant", "variant_tag": "passport_forms"}
+{"text": "여권번호 D 43275830", "labels": [{"kind": "passport", "start": 5, "end": 15}], "difficulty": "variant", "variant_tag": "passport_forms"}
+{"text": "TEL 031)800-1434", "labels": [{"kind": "phone", "start": 4, "end": 16}], "difficulty": "variant", "variant_tag": "phone_forms"}
+{"text": "대표 051)855-4369", "labels": [{"kind": "phone", "start": 3, "end": 15}], "difficulty": "variant", "variant_tag": "phone_forms"}
+{"text": "TEL 051)673-3622", "labels": [{"kind": "phone", "start": 4, "end": 16}], "difficulty": "variant", "variant_tag": "phone_forms"}
+{"text": "TEL 031)790-9408", "labels": [{"kind": "phone", "start": 4, "end": 16}], "difficulty": "variant", "variant_tag": "phone_forms"}
+{"text": "대표 031)116-3811", "labels": [{"kind": "phone", "start": 3, "end": 15}], "difficulty": "variant", "variant_tag": "phone_forms"}
+{"text": "대표 02)3413-4377", "labels": [{"kind": "phone", "start": 3, "end": 15}], "difficulty": "variant", "variant_tag": "phone_forms"}
+{"text": "TEL 031)896-4152", "labels": [{"kind": "phone", "start": 4, "end": 16}], "difficulty": "variant", "variant_tag": "phone_forms"}
+{"text": "대표 031)718-5516", "labels": [{"kind": "phone", "start": 3, "end": 15}], "difficulty": "variant", "variant_tag": "phone_forms"}
+{"text": "대표 031)879-1438", "labels": [{"kind": "phone", "start": 3, "end": 15}], "difficulty": "variant", "variant_tag": "phone_forms"}
+{"text": "TEL 031)622-7364", "labels": [{"kind": "phone", "start": 4, "end": 16}], "difficulty": "variant", "variant_tag": "phone_forms"}
+{"text": "대표 031)821-7905", "labels": [{"kind": "phone", "start": 3, "end": 15}], "difficulty": "variant", "variant_tag": "phone_forms"}
+{"text": "대표 031)772-5328", "labels": [{"kind": "phone", "start": 3, "end": 15}], "difficulty": "variant", "variant_tag": "phone_forms"}
+{"text": "대표 02)9105-3353", "labels": [{"kind": "phone", "start": 3, "end": 15}], "difficulty": "variant", "variant_tag": "phone_forms"}
+{"text": "TEL 051)198-5408", "labels": [{"kind": "phone", "start": 4, "end": 16}], "difficulty": "variant", "variant_tag": "phone_forms"}
+{"text": "대표 051)456-8699", "labels": [{"kind": "phone", "start": 3, "end": 15}], "difficulty": "variant", "variant_tag": "phone_forms"}
+{"text": "전화 +82 31 878 6573", "labels": [{"kind": "phone", "start": 3, "end": 18}], "difficulty": "variant", "variant_tag": "phone_forms"}
+{"text": "전화 +82 51 172 8963", "labels": [{"kind": "phone", "start": 3, "end": 18}], "difficulty": "variant", "variant_tag": "phone_forms"}
+{"text": "전화 +82 31 726 2782", "labels": [{"kind": "phone", "start": 3, "end": 18}], "difficulty": "variant", "variant_tag": "phone_forms"}
+{"text": "전화 +82 51 144 6651", "labels": [{"kind": "phone", "start": 3, "end": 18}], "difficulty": "variant", "variant_tag": "phone_forms"}
+{"text": "전화 +82 51 386 6233", "labels": [{"kind": "phone", "start": 3, "end": 18}], "difficulty": "variant", "variant_tag": "phone_forms"}
+{"text": "전화 +82 2 287 4991", "labels": [{"kind": "phone", "start": 3, "end": 17}], "difficulty": "variant", "variant_tag": "phone_forms"}
+{"text": "전화 +82 2 378 8728", "labels": [{"kind": "phone", "start": 3, "end": 17}], "difficulty": "variant", "variant_tag": "phone_forms"}
+{"text": "전화 +82 2 145 6771", "labels": [{"kind": "phone", "start": 3, "end": 17}], "difficulty": "variant", "variant_tag": "phone_forms"}
+{"text": "전화 +82 51 731 6637", "labels": [{"kind": "phone", "start": 3, "end": 18}], "difficulty": "variant", "variant_tag": "phone_forms"}
+{"text": "전화 +82 2 589 5292", "labels": [{"kind": "phone", "start": 3, "end": 17}], "difficulty": "variant", "variant_tag": "phone_forms"}
+{"text": "전화 +82 51 281 6851", "labels": [{"kind": "phone", "start": 3, "end": 18}], "difficulty": "variant", "variant_tag": "phone_forms"}
+{"text": "전화 +82 31 706 6173", "labels": [{"kind": "phone", "start": 3, "end": 18}], "difficulty": "variant", "variant_tag": "phone_forms"}
+{"text": "전화 +82 51 120 8744", "labels": [{"kind": "phone", "start": 3, "end": 18}], "difficulty": "variant", "variant_tag": "phone_forms"}
+{"text": "전화 +82 51 374 9089", "labels": [{"kind": "phone", "start": 3, "end": 18}], "difficulty": "variant", "variant_tag": "phone_forms"}
+{"text": "전화 +82 2 164 2336", "labels": [{"kind": "phone", "start": 3, "end": 17}], "difficulty": "variant", "variant_tag": "phone_forms"}
