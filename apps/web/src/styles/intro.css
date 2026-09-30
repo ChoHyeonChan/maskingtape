@@ -61,6 +61,104 @@
   color: var(--text-primary);
 }
 
+.service-intro__callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  margin: 0 0 0.9rem;
+  padding: 0.95rem 1.1rem;
+  border: 1.5px solid color-mix(in srgb, var(--brand-blue) 16%, var(--border));
+  border-radius: 12px;
+  background: var(--surface-strong);
+  box-shadow: 0 6px 16px rgba(16, 32, 61, 0.06);
+}
+
+.service-intro__callout-icon {
+  flex: 0 0 auto;
+  width: 1.8rem;
+  height: 1.8rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--brand-blue-soft);
+  color: var(--brand-blue);
+  font-weight: 900;
+  font-size: 0.95rem;
+}
+
+.service-intro p.service-intro__callout-title {
+  margin: 0 0 0.25rem;
+  color: var(--text-primary);
+  font-size: 0.92rem;
+  font-weight: 900;
+}
+
+.service-intro p.service-intro__callout-body {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  line-height: 1.55;
+}
+
+.service-intro__callout-body strong {
+  color: var(--brand-blue);
+}
+
+.service-intro__actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-top: 0.9rem;
+}
+
+.service-intro__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: 2.6rem;
+  padding: 0 1.3rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.service-intro__btn--primary {
+  background: var(--brand-blue);
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(24, 58, 139, 0.22);
+}
+
+.service-intro__btn--primary:hover {
+  filter: brightness(1.08);
+}
+
+.service-intro__btn--ghost {
+  background: var(--surface-strong);
+  border: 1.5px solid var(--border);
+  color: var(--text-primary);
+}
+
+.service-intro__btn--ghost:hover {
+  border-color: var(--brand-blue);
+  color: var(--brand-blue);
+}
+
+.service-intro p.service-intro__hint {
+  margin: 0.6rem 0 0;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.service-intro__hint code {
+  padding: 0.05rem 0.32rem;
+  border-radius: 4px;
+  background: var(--brand-blue-tint);
+  font-size: 0.76rem;
+}
+
 .mask-preview {
   display: flex;
   flex-direction: column;
@@ -117,6 +215,13 @@
   color: var(--text-secondary);
   font-size: 0.88rem;
   line-height: 1.5;
+}
+
+.coverage-section__lead--emphasis {
+  font-size: 1.3rem;
+  font-weight: 900;
+  line-height: 1.4;
+  color: var(--text-primary);
 }
 
 .coverage-section__list {

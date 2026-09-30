@@ -11,6 +11,92 @@
   gap: 1.75rem;
 }
 
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(244, 247, 252, 0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+
+.site-nav__inner {
+  max-width: 1440px;
+  height: 4.25rem;
+  margin: 0 auto;
+  padding: 0 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.site-nav__brand {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+}
+
+.site-nav__brand img {
+  display: block;
+  height: 2.15rem;
+  width: auto;
+  object-fit: contain;
+  object-position: left center;
+  mix-blend-mode: multiply;
+}
+
+.site-nav__links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
+  gap: 1.6rem;
+}
+
+.site-nav__link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.86rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.site-nav__link:hover {
+  color: var(--brand-blue);
+}
+
+.site-nav__cta {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  height: 2.15rem;
+  padding: 0 1.15rem;
+  border-radius: 999px;
+  background: var(--brand-blue);
+  color: #ffffff;
+  font-size: 0.84rem;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.site-nav__cta:hover {
+  filter: brightness(1.08);
+}
+
+@media (max-width: 780px) {
+  .site-nav__links {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .site-nav__inner {
+    padding: 0 0.85rem;
+  }
+}
+
 /* 입력·결과 "체험" 영역만 예전처럼 화면 하나에 담긴 고정 높이를 유지한다 — 목록이 길어져도
    패널 안에서만 스크롤되던 동작(DetectionList 등)을 그대로 지키기 위해서다. 그 안에서는
    app-shell 대신 이 컨테이너가 옛 100vh 그리드 역할을 이어받는다. */
