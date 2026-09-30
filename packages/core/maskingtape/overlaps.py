@@ -1,10 +1,11 @@
 # SPDX-FileCopyrightText: 2026 The maskingtape Authors
 # SPDX-License-Identifier: Apache-2.0
 
-"""겹치는 탐지 구간을 합친다. Pipeline과 치환형 마스킹 전략(label·pseudonym)이 함께 쓴다.
+"""겹치는 탐지 구간을 합친다. Pipeline과 마스킹 전략(mask·label·pseudonym)이 함께 쓴다.
 
-치환형 전략은 구간을 뒤에서부터 다른 길이의 문자열로 바꾼다. 겹친 탐지를 그대로 받으면 먼저
-바꾼 구간 때문에 위치가 밀려, 바깥 구간의 꼬리가 원문으로 남는다(#494). 그래서 Pipeline을
+치환형 전략(label·pseudonym)은 구간을 뒤에서부터 다른 길이의 문자열로 바꾼다. 겹친 탐지를 그대로
+받으면 먼저 바꾼 구간 때문에 위치가 밀려, 바깥 구간의 꼬리가 원문으로 남는다(#494). mask도
+keep_head로 구간마다 앞글자를 남기면 뒤 구간의 앞글자가 원문으로 남는다(#520). 그래서 Pipeline을
 거치지 않고 apply()를 직접 부를 때도 같은 규칙으로 먼저 합친다.
 """
 

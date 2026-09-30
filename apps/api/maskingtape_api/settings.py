@@ -1,8 +1,8 @@
 # SPDX-FileCopyrightText: 2026 The maskingtape Authors
 # SPDX-License-Identifier: Apache-2.0
 
-from dataclasses import dataclass
 import os
+from dataclasses import dataclass
 
 DEFAULT_CORS_ALLOWED_ORIGINS = (
     "http://localhost:5173",

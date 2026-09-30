@@ -279,11 +279,6 @@
   font-weight: 700;
 }
 
-.empty-state {
-  color: var(--text-secondary);
-  padding: 0.75rem 0;
-}
-
 .privacy-note {
   display: flex;
   align-items: center;
