@@ -21,7 +21,7 @@ const OVERALL = { precision: "0.983", recall: "0.950", f1: "0.966" };
 
 export function AccuracySection() {
   return (
-    <section className="accuracy-section" id="accuracy" aria-label="정확도">
+    <section className="accuracy-section" aria-label="정확도">
       <h2>얼마나 정확한가요</h2>
       <p className="accuracy-section__lead">
         저작권·개인정보 걱정 없는 자체 합성 데이터셋(500건, 규칙 전용 모드)으로 측정했습니다 — 같은 수치를{" "}

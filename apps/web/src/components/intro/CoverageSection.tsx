@@ -33,6 +33,23 @@ export function CoverageSection() {
           </li>
         ))}
       </ul>
+
+      {/* README·AccuracySection과 같은 수치(#455) — 전체/이름-하이브리드 F1은
+          AccuracySection의 OVERALL·ROWS와 함께 갱신한다. */}
+      <div className="coverage-section__stats" id="accuracy">
+        <div className="coverage-section__stat">
+          <div className="coverage-section__stat-value">0.966</div>
+          <div className="coverage-section__stat-label">전체 F1 (공개 벤치마크)</div>
+        </div>
+        <div className="coverage-section__stat">
+          <div className="coverage-section__stat-value">0.923</div>
+          <div className="coverage-section__stat-label">이름 F1 (--llm 하이브리드)</div>
+        </div>
+        <div className="coverage-section__stat">
+          <div className="coverage-section__stat-value">Apache-2.0</div>
+          <div className="coverage-section__stat-label">오픈소스 라이선스</div>
+        </div>
+      </div>
     </section>
   );
 }

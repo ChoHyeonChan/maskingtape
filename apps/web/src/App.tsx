@@ -8,7 +8,7 @@ import { CoverageSection } from "./components/intro/CoverageSection";
 import { ExampleGallery } from "./components/intro/ExampleGallery";
 import { ServiceIntro } from "./components/intro/ServiceIntro";
 import { InputPanel } from "./components/input/InputPanel";
-import { AppHeader } from "./components/layout/AppHeader";
+import { ClosingCta } from "./components/layout/ClosingCta";
 import { SiteNav } from "./components/layout/SiteNav";
 import { ResultsPanel } from "./components/results/ResultsPanel";
 import type { MaskMode } from "./lib/masking";
@@ -86,14 +86,12 @@ export function App() {
 
   return (
     <>
-      <SiteNav />
+      <SiteNav
+        onHelpClick={openCoachMark}
+        hasResult={Boolean(scanned)}
+        coachMarkActive={coachMarkVariant !== null}
+      />
       <div className="app-shell">
-        <AppHeader
-          onHelpClick={openCoachMark}
-          hasResult={Boolean(scanned)}
-          coachMarkActive={coachMarkVariant !== null}
-        />
-
         <ServiceIntro />
         <CoverageSection />
         <AccuracySection />
@@ -134,6 +132,8 @@ export function App() {
             />
           </main>
         </div>
+
+        <ClosingCta />
 
         {coachMarkVariant && <CoachMark variant={coachMarkVariant} onDismiss={dismissCoachMark} />}
       </div>
