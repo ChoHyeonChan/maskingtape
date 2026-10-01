@@ -351,4 +351,3 @@ def test_name_ending_in_a_particle_looking_syllable_is_still_masked_up_to_main(t
     # 어떤 옵션과도 안 맞아 통째로 놓쳤다. main도 "김가"까지만 가려 완전하지는 않았지만,
     # 적어도 그만큼은 가리도록 조사를 1~2개 반복하고 뒤에 존칭이 더 붙어도 받는다.
     assert name in [d.text for d in detect(text)]
-
