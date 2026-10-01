@@ -332,3 +332,47 @@ def test_large_csv_roster_stays_linear():
     seconds(200)
     small, large = seconds(2000), seconds(8000)
     assert large < 8 * small + 0.1  # 선형이면 약 4배, 제곱이면 약 16배
+
+
+# ── 슬래시(/)로 나눈 목록·표(#581) ───────────────────────────────────
+# 사내 공지·명단은 "김민수 / 개발팀 / 010-…"처럼 슬래시로 칸을 나눈다. 같은 줄의 전화번호는
+# 가려지고 이름만 원문으로 남았다.
+
+
+@pytest.mark.parametrize(
+    "text, expected",
+    [
+        ("김민수 / 개발팀 / 010-3456-7890", ["김민수"]),
+        ("- 김민수 / 개발팀 / 생년월일 1996년 2월 11일", ["김민수"]),
+        ("1. 정수빈 / 영업팀 / 010-1618-0339", ["정수빈"]),
+        ("오하늘/디자인팀/haneul.oh@example.com", ["오하늘"]),
+    ],
+)
+def test_slash_separated_record_line_masks_the_leading_name(text, expected):
+    assert names(text) == expected
+
+
+def test_slash_separated_table_with_a_name_header():
+    assert names("이름 / 부서\n김민수 / 개발팀\n이영희 / 인사팀") == ["김민수", "이영희"]
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "서울 / 부산 / 010-1234-5678",  # 흔한 낱말(지명)
+        "정기 / 회의 / 02-123-4567",  # 흔한 낱말(업무어)
+        "김치 / 반찬",  # 칸이 둘뿐이고 개인정보 칸이 없다
+        "개발팀 / 영업팀 / 인사팀",  # 개인정보 칸이 없다
+        "2024/01/01 회의록",
+        "연락처 / 부서 / 010-1234-5678",  # 첫 칸이 열 이름
+        # 처음 구현에서 오탐이던 줄 — 2글자 첫 칸, 날짜·시각·대표번호만 있는 칸
+        "정상 / 처리완료 / 2024-01-01 10:00",
+        "성공 / 200 / 2024-01-01T10:00:00",
+        "김포 / 공항 / 1588-1234",
+        "강남 / 역삼 / 02-555-1234",
+        "유선 / 무선 / 1588-0000",
+        "서비스 / 정상 / 2024-01-01",
+    ],
+)
+def test_slash_lines_without_a_name_record_shape_are_not_names(text):
+    assert names(text) == []
