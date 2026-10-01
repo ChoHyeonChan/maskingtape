@@ -98,6 +98,34 @@ def test_address_starting_with_gu_after_an_address_cue(cue, value):
 
 
 @pytest.mark.parametrize(
+    ("text", "value"),
+    [
+        ("강남구 역삼동 12 (배송지)", "강남구 역삼동 12"),
+        ("강남구 역삼동 12번지가 제 주소입니다", "강남구 역삼동 12번지"),
+    ],
+)
+def test_address_starting_with_gu_before_an_address_cue(text, value):
+    assert_masked(text, value)
+
+
+def test_address_starting_with_gu_in_a_cued_multiline_list():
+    text = "배송지 목록" + LF + "강남구 역삼동 12" + LF + "서초구 서초동 8"
+    found = AddressDetector().detect(text)
+    assert [d.text for d in found] == ["강남구 역삼동 12", "서초구 서초동 8"]
+
+
+def test_address_starting_with_gu_list_cue_stops_at_blank_line():
+    text = "배송지 목록" + LF + "강남구 역삼동 12" + LF * 2 + "서초구 서초동 8"
+    found = AddressDetector().detect(text)
+    assert [d.text for d in found] == ["강남구 역삼동 12"]
+
+
+def test_non_address_gu_word_in_a_cued_list_is_not_an_address():
+    text = "배송지 목록" + LF + "지역구 관리 2026 계획"
+    assert AddressDetector().detect(text) == []
+
+
+@pytest.mark.parametrize(
     "text",
     [
         "연구 교육동에서 만나자",

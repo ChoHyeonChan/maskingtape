@@ -4,7 +4,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../models/sample_texts.dart';
 import '../models/detection.dart';
 import '../services/anonymizer.dart';
 import '../services/mask_applier.dart';
@@ -191,29 +190,6 @@ class _TextScreenState extends State<TextScreen> {
     return Panel(
       title: '문서 입력',
       icon: Icons.notes_outlined,
-      actions: [
-        for (final sample in SampleText.all.take(2))
-          OutlinedButton(
-            onPressed: _running ? null : () => _controller.text = sample.text,
-            child: Text(sample.label),
-          ),
-        MenuAnchor(
-          menuChildren: [
-            for (final sample in SampleText.all)
-              MenuItemButton(
-                onPressed: () => _controller.text = sample.text,
-                child: Text(sample.label),
-              ),
-          ],
-          builder: (context, menu, _) => OutlinedButton.icon(
-            onPressed: _running
-                ? null
-                : () => menu.isOpen ? menu.close() : menu.open(),
-            icon: const Icon(Icons.expand_more, size: 18),
-            label: const Text('샘플 더 불러오기'),
-          ),
-        ),
-      ],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -351,6 +327,14 @@ class _TextScreenState extends State<TextScreen> {
   Widget _detectionsPanel(BuildContext context, AnonymizeResult? result) {
     return DetectionPanel(
       detections: result?.detections,
+      // 스캔 전 샘플 서랍 — 웹처럼 「입력창에 넣기」를 눌러야 입력이 바뀐다. 실패 안내는 새 문장과
+      // 상관없으니 지운다.
+      onSamplePick: _running
+          ? null
+          : (text) => setState(() {
+              _controller.text = text;
+              _error = null;
+            }),
       isMasked: _isMasked,
       toggleEnabled: _canAdjust,
       disabledNote: _canAdjust
