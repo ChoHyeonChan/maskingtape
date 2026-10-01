@@ -374,7 +374,15 @@ class NameDetector(Detector):
             if m.group("name") in _CUE_WORDS or _is_label_word_at(text, name_start, strong=strong):
                 # 라벨 단어는 이름이 아니다. 앞 단서를 달고 잡혔다면 그 단어 자리에서 다시 찾아
                 # 그 단어가 다음 이름의 단서가 되게 한다. 같은 자리를 또 잡으면(단서 없이) 넘긴다.
-                pos = name_start if (prefix is not None and name_start > pos) else m.end()
+                # 뒤 직함을 달고 잡혔다면 그 직함 자리에서 다시 찾는다 — "고객이 대리 김민수에게"는
+                # "고객이"(버림)+"대리"로 먼저 읽히는데, "대리"까지 소비하면 김민수의 앞 단서가
+                # 사라져 이름이 통째로 샌다(#580). 직함은 후보보다 뒤에 있어 늘 앞으로 나아간다.
+                if prefix is not None and name_start > pos:
+                    pos = name_start
+                elif suffix is not None:
+                    pos = m.start("suffix")
+                else:
+                    pos = m.end()
                 continue
             pos = m.end()
             if name_start > m.start() and _CUE_WITH_JOSA_RE.fullmatch(m.group("name")):
