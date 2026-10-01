@@ -125,8 +125,7 @@ void main() {
     await tester.pumpWidget(_host(FakeAnonymizer()));
 
     // 탭을 고르면 종류 태그·미리보기만 바뀌고 입력은 그대로다 — 둘러보기만 해도 쓰던 글이 안 날아간다.
-    await tester.ensureVisible(find.text('신청서 샘플'));
-    await tester.tap(find.text('신청서 샘플'));
+    await tester.tap(find.text('신청서 샘플').hitTestable());
     await tester.pump();
     expect(find.text('카드번호'), findsOneWidget);
     expect(
@@ -275,6 +274,12 @@ void main() {
   });
 
   testWidgets('홈 화면 툴바에서 텍스트 입력 모드로 전환된다', (WidgetTester tester) async {
+    // 기본 테스트 창(800×600)은 앱이 허용하는 최소 창(1024×680, windows/runner)보다 작아
+    // 샘플 탭이 너무 여러 줄로 접힌다 — 실제 최소 크기로 띄운다.
+    tester.view.physicalSize = const Size(1024, 680);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.light(),

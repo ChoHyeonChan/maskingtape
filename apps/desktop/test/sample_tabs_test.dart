@@ -36,7 +36,8 @@ void main() {
     await tester.pumpWidget(_host((_) {}));
 
     final first = SampleText.all.first;
-    expect(find.text(first.label), findsOneWidget);
+    // 자리만 잡는 보이지 않는 탭 줄에도 같은 글자가 있어, 눌리는 것만 센다.
+    expect(find.text(first.label).hitTestable(), findsOneWidget);
     expect(find.text(first.text), findsOneWidget);
     for (final kind in first.kinds) {
       expect(find.text(Detection.labelOf(kind)), findsOneWidget);
@@ -50,8 +51,7 @@ void main() {
     await tester.pumpWidget(_host((text) => picked = text));
 
     final rental = SampleText.all.last;
-    await tester.ensureVisible(find.text(rental.label));
-    await tester.tap(find.text(rental.label));
+    await tester.tap(find.text(rental.label).hitTestable());
     await tester.pump();
 
     expect(find.text(rental.text), findsOneWidget);
