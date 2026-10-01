@@ -147,6 +147,27 @@ FastAPI 라우터는 core를 직접 호출하지 않고 `maskingtape_api.service
 - `detections`는 원문 PII 값을 담는 `text` 필드를 반환하지 않는다. 클라이언트 하이라이트는 자신이 이미 가진 입력 원문과 `start`/`end`로 처리한다.
 - 계약 변경은 팀장 승인 후 이 문서부터 갱신한다
 
+### 이름 판단기 (웹 하이브리드 모드 준비, #545·#546)
+
+아직 `/scan`·`/anonymize`는 이 판단기를 쓰지 않는다. 요청에서 모드(`rule`/`hybrid`)를 고르는 부분은 #545에서 붙인다.
+
+- **약속**: `maskingtape_api/services/name_judge.py`의 `NameJudge.find_names(masked_text) -> list[str]`. 입력은 규칙으로 먼저 가린 글(`LabelAnonymizer` 결과)이다. 실패는 `NameJudgeError(code)`로 올리고, 메시지와 `code`에 원문·가린 글·모델 응답을 넣지 않는다.
+- **구현**: `services/openai_name_judge.py`의 `OpenAINameJudge`. 제품 코드에서 상용 AI API를 부르는 유일한 곳이다([CLAUDE.md](../../CLAUDE.md) §2 3번의 예외).
+  - OpenAI Responses API에 가린 글만 보낸다. `store: false`, 추론 끔(`reasoning.effort: "none"`), 온도 0, JSON 스키마(strict) `{"names": [...]}`로 받는다.
+  - 받은 이름 중 보낸 글에 그대로 있는 것만 돌려준다(없는 이름은 환각으로 보고 버린다).
+  - 리다이렉트를 따라가지 않는다(Authorization 헤더의 키가 다른 주소로 가지 않게).
+  - 상한: 입력 10,000자, 출력 512토큰, 응답 64KB.
+- **환경변수**
+
+  | 이름 | 기본값 | 설명 |
+  |---|---|---|
+  | `OPENAI_API_KEY` | 없음 | 없으면 판단기를 만들지 않는다(`openai_name_judge_from_env()`가 `None`). 배포에서는 Vercel Production 환경변수(Secret)에만 둔다 |
+  | `MASKINGTAPE_API_OPENAI_MODEL` | `gpt-6-luna` | 2026-09-30 OpenAI 가격표 기준 가장 싼 현행 모델 |
+  | `MASKINGTAPE_API_OPENAI_TIMEOUT_SECONDS` | `20` | 요청 시간 제한(초) |
+
+- **실패 코드**: `input_too_long` `timeout` `network` `auth` `rate_limited` `spend_limit` `redirect` `upstream` `http_error` `response_too_large` `bad_response` `incomplete` `refused` `empty_output` `bad_schema`
+- 이 앱은 `.env` 파일을 읽지 않는다. 로컬에서 시험할 때는 키를 환경변수로 둔다. 테스트는 가짜 응답으로 돌아 OpenAI를 부르지 않는다.
+
 ## 🔒 배포 시 보안 요구사항 (필수 — 구현할 때부터 지킬 것)
 
 **결정(2026-07-23): 웹 데모를 API 서버까지 포함해 배포한다.** 그러면 이 API가 **남의 개인정보를 실제로 받는 서버**가 된다. 우리 제품은 개인정보 보호 도구라, 여기서 정보가 새면 제품 자체가 부정된다. 아래는 선택이 아니라 요구사항이다.
