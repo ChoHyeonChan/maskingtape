@@ -121,6 +121,50 @@ def test_bare_gender_digit_without_any_separator_context_is_not_falsely_grabbed(
     assert RRNDetector().detect("800101 1234") == []
 
 
+# ── 드문 구분자·날짜 표기(#529, #508 독립 검증) ──────────────────────
+# 앞자리·뒷자리 사이 구분자가 하이픈·점·공백 계열 밖이면(슬래시·밑줄·가운뎃점 등) 원문
+# 그대로 샜다. 앞자리를 점·하이픈으로 나눠 쓴 날짜 표기(#529) 뒤에 뒷자리가 이어지는
+# 경우도 마찬가지였다.
+
+
+@pytest.mark.parametrize(
+    "sep",
+    ["/", "·", "_", " -  ", ",", ":", "ㆍ", "‧", "~", "|"],
+)
+def test_rare_separators_between_front_and_back_are_masked(sep):
+    text = f"주민번호 800101{sep}1234567"
+    found = RRNDetector().detect(text)
+    assert len(found) == 1, f"구분자 {sep!r}에서 못 잡음: {text!r}"
+    assert found[0].text == f"800101{sep}1234567"
+
+
+@pytest.mark.parametrize(
+    "front",
+    ["1980.01.01", "1980-01-01"],
+)
+def test_dotted_or_hyphenated_date_front_with_a_back_is_an_rrn(front):
+    # "1980.01.01-1234567"처럼 점·하이픈으로 나눠 쓴 생년월일 뒤에 뒷자리가 이어지면
+    # 그 자체로 주민등록번호다 — 날짜 표기만 보고 뒷자리를 놓치면 뒷자리 7개가 통째로 샌다.
+    text = f"생년월일 {front}-1234567"
+    found = RRNDetector().detect(text)
+    assert len(found) == 1, f"{front} 케이스를 못 잡음: {text!r}"
+    assert found[0].text == f"{front}-1234567"
+
+
+def test_dotted_date_front_checksum_uses_two_digit_year():
+    # 체크섬은 YYMMDD 6자리를 쓴다 — "1980.01.01"의 4자리 연도가 아니라 뒤 2자리("80")로
+    # 계산해야 한다. VALID_RRN("800101-1234560")과 앞 6자리가 같은 값으로 검증한다.
+    found = RRNDetector().detect("1980.01.01-1234560")
+    assert len(found) == 1
+    assert found[0].confidence == 1.0
+
+
+def test_pure_slash_date_without_a_back_is_not_falsely_grabbed():
+    # 대조군: 순수 날짜 표기("1999/07/21")는 뒷자리 모양이 없으므로 주민등록번호가 아니다 —
+    # 구분자를 슬래시까지 넓히면서 평범한 날짜까지 오탐하면 안 된다.
+    assert RRNDetector().detect("1999/07/21") == []
+
+
 # ── 가려지거나 성별 숫자만 남은 뒷자리는 하이픈류 구분자일 때만(#528 후속) ──
 # 리뷰(팀장, PR #564)에서 찾은 오탐: 구분자를 요구하지 않으면(공백이나 아예 없어도 됨)
 # 날짜로 시작하는 무관한 숫자열까지 주민번호로 잡는다. 완전한 숫자 7개짜리 뒷자리는
