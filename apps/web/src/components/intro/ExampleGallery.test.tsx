@@ -31,7 +31,7 @@ describe("ExampleGallery (#455)", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /여권번호/ }));
 
-    const passportPreset = PRESETS.find((preset) => preset.label === "항공권 예약 확인서");
+    const passportPreset = PRESETS.find((preset) => preset.kinds.includes("passport"));
     expect(onPick).toHaveBeenCalledWith(passportPreset?.text);
   });
 });
