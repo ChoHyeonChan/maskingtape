@@ -4,7 +4,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-/// 이름 정밀 탐지에 쓰는 로컬 LLM의 준비 상태.
+/// 로컬 LLM 사용에 쓰는 로컬 LLM의 준비 상태.
 ///
 /// "켰는데 왜 안 되지"를 실패한 뒤에야 알게 되는 걸 막으려고, 처리를 돌리기 전에
 /// 미리 확인해서 보여준다. 상태를 넷으로 나눈 이유는 **사용자가 할 일이 각각 다르기**
@@ -37,7 +37,7 @@ class LlmStatus {
   /// 상태를 보완하는 짧은 설명(모델명, 확인해야 할 것 등).
   final String detail;
 
-  /// 이름 정밀 탐지를 지금 켜도 되는지.
+  /// 로컬 LLM 사용을 지금 켜도 되는지.
   bool get usable =>
       readiness == LlmReadiness.loaded || readiness == LlmReadiness.downloaded;
 
