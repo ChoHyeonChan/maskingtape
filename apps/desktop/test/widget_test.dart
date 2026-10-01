@@ -84,6 +84,20 @@ void main() {
     expect(find.text('이름 정밀 탐지'), findsOneWidget);
   });
 
+  testWidgets('정보 버튼을 누르면 오픈소스 고지·라이선스 화면이 열린다 (#617)',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(home: HomeScreen(anonymizer: FakeAnonymizer())),
+    );
+
+    await tester.tap(find.byTooltip('오픈소스 고지·라이선스'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(LicensePage), findsOneWidget);
+    expect(find.text('마스킹테이프'), findsWidgets);
+    expect(find.textContaining('Apache-2.0'), findsWidgets);
+  });
+
   testWidgets('파일 찾아보기로 고른 파일이 목록에 추가된다', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
