@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../services/anonymizer.dart';
 
-/// 비식별화 옵션 조작부 — 이름 정밀 탐지 토글 + 전략 선택.
+/// 비식별화 옵션 조작부 — 로컬 LLM 사용 토글 + 전략 선택.
 ///
 /// 파일 일괄 모드와 텍스트 입력 모드가 같은 옵션을 쓰므로 위젯을 하나로 둔다.
 /// 옵션 값 자체는 부모(홈 화면)가 들고 있어 모드를 오가도 선택이 유지된다.
@@ -24,7 +24,7 @@ class OptionsToolbar extends StatelessWidget {
   /// 처리 중에는 옵션을 바꾸지 못하게 잠근다.
   final bool enabled;
 
-  /// 이름 정밀 탐지를 켜는 순간 호출 — 부모가 LLM 상태를 다시 확인하는 데 쓴다.
+  /// 로컬 LLM 사용을 켜는 순간 호출 — 부모가 LLM 상태를 다시 확인하는 데 쓴다.
   final VoidCallback? onLlmTurnedOn;
 
   @override
@@ -36,11 +36,11 @@ class OptionsToolbar extends StatelessWidget {
       children: [
         Tooltip(
           message:
-              '이름을 규칙 대신 로컬 LLM으로 판단합니다.\n'
-              '이 PC에서 Ollama가 실행 중이어야 합니다.',
+              '이름 탐지에 로컬 LLM(Ollama)을 함께 씁니다 — 규칙이 놓친 이름을 문맥으로 잡습니다.\n'
+              '이 PC에서 Ollama가 실행 중이어야 하고, 텍스트는 PC 밖으로 나가지 않습니다.',
           child: FilterChip(
             avatar: const Icon(Icons.psychology_outlined, size: 18),
-            label: const Text('이름 정밀 탐지'),
+            label: const Text('로컬 LLM 사용'),
             selected: options.useLlm,
             onSelected: !enabled
                 ? null

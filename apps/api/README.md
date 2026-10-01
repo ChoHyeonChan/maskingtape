@@ -38,6 +38,9 @@ $env:MASKINGTAPE_API_RATE_LIMIT_REQUESTS="60"
 $env:MASKINGTAPE_API_RATE_LIMIT_WINDOW_SECONDS="60"
 $env:MASKINGTAPE_API_RATE_LIMIT_MAX_BUCKETS="10000"
 $env:MASKINGTAPE_API_MAX_BODY_BYTES="1000000"
+$env:MASKINGTAPE_API_HYBRID_MAX_TEXT_LENGTH="5000"
+$env:MASKINGTAPE_API_HYBRID_RATE_LIMIT_REQUESTS="10"
+$env:MASKINGTAPE_API_HYBRID_RATE_LIMIT_WINDOW_SECONDS="60"
 # 앞단 프록시가 이 헤더를 반드시 덮어써 주는 배포에서만 설정한다(기본: 비어 있음)
 # $env:MASKINGTAPE_API_TRUSTED_CLIENT_IP_HEADERS="x-vercel-forwarded-for,x-real-ip"
 ```
@@ -54,6 +57,11 @@ client keys are presented.
 `MASKINGTAPE_API_MAX_BODY_BYTES` rejects oversized requests before JSON parsing.
 The limit is enforced on the bytes actually received, not just on `Content-Length`,
 so a chunked request that omits the header cannot bypass it.
+
+`MASKINGTAPE_API_HYBRID_*`는 웹 하이브리드 모드 전용 보호 장치다. 하이브리드는 외부 이름
+판단기를 호출할 수 있어 기본 `text` 상한(100,000자)보다 낮은 입력 상한(기본 5,000자)과 별도
+요청 제한(기본 60초 10회)을 둔다. 이 제한을 넘으면 429가 아니라 규칙 결과로 폴백하고 응답에
+`mode_used: "rule"`, `hybrid_failed: true`, `hybrid_failure_code`를 담는다.
 
 `MASKINGTAPE_API_TRUSTED_CLIENT_IP_HEADERS` lists the headers the limiter may use to
 identify a client (comma-separated). **It is empty by default and must stay empty unless
@@ -112,19 +120,28 @@ python -m pytest apps/api -q
 공통 제약:
 
 - 요청 `text`는 1자 이상, 100,000자 이하
+- 요청 `mode`는 `rule`(기본) 또는 `hybrid`
 - 서버는 입력 원문을 저장하지 않는다
 - 에러 응답은 `{ "code": "...", "message": "...", "details": { ... } }` 형식을 따른다
+- 성공 응답은 실제 사용 모드 `mode_used`와 하이브리드 폴백 여부(`hybrid_failed`,
+  `hybrid_failure_code`)를 함께 돌려준다
 
 `POST /scan` — 탐지 리포트만
 
-현재 `/scan`은 `packages/core`의 규칙 기반 `Pipeline.scan()`을 호출한다. LLM 탐지는 사용하지 않는다.
+`/scan`은 기본적으로 `packages/core`의 규칙 기반 `Pipeline.scan()`을 호출한다. `mode: "hybrid"`이면
+규칙 탐지 결과를 먼저 `LabelAnonymizer`로 가린 뒤 이름 판단기(`NameJudge`)에 보내고, 판단기가
+돌려준 이름을 원문 위치에서 찾아 `kind: "name"` 탐지로 합친다. 판단기가 없거나 실패하면 HTTP 200으로
+규칙 결과를 돌려주되 `mode_used: "rule"`과 실패 코드를 표시한다.
 FastAPI 라우터는 core를 직접 호출하지 않고 `maskingtape_api.services.core_adapter`를 통해서만 연결한다.
 
 ```json
 // 요청
-{ "text": "주민번호 800101-1234560 문의주세요" }
+{ "text": "주민번호 800101-1234560 문의주세요", "mode": "rule" }
 // 응답 — detections는 원문 조각(text)을 제외한 span metadata만 반환
 {
+  "mode_used": "rule",
+  "hybrid_failed": false,
+  "hybrid_failure_code": null,
   "detections": [
     { "kind": "rrn", "start": 5, "end": 19, "confidence": 1.0, "detector": "RRNDetector" }
   ]
@@ -133,13 +150,21 @@ FastAPI 라우터는 core를 직접 호출하지 않고 `maskingtape_api.service
 
 `POST /anonymize` — 비식별화 결과
 
-현재 `/anonymize`는 `packages/core`의 규칙 기반 `Pipeline.anonymize()`를 호출한다. `strategy`는 별표 마스킹(`mask`), 종류 라벨 치환(`label`), 가명 치환(`pseudonym`)을 지원한다.
+`/anonymize`도 같은 `mode` 계약을 쓴다. 하이브리드 성공 시 판단기가 더 찾은 이름까지 함께
+비식별화하고, 실패 시 규칙 결과만 비식별화한다. `strategy`는 별표 마스킹(`mask`), 종류 라벨
+치환(`label`), 가명 치환(`pseudonym`)을 지원한다.
 
 ```json
-// 요청 — strategy: "mask"(기본), "label", "pseudonym"
-{ "text": "주민번호 800101-1234560 문의주세요", "strategy": "mask" }
+// 요청 — strategy: "mask"(기본), "label", "pseudonym" / mode: "rule"(기본), "hybrid"
+{ "text": "주민번호 800101-1234560 문의주세요", "strategy": "mask", "mode": "rule" }
 // 응답
-{ "text": "주민번호 ************** 문의주세요", "detections": [ /* 위와 동일 */ ] }
+{
+  "text": "주민번호 ************** 문의주세요",
+  "mode_used": "rule",
+  "hybrid_failed": false,
+  "hybrid_failure_code": null,
+  "detections": [ /* 위와 동일 */ ]
+}
 ```
 
 - `kind` 값: `rrn`, `passport`, `driver_license`, `phone`, `email`, `name`, `address`, `card`, `account`, `biz_reg`, `birth_date` (11종, core에 전부 구현됨)
@@ -149,9 +174,13 @@ FastAPI 라우터는 core를 직접 호출하지 않고 `maskingtape_api.service
 
 ### 이름 판단기 (웹 하이브리드 모드 준비, #545·#546)
 
-아직 `/scan`·`/anonymize`는 이 판단기를 쓰지 않는다. 요청에서 모드(`rule`/`hybrid`)를 고르는 부분은 #545에서 붙인다.
+`mode: "hybrid"` 요청에서만 이름 판단기를 쓴다. 기본값은 계속 `rule`이라 OpenAI 키가 없어도
+기존 API와 테스트는 규칙 전용으로 동작한다.
 
 - **약속**: `maskingtape_api/services/name_judge.py`의 `NameJudge.find_names(masked_text) -> list[str]`. 입력은 규칙으로 먼저 가린 글(`LabelAnonymizer` 결과)이다. 실패는 `NameJudgeError(code)`로 올리고, 메시지와 `code`에 원문·가린 글·모델 응답을 넣지 않는다.
+- **API 폴백**: 판단기가 없거나 실패하면 규칙 결과를 돌려주고 `mode_used: "rule"`,
+  `hybrid_failed: true`, `hybrid_failure_code`를 채운다. 판단기 실패 코드는 `NameJudgeError.code`를
+  그대로 쓴다. `OPENAI_API_KEY`가 없어 판단기를 만들 수 없으면 `name_judge_unavailable`을 쓴다.
 - **구현**: `services/openai_name_judge.py`의 `OpenAINameJudge`. 제품 코드에서 상용 AI API를 부르는 유일한 곳이다([CLAUDE.md](../../CLAUDE.md) §2 3번의 예외).
   - OpenAI Responses API에 가린 글만 보낸다. `store: false`, 추론 끔(`reasoning.effort: "none"`), 온도 0, JSON 스키마(strict) `{"names": [...]}`로 받는다.
   - 받은 이름 중 보낸 글에 그대로 있는 것만 돌려준다(없는 이름은 환각으로 보고 버린다).
@@ -164,8 +193,11 @@ FastAPI 라우터는 core를 직접 호출하지 않고 `maskingtape_api.service
   | `OPENAI_API_KEY` | 없음 | 없으면 판단기를 만들지 않는다(`openai_name_judge_from_env()`가 `None`). 배포에서는 Vercel Production 환경변수(Secret)에만 둔다 |
   | `MASKINGTAPE_API_OPENAI_MODEL` | `gpt-6-luna` | 2026-09-30 OpenAI 가격표 기준 가장 싼 현행 모델 |
   | `MASKINGTAPE_API_OPENAI_TIMEOUT_SECONDS` | `20` | 요청 시간 제한(초) |
+  | `MASKINGTAPE_API_HYBRID_MAX_TEXT_LENGTH` | `5000` | 하이브리드 모드 입력 길이 상한. 초과 시 규칙 결과로 폴백하고 `input_too_long` |
+  | `MASKINGTAPE_API_HYBRID_RATE_LIMIT_REQUESTS` | `10` | 하이브리드 모드 전용 인메모리 요청 제한 |
+  | `MASKINGTAPE_API_HYBRID_RATE_LIMIT_WINDOW_SECONDS` | `60` | 하이브리드 모드 전용 요청 제한 시간창 |
 
-- **실패 코드**: `input_too_long` `timeout` `network` `auth` `rate_limited` `spend_limit` `redirect` `upstream` `http_error` `response_too_large` `bad_response` `incomplete` `refused` `empty_output` `bad_schema`
+- **실패 코드**: `name_judge_unavailable` `input_too_long` `timeout` `network` `auth` `rate_limited` `spend_limit` `redirect` `upstream` `http_error` `response_too_large` `bad_response` `incomplete` `refused` `empty_output` `bad_schema`
 - 이 앱은 `.env` 파일을 읽지 않는다. 로컬에서 시험할 때는 키를 환경변수로 둔다. 테스트는 가짜 응답으로 돌아 OpenAI를 부르지 않는다.
 
 ## 🔒 배포 시 보안 요구사항 (필수 — 구현할 때부터 지킬 것)
@@ -182,7 +214,7 @@ FastAPI 라우터는 core를 직접 호출하지 않고 `maskingtape_api.service
 2. **저장하지 않는다(stateless).** 요청 내용을 DB·파일·캐시에 쓰지 않는다. 처리 후 메모리에서 끝난다.
 3. **응답에 원문을 불필요하게 담지 않는다.** `/anonymize`는 비식별화된 텍스트를 돌려주는 게 목적이다. 디버그 필드로 원문을 반환하지 않고, `/scan`·`/anonymize`의 `detections`에도 원문 PII 조각을 넣지 않는다.
 4. **입력 크기 상한**을 둔다(예: 100KB). 초과 시 413으로 거절 — 비용·자원 보호.
-5. **호출 빈도 제한(rate limit)**을 둔다. 공개 URL은 남용된다. 현재 API는 `/scan`·`/anonymize`에 IP별 인메모리 제한을 적용하며 초과 시 429로 거절한다. 단, Vercel serverless처럼 여러 인스턴스가 생길 수 있는 환경에서는 카운터가 공유되지 않아 배포 등급의 강한 제한으로 보지 않는다. **결정(2026-08-17, 재확인 2026-09-13): 공모전 데모는 현행 인메모리 제한을 best-effort 보호로 유지하고 배포를 진행한다.** 남용/비용/DoS 위험이 커지면 Vercel 플랫폼 보호 또는 외부 공유 스토어 기반 limiter로 전환한다.
+5. **호출 빈도 제한(rate limit)**을 둔다. 공개 URL은 남용된다. 현재 API는 `/scan`·`/anonymize`에 IP별 인메모리 제한을 적용하며 초과 시 429로 거절한다. 하이브리드 모드는 별도 저한도 인메모리 제한을 두고, 초과 시 규칙 결과로 폴백한다. 단, Vercel serverless처럼 여러 인스턴스가 생길 수 있는 환경에서는 카운터가 공유되지 않아 배포 등급의 강한 제한으로 보지 않는다. **결정(2026-08-17, 재확인 2026-09-13): 공모전 데모는 현행 인메모리 제한을 best-effort 보호로 유지하고 배포를 진행한다.** 남용/비용/DoS 위험이 커지면 Vercel 플랫폼 보호 또는 외부 공유 스토어 기반 limiter로 전환한다. OpenAI 비용의 최종 안전장치는 OpenAI 프로젝트 월 사용 한도다(#546).
 6. **CORS를 우리 프론트 도메인으로 제한**한다. `*` 금지.
 7. **HTTPS만 허용**한다.
 
@@ -199,7 +231,7 @@ FastAPI 라우터는 core를 직접 호출하지 않고 `maskingtape_api.service
 
 ### 배포판의 기능 제약
 
-- **LLM 이름 탐지(`--llm`)는 배포판에서 제외한다.** 로컬 Ollama + 7B 모델이 필요해 서버리스 환경에 올릴 수 없다. 배포판은 **규칙 기반 탐지만** 제공하고, "문맥 판단 LLM 기능은 로컬 설치 시 사용 가능"이라고 안내한다.
+- **core의 로컬 LLM 이름 탐지(`--llm`)는 배포판에서 제외한다.** 로컬 Ollama + 7B 모델이 필요해 서버리스 환경에 올릴 수 없다. 대신 웹 데모 백엔드의 `mode: "hybrid"`에서만 OpenAI 이름 판단기를 선택적으로 쓴다. 키가 없거나 실패하면 규칙 기반 결과로 폴백한다.
 - 이 제약은 오히려 우리 메시지와 맞다: **"진짜 개인정보는 로컬에서 처리하세요."**
 
 ### 미정 (구현 시 실제로 확인할 것)
