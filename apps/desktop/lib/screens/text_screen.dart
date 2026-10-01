@@ -4,7 +4,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../models/sample_texts.dart';
 import '../models/detection.dart';
 import '../services/anonymizer.dart';
 import '../services/mask_applier.dart';
@@ -117,6 +116,10 @@ class _TextScreenState extends State<TextScreen> {
     } on AnonymizerException catch (e) {
       // 백엔드가 준 안내(Ollama 미실행 등)를 그대로 보여준다 — 덮어쓰면 원인이 가려진다.
       if (mounted) setState(() => _error = e.message);
+    } catch (_) {
+      // 예상 밖 오류도 화면에 알린다(예전엔 결과도 오류도 없이 끝났다, #497). 예외 문자열에는
+      // 원문 조각이 담길 수 있어 고정 문구만 보여준다.
+      if (mounted) setState(() => _error = unexpectedErrorMessage);
     } finally {
       if (mounted) setState(() => _running = false);
     }
@@ -187,29 +190,6 @@ class _TextScreenState extends State<TextScreen> {
     return Panel(
       title: '문서 입력',
       icon: Icons.notes_outlined,
-      actions: [
-        for (final sample in SampleText.all.take(2))
-          OutlinedButton(
-            onPressed: _running ? null : () => _controller.text = sample.text,
-            child: Text(sample.label),
-          ),
-        MenuAnchor(
-          menuChildren: [
-            for (final sample in SampleText.all)
-              MenuItemButton(
-                onPressed: () => _controller.text = sample.text,
-                child: Text(sample.label),
-              ),
-          ],
-          builder: (context, menu, _) => OutlinedButton.icon(
-            onPressed: _running
-                ? null
-                : () => menu.isOpen ? menu.close() : menu.open(),
-            icon: const Icon(Icons.expand_more, size: 18),
-            label: const Text('샘플 더 불러오기'),
-          ),
-        ),
-      ],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -347,6 +327,14 @@ class _TextScreenState extends State<TextScreen> {
   Widget _detectionsPanel(BuildContext context, AnonymizeResult? result) {
     return DetectionPanel(
       detections: result?.detections,
+      // 스캔 전 샘플 서랍 — 웹처럼 「입력창에 넣기」를 눌러야 입력이 바뀐다. 실패 안내는 새 문장과
+      // 상관없으니 지운다.
+      onSamplePick: _running
+          ? null
+          : (text) => setState(() {
+              _controller.text = text;
+              _error = null;
+            }),
       isMasked: _isMasked,
       toggleEnabled: _canAdjust,
       disabledNote: _canAdjust

@@ -20,7 +20,8 @@
 6. 시/도나 시 바로 뒤에 구를 붙여 써도("서울강남구", "성남시분당구") 구 이름에서 낱말이
    끝나면 받는다. "장군면"·"대구면"처럼 이름 가운데 '군'·'구'가 든 읍·면은 군·구로 읽지 않는다(#465).
 7. 시/도·시 없이 구로 시작하는 주소("주소: 강남구 테헤란로 123")도 잡는다. '구'로 끝나는 낱말이 흔해서
-   ("인구 이동 1.2%") 앞에 주소 단서(주소·배송지·거주지 등)가 있을 때만 받는다(#492).
+   ("인구 이동 1.2%") 앞·뒤나 같은 문단 목록 머리에 주소 단서(주소·배송지·거주지 등)가 있을 때만
+   받는다(#492/#492 후속).
 8. 조각 사이에 가로 공백이 여러 칸이거나 CRLF·공백 섞인 줄바꿈이면("서울특별시  강남구  테헤란로  123") 줄인 사본에서도
    찾아 원문 위치로 되돌린다. 원문 후보에 더하기만 하므로 덜 가리는 일은 없다(#492).
 
@@ -239,8 +240,8 @@ _ADDR_ABBR_RE = re.compile(
 # 시/도·시 없이 구로 시작하는 주소 — "주소: 강남구 테헤란로 123", "배송지 마포구 상암동 1601"(#492).
 # 서울·광역시에서 가장 흔한 줄임 표기인데 시작점이 없어 통째로 샜다. 다만 '구'로 끝나는 낱말은 흔하고
 # ("인구 이동 1.2%", "연구 활동 3, 4단계") 동/리로 끝나는 일반 낱말과 숫자가 뒤따르는 문장도 많아서,
-# 앞에 주소 단서(_GU_CUE_RE)가 있을 때만 받는다. 단서가 있으면 동이나 도로명만 와도 받고 나머지는
-# _TAIL이 번지·건물·동호까지 잇는다("강남구 가온동 새솔로 12 101동 1203호").
+# 앞·뒤 또는 같은 문단 목록 머리에 주소 단서(_GU_CUE_RE)가 있을 때만 받는다. 단서가 있으면 동이나
+# 도로명만 와도 받고 나머지는 _TAIL이 번지·건물·동호까지 잇는다("강남구 가온동 새솔로 12 101동 1203호").
 # 붙여 쓴 구(_GLUED_GU_WORD)와 같은 이유로 두 글자 구는 중구·동구·서구·남구·북구만 받는다. 단서가
 # 있어도 "거주 인구 이동 현황", "자택 가구 정리 3개"의 두 글자 낱말을 구로 읽으면 안 된다.
 _ADDR_GU_RE = re.compile(
@@ -249,6 +250,7 @@ _ADDR_GU_RE = re.compile(
 )
 _GU_CUE_RE = re.compile(r"주소|거주|소재지|배송|수령|도착지|자택|사업장|위치|사는 곳|본적|등록기준지|우편|배달")
 _GU_CUE_WINDOW = 15
+_GU_NON_ADDRESS_WORDS = {"지역구", "선거구", "행정구", "자치구"}
 
 # 조각 사이 공백이 한 칸이 아닌 자리(#492). 위 패턴들은 조각을 공백 한 칸(줄바꿈 하나 포함)으로 잇기
 # 때문에 "서울특별시  강남구  테헤란로  123"은 시/도만 가려지고 나머지가 샜다. 가로 공백 두 칸 이상과,
@@ -260,6 +262,48 @@ _WIDE_SPACE_RE = re.compile(
     + _HSPACE + r"+\n" + _HSPACE + r"*|\n" + _HSPACE + r"+|"
     + _HSPACE + r"{2,}"
 )
+_PARAGRAPH_BREAK_RE = re.compile(r"\r?\n[^\S\r\n]*\r?\n|[\u2028\u2029]")
+
+
+def _line_end(text: str, index: int, limit: int | None = None) -> int:
+    """index가 속한 줄의 끝 위치. limit이 있으면 그 안에서만 찾는다."""
+    if limit is None:
+        limit = len(text)
+    ends = [pos for sep in ("\r", "\n", "\u2028", "\u2029") if (pos := text.find(sep, index, limit)) != -1]
+    return min(ends, default=len(text))
+
+
+def _paragraph_start(text: str, index: int) -> int:
+    """빈 줄·문단 구분 문자 뒤의 위치. 구 주소 목록 단서는 이 경계를 넘지 않는다."""
+    start = 0
+    for m in _PARAGRAPH_BREAK_RE.finditer(text, 0, index):
+        start = m.end()
+    return start
+
+
+def _starts_line_ignoring_space(text: str, start: int) -> bool:
+    """들여쓰기만 지나 주소가 시작하면 목록 항목으로 본다."""
+    i = start - 1
+    while i >= 0 and text[i] not in "\r\n\u2028\u2029" and text[i].isspace():
+        i -= 1
+    return i < 0 or text[i] in "\r\n\u2028\u2029"
+
+
+def _has_gu_cue(text: str, start: int, end: int) -> bool:
+    """구로 시작하는 주소 후보가 충분한 주소 단서를 갖는지 확인한다.
+
+    - 앞 단서: 기존 #492 조건. 후보 앞 15자 안에 "주소/배송지/거주지…"가 있으면 통과.
+    - 뒤 단서: "강남구 역삼동 12 (배송지)", "…가 제 주소입니다"처럼 같은 줄 뒤에 단서가 있으면 통과.
+    - 목록 단서: "배송지 목록" 아래 여러 줄의 구 주소는 같은 문단 안에서만 통과. 빈 줄은 넘지 않는다.
+    """
+    if _GU_CUE_RE.search(text, max(0, start - _GU_CUE_WINDOW), start):
+        return True
+    after_limit = min(len(text), end + _GU_CUE_WINDOW)
+    if _GU_CUE_RE.search(text, end, min(_line_end(text, end, after_limit), after_limit)):
+        return True
+    if _starts_line_ignoring_space(text, start):
+        return _GU_CUE_RE.search(text, _paragraph_start(text, start), start) is not None
+    return False
 
 
 def _collapse_wide_spaces(text: str) -> tuple[str, Callable[[int], int]]:
@@ -313,8 +357,9 @@ def _candidates(text: str) -> list[tuple[int, int, float]]:
         for m in _search_every_start(pattern, text):
             if not m.group("dong"):
                 continue
-            if pattern is _ADDR_GU_RE and not _GU_CUE_RE.search(text, max(0, m.start() - _GU_CUE_WINDOW), m.start()):
-                continue
+            if pattern is _ADDR_GU_RE:
+                if m.group("si") in _GU_NON_ADDRESS_WORDS or not _has_gu_cue(text, m.start(), m.end()):
+                    continue
             candidates.append((m.start(), m.end(), _score(m, 0.4, 0.9)))
     return candidates
 

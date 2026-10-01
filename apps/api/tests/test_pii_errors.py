@@ -9,10 +9,10 @@ from maskingtape_api.services.core_adapter import CoreEngineError
 
 
 class FailingCore:
-    def scan(self, text: str):
+    def scan(self, text: str, *args):
         raise CoreEngineError("core scan failed")
 
-    def anonymize(self, text: str, strategy):
+    def anonymize(self, text: str, strategy, *args):
         raise CoreEngineError("core anonymize failed")
 
 

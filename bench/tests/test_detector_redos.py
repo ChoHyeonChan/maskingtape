@@ -131,12 +131,20 @@ _ACCOUNT_FUZZ_PIECES = (
     + ["-", " ", "계좌", "입금"]
 )
 
+# 카드 탐지기는 매치마다 한 글자만 넘기고 다시 찾는다(#510) — 겹치는 창을 모두 후보로 보므로, 숫자
+# 묶음·구분자·문맥어로 조립한 입력에서 시간이 선형인지 본다. 문맥어("카드")와 섞인 구분자를 넣어
+# 섞인 모양 경로와 "앞 카드 이어받기" 경로까지 탄다.
+_CARD_FUZZ_PIECES = [str(d) for d in range(10)] * 4 + [
+    "1111", "4111", "4242", " ", "-", ".", " - ", "  ", ",", "/", "카드", "결제", "2023-2024 ",
+]
+
 # 반복 횟수(iterations)는 가장 짧은 길이(_FUZZ_BASE_LENGTH)에서도 배치 시간이 Windows
 # 기본 시계 해상도(~15ms)의 5배 이상 되도록 실측으로 골랐다 — 그래야 한 번의 반복이 시계
 # 눈금 하나에 묻히지 않는다. 세 지점(n·2n·4n) × 5회(trials)로 늘면서 필요한 반복 수는 줄었다.
 _RATIO_CASES = [
     ("address_fuzz", AddressDetector(), _ADDRESS_FUZZ_PIECES, 5),
     ("account_fuzz", AccountDetector(), _ACCOUNT_FUZZ_PIECES, 8),
+    ("card_fuzz", CreditCardDetector(), _CARD_FUZZ_PIECES, 50),
 ]
 
 

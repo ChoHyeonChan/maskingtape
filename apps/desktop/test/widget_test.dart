@@ -78,10 +78,10 @@ void main() {
     expect(find.text('고객명단.csv'), findsOneWidget);
     expect(find.text('비식별화 시작'), findsOneWidget);
     expect(find.text('목록 비우기'), findsOneWidget);
-    // 전략 토글과 이름 정밀 탐지 토글이 함께 보인다
+    // 전략 토글과 로컬 LLM 사용 토글이 함께 보인다
     expect(find.text(MaskStrategy.mask.displayName), findsOneWidget);
     expect(find.text(MaskStrategy.label.displayName), findsOneWidget);
-    expect(find.text('이름 정밀 탐지'), findsOneWidget);
+    expect(find.text('로컬 LLM 사용'), findsOneWidget);
   });
 
   testWidgets('파일 찾아보기로 고른 파일이 목록에 추가된다', (WidgetTester tester) async {
@@ -175,7 +175,7 @@ void main() {
     expect(fake.lastOptions?.strategy, MaskStrategy.label);
   });
 
-  testWidgets('이름 정밀 탐지는 기본으로 꺼져 있다 (Ollama 없이도 동작)',
+  testWidgets('로컬 LLM 사용은 기본으로 꺼져 있다 (Ollama 없이도 동작)',
       (WidgetTester tester) async {
     final path = await _makeTempFile(
       tester,
@@ -194,7 +194,7 @@ void main() {
     expect(find.textContaining('탐지 1건 — 주민번호 1'), findsOneWidget);
   });
 
-  testWidgets('이름 정밀 탐지를 켜면 백엔드에 전달되고 이름까지 탐지된다',
+  testWidgets('로컬 LLM 사용을 켜면 백엔드에 전달되고 이름까지 탐지된다',
       (WidgetTester tester) async {
     final path = await _makeTempFile(
       tester,
@@ -206,7 +206,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(home: HomeScreen(anonymizer: fake, initialFiles: [path])),
     );
-    await tester.tap(find.text('이름 정밀 탐지'));
+    await tester.tap(find.text('로컬 LLM 사용'));
     await tester.pump();
     await _runProcessing(tester);
 
@@ -227,7 +227,7 @@ void main() {
         ),
       ),
     );
-    await tester.tap(find.text('이름 정밀 탐지'));
+    await tester.tap(find.text('로컬 LLM 사용'));
     await tester.pump();
     await _runProcessing(tester);
 
@@ -253,7 +253,7 @@ void main() {
     expect(find.text('Ollama 미실행'), findsOneWidget);
   });
 
-  testWidgets('이름 정밀 탐지를 켜면 LLM 상태를 다시 확인한다',
+  testWidgets('로컬 LLM 사용을 켜면 LLM 상태를 다시 확인한다',
       (WidgetTester tester) async {
     // 사용자가 그 사이 Ollama를 띄웠을 수 있으니, 켜는 시점에 다시 봐야 한다.
     var checks = 0;
@@ -274,7 +274,7 @@ void main() {
     await tester.pump();
     expect(find.text('Ollama 미실행'), findsOneWidget);
 
-    await tester.tap(find.text('이름 정밀 탐지'));
+    await tester.tap(find.text('로컬 LLM 사용'));
     await tester.pump();
     await tester.pump();
 
