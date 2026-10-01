@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 The maskingtape Authors
 // SPDX-License-Identifier: Apache-2.0
 
-import { StrictMode } from "react";
+import { StrictMode, type JSX } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
 import { AccuracyPage } from "./pages/AccuracyPage";
