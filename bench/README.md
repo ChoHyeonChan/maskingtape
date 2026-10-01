@@ -24,6 +24,7 @@ evaluators/           # 평가 도구 모음 — "무엇을 평가하는가"별�
   evaluate_masking.py    # CLI — 마스킹 결과에 개인정보가 실제로 남아있는지(유출률) 평가 (--strategy로 mask/label/pseudonym 선택)
   confidence_analysis.py # CLI — confidence 임계값별 precision/recall/F1 변화 분석
   compare_name_detectors.py  # CLI — 이름 탐지 규칙판 vs 하이브리드(LLM) 정확도 비교
+  compare_open_source_tools.py # CLI — 로컬 오픈소스 PII 도구와 같은 데이터·채점기로 정확도 비교
 datasets/            # 생성된 평가셋 (정답 라벨 포함) — synth_v1(제출 수치 근거)·synth_v2(주소 확장)
 reports/             # evaluate.py --report로 저장한 마크다운 리포트 (결과보고서 첨부용)
 tests/               # 생성기·평가 로직 단위 테스트
@@ -38,6 +39,31 @@ python -m bench.generate_dataset --count 500 --seed 42 --out bench/datasets/synt
 # 2. core 탐지기 정확도 평가 (--report로 마크다운 리포트 파일도 저장)
 python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl --report bench/reports/report_v1.md
 ```
+
+## 오픈소스 PII 도구 비교 — 발표용 기준선
+
+README와 ROADMAP의 "영어권 도구는 한국어 개인정보를 제대로 못 잡는다"는 주장을 숫자로 뒷받침하기
+위해, 로컬에서 실행되는 오픈소스 도구만 같은 합성 데이터셋과 같은 exact-match 채점기로 비교한다.
+상용 API 모델(GPT/Claude 등)과 비상업 전용 라이선스 모델은 비교 코드에 넣지 않는다. 현재 기준선은
+`scrubadub` 2.0.1이다 — PyPI 메타데이터는 MIT, classifier는 Apache-2.0으로 표시되며 둘 다 팀 허용
+라이선스다. 한국 주민번호·사업자등록번호·여권번호 같은 전용 kind가 없어 매핑 가능한
+`email`·`phone`·`credit_card → card`만 채점에 들어가고, 나머지는 그대로 FN으로 남는다.
+
+```bash
+python -m pip install -e "packages/core[bench-baselines]"
+python -m bench.evaluators.compare_open_source_tools bench/datasets/synth_v1.jsonl --report bench/reports/open_source_baselines_v1.md
+```
+
+500건 기준 실측(#406 발표용 대비표, 2026-10-01, `synth_v1.jsonl`):
+
+| tool | precision | recall | F1 | F2 | tp | fp | fn |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| maskingtape-rules | 0.988 | 0.974 | **0.981** | 0.977 | 969 | 12 | 26 |
+| scrubadub | 0.569 | 0.062 | **0.112** | 0.076 | 62 | 47 | 933 |
+
+종류별 표와 매핑표는 `bench/reports/open_source_baselines_v1.md`에 저장돼 있다. Presidio 같은
+무거운 NLP 기반 도구는 후보로 볼 수 있지만, 이 저장소에 비교 기준선으로 넣으려면 설치·모델 다운로드·
+라이선스·로컬 재현 절차가 먼저 안정적으로 정리돼야 한다.
 
 > **⚠️ 한계 고지 (#345) — 구조화 kind의 1.000을 읽을 때 반드시 함께 볼 것**
 >
