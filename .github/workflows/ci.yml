@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
   pull_request:
+  # branch-ci.yml이 PR 없는 브랜치 push에서 이 파일을 그대로 불러 쓴다(#573).
+  workflow_call:
 
 jobs:
   core:
