@@ -19,7 +19,7 @@ String locateCli({String? executable, bool Function(String path)? exists}) {
   final exe = executable ?? Platform.resolvedExecutable;
   // exe 경로를 직접 자른다 — `File(exe).parent`는 Linux(CI 테스트)에서 `\`를 구분자로
   // 보지 않아 '.'이 된다. 앱은 Windows 전용이지만 테스트는 양쪽에서 돈다.
-  final cut = exe.lastIndexOf(RegExp(r'[\/]'));
+  final cut = exe.lastIndexOf(RegExp(r'[\\/]'));
   final dir = cut < 0 ? '.' : exe.substring(0, cut);
   final sep = cut < 0 ? Platform.pathSeparator : exe[cut];
   final bundled = '$dir$sep$bundledCliRelativePath';
