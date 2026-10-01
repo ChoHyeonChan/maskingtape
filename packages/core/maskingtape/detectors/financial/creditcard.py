@@ -16,11 +16,16 @@
   진행하므로). 4자리 시작을 강제하면 앞 숫자를 삼키지 않아 카드를 놓치지 않는다.
 - 4자리 시작 강제는 주민등록번호 6-7 표기("471534-3756648")도 자동으로 제외한다 —
   6자리로 시작하므로 카드 후보가 아니다(RRNDetector가 담당한다).
+- 카드 두 장이 이어지면(#510) 앞 카드의 뒤 묶음과 뒤 카드의 앞 묶음을 이은 숫자열이 Luhn을
+  우연히 통과해 먼저 잡히고, finditer가 그 끝부터 다시 찾아 **진짜 뒤 카드를 검사하지 않았다**.
+  그래서 매치마다 한 글자만 넘기고 다시 찾는다(_search_every_start) — 겹치는 창을 모두 후보로
+  보고, 통과한 것을 Pipeline이 합친다(더 가리기=안전).
 """
 
 from __future__ import annotations
 
 import re
+from collections.abc import Iterator
 
 from maskingtape.detectors.base import Detector
 from maskingtape.types import Detection
@@ -45,6 +50,28 @@ _MIXED_CARD_RE = re.compile(r"(?<!\d)\d{4}[ -]{1,3}\d{4}[ -]{1,3}\d{4}[ -]{1,3}\
 # 신용카드·체크카드는 "카드"로 잡힌다. "신용"·"체크"만 두면 "신용등급"·"체크리스트" 뒤 연도 목록도 받는다.
 _CARD_CUE_RE = re.compile(r"카드|card|결제", re.IGNORECASE)
 _CARD_CUE_WINDOW = 15
+# 섞인 모양이 이미 찾은 카드 바로 뒤에 이어지면(구분자만 사이에 둠) 앞 카드의 문맥을 물려받는다(#510).
+# "카드 4111-1111 1111-1111 4111-1111 1111-1111"의 둘째 카드는 "카드"가 15자 밖이라 통째로 남았다.
+# 사이에 글자가 끼면 이어진 목록이 아니므로 받지 않는다 — 연도 목록 오탐 방지는 그대로다.
+_ADJACENT_GAP_RE = re.compile(r"[ ,/]{1,3}")
+# 이어받기로 받을 때만, 네 묶음이 모두 연도처럼 생긴 것(19xx·20xx)은 연도 목록으로 보고 받지 않는다.
+# 차등 검사에서 "카드번호 바로 뒤의 1999-2009 2014-2004"가 Luhn이 우연히 맞아 카드로 잡히는 오탐이
+# 나왔다. 실제 카드의 네 묶음이 모두 1900~2099일 일은 사실상 없다. 문맥어 경로에는 쓰지 않는다.
+_YEAR_LIST_RE = re.compile(r"(?:19|20)\d\d(?:[ -]{1,3}(?:19|20)\d\d){3}")
+
+
+def _search_every_start(pattern: re.Pattern[str], text: str) -> Iterator[re.Match[str]]:
+    """매치마다 한 글자만 넘기고 다시 찾는다 — 겹치는 창도 모두 후보로 본다(#510).
+
+    주소 탐지기의 같은 이름 함수(#465)와 같은 방식이다. finditer는 매치가 끝난 자리부터 다시
+    찾아서, 매치 안에서 시작하는 진짜 카드를 시도조차 하지 않는다. 각 모양 정규식은 앞뒤에
+    숫자가 붙어 있지 않아야 한다는 경계 검사가 있어 숫자 묶음 중간에서는 시작하지 않으므로,
+    후보 수는 묶음 수를 넘지 않는다.
+    """
+    pos = 0
+    while (m := pattern.search(text, pos)) is not None:
+        yield m
+        pos = m.start() + 1
 
 
 def _luhn_ok(digits: str) -> bool:
@@ -73,17 +100,17 @@ class CreditCardDetector(Detector):
         """
         found: list[Detection] = []
         seen: set[tuple[int, int]] = set()
-        matches = [m for regex in _CARD_RES for m in regex.finditer(text)]
-        matches += [
-            m
-            for m in _MIXED_CARD_RE.finditer(text)
-            if _CARD_CUE_RE.search(text, max(0, m.start() - _CARD_CUE_WINDOW), m.start())
-        ]
-        for m in sorted(matches, key=lambda m: m.span()):
+        # (매치, 섞인 모양인가). 섞인 모양의 문맥 확인은 아래 루프에서 한다 — 앞 카드를
+        # 이어받는지 보려면 이미 받은 카드를 알아야 해서다.
+        matches = [(m, False) for regex in _CARD_RES for m in _search_every_start(regex, text)]
+        matches += [(m, True) for m in _search_every_start(_MIXED_CARD_RE, text)]
+        for m, mixed in sorted(matches, key=lambda pair: pair[0].span()):
             digits = re.sub(r"\D", "", m.group(0))
             if not (13 <= len(digits) <= 19):
                 continue
             if not _luhn_ok(digits) or m.span() in seen:
+                continue
+            if mixed and not self._has_card_context(text, m, found):
                 continue
             seen.add(m.span())
             found.append(
@@ -97,3 +124,15 @@ class CreditCardDetector(Detector):
                 )
             )
         return found
+
+    @staticmethod
+    def _has_card_context(text: str, match: re.Match[str], found: list[Detection]) -> bool:
+        """섞인 모양 후보가 카드 문맥에 있는지 — 앞 15자 안 문맥어, 또는 이미 찾은 카드 바로 뒤."""
+        start = match.start()
+        if _CARD_CUE_RE.search(text, max(0, start - _CARD_CUE_WINDOW), start):
+            return True
+        if _YEAR_LIST_RE.fullmatch(match.group(0)):
+            return False
+        return any(
+            d.end <= start and _ADJACENT_GAP_RE.fullmatch(text, d.end, start) for d in found
+        )
