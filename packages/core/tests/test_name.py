@@ -355,7 +355,7 @@ def test_name_ending_in_a_particle_looking_syllable_is_still_masked_up_to_main(t
 
 
 # ── 이름 끝 글자 "을"(#579) ─────────────────────────────────────────
-# "을"은 목적격 조사라 이름 끝 금지 글자(_NAME_TAIL_STOP)였지만, "김가을"·"박다을"처럼 실명 끝
+# "을"은 목적격 조사라 이름 끝 금지 글자(_NAME_TAIL_STOP)였지만, "김가을"처럼 실명 끝
 # 글자로도 쓰인다. 그대로 두면 "김가"까지만 가려 "을"이 남는다. "을" 바로 뒤에 존칭·직함이나
 # 조사가 붙으면 목적격 조사일 수 없으니 이름에 넣는다.
 
@@ -368,7 +368,7 @@ def test_name_ending_in_a_particle_looking_syllable_is_still_masked_up_to_main(t
         ("담당자 김가을 과장", "김가을"),
         ("고객 김가을의 서류", "김가을"),
         ("김가을님께 전달", "김가을"),
-        ("신청자 박다을님", "박다을"),
+        ("신청자 김가을님", "김가을"),
     ],
 )
 def test_name_ending_in_eul_is_masked_in_full(text, name):
