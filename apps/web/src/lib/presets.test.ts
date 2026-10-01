@@ -10,6 +10,11 @@ describe("PRESETS (#455)", () => {
     expect(PRESETS.length).toBeGreaterThanOrEqual(8);
   });
 
+  it("keeps the drawer to 9 examples, including at least two long documents", () => {
+    expect(PRESETS).toHaveLength(9);
+    expect(PRESETS.filter((preset) => preset.text.length >= 500).length).toBeGreaterThanOrEqual(2);
+  });
+
   it("gives every preset a non-empty label, body, and kind list", () => {
     for (const preset of PRESETS) {
       expect(preset.label.length).toBeGreaterThan(0);
