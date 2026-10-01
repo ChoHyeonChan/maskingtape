@@ -769,13 +769,15 @@ core가 미탐을 더 막아도 점수가 거의 움직이지 않는다. 반대 
 [#600](https://github.com/ChoHyeonChan/maskingtape/issues/600)은 예전에 잡히던 문장
 ("담당자는 ○○○예요")이 새기 시작한 회귀인데 벤치 점수는 그대로였다.
 
-`bench/datasets/open_misses_v1.jsonl`은 core 이슈 10건의 재현 문장과 **같은 모양**으로 새로
-쓴 합성 문장 300건(15개 태그 × 20건)이다. 이슈 본문 문장을 복사하지 않고 값만 시드로 새로
+`bench/datasets/open_misses_v1.jsonl`은 core 이슈 13건의 재현 문장과 **같은 모양**으로 새로
+쓴 합성 문장 360건(18개 태그 × 20건)이다. 이슈 본문 문장을 복사하지 않고 값만 시드로 새로
 뽑았다. 조사는 받침에 맞춰 고른다(이/가, 은/는, 으로/로).
 
 ```bash
 python -m bench.generate_open_misses --out bench/datasets/open_misses_v1.jsonl
 python -m bench.evaluators.evaluate_open_misses bench/datasets/open_misses_v1.jsonl
+# 두 커밋 비교(고치기 전 → 고친 뒤, 또는 언제부터 새는지)를 한 명령으로 재현:
+python -m bench.evaluators.compare_open_misses_across_commits bench/datasets/open_misses_v1.jsonl --before b1c79b5 --after HEAD
 ```
 
 **채점 방식**
@@ -794,6 +796,9 @@ python -m bench.evaluators.evaluate_open_misses bench/datasets/open_misses_v1.js
 | core 이슈 | 태그 | 재현율 | 적중 | 부분 | 미탐 |
 |---|---|---|---|---|---|
 | [#589](https://github.com/ChoHyeonChan/maskingtape/issues/589) "A에서 B로 변경" | name_change_log_second | 0.000 | 0 | 0 | 20 |
+| [#592](https://github.com/ChoHyeonChan/maskingtape/issues/592) 날짜 뒤 생년월일 단서 | birth_date_cue_after | 0.000 | 0 | 0 | 20 |
+| [#593](https://github.com/ChoHyeonChan/maskingtape/issues/593) 건물명 + 동·호만 | address_building_dong_ho_only | 0.000 | 0 | 0 | 20 |
+| [#594](https://github.com/ChoHyeonChan/maskingtape/issues/594) 지역 이름 운전면허 | driver_license_region_name | 0.000 | 0 | 6 | 14 |
 | [#600](https://github.com/ChoHyeonChan/maskingtape/issues/600) 목록에 없는 어미 | name_unlisted_ending | 0.000 | 0 | 0 | 20 |
 | [#601](https://github.com/ChoHyeonChan/maskingtape/issues/601) 두 글자 이름 + 직함 | name_two_syllable_title | 0.000 | 0 | 0 | 20 |
 | [#602](https://github.com/ChoHyeonChan/maskingtape/issues/602) 나열한 이름 | name_list_after_label | 0.000 | 0 | 0 | 31 |
@@ -808,11 +813,27 @@ python -m bench.evaluators.evaluate_open_misses bench/datasets/open_misses_v1.js
 | [#607](https://github.com/ChoHyeonChan/maskingtape/issues/607) 라벨 + 틀린 검증 숫자 | card_label_bad_checksum | 0.000 | 0 | 0 | 20 |
 | | biz_reg_label_bad_checksum | 0.000 | 0 | 0 | 20 |
 | [#608](https://github.com/ChoHyeonChan/maskingtape/issues/608) 다시 나오는 이름 | name_repeat_without_cue | 0.000 | 0 | 0 | 40 |
-| **전체** | | **0.000** | **0** | **70** | **261** |
+| **전체** | | **0.000** | **0** | **76** | **315** |
 
 정답과 안 겹치는 오탐은 0건이다. #605는 전부 "부분"이다 — 번지까지는 가리고 층·호·건물명이
 남는다. #606은 주소 단서가 있으면 구부터 가려 시 이름만 남고(부분 10건), 단서가 없으면
-통째로 남는다(미탐 10건).
+통째로 남는다(미탐 10건). #594의 부분 6건은 지역 이름 뒤 숫자 일부가 다른 종류(전화 등)로
+우연히 잡힌 경우다.
+
+### 회귀를 숫자로 보기 — #600 (`b1c79b5` → `a4db5e2`)
+
+`compare_open_misses_across_commits.py`는 두 커밋의 core를 각각 격리된 임시 가상환경에
+설치해 같은 세트를 잰다(표기 변형 세트의 비교 도구와 같은 방식). #484 수정(PR #571)이
+들어가기 직전 커밋과 지금 main을 비교하면 한 줄만 달라진다.
+
+| core 이슈 | 태그 | #571 직전 (`b1c79b5`) | main (`a4db5e2`) |
+|---|---|---|---|
+| #600 | name_unlisted_ending | **1.000** | **0.000** |
+| 나머지 17개 태그 | | 0.000 | 0.000 |
+
+"담당자는 ○○○예요"·"고객 ○○○께서는" 같은 문장 20건이 #571 전에는 전부 잡혔고 지금은 전부
+샌다. synth_v1·v2에는 이 어미를 쓰는 템플릿이 없어서(지금 main의 v1·v2 미탐에 이 모양이
+한 건도 없다) 이 회귀가 벤치 점수에 보이지 않았다.
 
 **읽는 법과 한계**
 

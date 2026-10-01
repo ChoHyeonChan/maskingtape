@@ -1,3 +1,23 @@
+{"text": "새솔맨션 18동 106호 사시는 분이죠?", "labels": [{"kind": "address", "start": 0, "end": 13}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "한빛오피스텔 83동 701호입니다.", "labels": [{"kind": "address", "start": 0, "end": 15}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "누리아파트 56동 406호 사시는 분이죠?", "labels": [{"kind": "address", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "다온빌라 50동 802호입니다.", "labels": [{"kind": "address", "start": 0, "end": 13}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "가온빌라 91동 1501호로 보내 주세요.", "labels": [{"kind": "address", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "누리아파트 41동 1804호로 보내 주세요.", "labels": [{"kind": "address", "start": 0, "end": 15}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "가온맨션 44동 1406호 사시는 분이죠?", "labels": [{"kind": "address", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "한빛아파트 32동 302호로 보내 주세요.", "labels": [{"kind": "address", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "한빛오피스텔 26동 103호 사시는 분이죠?", "labels": [{"kind": "address", "start": 0, "end": 15}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "가온맨션 17동 109호입니다.", "labels": [{"kind": "address", "start": 0, "end": 13}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "새솔오피스텔 27동 602호 사시는 분이죠?", "labels": [{"kind": "address", "start": 0, "end": 15}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "가온빌라 39동 2004호로 보내 주세요.", "labels": [{"kind": "address", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "다온아파트 31동 304호 사시는 분이죠?", "labels": [{"kind": "address", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "가온빌라 46동 306호 사시는 분이죠?", "labels": [{"kind": "address", "start": 0, "end": 13}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "다온맨션 119동 2008호 사시는 분이죠?", "labels": [{"kind": "address", "start": 0, "end": 15}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "다온아파트 12동 607호로 보내 주세요.", "labels": [{"kind": "address", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "다온빌라 69동 108호로 보내 주세요.", "labels": [{"kind": "address", "start": 0, "end": 13}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "다온아파트 74동 303호입니다.", "labels": [{"kind": "address", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "가온빌라 34동 903호 사시는 분이죠?", "labels": [{"kind": "address", "start": 0, "end": 13}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "누리빌라 98동 1407호입니다.", "labels": [{"kind": "address", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
 {"text": "용인 기흥구 동성로 106입니다.", "labels": [{"kind": "address", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "address_city_without_si", "issue": 606}
 {"text": "배송지 청주 흥덕구 센텀중앙로 194", "labels": [{"kind": "address", "start": 4, "end": 20}], "difficulty": "open_miss", "miss_tag": "address_city_without_si", "issue": 606}
 {"text": "배송지 청주 흥덕구 센텀중앙로 289", "labels": [{"kind": "address", "start": 4, "end": 20}], "difficulty": "open_miss", "miss_tag": "address_city_without_si", "issue": 606}
@@ -78,6 +98,26 @@
 {"text": "주소: 서울특별시 종로구 판교역로 118 (청운동)", "labels": [{"kind": "address", "start": 4, "end": 28}], "difficulty": "open_miss", "miss_tag": "address_tail_paren_dong", "issue": 605}
 {"text": "주소: 대구광역시 수영구 판교역로 31 (광안동)", "labels": [{"kind": "address", "start": 4, "end": 27}], "difficulty": "open_miss", "miss_tag": "address_tail_paren_dong", "issue": 605}
 {"text": "주소: 대전광역시 마포구 월드컵로 285 (합정동)", "labels": [{"kind": "address", "start": 4, "end": 28}], "difficulty": "open_miss", "miss_tag": "address_tail_paren_dong", "issue": 605}
+{"text": "막내는 98년 11월 17일에 태어났어요.", "labels": [{"kind": "birth_date", "start": 4, "end": 15}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "저는 94년 11월 14일생입니다.", "labels": [{"kind": "birth_date", "start": 3, "end": 14}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "85년 5월 13일이 제 생일이에요.", "labels": [{"kind": "birth_date", "start": 0, "end": 10}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "15년 8월 26일생이에요.", "labels": [{"kind": "birth_date", "start": 0, "end": 10}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "저는 2009년 7월 1일생입니다.", "labels": [{"kind": "birth_date", "start": 3, "end": 14}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "73년 8월 10일생이에요.", "labels": [{"kind": "birth_date", "start": 0, "end": 10}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "1976년 9월 28일생이에요.", "labels": [{"kind": "birth_date", "start": 0, "end": 12}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "저는 2009년 6월 22일생입니다.", "labels": [{"kind": "birth_date", "start": 3, "end": 15}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "54년 11월 11일생이에요.", "labels": [{"kind": "birth_date", "start": 0, "end": 11}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "2014년 11월 2일이 제 생일이에요.", "labels": [{"kind": "birth_date", "start": 0, "end": 12}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "막내는 06년 1월 19일에 태어났어요.", "labels": [{"kind": "birth_date", "start": 4, "end": 14}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "15년 2월 24일생이에요.", "labels": [{"kind": "birth_date", "start": 0, "end": 10}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "87년 10월 22일이 제 생일이에요.", "labels": [{"kind": "birth_date", "start": 0, "end": 11}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "저는 1980년 8월 11일생입니다.", "labels": [{"kind": "birth_date", "start": 3, "end": 15}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "60년 4월 25일생이에요.", "labels": [{"kind": "birth_date", "start": 0, "end": 10}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "97년 7월 5일생이에요.", "labels": [{"kind": "birth_date", "start": 0, "end": 9}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "1956년 6월 4일이 제 생일이에요.", "labels": [{"kind": "birth_date", "start": 0, "end": 11}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "89년 2월 10일생이에요.", "labels": [{"kind": "birth_date", "start": 0, "end": 10}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "막내는 2014년 5월 5일에 태어났어요.", "labels": [{"kind": "birth_date", "start": 4, "end": 15}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "저는 1970년 6월 10일생입니다.", "labels": [{"kind": "birth_date", "start": 3, "end": 15}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
 {"text": "사업자등록번호: 170-64-37722", "labels": [{"kind": "biz_reg", "start": 9, "end": 21}], "difficulty": "open_miss", "miss_tag": "biz_reg_label_bad_checksum", "issue": 607}
 {"text": "사업자등록번호: 613-26-81588", "labels": [{"kind": "biz_reg", "start": 9, "end": 21}], "difficulty": "open_miss", "miss_tag": "biz_reg_label_bad_checksum", "issue": 607}
 {"text": "사업자등록번호 842-90-10448", "labels": [{"kind": "biz_reg", "start": 8, "end": 20}], "difficulty": "open_miss", "miss_tag": "biz_reg_label_bad_checksum", "issue": 607}
@@ -118,6 +158,26 @@
 {"text": "카드번호 4265-6118-4425-4791", "labels": [{"kind": "card", "start": 5, "end": 24}], "difficulty": "open_miss", "miss_tag": "card_label_bad_checksum", "issue": 607}
 {"text": "법인카드 5559-7721-7285-5840", "labels": [{"kind": "card", "start": 5, "end": 24}], "difficulty": "open_miss", "miss_tag": "card_label_bad_checksum", "issue": 607}
 {"text": "카드번호 5547-0373-9490-8545", "labels": [{"kind": "card", "start": 5, "end": 24}], "difficulty": "open_miss", "miss_tag": "card_label_bad_checksum", "issue": 607}
+{"text": "운전면허번호: 서울 16-672643-57입니다.", "labels": [{"kind": "driver_license", "start": 8, "end": 23}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "운전면허번호: 서울 27-284426-82입니다.", "labels": [{"kind": "driver_license", "start": 8, "end": 23}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "면허번호: 서울 66-389655-71입니다.", "labels": [{"kind": "driver_license", "start": 6, "end": 21}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "면허번호 강원 27-110398-57", "labels": [{"kind": "driver_license", "start": 5, "end": 20}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "면허번호: 경기 89-639479-87입니다.", "labels": [{"kind": "driver_license", "start": 6, "end": 21}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "운전면허번호: 부산 09-172730-81", "labels": [{"kind": "driver_license", "start": 8, "end": 23}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "면허번호: 부산 10-801227-39", "labels": [{"kind": "driver_license", "start": 6, "end": 21}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "면허번호 서울 65-865705-88", "labels": [{"kind": "driver_license", "start": 5, "end": 20}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "면허번호 부산 79-508539-73", "labels": [{"kind": "driver_license", "start": 5, "end": 20}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "면허번호: 경기 79-838153-42입니다.", "labels": [{"kind": "driver_license", "start": 6, "end": 21}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "면허번호: 강원 08-877071-52입니다.", "labels": [{"kind": "driver_license", "start": 6, "end": 21}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "운전면허번호: 대구 21-418059-15", "labels": [{"kind": "driver_license", "start": 8, "end": 23}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "운전면허번호: 강원 14-946486-12", "labels": [{"kind": "driver_license", "start": 8, "end": 23}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "면허번호: 전남 60-691814-27입니다.", "labels": [{"kind": "driver_license", "start": 6, "end": 21}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "면허번호: 서울 58-580055-87", "labels": [{"kind": "driver_license", "start": 6, "end": 21}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "운전면허번호: 부산 13-645521-60입니다.", "labels": [{"kind": "driver_license", "start": 8, "end": 23}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "면허번호: 경기 45-019744-40입니다.", "labels": [{"kind": "driver_license", "start": 6, "end": 21}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "운전면허번호: 경기 09-421429-99", "labels": [{"kind": "driver_license", "start": 8, "end": 23}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "면허번호: 경기 24-287176-32", "labels": [{"kind": "driver_license", "start": 6, "end": 21}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "면허번호 부산 40-584691-78입니다.", "labels": [{"kind": "driver_license", "start": 5, "end": 20}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
 {"text": "신청자가 백율아에서 허우규로 변경되었습니다.", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 11, "end": 14}], "difficulty": "open_miss", "miss_tag": "name_change_log_second", "issue": 589}
 {"text": "담당자가 양재서에서 황아찬으로 변경되었습니다.", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 11, "end": 14}], "difficulty": "open_miss", "miss_tag": "name_change_log_second", "issue": 589}
 {"text": "보호자가 임영혜에서 백군찬으로 변경되었습니다.", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 11, "end": 14}], "difficulty": "open_miss", "miss_tag": "name_change_log_second", "issue": 589}

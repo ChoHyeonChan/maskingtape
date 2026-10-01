@@ -117,6 +117,41 @@ def gen_name_change_log_second(rng: random.Random) -> MissDoc:
     )
 
 
+# ── #592 날짜 뒤에 오는 생년월일 단서 ──────────────────────────────
+
+
+def gen_birth_date_cue_after(rng: random.Random) -> MissDoc:
+    """단서("생", "에 태어났", "이 생일")가 날짜 **뒤**에 온다. 앞에 라벨이 있으면 지금도 잡힌다."""
+    year, month, day = rng.randint(1950, 2015), rng.randint(1, 12), rng.randint(1, 28)
+    date = rng.choice([f"{year}년 {month}월 {day}일", f"{year % 100:02d}년 {month}월 {day}일"])
+    lead, tail = rng.choice([
+        ("저는 ", "생입니다."), ("", "생이에요."), ("막내는 ", "에 태어났어요."), ("", "이 제 생일이에요."),
+    ])
+    return _build([lead, ("birth_date", date), tail], "birth_date_cue_after", 592)
+
+
+# ── #593 건물명 + 동·호만 쓴 주소 ──────────────────────────────────
+
+
+def gen_address_building_dong_ho_only(rng: random.Random) -> MissDoc:
+    """시·도나 도로명 없이 건물명부터 시작한다. 건물 종류는 core가 꼬리에서 이미 아는 낱말만 쓴다 —
+    시작점이 없다는 것만 다르게 해서 #605(꼬리 유출)와 섞이지 않게 한다."""
+    building = rng.choice(_BUILDING_STEMS) + rng.choice(["아파트", "빌라", "맨션", "오피스텔"])
+    value = f"{building} {rng.randint(1, 120)}동 {rng.randint(1, 20)}{rng.randint(1, 9):02d}호"
+    tail = rng.choice(["로 보내 주세요.", " 사시는 분이죠?", "입니다."])
+    return _build([("address", value), tail], "address_building_dong_ho_only", 593)
+
+
+# ── #594 지역 이름으로 시작하는 옛 운전면허번호 ────────────────────
+
+
+def gen_driver_license_region_name(rng: random.Random) -> MissDoc:
+    region = rng.choice(["서울", "경기", "부산", "전남", "대구", "강원"])
+    value = f"{region} {rng.randint(0, 99):02d}-{rng.randint(0, 999999):06d}-{rng.randint(0, 99):02d}"
+    label = rng.choice(["면허번호 ", "운전면허번호: ", "면허번호: "])
+    return _build([label, ("driver_license", value), rng.choice(["입니다.", ""])], "driver_license_region_name", 594)
+
+
 # ── #600 앞 단서 + 이름 + 목록에 없는 어미 ─────────────────────────
 
 # 이름 끝 글자의 받침과 무관하게 붙는 어미.
@@ -303,6 +338,9 @@ MISS_TAGS = {
     f.__name__: f
     for f in (
         gen_name_change_log_second,
+        gen_birth_date_cue_after,
+        gen_address_building_dong_ho_only,
+        gen_driver_license_region_name,
         gen_name_unlisted_ending,
         gen_name_two_syllable_title,
         gen_name_list_after_label,
