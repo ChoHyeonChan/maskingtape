@@ -1,0 +1,19 @@
+name: Branch CI
+
+# PR 없이 브랜치에만 올린 커밋도 테스트·빌드 검사를 받게 한다(#573). ci.yml은 main push와
+# PR에서만 돌아서, #572처럼 PR 없는 브랜치의 빌드 에러를 아무도 몰랐다.
+# ci.yml을 그대로 불러 쓰므로 검사 내용은 같고, 검사 이름은 "branch / core"처럼 앞에
+# "branch /"가 붙어 main 머지 조건인 필수 검사(core·api·web)와 섞이지 않는다.
+# 실패하면 push한 사람이 GitHub 알림(Settings → Notifications → Actions)으로 받는다.
+on:
+  push:
+    branches-ignore: [main]
+
+# 같은 브랜치에 연달아 push하면 앞의 실행은 취소한다.
+concurrency:
+  group: branch-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  branch:
+    uses: ./.github/workflows/ci.yml
