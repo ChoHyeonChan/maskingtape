@@ -8,7 +8,7 @@ import '../theme.dart';
 
 /// 로컬 LLM 준비 상태를 보여주는 칩. 누르면 다시 확인한다.
 ///
-/// 이름 정밀 탐지를 켜기 *전에* 상태가 보여야 의미가 있다 — Ollama를 켜야 하는지,
+/// 로컬 LLM 사용을 켜기 *전에* 상태가 보여야 의미가 있다 — Ollama를 켜야 하는지,
 /// 모델을 받아야 하는지를 파일 처리에 실패한 뒤에 알게 되면 늦다.
 class LlmStatusPill extends StatelessWidget {
   const LlmStatusPill({super.key, required this.status, required this.onRefresh});
