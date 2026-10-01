@@ -37,12 +37,12 @@ void main() {
     await tester.pumpWidget(_host(FakeAnonymizer()));
 
     expect(find.text('문서 입력'), findsOneWidget);
-    expect(find.text('탐지 결과'), findsOneWidget);
+    expect(find.text('샘플 선택하기'), findsOneWidget);
     final button = tester.widget<FilledButton>(
       find.widgetWithText(FilledButton, '텍스트 입력 필요'),
     );
     expect(button.onPressed, isNull);
-    expect(find.textContaining('왼쪽에 텍스트를 입력하고'), findsOneWidget);
+    expect(find.textContaining('샘플 문서를 골라'), findsOneWidget);
   });
 
   testWidgets('문장을 넣고 실행하면 마스킹 결과와 탐지 목록이 나온다', (WidgetTester tester) async {
@@ -116,13 +116,25 @@ void main() {
       isEmpty,
     );
     expect(find.text('0 / 100,000자'), findsOneWidget);
-    expect(find.textContaining('왼쪽에 텍스트를 입력하고'), findsOneWidget);
+    expect(find.textContaining('샘플 문서를 골라'), findsOneWidget);
   });
 
-  testWidgets('샘플 버튼을 누르면 합성 예시 문장이 채워진다', (WidgetTester tester) async {
+  testWidgets('샘플 서랍에서 탭을 고르고 「입력창에 넣기」를 눌러야 합성 예시 문장이 채워진다', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(_host(FakeAnonymizer()));
 
+    // 탭을 고르면 종류 태그·미리보기만 바뀌고 입력은 그대로다 — 둘러보기만 해도 쓰던 글이 안 날아간다.
+    await tester.ensureVisible(find.text('신청서 샘플'));
     await tester.tap(find.text('신청서 샘플'));
+    await tester.pump();
+    expect(find.text('카드번호'), findsOneWidget);
+    expect(
+      tester.widget<TextField>(find.byType(TextField)).controller!.text,
+      isEmpty,
+    );
+
+    await tester.tap(find.text('입력창에 넣기'));
     await tester.pump();
 
     final field = tester.widget<TextField>(find.byType(TextField));
