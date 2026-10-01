@@ -147,6 +147,20 @@ def test_birthdate_label_with_two_parenthetical_notes():
     assert "1999-07-21" in texts(BirthDateDetector(), "생년월일(만 나이)(한국식) 1999-07-21")
 
 
+@pytest.mark.parametrize(
+    "text",
+    [
+        "생년월일 (만 나이) 1999-07-21",  # 라벨과 괄호 사이에 공백(#529)
+        "생년월일 (만 나이) (한국식) 1999-07-21",  # 괄호마다 앞에 공백
+        "생년월일(만)(양력)(한국식) 1999-07-21",  # 붙여 쓴 괄호 세 개(#508은 두 개까지만 받았다)
+    ],
+)
+def test_birthdate_label_with_spaced_or_triple_parenthetical_notes(text):
+    # #508은 라벨에 바로 붙은 괄호 두 개까지만 받았다 — 라벨과 괄호 사이 공백이나 괄호
+    # 세 개는 놓쳐서 날짜가 원문 그대로 샜다(#529).
+    assert "1999-07-21" in texts(BirthDateDetector(), text)
+
+
 # ── 전화 ────────────────────────────────────────────────────────────
 
 
