@@ -120,3 +120,68 @@ def test_card_must_start_with_a_four_digit_group():
     """구분자가 있으면 4자리 그룹으로 시작해야 한다 — 3-4-4(전화)나 6-7(주민번호)은 카드가 아니다."""
     assert detect("010-1234-5678") == []
     assert detect("123-4567-8901-2345") == []  # 3자리 시작
+
+
+# ─── #510: 카드 두 장이 이어질 때 뒤 카드가 새지 않는다 ───────────────────────────
+
+
+def _covered(text: str, card: str, start_at: int = 0) -> bool:
+    """text 안 start_at 이후 처음 나오는 card의 모든 글자가 어떤 탐지 구간 안에 들어가는지."""
+    begin = text.index(card, start_at)
+    spans = [(d.start, d.end) for d in detect(text)]
+    return all(any(s <= i < e for s, e in spans) for i in range(begin, begin + len(card)))
+
+
+def test_second_card_after_mixed_separator_card_is_fully_detected():
+    """이슈 원문 — 앞 카드의 뒤 두 묶음과 뒤 카드의 앞 두 묶음을 이은 숫자열이 Luhn을 우연히
+    통과해 먼저 잡히고, finditer가 그 끝부터 다시 찾아 진짜 뒤 카드를 검사하지 않았다.
+    뒤 카드의 마지막 묶음 "1111"이 원문으로 남았다."""
+    text = "카드 4111-1111 1111-1111 4111 1111 1111 1111"
+    assert _covered(text, "4111-1111 1111-1111")
+    assert _covered(text, "4111 1111 1111 1111")
+
+
+def test_mixed_separator_card_right_after_another_card_is_detected():
+    """뒤 카드가 하이픈·공백을 섞어 쓰면 섞인 모양 정규식으로만 잡히는데, 연도 목록 오탐을 막는
+    카드 문맥어("카드")가 앞 15자 밖이라 버려져 **뒤 카드가 통째로** 남았다."""
+    mixed_then_mixed = "카드 4111-1111 1111-1111 4111-1111 1111-1111"
+    assert _covered(mixed_then_mixed, "4111-1111 1111-1111")
+    assert _covered(mixed_then_mixed, "4111-1111 1111-1111", start_at=10)
+
+    space_then_mixed = "카드 4111 1111 1111 1111 4111-1111 1111-1111"
+    assert _covered(space_then_mixed, "4111 1111 1111 1111")
+    assert _covered(space_then_mixed, "4111-1111 1111-1111")
+
+    comma_between = "카드 4111-1111 1111-1111, 4242-4242 4242-4242"
+    assert _covered(comma_between, "4242-4242 4242-4242")
+
+
+def test_adjacent_cards_leave_no_digits_after_masking():
+    """파이프라인 끝까지 — 이어진 카드 두 장의 숫자가 마스킹 결과에 하나도 남지 않는다."""
+    from maskingtape.pipeline import Pipeline
+
+    pipeline = Pipeline()
+    for text in (
+        "카드 4111-1111 1111-1111 4111 1111 1111 1111",
+        "카드 4111-1111 1111-1111 4111-1111 1111-1111",
+        "카드 4111 1111 1111 1111 4111-1111 1111-1111",
+    ):
+        masked = pipeline.anonymize(text).text
+        assert not any(ch.isdigit() for ch in masked), f"{text!r} → {masked!r}"
+
+
+def test_mixed_separator_year_list_without_card_cue_is_still_ignored():
+    """섞인 모양을 카드 뒤에 이어 받게 한 뒤에도, 카드 문맥이 없는 연도 목록은 그대로 무시한다."""
+    assert detect("재직 기간 2023-2024 2025-2026") == []
+    assert detect("사업 기간 2015-2016 2017-2018, 2019-2020 2021-2022") == []
+
+
+def test_year_list_right_after_a_card_is_not_taken_as_a_second_card():
+    """카드 뒤 이어받기가 연도 목록 오탐을 다시 열지 않는다 — 차등 검사에서 나온 경우다.
+    "1999-2009 2014-2004"는 Luhn을 통과하지만, 네 묶음이 모두 연도라 카드로 받지 않는다."""
+    text = "카드 4111-1111 1111-1111 1999-2009 2014-2004"
+    years = text.index("1999")
+    assert all(d.end <= years for d in detect(text))
+    # 같은 모양이라도 앞에 카드 문맥어가 직접 있으면 예전처럼 문맥어 규칙을 따른다(변화 없음).
+    assert detect("카드 1999-2009 2014-2004") != []
+
