@@ -341,8 +341,8 @@ def test_common_prefix_role_words_without_a_colon_still_drop_stopwords():
 @pytest.mark.parametrize(
     "text, name",
     [
-        ("담당자 김가을님 확인", "김가"),
-        ("고객 김가을이 방문", "김가"),
+        ("담당자 김가을님 확인", "김가을"),
+        ("고객 김가을이 방문", "김가을"),
     ],
 )
 def test_name_ending_in_a_particle_looking_syllable_is_still_masked_up_to_main(text, name):
@@ -351,3 +351,38 @@ def test_name_ending_in_a_particle_looking_syllable_is_still_masked_up_to_main(t
     # 어떤 옵션과도 안 맞아 통째로 놓쳤다. main도 "김가"까지만 가려 완전하지는 않았지만,
     # 적어도 그만큼은 가리도록 조사를 1~2개 반복하고 뒤에 존칭이 더 붙어도 받는다.
     assert name in [d.text for d in detect(text)]
+    # #579부터는 "을"까지 이름에 넣어 "김가을" 전체를 가린다(아래 테스트).
+
+
+# ── 이름 끝 글자 "을"(#579) ─────────────────────────────────────────
+# "을"은 목적격 조사라 이름 끝 금지 글자(_NAME_TAIL_STOP)였지만, "김가을"·"박다을"처럼 실명 끝
+# 글자로도 쓰인다. 그대로 두면 "김가"까지만 가려 "을"이 남는다. "을" 바로 뒤에 존칭·직함이나
+# 조사가 붙으면 목적격 조사일 수 없으니 이름에 넣는다.
+
+
+@pytest.mark.parametrize(
+    "text, name",
+    [
+        ("담당자 김가을님 확인", "김가을"),
+        ("고객 김가을이 방문했습니다", "김가을"),
+        ("담당자 김가을 과장", "김가을"),
+        ("고객 김가을의 서류", "김가을"),
+        ("김가을님께 전달", "김가을"),
+        ("신청자 박다을님", "박다을"),
+    ],
+)
+def test_name_ending_in_eul_is_masked_in_full(text, name):
+    assert name in [d.text for d in detect(text)]
+
+
+@pytest.mark.parametrize("text", ["고객 김민을 만났다", "담당자가 김민을 찾았다"])
+def test_object_particle_eul_is_still_left_out_of_the_name(text):
+    # 뒤가 공백이면 "을"은 목적격 조사다 — 지금처럼 이름 밖에 둔다.
+    assert [d.text for d in detect(text)] == ["김민"]
+
+
+@pytest.mark.parametrize("text", ["신청인 이하은", "담당자: 이하은, 010-1234-5678"])
+def test_name_ending_in_eun_after_a_strong_cue_is_masked(text):
+    # 끝 글자 "은"은 조사와 같아 "이하"(일반어)+"은"으로 읽혀 버려졌다. 강한 단서(좁은 양식
+    # 라벨, 쌍점) 뒤에서는 일반어 필터를 면제해(#571) 이름 전체가 잡힌다(#579).
+    assert "이하은" in [d.text for d in detect(text)]
