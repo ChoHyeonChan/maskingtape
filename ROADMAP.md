@@ -125,6 +125,7 @@
 - [x] PyPI 배포 ([#48](https://github.com/ChoHyeonChan/maskingtape/issues/48))
 - [x] 새 탐지기: 운전면허 ([#267](https://github.com/ChoHyeonChan/maskingtape/issues/267)) + 보안 하드닝 (ReDoS [#289](https://github.com/ChoHyeonChan/maskingtape/issues/289))
 - [x] 0.3.0 배포 ([#429](https://github.com/ChoHyeonChan/maskingtape/issues/429)) — 주소 부분 유출 ([#423](https://github.com/ChoHyeonChan/maskingtape/issues/423))·주소 겹침 검사 O(n²) ([#426](https://github.com/ChoHyeonChan/maskingtape/issues/426)) 수정 포함
+- [x] 0.4.0 배포 ([#500](https://github.com/ChoHyeonChan/maskingtape/issues/500)): 표기 변형 ([#490](https://github.com/ChoHyeonChan/maskingtape/issues/490))·`--llm` 원문 외부 전송 경로 ([#468](https://github.com/ChoHyeonChan/maskingtape/issues/468))·이름·주소·번호 미탐 수정, 벤치 이름 재현율 0.668→0.932
 - [x] 시·군 뒤에 바로 오는 도로명 주소 ([#425](https://github.com/ChoHyeonChan/maskingtape/issues/425))
 - [x] 라이선스 정비: 모든 소스 파일 저작권 헤더 + CI 검사 ([#437](https://github.com/ChoHyeonChan/maskingtape/issues/437)), SBOM 전이 의존성·AI 모델 상세 ([#438](https://github.com/ChoHyeonChan/maskingtape/issues/438)), OpenUP 사전 검증 1차 스캔(2026-09-24)
 - 상시: 팀원 PR 리뷰·아키텍처

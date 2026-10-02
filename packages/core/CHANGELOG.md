@@ -3,6 +3,101 @@
 이 파일은 `maskingtape` 코어 패키지(PyPI 배포본)의 변경만 다룬다.
 전체 저장소의 진행 상황은 [ROADMAP.md](../../ROADMAP.md)와 [Issues](https://github.com/ChoHyeonChan/maskingtape/issues)를 참고한다.
 
+## 0.4.0 (2026-10-02)
+
+0.3.0 뒤로 core에 들어간 유출 수정을 묶었다. 이름·주소·번호를 조금만 다르게 써도 원문이 그대로 남던 경우가 대부분이다.
+합성 벤치(`synth_v1` 500건, 규칙 전용)에서 이름 재현율이 0.668에서 0.932로 올라, 놓친 이름이 127개에서 26개로 줄었다.
+전체 F1은 0.911에서 0.981이다. 여기에는 벤치 문장 틀에 쓰인 라벨 어휘를 더한 몫([#537](https://github.com/ChoHyeonChan/maskingtape/issues/537))이 섞여 있어,
+실제 문서에서는 상한으로 읽어야 한다. 0.3.x 사용자는 **업그레이드를 권한다**.
+
+아래 예시 입력(합성 값)은 모두 0.3.0에서 원문이 남고 0.4.0에서 가려지는 것을 직접 돌려 확인했다.
+
+### 보안 (미탐 = 유출)
+
+**표기 변형**
+
+- **전각 숫자·폭 없는 공백·대시 변형·자모 분해 표기에서 탐지를 통째로 비껴가던 문제** ([#490](https://github.com/ChoHyeonChan/maskingtape/issues/490))
+  `주민번호 ８００１０１-１２３４５６０`, `전화 010−1234−5678`(U+2212 빼기 기호), 자모로 분해한(NFD) `고객 김민수님`이 원문 그대로 남았다.
+  원문과, 표기를 정리한 사본 둘 다에서 찾아 합친다. 원문에서 찾은 결과는 그대로 두므로 정리 때문에 덜 가리는 일은 없다.
+
+**이름**
+
+- **서식 역할어·실무 직함 뒤 이름** ([#394](https://github.com/ChoHyeonChan/maskingtape/issues/394), [#580](https://github.com/ChoHyeonChan/maskingtape/issues/580)):
+  `총무 김민수 확인`, `담당 상담원 김민수`. 역할어(환자명·예금주·지원자 등)와 직함(총무·매니저·간호사 등) 어휘를 넓혔다.
+- **양식 라벨의 흔한 변형** ([#491](https://github.com/ChoHyeonChan/maskingtape/issues/491)):
+  `성명 : 홍길동`(콜론 앞 공백), `| 성명 | 홍길동 |`(표 칸), 사전에 없는 성씨(`성명: 류서윤`)
+- **표 머리행의 이름 열** ([#526](https://github.com/ChoHyeonChan/maskingtape/issues/526)):
+  CSV·TSV·마크다운 표의 머리행이 `이름`·`성명` 등이면 아래 행의 이름을 가린다. 전에는 같은 행의 전화번호·이메일만 가려지고 이름은 남았다.
+- **슬래시로 나눈 명단** ([#581](https://github.com/ChoHyeonChan/maskingtape/issues/581)): `김민수 / 개발팀 / 010-3456-7890`
+- **끝 글자가 조사처럼 생긴 이름** ([#579](https://github.com/ChoHyeonChan/maskingtape/issues/579)): `신청인 이하은`
+- **업무 문서 제목형 라벨** ([#537](https://github.com/ChoHyeonChan/maskingtape/issues/537)): `이력서 접수: 전혜호, 생일 1986-10-02`.
+  벤치 문장 틀에 있던 라벨이라 벤치 수치를 올린 몫이 크다.
+
+**주소**
+
+- **시·군 뒤에 바로 오는 도로명** ([#425](https://github.com/ChoHyeonChan/maskingtape/issues/425)): `김포시 김포대로 123`이 통째로 남았다.
+- **세종 축약형과 읍·면 부분 유출** ([#465](https://github.com/ChoHyeonChan/maskingtape/issues/465)):
+  `세종 한누리대로 2130`이 통째로 남고, `세종특별자치시 장군면 대학길 12`는 `면 대학길 12`가 남았다.
+- **두 칸 이상 공백이나 줄바꿈으로 나눈 주소** ([#492](https://github.com/ChoHyeonChan/maskingtape/issues/492)):
+  `서울특별시  강남구  테헤란로  123`에서 시/도만 가려졌다.
+- **시/도 없이 구로 시작하는 주소** ([#492](https://github.com/ChoHyeonChan/maskingtape/issues/492), [#511](https://github.com/ChoHyeonChan/maskingtape/issues/511)):
+  `주소: 강남구 테헤란로 123`, `강남구 역삼동 12 (배송지)`, `배송지 목록` 아래 줄마다 이어지는 구 주소.
+  `인구 이동 강남구 역삼동 1.2%` 같은 통계 문장은 잡지 않도록, 앞뒤나 목록 머리에 주소 단서가 있을 때만 받는다.
+
+**주민등록번호·생년월일**
+
+- **날짜 표기** ([#399](https://github.com/ChoHyeonChan/maskingtape/issues/399), [#493](https://github.com/ChoHyeonChan/maskingtape/issues/493)):
+  `생년월일 95.03.22`(2자리 연도), `생년월일: 1999. 7. 21.`(공문서 날짜)
+- **8자리 앞자리 주민등록번호** ([#508](https://github.com/ChoHyeonChan/maskingtape/issues/508)): `생년월일 19800101-1234567`의 뒷자리가 남았다.
+- **뒷자리를 가린 주민등록번호** ([#528](https://github.com/ChoHyeonChan/maskingtape/issues/528)): `주민번호 800101-1******`의 앞자리(생년월일)가 통째로 남았다.
+- **드문 구분자** ([#529](https://github.com/ChoHyeonChan/maskingtape/issues/529)): `800101/1234567`처럼 `/`·`·`·`_` 등으로 나눈 번호
+
+**전화·계좌·카드·여권**
+
+- 전화: `TEL 02)555-1234`([#493](https://github.com/ChoHyeonChan/maskingtape/issues/493)), `(+82) 10-1234-5678`·`+820212345678`([#509](https://github.com/ChoHyeonChan/maskingtape/issues/509))
+- 계좌: 은행 약칭만 붙은 `신한 110-123-456789`와 끝 묶음이 한 자리인 `9002-1234-5678-1`([#472](https://github.com/ChoHyeonChan/maskingtape/issues/472)),
+  공백·점으로 나눈 `입금 계좌 1002 123 456789`([#474](https://github.com/ChoHyeonChan/maskingtape/issues/474)),
+  라벨에 하이픈으로 붙은 `입금계좌-110-123-456789`([#493](https://github.com/ChoHyeonChan/maskingtape/issues/493))
+- 카드: 19자리 `6212 3456 7890 1234 569`([#493](https://github.com/ChoHyeonChan/maskingtape/issues/493)),
+  두 장을 이어 쓰면 뒤 카드가 남던 문제([#510](https://github.com/ChoHyeonChan/maskingtape/issues/510))
+- 여권: `여권번호 M 12345678`([#493](https://github.com/ChoHyeonChan/maskingtape/issues/493))
+
+**로컬 LLM과 치환 전략**
+
+- **`--llm` 원문이 PC 밖으로 나갈 수 있던 경로** ([#468](https://github.com/ChoHyeonChan/maskingtape/issues/468)):
+  프록시 설정(`HTTP_PROXY`, Windows 시스템 프록시)을 따라가거나, 클라우드 모델(`gpt-oss:120b-cloud` 등)이 원문을 ollama.com으로 넘기거나,
+  `http://evil.com@localhost:11434`처럼 검사한 주소와 실제 접속 주소가 다르거나, 리다이렉트를 따라갈 수 있었다. 원문을 보내기 전에 모두 막는다.
+- **겹친 탐지를 치환하다 원문 글자를 남기던 문제** ([#494](https://github.com/ChoHyeonChan/maskingtape/issues/494)):
+  탐지 목록을 직접 넘기는 라이브러리 호출에서 `LabelAnonymizer`가 `연락처 [전화번호]름]8 끝`처럼 원문 끝 글자를 남겼다.
+  `PseudonymAnonymizer`도 같았다. 치환하기 전에 겹친 탐지를 합친다. `Pipeline`을 거친 결과는 원래 겹침이 없어 영향이 없었다.
+- **가명이 원본과 같던 문제** ([#494](https://github.com/ChoHyeonChan/maskingtape/issues/494)):
+  `고객 김서준님`의 가명이 시드 2,000개 중 3개에서 `김서준` 그대로였다. 원본과 같거나 서로 품는 가명, 같은 호출에서 이미 쓴 가명은 다시 뽑는다.
+
+### 변경
+
+- **로컬 LLM 접속** ([#468](https://github.com/ChoHyeonChan/maskingtape/issues/468))
+  - 기본 주소가 `http://localhost:11434`에서 `http://127.0.0.1:11434`로 바뀌었다. Windows가 localhost를 IPv6로 먼저 시도해 요청마다 약 2초를 기다렸기 때문이다.
+  - 프록시 설정을 무시하고 직접 연결한다. 리다이렉트는 따라가지 않는다.
+  - 원문을 보내기 전에 모델 정보(`/api/show`)를 한 번 더 요청해, 원격 모델로 이어진 로컬 별칭을 거부한다.
+  - 원격 주소처럼 클라우드 모델과 `@`가 든 주소도 탐지기를 만들 때 `ValueError`를 낸다. CLI는 안내를 출력하고 종료 코드 2로 끝난다.
+- **LLM 하이브리드의 규칙 안전망** ([#476](https://github.com/ChoHyeonChan/maskingtape/issues/476)): 확신도 0.75 이상만 남기던 규칙 이름 탐지를 전부 함께 쓴다.
+  벤치(qwen2.5:7b)에서 놓친 이름이 30개에서 21개로 줄고, 오탐은 21개에서 28개로 늘었다.
+- **LLM 호출 범위와 응답 검증** ([#494](https://github.com/ChoHyeonChan/maskingtape/issues/494)): 사전에 없는 성씨로 시작하는 문장도 LLM에 보낸다.
+  응답의 이름 목록에 문자열이 아닌 값이 있으면 `TypeError`를 낸다. 메시지에는 받은 형태만 적고 이름은 적지 않는다. 같은 이름은 한 번만 찾는다.
+- **`MaskAnonymizer`도 치환 전에 겹친 탐지를 합친다** ([#520](https://github.com/ChoHyeonChan/maskingtape/issues/520)). `Pipeline` 결과에는 출력 변화가 없다.
+- **가명 어휘가 모자라면 라벨로 가린다** ([#494](https://github.com/ChoHyeonChan/maskingtape/issues/494)): 한 호출에 서로 다른 이름이 수백 개면 뒤쪽 이름은 가명 대신 `[이름]`이 된다. 원본은 남지 않는다.
+- `Detector`에 `calls_model` 속성이 생겼다(기본 `False`). 모델을 부르는 비싼 탐지기는 `True`로 두면, `Pipeline`이 표기를 정리해 다시 찾을 때 되도록 정리본에서만 부른다([#490](https://github.com/ChoHyeonChan/maskingtape/issues/490)).
+- 선택 의존성 `bench-baselines`(scrubadub)가 패키지 메타데이터에 생겼다. 저장소 벤치에서 다른 도구와 비교할 때만 쓰고, 설치하지 않으면 영향이 없다.
+
+### 수정
+
+- CLI 출력이 Windows에서 CRLF 줄바꿈을 `\r\r\n`으로 바꾸던 문제 ([#494](https://github.com/ChoHyeonChan/maskingtape/issues/494)). 데스크톱 앱이 이 출력을 저장하면 CSV 행 수가 두 배가 됐다.
+- 일반 낱말을 이름으로 가리던 오탐: `고객님께`의 `고객`([#450](https://github.com/ChoHyeonChan/maskingtape/issues/450)), `이름 정밀 탐지`의 `정밀`([#484](https://github.com/ChoHyeonChan/maskingtape/issues/484))
+
+### 기타
+
+- 모든 소스 파일에 저작권·라이선스 헤더(SPDX)를 넣었다 ([#437](https://github.com/ChoHyeonChan/maskingtape/issues/437)).
+
 ## 0.3.0 (2026-09-15)
 
 주소에서 건물번호가 새던 부분 유출과, 주소가 반복되는 긴 입력에서 처리가 수십 초씩 걸리던 문제를 고쳤다.
