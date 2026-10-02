@@ -108,7 +108,7 @@ class RestAnonymizer implements Anonymizer {
 
   static String _unsupportedMessage(AnonymizeOptions options) {
     if (options.useLlm) {
-      return '이름 정밀 탐지(로컬 LLM)는 API 백엔드가 지원하지 않습니다 — '
+      return '로컬 LLM 사용(이름 탐지)은 API 백엔드가 지원하지 않습니다 — '
           'maskingtape CLI를 설치하면 이 PC에서 처리할 수 있습니다';
     }
     return '${options.strategy.displayName} 전략은 API 백엔드가 지원하지 않습니다 — '

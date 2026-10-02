@@ -51,6 +51,8 @@ _TITLE_CUES = [
     "부사장", "부원장", "부팀장", "센터장", "사무장", "이사장", "위원장", "위원", "주무관",
     # 전문직·현장 직함
     "간호사", "변호사", "회계사", "세무사", "약사", "의사", "교사", "강사", "상담사",
+    # "상담원"(#580): 고객센터 상담 기록에 흔한데 "상담사"만 있어 "담당 상담원 김민수"를 놓쳤다.
+    "상담원",
     "연구원", "조교", "기자", "코치", "감독", "인턴", "팀원",
 ]
 
@@ -161,6 +163,13 @@ _SUFFIX_ALT = (
 # "환자 신성의"는 "신성의"로 한 글자 더 가려진다(안전). 정확한 경계는 LLM판이 처리.
 _NAME_TAIL_STOP = "님씨입는을를과와에께"
 
+# 예외: "을"은 목적격 조사지만 실명 끝 글자로도 쓰인다("김가을"). 위 규칙만 두면
+# "김가"까지만 가려 "을"이 샌다(#579). "을" 바로 뒤에 존칭·직함(공백 하나까지)이나 조사가
+# 붙으면 목적격 조사일 수 없으니 이름에 넣는다. 뒤가 공백·문장부호면("고객 김민을 만났다")
+# 지금처럼 조사로 보고 뺀다. "김민을 대리로"처럼 목적격 "을" 뒤에 직함 낱말이 오면 "을"까지
+# 가려지지만, 한 글자 더 가리는 쪽이라 안전하다.
+_EUL_AS_LAST_SYLLABLE = r"을(?=\s?(?:" + _SUFFIX_ALT_PLAIN + r")|[이가은는의에도만로와과랑께])"
+
 # 라벨과 이름 사이 구분자. 예전 규칙(쌍점·공백 두 글자, "성명::홍길동"·줄바꿈 하나 포함)을 그대로
 # 두고, 가로 공백 세 칸과 앞뒤 공백을 둔 쌍점·세로줄(" : ", 표 칸 " | ")을 더한다(#491).
 # 더한 쪽은 줄을 넘지 않는다. 괄호 설명은 여기서 받지 않는다 — 괄호를 통째로 소비하면
@@ -206,12 +215,24 @@ _FORM_VALUE_ENDING_RE = re.compile(r"(?:입니다|이며|이고|님|씨|[는을�
 
 # 표(CSV·TSV·마크다운)의 구분자. 쉼표를 먼저 시도한다 — 마크다운 표에 쉼표가 포함된 값이
 # 들어 있어도(드묾) 세로줄이 없으면 쉼표 판정으로 못 넘어가므로 순서가 결과에 영향을 주지
-# 않는다(#526).
-_TABLE_SEPS = (",", "\t", "|")
+# 않는다(#526). 슬래시는 "이름 / 부서"처럼 사내 명단에서 칸을 나눌 때 쓴다(#581) — 머리행에
+# 이름 열 라벨이 칸 하나로 있어야 표로 보므로 날짜(2024/01/01)·"및/또는" 같은 줄은 걸리지 않는다.
+_TABLE_SEPS = (",", "\t", "|", "/")
 
 # 표 값 칸에 들어갈 수 있는 이름 모양 — _FORM_NAME_RE의 name 그룹과 같은 글자 제약(2~4자
 # 순한글, 님·씨로 시작 금지)이다. 표 칸은 라벨이 따로 없어 성씨 사전 밖 이름도 받는다(#526).
 _TABLE_NAME_VALUE_RE = re.compile(r"(?:(?![님씨])[가-힣]){2,4}")
+
+# 머리행 없이 슬래시로 칸을 나눈 명단 한 줄("김민수 / 개발팀 / 010-…", #581). 첫 칸이 3~4자 이름
+# 모양이고, 같은 줄 다른 칸에 전화번호(0으로 시작)·이메일·생년월일이 있을 때만 첫 칸을 이름으로
+# 본다. 칸은 셋 이상이어야 한다. 줄 앞 목록 기호("- "·"1. ")는 건너뛴다.
+# 2글자 첫 칸과 "숫자만 많은 칸"(날짜·시각·대표번호 1588-…)까지 받으면 "정상 / 처리완료 /
+# 2024-01-01 10:00"·"강남 / 역삼 / 02-555-1234" 같은 줄이 이름으로 잡혀 오탐이 17줄 중 6줄이었다.
+# 그래서 2글자 이름은 이 경로에서 받지 않는다(한계 — 다른 단서가 있으면 기존 규칙이 잡는다).
+_SLASH_RECORD_LEAD_RE = re.compile(r"[ \t]*(?:[-*•·]|\d{1,3}[.)])?[ \t]*")
+_SLASH_RECORD_MIN_CELLS = 3
+_SLASH_RECORD_MIN_NAME_LEN = 3
+_SLASH_RECORD_DETAIL_RE = re.compile(r"@|0\d{1,2}[-.\s]?\d{3,4}[-.\s]?\d{4}|생년월일|생일")
 
 # 마크다운 구분행("|---|:--:|--:|")의 칸 — 대시·콜론·공백만으로 이뤄진다. 적어도 한 칸은
 # 비어 있지 않아야 진짜 구분행이다(전부 빈 칸인 데이터 행과 헷갈리지 않기 위해).
@@ -239,7 +260,8 @@ _NAME_RE = re.compile(
     # 존칭으로 삼켜 오탐이 된다. 앞이 공백/문장부호/문두면 통과하므로 정상 이름은 그대로 잡힌다.
     r"(?<![가-힣])"
     # 성씨 + 1글자, 2번째 글자는 이름 끝에 올 수 없는 글자가 아닐 때만 붙인다(#147).
-    r"(?P<name>(?:" + _SURNAME_ALT + r")[가-힣](?:(?![" + _NAME_TAIL_STOP + r"])[가-힣])?)"
+    r"(?P<name>(?:" + _SURNAME_ALT + r")[가-힣]"
+    r"(?:(?![" + _NAME_TAIL_STOP + r"])[가-힣]|" + _EUL_AS_LAST_SYLLABLE + r")?)"
     r"(?:\s?(?P<suffix>" + _SUFFIX_ALT + r"))?"
     # suffix가 없으면(뒤 단서를 못 찾았으면) 이름이 낱말 끝에서 끝나야 한다 — 없으면 "하이
     # 브리드"의 "하이브"처럼 더 긴 낱말의 앞부분만 잘라 이름으로 오탐한다(#484). suffix가
@@ -372,7 +394,15 @@ class NameDetector(Detector):
             if m.group("name") in _CUE_WORDS or _is_label_word_at(text, name_start, strong=strong):
                 # 라벨 단어는 이름이 아니다. 앞 단서를 달고 잡혔다면 그 단어 자리에서 다시 찾아
                 # 그 단어가 다음 이름의 단서가 되게 한다. 같은 자리를 또 잡으면(단서 없이) 넘긴다.
-                pos = name_start if (prefix is not None and name_start > pos) else m.end()
+                # 뒤 직함을 달고 잡혔다면 그 직함 자리에서 다시 찾는다 — "고객이 대리 김민수에게"는
+                # "고객이"(버림)+"대리"로 먼저 읽히는데, "대리"까지 소비하면 김민수의 앞 단서가
+                # 사라져 이름이 통째로 샌다(#580). 직함은 후보보다 뒤에 있어 늘 앞으로 나아간다.
+                if prefix is not None and name_start > pos:
+                    pos = name_start
+                elif suffix is not None:
+                    pos = m.start("suffix")
+                else:
+                    pos = m.end()
                 continue
             pos = m.end()
             if name_start > m.start() and _CUE_WITH_JOSA_RE.fullmatch(m.group("name")):
@@ -411,8 +441,10 @@ class NameDetector(Detector):
             )
         form_extra = self._form_names(text, found)
         table_extra = self._table_names(text, found + form_extra)
+        slash_extra = self._slash_record_names(text, found + form_extra + table_extra)
         found.extend(form_extra)
         found.extend(table_extra)
+        found.extend(slash_extra)
         return found
 
     def _form_names(self, text: str, found: list[Detection]) -> list[Detection]:
@@ -510,6 +542,68 @@ class NameDetector(Detector):
                 offset += len(row)
                 i += 1
         return extra
+
+    def _slash_record_names(self, text: str, found: list[Detection]) -> list[Detection]:
+        """머리행 없이 슬래시로 칸을 나눈 명단 줄의 첫 칸 이름을 찾는다(#581).
+
+        "김민수 / 개발팀 / 010-3456-7890"처럼 같은 줄의 전화번호는 가려지고 이름만 남던
+        경우다. 오탐을 줄이려고 조건을 좁게 건다 — 칸이 셋 이상, 첫 칸이 성씨로 시작하는
+        3~4자 한글이고 흔한 낱말·열 이름이 아니며, 다른 칸에 전화번호·이메일·생년월일이 있다.
+        확신도는 단서 하나짜리와 같은 0.5다. 한 줄씩만 훑어 선형 시간을 유지한다.
+        """
+        if self.min_confidence > 0.5:
+            return []
+        covered = bytearray(len(text))
+        for d in found:
+            covered[d.start : d.end] = b"\x01" * (d.end - d.start)
+
+        extra: list[Detection] = []
+        offset = 0
+        for line in text.splitlines(keepends=True):
+            body = line.rstrip("\r\n")
+            if body.count("/") >= _SLASH_RECORD_MIN_CELLS - 1:
+                cells = body.split("/")
+                lead = _SLASH_RECORD_LEAD_RE.match(cells[0]).end()
+                value = cells[0][lead:].rstrip()
+                start = offset + lead
+                end = start + len(value)
+                if (
+                    self._looks_like_slash_record_name(value)
+                    and any(self._looks_like_record_detail(cell) for cell in cells[1:])
+                    and not all(covered[start:end])
+                ):
+                    extra.append(
+                        Detection(
+                            kind=self.kind,
+                            start=start,
+                            end=end,
+                            text=value,
+                            confidence=0.5,
+                            detector=self.__class__.__name__,
+                        )
+                    )
+            offset += len(line)
+        return extra
+
+    @staticmethod
+    def _looks_like_slash_record_name(value: str) -> bool:
+        """슬래시 명단 첫 칸이 이름으로 볼 만한지 — 표 값 기준에 성씨 시작과 흔한 낱말 거르기를 더한다.
+
+        표와 달리 머리행이 이름 열이라고 알려 주지 않으므로, 성씨로 시작해야 하고 "서울"·"정기"
+        같은 흔한 낱말(_COMMON_WORDS)도 버린다.
+        """
+        return (
+            len(value) >= _SLASH_RECORD_MIN_NAME_LEN
+            and NameDetector._looks_like_table_name(value)
+            and value.startswith(tuple(_SURNAMES))
+            and value not in _CUE_WORDS
+            and not _is_common_word_at(value, 0)
+        )
+
+    @staticmethod
+    def _looks_like_record_detail(cell: str) -> bool:
+        """사람 기록임을 보여 주는 칸인지 — 0으로 시작하는 전화번호, 이메일("@"), 생년월일·생일."""
+        return _SLASH_RECORD_DETAIL_RE.search(cell) is not None
 
     @staticmethod
     def _table_header(line: str) -> tuple[str, int, int] | None:
