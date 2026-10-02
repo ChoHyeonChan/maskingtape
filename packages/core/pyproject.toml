@@ -31,6 +31,7 @@ Issues = "https://github.com/ChoHyeonChan/maskingtape/issues"
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "ruff>=0.16"]
+bench-baselines = ["scrubadub>=2,<3"]
 
 [project.scripts]
 maskingtape = "maskingtape.cli:main"

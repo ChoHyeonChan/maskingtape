@@ -37,6 +37,12 @@ def create_app(settings: ApiSettings | None = None) -> FastAPI:
         window_seconds=settings.rate_limit_window_seconds,
         max_buckets=settings.rate_limit_max_buckets,
     )
+    app.state.hybrid_rate_limiter = InMemoryRateLimiter(
+        limit=settings.hybrid_rate_limit_requests,
+        window_seconds=settings.hybrid_rate_limit_window_seconds,
+        max_buckets=settings.rate_limit_max_buckets,
+    )
+    app.state.hybrid_max_text_length = settings.hybrid_max_text_length
     app.state.trusted_client_ip_headers = settings.trusted_client_ip_headers
     _configure_body_size_limit(app, settings)
     _configure_cors(app, settings)

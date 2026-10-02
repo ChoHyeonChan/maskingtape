@@ -1,0 +1,360 @@
+{"text": "새솔맨션 18동 106호 사시는 분이죠?", "labels": [{"kind": "address", "start": 0, "end": 13}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "한빛오피스텔 83동 701호입니다.", "labels": [{"kind": "address", "start": 0, "end": 15}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "누리아파트 56동 406호 사시는 분이죠?", "labels": [{"kind": "address", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "다온빌라 50동 802호입니다.", "labels": [{"kind": "address", "start": 0, "end": 13}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "가온빌라 91동 1501호로 보내 주세요.", "labels": [{"kind": "address", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "누리아파트 41동 1804호로 보내 주세요.", "labels": [{"kind": "address", "start": 0, "end": 15}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "가온맨션 44동 1406호 사시는 분이죠?", "labels": [{"kind": "address", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "한빛아파트 32동 302호로 보내 주세요.", "labels": [{"kind": "address", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "한빛오피스텔 26동 103호 사시는 분이죠?", "labels": [{"kind": "address", "start": 0, "end": 15}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "가온맨션 17동 109호입니다.", "labels": [{"kind": "address", "start": 0, "end": 13}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "새솔오피스텔 27동 602호 사시는 분이죠?", "labels": [{"kind": "address", "start": 0, "end": 15}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "가온빌라 39동 2004호로 보내 주세요.", "labels": [{"kind": "address", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "다온아파트 31동 304호 사시는 분이죠?", "labels": [{"kind": "address", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "가온빌라 46동 306호 사시는 분이죠?", "labels": [{"kind": "address", "start": 0, "end": 13}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "다온맨션 119동 2008호 사시는 분이죠?", "labels": [{"kind": "address", "start": 0, "end": 15}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "다온아파트 12동 607호로 보내 주세요.", "labels": [{"kind": "address", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "다온빌라 69동 108호로 보내 주세요.", "labels": [{"kind": "address", "start": 0, "end": 13}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "다온아파트 74동 303호입니다.", "labels": [{"kind": "address", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "가온빌라 34동 903호 사시는 분이죠?", "labels": [{"kind": "address", "start": 0, "end": 13}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "누리빌라 98동 1407호입니다.", "labels": [{"kind": "address", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "용인 기흥구 동성로 106입니다.", "labels": [{"kind": "address", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "address_city_without_si", "issue": 606}
+{"text": "배송지 청주 흥덕구 센텀중앙로 194", "labels": [{"kind": "address", "start": 4, "end": 20}], "difficulty": "open_miss", "miss_tag": "address_city_without_si", "issue": 606}
+{"text": "배송지 청주 흥덕구 센텀중앙로 289", "labels": [{"kind": "address", "start": 4, "end": 20}], "difficulty": "open_miss", "miss_tag": "address_city_without_si", "issue": 606}
+{"text": "주소: 안양 동안구 센텀중앙로 48", "labels": [{"kind": "address", "start": 4, "end": 19}], "difficulty": "open_miss", "miss_tag": "address_city_without_si", "issue": 606}
+{"text": "천안 서북구 동성로 175입니다.", "labels": [{"kind": "address", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "address_city_without_si", "issue": 606}
+{"text": "수원 영통구 동성로 256", "labels": [{"kind": "address", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "address_city_without_si", "issue": 606}
+{"text": "배송지 천안 서북구 테헤란로 70", "labels": [{"kind": "address", "start": 4, "end": 18}], "difficulty": "open_miss", "miss_tag": "address_city_without_si", "issue": 606}
+{"text": "안양 동안구 월드컵로 153", "labels": [{"kind": "address", "start": 0, "end": 15}], "difficulty": "open_miss", "miss_tag": "address_city_without_si", "issue": 606}
+{"text": "전주 완산구 월드컵로 55입니다.", "labels": [{"kind": "address", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "address_city_without_si", "issue": 606}
+{"text": "주소: 성남 분당구 센텀중앙로 104", "labels": [{"kind": "address", "start": 4, "end": 20}], "difficulty": "open_miss", "miss_tag": "address_city_without_si", "issue": 606}
+{"text": "주소: 수원 영통구 판교역로 215입니다.", "labels": [{"kind": "address", "start": 4, "end": 19}], "difficulty": "open_miss", "miss_tag": "address_city_without_si", "issue": 606}
+{"text": "고양 일산동구 테헤란로 96", "labels": [{"kind": "address", "start": 0, "end": 15}], "difficulty": "open_miss", "miss_tag": "address_city_without_si", "issue": 606}
+{"text": "배송지 성남 분당구 센텀중앙로 39", "labels": [{"kind": "address", "start": 4, "end": 19}], "difficulty": "open_miss", "miss_tag": "address_city_without_si", "issue": 606}
+{"text": "수원 영통구 동성로 279입니다.", "labels": [{"kind": "address", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "address_city_without_si", "issue": 606}
+{"text": "배송지 전주 완산구 판교역로 114입니다.", "labels": [{"kind": "address", "start": 4, "end": 19}], "difficulty": "open_miss", "miss_tag": "address_city_without_si", "issue": 606}
+{"text": "고양 일산동구 판교역로 50입니다.", "labels": [{"kind": "address", "start": 0, "end": 15}], "difficulty": "open_miss", "miss_tag": "address_city_without_si", "issue": 606}
+{"text": "전주 완산구 테헤란로 156입니다.", "labels": [{"kind": "address", "start": 0, "end": 15}], "difficulty": "open_miss", "miss_tag": "address_city_without_si", "issue": 606}
+{"text": "성남 분당구 테헤란로 116", "labels": [{"kind": "address", "start": 0, "end": 15}], "difficulty": "open_miss", "miss_tag": "address_city_without_si", "issue": 606}
+{"text": "배송지 고양 일산동구 센텀중앙로 112입니다.", "labels": [{"kind": "address", "start": 4, "end": 21}], "difficulty": "open_miss", "miss_tag": "address_city_without_si", "issue": 606}
+{"text": "배송지 천안 서북구 테헤란로 245", "labels": [{"kind": "address", "start": 4, "end": 19}], "difficulty": "open_miss", "miss_tag": "address_city_without_si", "issue": 606}
+{"text": "주소: 대구광역시 강남구 월드컵로 102 다온스퀘어 A동 13층", "labels": [{"kind": "address", "start": 4, "end": 35}], "difficulty": "open_miss", "miss_tag": "address_tail_building", "issue": 605}
+{"text": "주소: 대전광역시 유성구 월드컵로 180 누리센터 504호", "labels": [{"kind": "address", "start": 4, "end": 32}], "difficulty": "open_miss", "miss_tag": "address_tail_building", "issue": 605}
+{"text": "주소: 인천광역시 수영구 월드컵로 28 가온프라자 14층 1403호", "labels": [{"kind": "address", "start": 4, "end": 37}], "difficulty": "open_miss", "miss_tag": "address_tail_building", "issue": 605}
+{"text": "주소: 울산광역시 노원구 월드컵로 114 새솔스퀘어 N동 12층", "labels": [{"kind": "address", "start": 4, "end": 35}], "difficulty": "open_miss", "miss_tag": "address_tail_building", "issue": 605}
+{"text": "주소: 광주광역시 마포구 테헤란로 276 누리스퀘어 A동 19층", "labels": [{"kind": "address", "start": 4, "end": 35}], "difficulty": "open_miss", "miss_tag": "address_tail_building", "issue": 605}
+{"text": "주소: 대구광역시 종로구 센텀중앙로 1 가온프라자 20층 2005호", "labels": [{"kind": "address", "start": 4, "end": 37}], "difficulty": "open_miss", "miss_tag": "address_tail_building", "issue": 605}
+{"text": "주소: 서울특별시 해운대구 테헤란로 229 한빛스퀘어 A동 13층", "labels": [{"kind": "address", "start": 4, "end": 36}], "difficulty": "open_miss", "miss_tag": "address_tail_building", "issue": 605}
+{"text": "주소: 광주광역시 수영구 판교역로 236 새솔스퀘어 A동 17층", "labels": [{"kind": "address", "start": 4, "end": 35}], "difficulty": "open_miss", "miss_tag": "address_tail_building", "issue": 605}
+{"text": "주소: 광주광역시 마포구 판교역로 2 가온센터 706호", "labels": [{"kind": "address", "start": 4, "end": 30}], "difficulty": "open_miss", "miss_tag": "address_tail_building", "issue": 605}
+{"text": "주소: 울산광역시 종로구 테헤란로 129 새솔센터 304호", "labels": [{"kind": "address", "start": 4, "end": 32}], "difficulty": "open_miss", "miss_tag": "address_tail_building", "issue": 605}
+{"text": "주소: 광주광역시 수영구 센텀중앙로 192 가온프라자 15층 1508호", "labels": [{"kind": "address", "start": 4, "end": 39}], "difficulty": "open_miss", "miss_tag": "address_tail_building", "issue": 605}
+{"text": "주소: 대구광역시 종로구 센텀중앙로 146 다온빌딩 15층", "labels": [{"kind": "address", "start": 4, "end": 32}], "difficulty": "open_miss", "miss_tag": "address_tail_building", "issue": 605}
+{"text": "주소: 대전광역시 강남구 센텀중앙로 212 누리스퀘어 N동 5층", "labels": [{"kind": "address", "start": 4, "end": 35}], "difficulty": "open_miss", "miss_tag": "address_tail_building", "issue": 605}
+{"text": "주소: 대구광역시 마포구 월드컵로 3 누리빌딩 2층", "labels": [{"kind": "address", "start": 4, "end": 28}], "difficulty": "open_miss", "miss_tag": "address_tail_building", "issue": 605}
+{"text": "주소: 인천광역시 해운대구 동성로 258 누리빌딩 15층", "labels": [{"kind": "address", "start": 4, "end": 31}], "difficulty": "open_miss", "miss_tag": "address_tail_building", "issue": 605}
+{"text": "주소: 인천광역시 노원구 판교역로 198 다온스퀘어 B동 8층", "labels": [{"kind": "address", "start": 4, "end": 34}], "difficulty": "open_miss", "miss_tag": "address_tail_building", "issue": 605}
+{"text": "주소: 대전광역시 노원구 월드컵로 136 새솔센터 202호", "labels": [{"kind": "address", "start": 4, "end": 32}], "difficulty": "open_miss", "miss_tag": "address_tail_building", "issue": 605}
+{"text": "주소: 광주광역시 해운대구 동성로 29 가온센터 1306호", "labels": [{"kind": "address", "start": 4, "end": 32}], "difficulty": "open_miss", "miss_tag": "address_tail_building", "issue": 605}
+{"text": "주소: 서울특별시 노원구 센텀중앙로 139 새솔프라자 9층 904호", "labels": [{"kind": "address", "start": 4, "end": 37}], "difficulty": "open_miss", "miss_tag": "address_tail_building", "issue": 605}
+{"text": "주소: 광주광역시 노원구 동성로 19 한빛프라자 17층 1705호", "labels": [{"kind": "address", "start": 4, "end": 36}], "difficulty": "open_miss", "miss_tag": "address_tail_building", "issue": 605}
+{"text": "주소: 대전광역시 광진구 테헤란로 170 10층 1003호", "labels": [{"kind": "address", "start": 4, "end": 32}], "difficulty": "open_miss", "miss_tag": "address_tail_floor_unit", "issue": 605}
+{"text": "주소: 대구광역시 강남구 센텀중앙로 206, 19층", "labels": [{"kind": "address", "start": 4, "end": 28}], "difficulty": "open_miss", "miss_tag": "address_tail_floor_unit", "issue": 605}
+{"text": "주소: 서울특별시 유성구 테헤란로 133, 7층", "labels": [{"kind": "address", "start": 4, "end": 26}], "difficulty": "open_miss", "miss_tag": "address_tail_floor_unit", "issue": 605}
+{"text": "주소: 서울특별시 해운대구 테헤란로 5 지하 2층", "labels": [{"kind": "address", "start": 4, "end": 27}], "difficulty": "open_miss", "miss_tag": "address_tail_floor_unit", "issue": 605}
+{"text": "주소: 서울특별시 노원구 테헤란로 265 8층", "labels": [{"kind": "address", "start": 4, "end": 25}], "difficulty": "open_miss", "miss_tag": "address_tail_floor_unit", "issue": 605}
+{"text": "주소: 대구광역시 마포구 센텀중앙로 246, 4층", "labels": [{"kind": "address", "start": 4, "end": 27}], "difficulty": "open_miss", "miss_tag": "address_tail_floor_unit", "issue": 605}
+{"text": "주소: 대전광역시 강남구 센텀중앙로 115 지하 3층", "labels": [{"kind": "address", "start": 4, "end": 29}], "difficulty": "open_miss", "miss_tag": "address_tail_floor_unit", "issue": 605}
+{"text": "주소: 인천광역시 강남구 판교역로 64, 17층", "labels": [{"kind": "address", "start": 4, "end": 26}], "difficulty": "open_miss", "miss_tag": "address_tail_floor_unit", "issue": 605}
+{"text": "주소: 서울특별시 강남구 테헤란로 63 9층 902호", "labels": [{"kind": "address", "start": 4, "end": 29}], "difficulty": "open_miss", "miss_tag": "address_tail_floor_unit", "issue": 605}
+{"text": "주소: 서울특별시 유성구 센텀중앙로 232 지하 2층", "labels": [{"kind": "address", "start": 4, "end": 29}], "difficulty": "open_miss", "miss_tag": "address_tail_floor_unit", "issue": 605}
+{"text": "주소: 울산광역시 해운대구 판교역로 225, 17층", "labels": [{"kind": "address", "start": 4, "end": 28}], "difficulty": "open_miss", "miss_tag": "address_tail_floor_unit", "issue": 605}
+{"text": "주소: 울산광역시 종로구 동성로 214, 9층", "labels": [{"kind": "address", "start": 4, "end": 25}], "difficulty": "open_miss", "miss_tag": "address_tail_floor_unit", "issue": 605}
+{"text": "주소: 서울특별시 마포구 센텀중앙로 268 8층", "labels": [{"kind": "address", "start": 4, "end": 26}], "difficulty": "open_miss", "miss_tag": "address_tail_floor_unit", "issue": 605}
+{"text": "주소: 울산광역시 광진구 동성로 128 2층", "labels": [{"kind": "address", "start": 4, "end": 24}], "difficulty": "open_miss", "miss_tag": "address_tail_floor_unit", "issue": 605}
+{"text": "주소: 서울특별시 마포구 동성로 54, 5층", "labels": [{"kind": "address", "start": 4, "end": 24}], "difficulty": "open_miss", "miss_tag": "address_tail_floor_unit", "issue": 605}
+{"text": "주소: 광주광역시 노원구 동성로 50 11층", "labels": [{"kind": "address", "start": 4, "end": 24}], "difficulty": "open_miss", "miss_tag": "address_tail_floor_unit", "issue": 605}
+{"text": "주소: 인천광역시 광진구 판교역로 111 지하 1층", "labels": [{"kind": "address", "start": 4, "end": 28}], "difficulty": "open_miss", "miss_tag": "address_tail_floor_unit", "issue": 605}
+{"text": "주소: 울산광역시 마포구 동성로 9, 3층", "labels": [{"kind": "address", "start": 4, "end": 23}], "difficulty": "open_miss", "miss_tag": "address_tail_floor_unit", "issue": 605}
+{"text": "주소: 대전광역시 수영구 판교역로 244 8층 806호", "labels": [{"kind": "address", "start": 4, "end": 30}], "difficulty": "open_miss", "miss_tag": "address_tail_floor_unit", "issue": 605}
+{"text": "주소: 인천광역시 유성구 센텀중앙로 27 17층 1705호", "labels": [{"kind": "address", "start": 4, "end": 32}], "difficulty": "open_miss", "miss_tag": "address_tail_floor_unit", "issue": 605}
+{"text": "주소: 대구광역시 수영구 월드컵로 289 (광안동)", "labels": [{"kind": "address", "start": 4, "end": 28}], "difficulty": "open_miss", "miss_tag": "address_tail_paren_dong", "issue": 605}
+{"text": "주소: 서울특별시 광진구 동성로 271 (자양동)", "labels": [{"kind": "address", "start": 4, "end": 27}], "difficulty": "open_miss", "miss_tag": "address_tail_paren_dong", "issue": 605}
+{"text": "주소: 서울특별시 해운대구 센텀중앙로 295 (우동)", "labels": [{"kind": "address", "start": 4, "end": 29}], "difficulty": "open_miss", "miss_tag": "address_tail_paren_dong", "issue": 605}
+{"text": "주소: 인천광역시 노원구 월드컵로 59 (상계동)", "labels": [{"kind": "address", "start": 4, "end": 27}], "difficulty": "open_miss", "miss_tag": "address_tail_paren_dong", "issue": 605}
+{"text": "주소: 대구광역시 광진구 센텀중앙로 159 (자양동)", "labels": [{"kind": "address", "start": 4, "end": 29}], "difficulty": "open_miss", "miss_tag": "address_tail_paren_dong", "issue": 605}
+{"text": "주소: 대전광역시 유성구 센텀중앙로 102 (봉명동)", "labels": [{"kind": "address", "start": 4, "end": 29}], "difficulty": "open_miss", "miss_tag": "address_tail_paren_dong", "issue": 605}
+{"text": "주소: 대전광역시 유성구 테헤란로 27 (봉명동)", "labels": [{"kind": "address", "start": 4, "end": 27}], "difficulty": "open_miss", "miss_tag": "address_tail_paren_dong", "issue": 605}
+{"text": "주소: 광주광역시 유성구 동성로 262 (봉명동)", "labels": [{"kind": "address", "start": 4, "end": 27}], "difficulty": "open_miss", "miss_tag": "address_tail_paren_dong", "issue": 605}
+{"text": "주소: 부산광역시 노원구 동성로 48 (상계동)", "labels": [{"kind": "address", "start": 4, "end": 26}], "difficulty": "open_miss", "miss_tag": "address_tail_paren_dong", "issue": 605}
+{"text": "주소: 대전광역시 수영구 센텀중앙로 120 (광안동)", "labels": [{"kind": "address", "start": 4, "end": 29}], "difficulty": "open_miss", "miss_tag": "address_tail_paren_dong", "issue": 605}
+{"text": "주소: 서울특별시 마포구 테헤란로 130 (합정동)", "labels": [{"kind": "address", "start": 4, "end": 28}], "difficulty": "open_miss", "miss_tag": "address_tail_paren_dong", "issue": 605}
+{"text": "주소: 인천광역시 마포구 동성로 10 (합정동)", "labels": [{"kind": "address", "start": 4, "end": 26}], "difficulty": "open_miss", "miss_tag": "address_tail_paren_dong", "issue": 605}
+{"text": "주소: 울산광역시 유성구 테헤란로 157 (봉명동)", "labels": [{"kind": "address", "start": 4, "end": 28}], "difficulty": "open_miss", "miss_tag": "address_tail_paren_dong", "issue": 605}
+{"text": "주소: 부산광역시 종로구 월드컵로 131 (청운동)", "labels": [{"kind": "address", "start": 4, "end": 28}], "difficulty": "open_miss", "miss_tag": "address_tail_paren_dong", "issue": 605}
+{"text": "주소: 인천광역시 수영구 테헤란로 177 (광안동)", "labels": [{"kind": "address", "start": 4, "end": 28}], "difficulty": "open_miss", "miss_tag": "address_tail_paren_dong", "issue": 605}
+{"text": "주소: 대구광역시 마포구 센텀중앙로 217 (합정동)", "labels": [{"kind": "address", "start": 4, "end": 29}], "difficulty": "open_miss", "miss_tag": "address_tail_paren_dong", "issue": 605}
+{"text": "주소: 인천광역시 수영구 월드컵로 223 (광안동)", "labels": [{"kind": "address", "start": 4, "end": 28}], "difficulty": "open_miss", "miss_tag": "address_tail_paren_dong", "issue": 605}
+{"text": "주소: 서울특별시 종로구 판교역로 118 (청운동)", "labels": [{"kind": "address", "start": 4, "end": 28}], "difficulty": "open_miss", "miss_tag": "address_tail_paren_dong", "issue": 605}
+{"text": "주소: 대구광역시 수영구 판교역로 31 (광안동)", "labels": [{"kind": "address", "start": 4, "end": 27}], "difficulty": "open_miss", "miss_tag": "address_tail_paren_dong", "issue": 605}
+{"text": "주소: 대전광역시 마포구 월드컵로 285 (합정동)", "labels": [{"kind": "address", "start": 4, "end": 28}], "difficulty": "open_miss", "miss_tag": "address_tail_paren_dong", "issue": 605}
+{"text": "막내는 98년 11월 17일에 태어났어요.", "labels": [{"kind": "birth_date", "start": 4, "end": 15}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "저는 94년 11월 14일생입니다.", "labels": [{"kind": "birth_date", "start": 3, "end": 14}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "85년 5월 13일이 제 생일이에요.", "labels": [{"kind": "birth_date", "start": 0, "end": 10}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "15년 8월 26일생이에요.", "labels": [{"kind": "birth_date", "start": 0, "end": 10}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "저는 2009년 7월 1일생입니다.", "labels": [{"kind": "birth_date", "start": 3, "end": 14}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "73년 8월 10일생이에요.", "labels": [{"kind": "birth_date", "start": 0, "end": 10}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "1976년 9월 28일생이에요.", "labels": [{"kind": "birth_date", "start": 0, "end": 12}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "저는 2009년 6월 22일생입니다.", "labels": [{"kind": "birth_date", "start": 3, "end": 15}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "54년 11월 11일생이에요.", "labels": [{"kind": "birth_date", "start": 0, "end": 11}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "2014년 11월 2일이 제 생일이에요.", "labels": [{"kind": "birth_date", "start": 0, "end": 12}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "막내는 06년 1월 19일에 태어났어요.", "labels": [{"kind": "birth_date", "start": 4, "end": 14}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "15년 2월 24일생이에요.", "labels": [{"kind": "birth_date", "start": 0, "end": 10}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "87년 10월 22일이 제 생일이에요.", "labels": [{"kind": "birth_date", "start": 0, "end": 11}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "저는 1980년 8월 11일생입니다.", "labels": [{"kind": "birth_date", "start": 3, "end": 15}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "60년 4월 25일생이에요.", "labels": [{"kind": "birth_date", "start": 0, "end": 10}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "97년 7월 5일생이에요.", "labels": [{"kind": "birth_date", "start": 0, "end": 9}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "1956년 6월 4일이 제 생일이에요.", "labels": [{"kind": "birth_date", "start": 0, "end": 11}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "89년 2월 10일생이에요.", "labels": [{"kind": "birth_date", "start": 0, "end": 10}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "막내는 2014년 5월 5일에 태어났어요.", "labels": [{"kind": "birth_date", "start": 4, "end": 15}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "저는 1970년 6월 10일생입니다.", "labels": [{"kind": "birth_date", "start": 3, "end": 15}], "difficulty": "open_miss", "miss_tag": "birth_date_cue_after", "issue": 592}
+{"text": "사업자등록번호: 170-64-37722", "labels": [{"kind": "biz_reg", "start": 9, "end": 21}], "difficulty": "open_miss", "miss_tag": "biz_reg_label_bad_checksum", "issue": 607}
+{"text": "사업자등록번호: 613-26-81588", "labels": [{"kind": "biz_reg", "start": 9, "end": 21}], "difficulty": "open_miss", "miss_tag": "biz_reg_label_bad_checksum", "issue": 607}
+{"text": "사업자등록번호 842-90-10448", "labels": [{"kind": "biz_reg", "start": 8, "end": 20}], "difficulty": "open_miss", "miss_tag": "biz_reg_label_bad_checksum", "issue": 607}
+{"text": "사업자등록번호 479-29-32616", "labels": [{"kind": "biz_reg", "start": 8, "end": 20}], "difficulty": "open_miss", "miss_tag": "biz_reg_label_bad_checksum", "issue": 607}
+{"text": "사업자번호: 879-04-45695", "labels": [{"kind": "biz_reg", "start": 7, "end": 19}], "difficulty": "open_miss", "miss_tag": "biz_reg_label_bad_checksum", "issue": 607}
+{"text": "사업자등록번호: 313-24-25789", "labels": [{"kind": "biz_reg", "start": 9, "end": 21}], "difficulty": "open_miss", "miss_tag": "biz_reg_label_bad_checksum", "issue": 607}
+{"text": "사업자번호: 231-87-87626", "labels": [{"kind": "biz_reg", "start": 7, "end": 19}], "difficulty": "open_miss", "miss_tag": "biz_reg_label_bad_checksum", "issue": 607}
+{"text": "사업자등록번호: 175-17-68255", "labels": [{"kind": "biz_reg", "start": 9, "end": 21}], "difficulty": "open_miss", "miss_tag": "biz_reg_label_bad_checksum", "issue": 607}
+{"text": "사업자번호: 270-00-81860", "labels": [{"kind": "biz_reg", "start": 7, "end": 19}], "difficulty": "open_miss", "miss_tag": "biz_reg_label_bad_checksum", "issue": 607}
+{"text": "사업자번호: 143-29-76090", "labels": [{"kind": "biz_reg", "start": 7, "end": 19}], "difficulty": "open_miss", "miss_tag": "biz_reg_label_bad_checksum", "issue": 607}
+{"text": "사업자등록번호 949-32-25246", "labels": [{"kind": "biz_reg", "start": 8, "end": 20}], "difficulty": "open_miss", "miss_tag": "biz_reg_label_bad_checksum", "issue": 607}
+{"text": "사업자등록번호 661-03-81176", "labels": [{"kind": "biz_reg", "start": 8, "end": 20}], "difficulty": "open_miss", "miss_tag": "biz_reg_label_bad_checksum", "issue": 607}
+{"text": "사업자등록번호 140-40-52815", "labels": [{"kind": "biz_reg", "start": 8, "end": 20}], "difficulty": "open_miss", "miss_tag": "biz_reg_label_bad_checksum", "issue": 607}
+{"text": "사업자등록번호: 998-81-22570", "labels": [{"kind": "biz_reg", "start": 9, "end": 21}], "difficulty": "open_miss", "miss_tag": "biz_reg_label_bad_checksum", "issue": 607}
+{"text": "사업자번호: 944-68-12250", "labels": [{"kind": "biz_reg", "start": 7, "end": 19}], "difficulty": "open_miss", "miss_tag": "biz_reg_label_bad_checksum", "issue": 607}
+{"text": "사업자등록번호 937-83-31452", "labels": [{"kind": "biz_reg", "start": 8, "end": 20}], "difficulty": "open_miss", "miss_tag": "biz_reg_label_bad_checksum", "issue": 607}
+{"text": "사업자등록번호 500-76-50061", "labels": [{"kind": "biz_reg", "start": 8, "end": 20}], "difficulty": "open_miss", "miss_tag": "biz_reg_label_bad_checksum", "issue": 607}
+{"text": "사업자등록번호 199-17-30502", "labels": [{"kind": "biz_reg", "start": 8, "end": 20}], "difficulty": "open_miss", "miss_tag": "biz_reg_label_bad_checksum", "issue": 607}
+{"text": "사업자등록번호: 405-70-41575", "labels": [{"kind": "biz_reg", "start": 9, "end": 21}], "difficulty": "open_miss", "miss_tag": "biz_reg_label_bad_checksum", "issue": 607}
+{"text": "사업자등록번호: 725-73-74404", "labels": [{"kind": "biz_reg", "start": 9, "end": 21}], "difficulty": "open_miss", "miss_tag": "biz_reg_label_bad_checksum", "issue": 607}
+{"text": "신용카드 번호: 5525-0039-3975-1719", "labels": [{"kind": "card", "start": 9, "end": 28}], "difficulty": "open_miss", "miss_tag": "card_label_bad_checksum", "issue": 607}
+{"text": "카드번호 5216-1798-7478-7330", "labels": [{"kind": "card", "start": 5, "end": 24}], "difficulty": "open_miss", "miss_tag": "card_label_bad_checksum", "issue": 607}
+{"text": "카드번호 5576-4087-8041-8642", "labels": [{"kind": "card", "start": 5, "end": 24}], "difficulty": "open_miss", "miss_tag": "card_label_bad_checksum", "issue": 607}
+{"text": "신용카드 번호: 5178-2548-1625-9148", "labels": [{"kind": "card", "start": 9, "end": 28}], "difficulty": "open_miss", "miss_tag": "card_label_bad_checksum", "issue": 607}
+{"text": "카드번호 5214-0747-1601-8285", "labels": [{"kind": "card", "start": 5, "end": 24}], "difficulty": "open_miss", "miss_tag": "card_label_bad_checksum", "issue": 607}
+{"text": "신용카드 번호: 5392-9741-6000-8321", "labels": [{"kind": "card", "start": 9, "end": 28}], "difficulty": "open_miss", "miss_tag": "card_label_bad_checksum", "issue": 607}
+{"text": "법인카드 5115-2641-9913-2904", "labels": [{"kind": "card", "start": 5, "end": 24}], "difficulty": "open_miss", "miss_tag": "card_label_bad_checksum", "issue": 607}
+{"text": "카드번호: 5261-1765-2527-0601", "labels": [{"kind": "card", "start": 6, "end": 25}], "difficulty": "open_miss", "miss_tag": "card_label_bad_checksum", "issue": 607}
+{"text": "카드번호 4039-0945-0364-0186", "labels": [{"kind": "card", "start": 5, "end": 24}], "difficulty": "open_miss", "miss_tag": "card_label_bad_checksum", "issue": 607}
+{"text": "카드번호: 5382-2637-8847-5468", "labels": [{"kind": "card", "start": 6, "end": 25}], "difficulty": "open_miss", "miss_tag": "card_label_bad_checksum", "issue": 607}
+{"text": "법인카드 5126-5245-8257-8272", "labels": [{"kind": "card", "start": 5, "end": 24}], "difficulty": "open_miss", "miss_tag": "card_label_bad_checksum", "issue": 607}
+{"text": "카드번호: 5190-0120-7435-4787", "labels": [{"kind": "card", "start": 6, "end": 25}], "difficulty": "open_miss", "miss_tag": "card_label_bad_checksum", "issue": 607}
+{"text": "신용카드 번호: 5227-2996-6058-5501", "labels": [{"kind": "card", "start": 9, "end": 28}], "difficulty": "open_miss", "miss_tag": "card_label_bad_checksum", "issue": 607}
+{"text": "카드번호 5310-3210-3817-0466", "labels": [{"kind": "card", "start": 5, "end": 24}], "difficulty": "open_miss", "miss_tag": "card_label_bad_checksum", "issue": 607}
+{"text": "카드번호: 5481-1474-4417-9855", "labels": [{"kind": "card", "start": 6, "end": 25}], "difficulty": "open_miss", "miss_tag": "card_label_bad_checksum", "issue": 607}
+{"text": "카드번호: 5152-2133-5961-0785", "labels": [{"kind": "card", "start": 6, "end": 25}], "difficulty": "open_miss", "miss_tag": "card_label_bad_checksum", "issue": 607}
+{"text": "카드번호 5231-1624-9723-8735", "labels": [{"kind": "card", "start": 5, "end": 24}], "difficulty": "open_miss", "miss_tag": "card_label_bad_checksum", "issue": 607}
+{"text": "카드번호 4265-6118-4425-4791", "labels": [{"kind": "card", "start": 5, "end": 24}], "difficulty": "open_miss", "miss_tag": "card_label_bad_checksum", "issue": 607}
+{"text": "법인카드 5559-7721-7285-5840", "labels": [{"kind": "card", "start": 5, "end": 24}], "difficulty": "open_miss", "miss_tag": "card_label_bad_checksum", "issue": 607}
+{"text": "카드번호 5547-0373-9490-8545", "labels": [{"kind": "card", "start": 5, "end": 24}], "difficulty": "open_miss", "miss_tag": "card_label_bad_checksum", "issue": 607}
+{"text": "운전면허번호: 서울 16-672643-57입니다.", "labels": [{"kind": "driver_license", "start": 8, "end": 23}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "운전면허번호: 서울 27-284426-82입니다.", "labels": [{"kind": "driver_license", "start": 8, "end": 23}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "면허번호: 서울 66-389655-71입니다.", "labels": [{"kind": "driver_license", "start": 6, "end": 21}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "면허번호 강원 27-110398-57", "labels": [{"kind": "driver_license", "start": 5, "end": 20}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "면허번호: 경기 89-639479-87입니다.", "labels": [{"kind": "driver_license", "start": 6, "end": 21}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "운전면허번호: 부산 09-172730-81", "labels": [{"kind": "driver_license", "start": 8, "end": 23}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "면허번호: 부산 10-801227-39", "labels": [{"kind": "driver_license", "start": 6, "end": 21}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "면허번호 서울 65-865705-88", "labels": [{"kind": "driver_license", "start": 5, "end": 20}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "면허번호 부산 79-508539-73", "labels": [{"kind": "driver_license", "start": 5, "end": 20}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "면허번호: 경기 79-838153-42입니다.", "labels": [{"kind": "driver_license", "start": 6, "end": 21}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "면허번호: 강원 08-877071-52입니다.", "labels": [{"kind": "driver_license", "start": 6, "end": 21}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "운전면허번호: 대구 21-418059-15", "labels": [{"kind": "driver_license", "start": 8, "end": 23}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "운전면허번호: 강원 14-946486-12", "labels": [{"kind": "driver_license", "start": 8, "end": 23}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "면허번호: 전남 60-691814-27입니다.", "labels": [{"kind": "driver_license", "start": 6, "end": 21}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "면허번호: 서울 58-580055-87", "labels": [{"kind": "driver_license", "start": 6, "end": 21}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "운전면허번호: 부산 13-645521-60입니다.", "labels": [{"kind": "driver_license", "start": 8, "end": 23}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "면허번호: 경기 45-019744-40입니다.", "labels": [{"kind": "driver_license", "start": 6, "end": 21}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "운전면허번호: 경기 09-421429-99", "labels": [{"kind": "driver_license", "start": 8, "end": 23}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "면허번호: 경기 24-287176-32", "labels": [{"kind": "driver_license", "start": 6, "end": 21}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "면허번호 부산 40-584691-78입니다.", "labels": [{"kind": "driver_license", "start": 5, "end": 20}], "difficulty": "open_miss", "miss_tag": "driver_license_region_name", "issue": 594}
+{"text": "신청자가 백율아에서 허우규로 변경되었습니다.", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 11, "end": 14}], "difficulty": "open_miss", "miss_tag": "name_change_log_second", "issue": 589}
+{"text": "담당자가 양재서에서 황아찬으로 변경되었습니다.", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 11, "end": 14}], "difficulty": "open_miss", "miss_tag": "name_change_log_second", "issue": 589}
+{"text": "보호자가 임영혜에서 백군찬으로 변경되었습니다.", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 11, "end": 14}], "difficulty": "open_miss", "miss_tag": "name_change_log_second", "issue": 589}
+{"text": "신청자가 최연진에서 심지준으로 변경되었습니다.", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 11, "end": 14}], "difficulty": "open_miss", "miss_tag": "name_change_log_second", "issue": 589}
+{"text": "보호자가 정찬혜에서 정정서로 변경되었습니다.", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 11, "end": 14}], "difficulty": "open_miss", "miss_tag": "name_change_log_second", "issue": 589}
+{"text": "담당자가 박윤율에서 손영규로 변경되었습니다.", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 11, "end": 14}], "difficulty": "open_miss", "miss_tag": "name_change_log_second", "issue": 589}
+{"text": "신청자가 김수은에서 고재빈으로 변경되었습니다.", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 11, "end": 14}], "difficulty": "open_miss", "miss_tag": "name_change_log_second", "issue": 589}
+{"text": "보호자가 최은아에서 이예석으로 변경되었습니다.", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 11, "end": 14}], "difficulty": "open_miss", "miss_tag": "name_change_log_second", "issue": 589}
+{"text": "담당자가 백훈율에서 신영경으로 변경되었습니다.", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 11, "end": 14}], "difficulty": "open_miss", "miss_tag": "name_change_log_second", "issue": 589}
+{"text": "신청자가 이훈진에서 오우예로 변경되었습니다.", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 11, "end": 14}], "difficulty": "open_miss", "miss_tag": "name_change_log_second", "issue": 589}
+{"text": "신청자가 강호성에서 한윤하로 변경되었습니다.", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 11, "end": 14}], "difficulty": "open_miss", "miss_tag": "name_change_log_second", "issue": 589}
+{"text": "담당자가 최연군에서 홍민석으로 변경되었습니다.", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 11, "end": 14}], "difficulty": "open_miss", "miss_tag": "name_change_log_second", "issue": 589}
+{"text": "보호자가 허진현에서 권준성으로 변경되었습니다.", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 11, "end": 14}], "difficulty": "open_miss", "miss_tag": "name_change_log_second", "issue": 589}
+{"text": "신청자가 박군율에서 황서빈으로 변경되었습니다.", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 11, "end": 14}], "difficulty": "open_miss", "miss_tag": "name_change_log_second", "issue": 589}
+{"text": "담당자가 황경석에서 황은현으로 변경되었습니다.", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 11, "end": 14}], "difficulty": "open_miss", "miss_tag": "name_change_log_second", "issue": 589}
+{"text": "보호자가 최혜호에서 양석율로 변경되었습니다.", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 11, "end": 14}], "difficulty": "open_miss", "miss_tag": "name_change_log_second", "issue": 589}
+{"text": "신청자가 손예빈에서 박민정으로 변경되었습니다.", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 11, "end": 14}], "difficulty": "open_miss", "miss_tag": "name_change_log_second", "issue": 589}
+{"text": "보호자가 유규율에서 임찬은으로 변경되었습니다.", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 11, "end": 14}], "difficulty": "open_miss", "miss_tag": "name_change_log_second", "issue": 589}
+{"text": "신청자가 이율찬에서 임훈준으로 변경되었습니다.", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 11, "end": 14}], "difficulty": "open_miss", "miss_tag": "name_change_log_second", "issue": 589}
+{"text": "보호자가 서성은에서 신규성으로 변경되었습니다.", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 11, "end": 14}], "difficulty": "open_miss", "miss_tag": "name_change_log_second", "issue": 589}
+{"text": "감사합니다.\n임경지 드림", "labels": [{"kind": "name", "start": 7, "end": 10}], "difficulty": "open_miss", "miss_tag": "name_cue_closing", "issue": 603}
+{"text": "감사합니다.\n오연재 배상", "labels": [{"kind": "name", "start": 7, "end": 10}], "difficulty": "open_miss", "miss_tag": "name_cue_closing", "issue": 603}
+{"text": "이아율 귀하", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_cue_closing", "issue": 603}
+{"text": "이규원 올림", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_cue_closing", "issue": 603}
+{"text": "이상입니다.\n박정율 배상", "labels": [{"kind": "name", "start": 7, "end": 10}], "difficulty": "open_miss", "miss_tag": "name_cue_closing", "issue": 603}
+{"text": "이상입니다.\n윤인아 귀하", "labels": [{"kind": "name", "start": 7, "end": 10}], "difficulty": "open_miss", "miss_tag": "name_cue_closing", "issue": 603}
+{"text": "감사합니다.\n홍아재 올림", "labels": [{"kind": "name", "start": 7, "end": 10}], "difficulty": "open_miss", "miss_tag": "name_cue_closing", "issue": 603}
+{"text": "권재호 올림", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_cue_closing", "issue": 603}
+{"text": "송민빈 배상", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_cue_closing", "issue": 603}
+{"text": "전현서 드림", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_cue_closing", "issue": 603}
+{"text": "감사합니다.\n송도수 귀하", "labels": [{"kind": "name", "start": 7, "end": 10}], "difficulty": "open_miss", "miss_tag": "name_cue_closing", "issue": 603}
+{"text": "감사합니다.\n허원수 올림", "labels": [{"kind": "name", "start": 7, "end": 10}], "difficulty": "open_miss", "miss_tag": "name_cue_closing", "issue": 603}
+{"text": "이상입니다.\n이윤호 올림", "labels": [{"kind": "name", "start": 7, "end": 10}], "difficulty": "open_miss", "miss_tag": "name_cue_closing", "issue": 603}
+{"text": "감사합니다.\n송민서 올림", "labels": [{"kind": "name", "start": 7, "end": 10}], "difficulty": "open_miss", "miss_tag": "name_cue_closing", "issue": 603}
+{"text": "전하규 올림", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_cue_closing", "issue": 603}
+{"text": "정성영 올림", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_cue_closing", "issue": 603}
+{"text": "전도연 귀하", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_cue_closing", "issue": 603}
+{"text": "이상입니다.\n고석혜 배상", "labels": [{"kind": "name", "start": 7, "end": 10}], "difficulty": "open_miss", "miss_tag": "name_cue_closing", "issue": 603}
+{"text": "이상입니다.\n윤군양 귀하", "labels": [{"kind": "name", "start": 7, "end": 10}], "difficulty": "open_miss", "miss_tag": "name_cue_closing", "issue": 603}
+{"text": "남재연 올림", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_cue_closing", "issue": 603}
+{"text": "보내는 사람 남연군", "labels": [{"kind": "name", "start": 7, "end": 10}], "difficulty": "open_miss", "miss_tag": "name_cue_role_label", "issue": 603}
+{"text": "피고인 백원재", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "open_miss", "miss_tag": "name_cue_role_label", "issue": 603}
+{"text": "보내는 사람 백규진", "labels": [{"kind": "name", "start": 7, "end": 10}], "difficulty": "open_miss", "miss_tag": "name_cue_role_label", "issue": 603}
+{"text": "주문자 한아양", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "open_miss", "miss_tag": "name_cue_role_label", "issue": 603}
+{"text": "기안자 전도찬", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "open_miss", "miss_tag": "name_cue_role_label", "issue": 603}
+{"text": "결재: 오정도", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "open_miss", "miss_tag": "name_cue_role_label", "issue": 603}
+{"text": "검토자 고민정", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "open_miss", "miss_tag": "name_cue_role_label", "issue": 603}
+{"text": "검토자 문진빈", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "open_miss", "miss_tag": "name_cue_role_label", "issue": 603}
+{"text": "받는 분: 한도인", "labels": [{"kind": "name", "start": 6, "end": 9}], "difficulty": "open_miss", "miss_tag": "name_cue_role_label", "issue": 603}
+{"text": "피고인 김성예", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "open_miss", "miss_tag": "name_cue_role_label", "issue": 603}
+{"text": "기안자 서수찬", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "open_miss", "miss_tag": "name_cue_role_label", "issue": 603}
+{"text": "세대주 윤성석", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "open_miss", "miss_tag": "name_cue_role_label", "issue": 603}
+{"text": "구매자: 양인군", "labels": [{"kind": "name", "start": 5, "end": 8}], "difficulty": "open_miss", "miss_tag": "name_cue_role_label", "issue": 603}
+{"text": "승인자: 전서도", "labels": [{"kind": "name", "start": 5, "end": 8}], "difficulty": "open_miss", "miss_tag": "name_cue_role_label", "issue": 603}
+{"text": "보내는 사람 권경하", "labels": [{"kind": "name", "start": 7, "end": 10}], "difficulty": "open_miss", "miss_tag": "name_cue_role_label", "issue": 603}
+{"text": "주문자 장하준", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "open_miss", "miss_tag": "name_cue_role_label", "issue": 603}
+{"text": "검토자 전예성", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "open_miss", "miss_tag": "name_cue_role_label", "issue": 603}
+{"text": "보내는 사람 안혜호", "labels": [{"kind": "name", "start": 7, "end": 10}], "difficulty": "open_miss", "miss_tag": "name_cue_role_label", "issue": 603}
+{"text": "발신: 안지원", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "open_miss", "miss_tag": "name_cue_role_label", "issue": 603}
+{"text": "서명: 오규성", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "open_miss", "miss_tag": "name_cue_role_label", "issue": 603}
+{"text": "양찬성 책임님 확인 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_cue_title_after", "issue": 603}
+{"text": "김규석 수석님 확인 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_cue_title_after", "issue": 603}
+{"text": "배지군 책임님 확인 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_cue_title_after", "issue": 603}
+{"text": "전성하 여사 확인 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_cue_title_after", "issue": 603}
+{"text": "황원영 책임님 확인 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_cue_title_after", "issue": 603}
+{"text": "정도민 기사님 확인 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_cue_title_after", "issue": 603}
+{"text": "황찬진 박사 확인 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_cue_title_after", "issue": 603}
+{"text": "권율영 기사님 확인 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_cue_title_after", "issue": 603}
+{"text": "이진빈 수석님 확인 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_cue_title_after", "issue": 603}
+{"text": "최호수 여사 확인 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_cue_title_after", "issue": 603}
+{"text": "강하진 프로 확인 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_cue_title_after", "issue": 603}
+{"text": "강연혜 여사 확인 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_cue_title_after", "issue": 603}
+{"text": "유아원 선임 확인 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_cue_title_after", "issue": 603}
+{"text": "신윤규 책임님 확인 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_cue_title_after", "issue": 603}
+{"text": "허도인 수석님 확인 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_cue_title_after", "issue": 603}
+{"text": "허빈석 선수 확인 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_cue_title_after", "issue": 603}
+{"text": "김예석 박사 확인 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_cue_title_after", "issue": 603}
+{"text": "오현영 수석님 확인 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_cue_title_after", "issue": 603}
+{"text": "백예양 선수 확인 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_cue_title_after", "issue": 603}
+{"text": "심정하 기사님 확인 부탁드립니다.", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_cue_title_after", "issue": 603}
+{"text": "참석자: 송현혜 이호민", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 9, "end": 12}], "difficulty": "open_miss", "miss_tag": "name_list_after_label", "issue": 602}
+{"text": "보호자: 유양예 및 전준호", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 11, "end": 14}], "difficulty": "open_miss", "miss_tag": "name_list_after_label", "issue": 602}
+{"text": "참석자: 허재원, 권진도", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 10, "end": 13}], "difficulty": "open_miss", "miss_tag": "name_list_after_label", "issue": 602}
+{"text": "참석자: 양양준, 손규혜", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 10, "end": 13}], "difficulty": "open_miss", "miss_tag": "name_list_after_label", "issue": 602}
+{"text": "보호자: 박준민·오민우", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 9, "end": 12}], "difficulty": "open_miss", "miss_tag": "name_list_after_label", "issue": 602}
+{"text": "보호자: 유빈진·강도연", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 9, "end": 12}], "difficulty": "open_miss", "miss_tag": "name_list_after_label", "issue": 602}
+{"text": "수신인: 조준윤, 전경규, 유진원", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 10, "end": 13}, {"kind": "name", "start": 15, "end": 18}], "difficulty": "open_miss", "miss_tag": "name_list_after_label", "issue": 602}
+{"text": "보호자: 양규수 및 홍양혜 및 황연하", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 11, "end": 14}, {"kind": "name", "start": 17, "end": 20}], "difficulty": "open_miss", "miss_tag": "name_list_after_label", "issue": 602}
+{"text": "수신인: 황아경 및 안서도 및 황정은", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 11, "end": 14}, {"kind": "name", "start": 17, "end": 20}], "difficulty": "open_miss", "miss_tag": "name_list_after_label", "issue": 602}
+{"text": "담당자: 황현석 조수영 신원아", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 9, "end": 12}, {"kind": "name", "start": 13, "end": 16}], "difficulty": "open_miss", "miss_tag": "name_list_after_label", "issue": 602}
+{"text": "보호자: 서인빈 김빈아", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 9, "end": 12}], "difficulty": "open_miss", "miss_tag": "name_list_after_label", "issue": 602}
+{"text": "담당자: 이규빈·권수아·한우윤", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 9, "end": 12}, {"kind": "name", "start": 13, "end": 16}], "difficulty": "open_miss", "miss_tag": "name_list_after_label", "issue": 602}
+{"text": "보호자: 박찬율 송혜지 박정원", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 9, "end": 12}, {"kind": "name", "start": 13, "end": 16}], "difficulty": "open_miss", "miss_tag": "name_list_after_label", "issue": 602}
+{"text": "참석자: 허율민·임규빈", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 9, "end": 12}], "difficulty": "open_miss", "miss_tag": "name_list_after_label", "issue": 602}
+{"text": "참석자: 전도예·백재율", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 9, "end": 12}], "difficulty": "open_miss", "miss_tag": "name_list_after_label", "issue": 602}
+{"text": "보호자: 김경규 강현혜 이찬호", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 9, "end": 12}, {"kind": "name", "start": 13, "end": 16}], "difficulty": "open_miss", "miss_tag": "name_list_after_label", "issue": 602}
+{"text": "참석자: 신찬은 심서인 장하지", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 9, "end": 12}, {"kind": "name", "start": 13, "end": 16}], "difficulty": "open_miss", "miss_tag": "name_list_after_label", "issue": 602}
+{"text": "담당자: 한훈찬, 임빈연, 정은지", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 10, "end": 13}, {"kind": "name", "start": 15, "end": 18}], "difficulty": "open_miss", "miss_tag": "name_list_after_label", "issue": 602}
+{"text": "보호자: 유재아, 조준서, 전양민", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 10, "end": 13}, {"kind": "name", "start": 15, "end": 18}], "difficulty": "open_miss", "miss_tag": "name_list_after_label", "issue": 602}
+{"text": "보호자: 정지원 및 황양빈 및 심혜수", "labels": [{"kind": "name", "start": 5, "end": 8, "target": false}, {"kind": "name", "start": 11, "end": 14}, {"kind": "name", "start": 17, "end": 20}], "difficulty": "open_miss", "miss_tag": "name_list_after_label", "issue": 602}
+{"text": "권양군(만 64세)", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_paren_after", "issue": 604}
+{"text": "장지빈(대리)", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_paren_after", "issue": 604}
+{"text": "윤인성(인)", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_paren_after", "issue": 604}
+{"text": "배정영(과장)", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_paren_after", "issue": 604}
+{"text": "최우훈(과장)", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_paren_after", "issue": 604}
+{"text": "황인찬(만 42세)", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_paren_after", "issue": 604}
+{"text": "윤찬율(과장)", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_paren_after", "issue": 604}
+{"text": "안지은(인)", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_paren_after", "issue": 604}
+{"text": "유호재 (서명)", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_paren_after", "issue": 604}
+{"text": "임찬정 (서명)", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_paren_after", "issue": 604}
+{"text": "전율민(인)", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_paren_after", "issue": 604}
+{"text": "전규양(인)", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_paren_after", "issue": 604}
+{"text": "황예민(만 42세)", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_paren_after", "issue": 604}
+{"text": "장수훈 (서명)", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_paren_after", "issue": 604}
+{"text": "전아양(만 68세)", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_paren_after", "issue": 604}
+{"text": "안예훈(만 22세)", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_paren_after", "issue": 604}
+{"text": "손은원(만 59세)", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_paren_after", "issue": 604}
+{"text": "박석민 (서명)", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_paren_after", "issue": 604}
+{"text": "박서연(59세, 남)", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_paren_after", "issue": 604}
+{"text": "배연도(40세, 남)", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_paren_after", "issue": 604}
+{"text": "담당자 안아준님 건입니다. 어제 안아준이 서류를 제출했고, 안아준의 연락처는 따로 받았습니다.", "labels": [{"kind": "name", "start": 4, "end": 7, "target": false}, {"kind": "name", "start": 18, "end": 21}, {"kind": "name", "start": 33, "end": 36}], "difficulty": "open_miss", "miss_tag": "name_repeat_without_cue", "issue": 608}
+{"text": "신청자 김하석님 건입니다. 어제 김하석이 서류를 제출했고, 김하석의 연락처는 따로 받았습니다.", "labels": [{"kind": "name", "start": 4, "end": 7, "target": false}, {"kind": "name", "start": 18, "end": 21}, {"kind": "name", "start": 33, "end": 36}], "difficulty": "open_miss", "miss_tag": "name_repeat_without_cue", "issue": 608}
+{"text": "담당자 최양규님 건입니다. 어제 최양규가 서류를 제출했고, 최양규의 연락처는 따로 받았습니다.", "labels": [{"kind": "name", "start": 4, "end": 7, "target": false}, {"kind": "name", "start": 18, "end": 21}, {"kind": "name", "start": 33, "end": 36}], "difficulty": "open_miss", "miss_tag": "name_repeat_without_cue", "issue": 608}
+{"text": "고객 이하수입니다. 어제 이하수가 서류를 제출했고, 이하수의 연락처는 따로 받았습니다.", "labels": [{"kind": "name", "start": 3, "end": 6, "target": false}, {"kind": "name", "start": 14, "end": 17}, {"kind": "name", "start": 29, "end": 32}], "difficulty": "open_miss", "miss_tag": "name_repeat_without_cue", "issue": 608}
+{"text": "환자 문준재입니다. 어제 문준재가 서류를 제출했고, 문준재의 연락처는 따로 받았습니다.", "labels": [{"kind": "name", "start": 3, "end": 6, "target": false}, {"kind": "name", "start": 14, "end": 17}, {"kind": "name", "start": 29, "end": 32}], "difficulty": "open_miss", "miss_tag": "name_repeat_without_cue", "issue": 608}
+{"text": "환자 문인준입니다. 어제 문인준이 서류를 제출했고, 문인준의 연락처는 따로 받았습니다.", "labels": [{"kind": "name", "start": 3, "end": 6, "target": false}, {"kind": "name", "start": 14, "end": 17}, {"kind": "name", "start": 29, "end": 32}], "difficulty": "open_miss", "miss_tag": "name_repeat_without_cue", "issue": 608}
+{"text": "담당자 심혜성님이 문의했습니다. 어제 심혜성이 서류를 제출했고, 심혜성의 연락처는 따로 받았습니다.", "labels": [{"kind": "name", "start": 4, "end": 7, "target": false}, {"kind": "name", "start": 21, "end": 24}, {"kind": "name", "start": 36, "end": 39}], "difficulty": "open_miss", "miss_tag": "name_repeat_without_cue", "issue": 608}
+{"text": "환자 황군재입니다. 어제 황군재가 서류를 제출했고, 황군재의 연락처는 따로 받았습니다.", "labels": [{"kind": "name", "start": 3, "end": 6, "target": false}, {"kind": "name", "start": 14, "end": 17}, {"kind": "name", "start": 29, "end": 32}], "difficulty": "open_miss", "miss_tag": "name_repeat_without_cue", "issue": 608}
+{"text": "고객 황인아님 건입니다. 어제 황인아가 서류를 제출했고, 황인아의 연락처는 따로 받았습니다.", "labels": [{"kind": "name", "start": 3, "end": 6, "target": false}, {"kind": "name", "start": 17, "end": 20}, {"kind": "name", "start": 32, "end": 35}], "difficulty": "open_miss", "miss_tag": "name_repeat_without_cue", "issue": 608}
+{"text": "담당자 임지인님 건입니다. 어제 임지인이 서류를 제출했고, 임지인의 연락처는 따로 받았습니다.", "labels": [{"kind": "name", "start": 4, "end": 7, "target": false}, {"kind": "name", "start": 18, "end": 21}, {"kind": "name", "start": 33, "end": 36}], "difficulty": "open_miss", "miss_tag": "name_repeat_without_cue", "issue": 608}
+{"text": "고객 권석성님 건입니다. 어제 권석성이 서류를 제출했고, 권석성의 연락처는 따로 받았습니다.", "labels": [{"kind": "name", "start": 3, "end": 6, "target": false}, {"kind": "name", "start": 17, "end": 20}, {"kind": "name", "start": 32, "end": 35}], "difficulty": "open_miss", "miss_tag": "name_repeat_without_cue", "issue": 608}
+{"text": "환자 송준경입니다. 어제 송준경이 서류를 제출했고, 송준경의 연락처는 따로 받았습니다.", "labels": [{"kind": "name", "start": 3, "end": 6, "target": false}, {"kind": "name", "start": 14, "end": 17}, {"kind": "name", "start": 29, "end": 32}], "difficulty": "open_miss", "miss_tag": "name_repeat_without_cue", "issue": 608}
+{"text": "신청자 오서우님 건입니다. 어제 오서우가 서류를 제출했고, 오서우의 연락처는 따로 받았습니다.", "labels": [{"kind": "name", "start": 4, "end": 7, "target": false}, {"kind": "name", "start": 18, "end": 21}, {"kind": "name", "start": 33, "end": 36}], "difficulty": "open_miss", "miss_tag": "name_repeat_without_cue", "issue": 608}
+{"text": "고객 최진군입니다. 어제 최진군이 서류를 제출했고, 최진군의 연락처는 따로 받았습니다.", "labels": [{"kind": "name", "start": 3, "end": 6, "target": false}, {"kind": "name", "start": 14, "end": 17}, {"kind": "name", "start": 29, "end": 32}], "difficulty": "open_miss", "miss_tag": "name_repeat_without_cue", "issue": 608}
+{"text": "담당자 서찬우님 건입니다. 어제 서찬우가 서류를 제출했고, 서찬우의 연락처는 따로 받았습니다.", "labels": [{"kind": "name", "start": 4, "end": 7, "target": false}, {"kind": "name", "start": 18, "end": 21}, {"kind": "name", "start": 33, "end": 36}], "difficulty": "open_miss", "miss_tag": "name_repeat_without_cue", "issue": 608}
+{"text": "신청자 황빈진입니다. 어제 황빈진이 서류를 제출했고, 황빈진의 연락처는 따로 받았습니다.", "labels": [{"kind": "name", "start": 4, "end": 7, "target": false}, {"kind": "name", "start": 15, "end": 18}, {"kind": "name", "start": 30, "end": 33}], "difficulty": "open_miss", "miss_tag": "name_repeat_without_cue", "issue": 608}
+{"text": "담당자 오정훈님이 문의했습니다. 어제 오정훈이 서류를 제출했고, 오정훈의 연락처는 따로 받았습니다.", "labels": [{"kind": "name", "start": 4, "end": 7, "target": false}, {"kind": "name", "start": 21, "end": 24}, {"kind": "name", "start": 36, "end": 39}], "difficulty": "open_miss", "miss_tag": "name_repeat_without_cue", "issue": 608}
+{"text": "환자 백양혜님 건입니다. 어제 백양혜가 서류를 제출했고, 백양혜의 연락처는 따로 받았습니다.", "labels": [{"kind": "name", "start": 3, "end": 6, "target": false}, {"kind": "name", "start": 17, "end": 20}, {"kind": "name", "start": 32, "end": 35}], "difficulty": "open_miss", "miss_tag": "name_repeat_without_cue", "issue": 608}
+{"text": "신청자 강훈도님이 문의했습니다. 어제 강훈도가 서류를 제출했고, 강훈도의 연락처는 따로 받았습니다.", "labels": [{"kind": "name", "start": 4, "end": 7, "target": false}, {"kind": "name", "start": 21, "end": 24}, {"kind": "name", "start": 36, "end": 39}], "difficulty": "open_miss", "miss_tag": "name_repeat_without_cue", "issue": 608}
+{"text": "신청자 임율경님이 문의했습니다. 어제 임율경이 서류를 제출했고, 임율경의 연락처는 따로 받았습니다.", "labels": [{"kind": "name", "start": 4, "end": 7, "target": false}, {"kind": "name", "start": 21, "end": 24}, {"kind": "name", "start": 36, "end": 39}], "difficulty": "open_miss", "miss_tag": "name_repeat_without_cue", "issue": 608}
+{"text": "고석 부장이 계약서에 서명했습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}], "difficulty": "open_miss", "miss_tag": "name_two_syllable_title", "issue": 601}
+{"text": "임성 팀장이 프로젝트 현황을 보고했습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}], "difficulty": "open_miss", "miss_tag": "name_two_syllable_title", "issue": 601}
+{"text": "김은 실장이 계약서에 서명했습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}], "difficulty": "open_miss", "miss_tag": "name_two_syllable_title", "issue": 601}
+{"text": "유율 과장이 프로젝트 현황을 보고했습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}], "difficulty": "open_miss", "miss_tag": "name_two_syllable_title", "issue": 601}
+{"text": "홍아 과장이 계약서에 서명했습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}], "difficulty": "open_miss", "miss_tag": "name_two_syllable_title", "issue": 601}
+{"text": "정진 부장이 프로젝트 현황을 보고했습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}], "difficulty": "open_miss", "miss_tag": "name_two_syllable_title", "issue": 601}
+{"text": "유정 팀장이 계약서에 서명했습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}], "difficulty": "open_miss", "miss_tag": "name_two_syllable_title", "issue": 601}
+{"text": "김호 대표가 프로젝트 현황을 보고했습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}], "difficulty": "open_miss", "miss_tag": "name_two_syllable_title", "issue": 601}
+{"text": "김석 실장이 프로젝트 현황을 보고했습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}], "difficulty": "open_miss", "miss_tag": "name_two_syllable_title", "issue": 601}
+{"text": "장연 팀장이 계약서에 서명했습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}], "difficulty": "open_miss", "miss_tag": "name_two_syllable_title", "issue": 601}
+{"text": "오연 부장이 프로젝트 현황을 보고했습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}], "difficulty": "open_miss", "miss_tag": "name_two_syllable_title", "issue": 601}
+{"text": "고영 과장이 프로젝트 현황을 보고했습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}], "difficulty": "open_miss", "miss_tag": "name_two_syllable_title", "issue": 601}
+{"text": "정정 과장이 계약서에 서명했습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}], "difficulty": "open_miss", "miss_tag": "name_two_syllable_title", "issue": 601}
+{"text": "임군 부장님께 서류를 전달했습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}], "difficulty": "open_miss", "miss_tag": "name_two_syllable_title", "issue": 601}
+{"text": "배우 실장이 프로젝트 현황을 보고했습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}], "difficulty": "open_miss", "miss_tag": "name_two_syllable_title", "issue": 601}
+{"text": "장호 실장이 프로젝트 현황을 보고했습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}], "difficulty": "open_miss", "miss_tag": "name_two_syllable_title", "issue": 601}
+{"text": "허성 대표님께 서류를 전달했습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}], "difficulty": "open_miss", "miss_tag": "name_two_syllable_title", "issue": 601}
+{"text": "허영 부장이 계약서에 서명했습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}], "difficulty": "open_miss", "miss_tag": "name_two_syllable_title", "issue": 601}
+{"text": "조아 팀장이 프로젝트 현황을 보고했습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}], "difficulty": "open_miss", "miss_tag": "name_two_syllable_title", "issue": 601}
+{"text": "서아 팀장이 계약서에 서명했습니다.", "labels": [{"kind": "name", "start": 0, "end": 2}], "difficulty": "open_miss", "miss_tag": "name_two_syllable_title", "issue": 601}
+{"text": "보호자 전군경뿐입니다.", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "open_miss", "miss_tag": "name_unlisted_ending", "issue": 600}
+{"text": "환자는 홍군도예요.", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "open_miss", "miss_tag": "name_unlisted_ending", "issue": 600}
+{"text": "보호자 손호도인데요.", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "open_miss", "miss_tag": "name_unlisted_ending", "issue": 600}
+{"text": "고객 김인성께서는 오늘 방문했습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}], "difficulty": "open_miss", "miss_tag": "name_unlisted_ending", "issue": 600}
+{"text": "학생 심훈영에게는 따로 안내했습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}], "difficulty": "open_miss", "miss_tag": "name_unlisted_ending", "issue": 600}
+{"text": "신청자 강은지마저 불참했습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "open_miss", "miss_tag": "name_unlisted_ending", "issue": 600}
+{"text": "환자 박도혜야.", "labels": [{"kind": "name", "start": 3, "end": 6}], "difficulty": "open_miss", "miss_tag": "name_unlisted_ending", "issue": 600}
+{"text": "고객 이우민뿐입니다.", "labels": [{"kind": "name", "start": 3, "end": 6}], "difficulty": "open_miss", "miss_tag": "name_unlisted_ending", "issue": 600}
+{"text": "담당자 박연진조차 몰랐습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "open_miss", "miss_tag": "name_unlisted_ending", "issue": 600}
+{"text": "고객은 유우지예요.", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "open_miss", "miss_tag": "name_unlisted_ending", "issue": 600}
+{"text": "신청자 강은경밖에 없습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "open_miss", "miss_tag": "name_unlisted_ending", "issue": 600}
+{"text": "고객 신연은밖에 없습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}], "difficulty": "open_miss", "miss_tag": "name_unlisted_ending", "issue": 600}
+{"text": "담당자 문우지뿐입니다.", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "open_miss", "miss_tag": "name_unlisted_ending", "issue": 600}
+{"text": "환자는 홍영경이야.", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "open_miss", "miss_tag": "name_unlisted_ending", "issue": 600}
+{"text": "환자는 서양찬이라고 합니다.", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "open_miss", "miss_tag": "name_unlisted_ending", "issue": 600}
+{"text": "환자 오성호께서는 오늘 방문했습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}], "difficulty": "open_miss", "miss_tag": "name_unlisted_ending", "issue": 600}
+{"text": "환자 송우율이에요.", "labels": [{"kind": "name", "start": 3, "end": 6}], "difficulty": "open_miss", "miss_tag": "name_unlisted_ending", "issue": 600}
+{"text": "담당자 배재도뿐입니다.", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "open_miss", "miss_tag": "name_unlisted_ending", "issue": 600}
+{"text": "학생 최도재라는 분입니다.", "labels": [{"kind": "name", "start": 3, "end": 6}], "difficulty": "open_miss", "miss_tag": "name_unlisted_ending", "issue": 600}
+{"text": "보호자 황아정이야.", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "open_miss", "miss_tag": "name_unlisted_ending", "issue": 600}
