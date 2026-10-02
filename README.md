@@ -9,6 +9,22 @@ AI 에이전트가 한국어 데이터를 다루기 전에 거치는 **프라이
 
 **2026 오픈소스 개발자대회**(과학기술정보통신부 주최·NIPA 주관) 출품작 — 팀 **마스킹테이프** · Apache-2.0
 
+## English Summary
+
+**maskingtape** is an Apache-2.0 Korean PII detection and anonymization toolkit. It provides
+a Python library, CLI, MCP server, REST API, web playground, desktop app, and reproducible
+synthetic benchmarks from one shared core engine.
+
+- Built for Korean identifiers and writing conventions: resident registration numbers, Korean
+  phone numbers, road-name addresses, Korean names, cards, accounts, business registration
+  numbers, passports, birth dates, and driver licenses.
+- Runs locally by default. The core library, CLI, MCP server, and desktop app do not call
+  commercial AI APIs. Optional name disambiguation uses local Ollama.
+- Includes a public demo for quick exploration. Do not enter real personal data in the demo;
+  use the local CLI, MCP server, or desktop app for sensitive documents.
+- Contributions are issue-driven. Start with [CONTRIBUTING.md](CONTRIBUTING.md), use synthetic
+  data only, and record the tests or benchmark commands you ran.
+
 ## 왜 maskingtape인가
 
 - **한국어 전용**: 주민등록번호(체크섬 검증 포함)·한국 전화번호·도로명 주소·한국어 이름 등 국내 포맷 특화 — 영어권 도구(Presidio 등)가 못 채우는 갭

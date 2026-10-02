@@ -9,6 +9,37 @@
 1. 루트 [CLAUDE.md](../../CLAUDE.md) 필독
 2. 의존성(fastapi, uvicorn 등) 추가 시 [SBOM.md](../../SBOM.md)에 한 줄씩 추가 — 라이선스 확인 필수
 
+## 개발자 지도
+
+API는 `packages/core`의 탐지·마스킹 엔진을 HTTP 계약으로 감싸는 얇은 계층이다. 탐지 규칙을
+여기서 새로 만들지 않는다.
+
+| 파일 | 역할 | 바꿀 때 같이 볼 것 |
+|---|---|---|
+| `maskingtape_api/schemas.py` | 공개 요청·응답 모델. 프론트/데스크톱이 의존하는 계약 | 이 README, `tests/test_openapi_contract.py` |
+| `maskingtape_api/routers/pii.py` | `/scan`, `/anonymize` 라우터. 의존성 주입과 에러 응답만 담당 | `services/core_adapter.py`, `errors.py` |
+| `maskingtape_api/services/core_adapter.py` | core `Pipeline` 호출과 API 응답 모델 변환 | core detection kind 변경, unknown kind 테스트 |
+| `maskingtape_api/settings.py` | 환경변수 파싱과 런타임 기본값 | `tests/test_settings.py`, README 환경변수 표 |
+| `maskingtape_api/body_limit.py` | JSON 파싱 전 요청 크기 제한 | 보안 요구사항 4번 |
+| `maskingtape_api/rate_limit.py` | `/scan`·`/anonymize` 요청 제한 | 서버리스 한계 문서, rate limit 테스트 |
+| `services/name_judge.py` | 웹 하이브리드 이름 판단기 Protocol | #545·#546 계약, OpenAI 연결 코드 |
+| `services/openai_name_judge.py` | 웹 데모 하이브리드 모드의 유일한 상용 API 연결 지점 | 키 관리, 실패 코드, 테스트 fake |
+
+계약 변경 순서:
+
+1. `apps/api/README.md`에서 요청·응답 모양을 먼저 고친다.
+2. `schemas.py`와 `tests/test_openapi_contract.py`를 맞춘다.
+3. `core_adapter.py`와 라우터를 고친다.
+4. 웹·데스크톱이 같은 계약을 쓰는지 확인한다.
+
+원문 보호 규칙:
+
+- 응답 `detections`에는 원문 PII 값을 싣지 않는다. 클라이언트는 자신이 가진 원문과 `start`/`end`로
+  하이라이트한다.
+- 에러 메시지와 로그에는 입력 `text`, 판단기 입력, 판단기 원문 응답을 넣지 않는다.
+- core가 API enum에 아직 없는 새 `kind`를 내도 500을 내지 않고 문자열 그대로 통과시킨다. 그래도
+  원칙적으로는 `DetectionKind`와 문서를 같은 PR에서 갱신한다.
+
 ## 로컬 실행
 
 요구사항:
@@ -44,6 +75,21 @@ $env:MASKINGTAPE_API_HYBRID_RATE_LIMIT_WINDOW_SECONDS="60"
 # 앞단 프록시가 이 헤더를 반드시 덮어써 주는 배포에서만 설정한다(기본: 비어 있음)
 # $env:MASKINGTAPE_API_TRUSTED_CLIENT_IP_HEADERS="x-vercel-forwarded-for,x-real-ip"
 ```
+
+환경변수 한눈에 보기:
+
+| 이름 | 기본값 | 역할 |
+|---|---|---|
+| `MASKINGTAPE_API_ENV` | `development` | 실행 환경. `production`이면 CORS 기본 허용 목록이 비어 있다 |
+| `MASKINGTAPE_API_CORS_ORIGINS` | 로컬 웹 dev 서버 2개 | 쉼표로 구분한 CORS 허용 origin. 배포에서는 실제 웹 도메인만 둔다 |
+| `MASKINGTAPE_API_RATE_LIMIT_REQUESTS` | `60` | 클라이언트 키별 요청 허용 횟수 |
+| `MASKINGTAPE_API_RATE_LIMIT_WINDOW_SECONDS` | `60` | rate limit 시간창(초) |
+| `MASKINGTAPE_API_RATE_LIMIT_MAX_BUCKETS` | `10000` | rate limit 버킷 최대 개수 |
+| `MASKINGTAPE_API_MAX_BODY_BYTES` | `1000000` | JSON 파싱 전 요청 본문 최대 바이트 |
+| `MASKINGTAPE_API_TRUSTED_CLIENT_IP_HEADERS` | Vercel에서만 자동 기본값 | 신뢰 프록시가 덮어쓴 IP 헤더만 지정 |
+| `OPENAI_API_KEY` | 없음 | 웹 하이브리드 이름 판단기 연결 시에만 사용. 없으면 판단기를 만들지 않는다 |
+| `MASKINGTAPE_API_OPENAI_MODEL` | `gpt-6-luna` | OpenAI 이름 판단기 모델 |
+| `MASKINGTAPE_API_OPENAI_TIMEOUT_SECONDS` | `20` | OpenAI 이름 판단기 요청 제한 시간 |
 
 `MASKINGTAPE_API_CORS_ORIGINS` is a comma-separated allowlist. Do not use `*`;
 set the deployed web origin explicitly when the frontend domain is decided.
@@ -115,6 +161,33 @@ ruff check apps/api
 python -m pytest apps/api -q
 ```
 
+## 엔드포인트 개발 규칙
+
+| 엔드포인트 | 목적 | 주의할 점 |
+|---|---|---|
+| `GET /health` | 로컬·배포 헬스체크 | rate limit 대상이 아니다 |
+| `POST /scan` | 탐지 metadata만 반환 | `detections[].text`를 반환하지 않는다 |
+| `POST /anonymize` | 비식별화된 텍스트와 사용한 탐지 metadata 반환 | `strategy`는 `mask`/`label`/`pseudonym` |
+
+수동 확인:
+
+```bash
+curl http://127.0.0.1:8000/health
+curl -X POST http://127.0.0.1:8000/scan \
+  -H "Content-Type: application/json" \
+  -d '{"text":"담당자 김민수, 연락처 010-1234-5678"}'
+curl -X POST http://127.0.0.1:8000/anonymize \
+  -H "Content-Type: application/json" \
+  -d '{"text":"담당자 김민수, 연락처 010-1234-5678","strategy":"label"}'
+```
+
+응답 검토 기준:
+
+- `/scan`은 탐지 목록만 돌려준다.
+- `/anonymize`는 비식별화된 `text`를 돌려준다.
+- 두 응답의 `detections`는 `kind`, `start`, `end`, `confidence`, `detector`만 포함한다.
+- 실패 응답은 공유 에러 모양(`code`, `message`, `details`)을 따른다.
+
 ## API 계약 (v1 — 프론트·데스크톱은 이 스키마로 목업 개발 시작 가능)
 
 공통 제약:
@@ -178,9 +251,18 @@ FastAPI 라우터는 core를 직접 호출하지 않고 `maskingtape_api.service
 기존 API와 테스트는 규칙 전용으로 동작한다.
 
 - **약속**: `maskingtape_api/services/name_judge.py`의 `NameJudge.find_names(masked_text) -> list[str]`. 입력은 규칙으로 먼저 가린 글(`LabelAnonymizer` 결과)이다. 실패는 `NameJudgeError(code)`로 올리고, 메시지와 `code`에 원문·가린 글·모델 응답을 넣지 않는다.
+- **가져다 쓸 import**:
+  ```python
+  from maskingtape_api.services.name_judge import NameJudge, NameJudgeError
+  from maskingtape_api.services.openai_name_judge import openai_name_judge_from_env
+  ```
+- **성공 경로**: 규칙 탐지 결과를 먼저 `LabelAnonymizer`로 가린 뒤 판단기에 보내고, 판단기가 돌려준
+  이름을 원문 위치에서 찾아 `kind: "name"` 탐지로 합친다. 겹침 처리는 core의 `resolve_overlaps`를 쓴다.
 - **API 폴백**: 판단기가 없거나 실패하면 규칙 결과를 돌려주고 `mode_used: "rule"`,
   `hybrid_failed: true`, `hybrid_failure_code`를 채운다. 판단기 실패 코드는 `NameJudgeError.code`를
   그대로 쓴다. `OPENAI_API_KEY`가 없어 판단기를 만들 수 없으면 `name_judge_unavailable`을 쓴다.
+- **테스트 원칙**: API 테스트는 OpenAI를 부르지 않는다. `find_names()`만 가진 fake 판단기와
+  `NameJudgeError`를 던지는 fake로 규칙/하이브리드 성공/하이브리드 실패를 고정한다.
 - **구현**: `services/openai_name_judge.py`의 `OpenAINameJudge`. 제품 코드에서 상용 AI API를 부르는 유일한 곳이다([CLAUDE.md](../../CLAUDE.md) §2 3번의 예외).
   - OpenAI Responses API에 가린 글만 보낸다. `store: false`, 추론 끔(`reasoning.effort: "none"`), 온도 0, JSON 스키마(strict) `{"names": [...]}`로 받는다.
   - 받은 이름 중 보낸 글에 그대로 있는 것만 돌려준다(없는 이름은 환각으로 보고 버린다).
