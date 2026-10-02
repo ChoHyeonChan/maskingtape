@@ -137,7 +137,12 @@ def npm_repo(name: str, version: str) -> str:
 
 
 def pub_meta(name: str, version: str) -> tuple[str, str]:
-    """라이선스는 pub.dev가 LICENSE 파일에서 판별한 태그(최신 버전 기준)를 쓴다."""
+    """라이선스는 pub.dev가 LICENSE 파일에서 판별한 태그(최신 버전 기준)를 쓴다.
+
+    태그가 여럿이면 LICENSE 한 파일에 라이선스 여러 개가 함께 들어 있다는 뜻이라 AND로 잇는다.
+    골라 쓰는 이중 라이선스(OR)로 단정하지 않는다(file_selector_android: Flutter 코드 BSD-3-Clause +
+    함께 든 aFileChooser Apache-2.0).
+    """
     tags = fetch_json(f"https://pub.dev/api/packages/{name}/score").get("tags", [])
     found = {
         _PUB_TAG_TO_SPDX.get(tag.split(":", 1)[1], tag.split(":", 1)[1])
@@ -146,7 +151,7 @@ def pub_meta(name: str, version: str) -> tuple[str, str]:
     }
     pubspec = fetch_json(f"https://pub.dev/api/packages/{name}/versions/{version}")["pubspec"]
     repo = clean_repo(pubspec.get("repository") or pubspec.get("homepage"))
-    return " OR ".join(sorted(found)) or "확인 필요", repo
+    return " AND ".join(sorted(found)) or "확인 필요", repo
 
 
 # --- 배포물별 의존성 그래프 ---

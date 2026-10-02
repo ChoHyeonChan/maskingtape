@@ -135,7 +135,7 @@ PyPI 코어 패키지(`maskingtape`)는 런타임 외부 의존성이 없어 표
 | desktop_drop | 0.7.1 | Apache-2.0 | https://github.com/MixinNetwork/flutter-plugins/tree/main/packages/desktop_drop | 직접(런타임) |
 | fake_async | 1.3.3 | Apache-2.0 | https://github.com/dart-lang/test/tree/master/pkgs/fake_async | 전이 |
 | file_selector | 1.1.0 | BSD-3-Clause | https://github.com/flutter/packages/tree/main/packages/file_selector/file_selector | 직접(런타임) |
-| file_selector_android | 0.5.2+8 | Apache-2.0 OR BSD-3-Clause | https://github.com/flutter/packages/tree/main/packages/file_selector/file_selector_android | 전이 |
+| file_selector_android | 0.5.2+8 | Apache-2.0 AND BSD-3-Clause | https://github.com/flutter/packages/tree/main/packages/file_selector/file_selector_android | 전이 |
 | file_selector_ios | 0.5.3+5 | BSD-3-Clause | https://github.com/flutter/packages/tree/main/packages/file_selector/file_selector_ios | 전이 |
 | file_selector_linux | 0.9.4 | BSD-3-Clause | https://github.com/flutter/packages/tree/main/packages/file_selector/file_selector_linux | 전이 |
 | file_selector_macos | 0.9.5 | BSD-3-Clause | https://github.com/flutter/packages/tree/main/packages/file_selector/file_selector_macos | 전이 |

@@ -80,6 +80,19 @@ def test_desktop_rows_cover_the_whole_lockfile(monkeypatch):
     assert rows["desktop_drop"]["note"] == "직접(런타임)"
 
 
+def test_pub_meta_joins_several_license_tags_with_and(monkeypatch):
+    # 태그가 여럿이면 LICENSE 한 파일에 함께 든 라이선스라 둘 다 지켜야 한다(#634)
+    def fake_fetch(url):
+        if url.endswith("/score"):
+            tags = ["license:apache-2.0", "license:bsd-3-clause", "license:fsf-libre", "license:osi-approved"]
+            return {"tags": tags}
+        return {"pubspec": {"repository": "https://github.com/flutter/packages"}}
+
+    monkeypatch.setattr(sbom, "fetch_json", fake_fetch)
+    license_, _ = sbom.pub_meta("file_selector_android", "0.5.2+8")
+    assert license_ == "Apache-2.0 AND BSD-3-Clause"
+
+
 def test_checked_pub_license_replaces_registry_tag(monkeypatch):
     # pub.dev 태그는 BSD-3-Clause 하나지만 vector_math 2.2.0 LICENSE에는 zlib 전문도 있다(#634)
     monkeypatch.setattr(sbom, "pub_meta", lambda name, version: ("BSD-3-Clause", ""))
