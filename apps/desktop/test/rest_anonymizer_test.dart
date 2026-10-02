@@ -193,7 +193,7 @@ void main() {
             .anonymize('x', options: const AnonymizeOptions(useLlm: true)),
         throwsA(
           isA<AnonymizerException>()
-              .having((e) => e.message, 'message', contains('이름 정밀 탐지'))
+              .having((e) => e.message, 'message', contains('로컬 LLM 사용'))
               // unavailable이면 다른 백엔드로 넘어가는데, 이건 그런 종류가 아니다.
               .having((e) => e is AnonymizerUnavailableException, 'unavailable', isFalse),
         ),

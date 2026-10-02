@@ -3,6 +3,9 @@
 
 from maskingtape_api.settings import (
     DEFAULT_CORS_ALLOWED_ORIGINS,
+    DEFAULT_HYBRID_MAX_TEXT_LENGTH,
+    DEFAULT_HYBRID_RATE_LIMIT_REQUESTS,
+    DEFAULT_HYBRID_RATE_LIMIT_WINDOW_SECONDS,
     DEFAULT_MAX_BODY_BYTES,
     DEFAULT_PRODUCTION_CORS_ALLOWED_ORIGINS,
     DEFAULT_RATE_LIMIT_MAX_BUCKETS,
@@ -55,6 +58,9 @@ def test_settings_default_to_local_web_dev_origins(monkeypatch) -> None:
     assert settings.rate_limit_window_seconds == DEFAULT_RATE_LIMIT_WINDOW_SECONDS
     assert settings.rate_limit_max_buckets == DEFAULT_RATE_LIMIT_MAX_BUCKETS
     assert settings.max_body_bytes == DEFAULT_MAX_BODY_BYTES
+    assert settings.hybrid_max_text_length == DEFAULT_HYBRID_MAX_TEXT_LENGTH
+    assert settings.hybrid_rate_limit_requests == DEFAULT_HYBRID_RATE_LIMIT_REQUESTS
+    assert settings.hybrid_rate_limit_window_seconds == DEFAULT_HYBRID_RATE_LIMIT_WINDOW_SECONDS
 
 
 def test_settings_read_cors_origins_from_comma_separated_env(monkeypatch) -> None:
@@ -103,11 +109,26 @@ def test_settings_read_max_body_bytes_from_env(monkeypatch) -> None:
     assert settings.max_body_bytes == 512
 
 
+def test_settings_read_hybrid_limits_from_env(monkeypatch) -> None:
+    monkeypatch.setenv("MASKINGTAPE_API_HYBRID_MAX_TEXT_LENGTH", "1234")
+    monkeypatch.setenv("MASKINGTAPE_API_HYBRID_RATE_LIMIT_REQUESTS", "4")
+    monkeypatch.setenv("MASKINGTAPE_API_HYBRID_RATE_LIMIT_WINDOW_SECONDS", "30")
+
+    settings = get_api_settings()
+
+    assert settings.hybrid_max_text_length == 1234
+    assert settings.hybrid_rate_limit_requests == 4
+    assert settings.hybrid_rate_limit_window_seconds == 30
+
+
 def test_settings_ignore_invalid_rate_limit_env(monkeypatch) -> None:
     monkeypatch.setenv("MASKINGTAPE_API_RATE_LIMIT_REQUESTS", "0")
     monkeypatch.setenv("MASKINGTAPE_API_RATE_LIMIT_WINDOW_SECONDS", "abc")
     monkeypatch.setenv("MASKINGTAPE_API_RATE_LIMIT_MAX_BUCKETS", "-1")
     monkeypatch.setenv("MASKINGTAPE_API_MAX_BODY_BYTES", "0")
+    monkeypatch.setenv("MASKINGTAPE_API_HYBRID_MAX_TEXT_LENGTH", "0")
+    monkeypatch.setenv("MASKINGTAPE_API_HYBRID_RATE_LIMIT_REQUESTS", "-1")
+    monkeypatch.setenv("MASKINGTAPE_API_HYBRID_RATE_LIMIT_WINDOW_SECONDS", "abc")
 
     settings = get_api_settings()
 
@@ -115,3 +136,6 @@ def test_settings_ignore_invalid_rate_limit_env(monkeypatch) -> None:
     assert settings.rate_limit_window_seconds == DEFAULT_RATE_LIMIT_WINDOW_SECONDS
     assert settings.rate_limit_max_buckets == DEFAULT_RATE_LIMIT_MAX_BUCKETS
     assert settings.max_body_bytes == DEFAULT_MAX_BODY_BYTES
+    assert settings.hybrid_max_text_length == DEFAULT_HYBRID_MAX_TEXT_LENGTH
+    assert settings.hybrid_rate_limit_requests == DEFAULT_HYBRID_RATE_LIMIT_REQUESTS
+    assert settings.hybrid_rate_limit_window_seconds == DEFAULT_HYBRID_RATE_LIMIT_WINDOW_SECONDS

@@ -13,6 +13,9 @@ DEFAULT_RATE_LIMIT_REQUESTS = 60
 DEFAULT_RATE_LIMIT_WINDOW_SECONDS = 60
 DEFAULT_RATE_LIMIT_MAX_BUCKETS = 10_000
 DEFAULT_MAX_BODY_BYTES = 1_000_000
+DEFAULT_HYBRID_MAX_TEXT_LENGTH = 5_000
+DEFAULT_HYBRID_RATE_LIMIT_REQUESTS = 10
+DEFAULT_HYBRID_RATE_LIMIT_WINDOW_SECONDS = 60
 
 # 신뢰 프록시 뒤에서만 의미가 있는 헤더들. 클라이언트가 직접 보낼 수 있는 값이라,
 # 앞단 프록시가 반드시 덮어써 준다고 확신할 수 있을 때만 rate limit 키로 쓴다.
@@ -29,6 +32,9 @@ class ApiSettings:
     rate_limit_window_seconds: int = DEFAULT_RATE_LIMIT_WINDOW_SECONDS
     rate_limit_max_buckets: int = DEFAULT_RATE_LIMIT_MAX_BUCKETS
     max_body_bytes: int = DEFAULT_MAX_BODY_BYTES
+    hybrid_max_text_length: int = DEFAULT_HYBRID_MAX_TEXT_LENGTH
+    hybrid_rate_limit_requests: int = DEFAULT_HYBRID_RATE_LIMIT_REQUESTS
+    hybrid_rate_limit_window_seconds: int = DEFAULT_HYBRID_RATE_LIMIT_WINDOW_SECONDS
     # rate limit 키로 신뢰할 클라이언트 IP 헤더. 기본은 비어 있다(= TCP 소켓 주소만 사용).
     trusted_client_ip_headers: tuple[str, ...] = ()
 
@@ -61,6 +67,18 @@ def get_api_settings() -> ApiSettings:
         max_body_bytes=_env_int(
             "MASKINGTAPE_API_MAX_BODY_BYTES",
             DEFAULT_MAX_BODY_BYTES,
+        ),
+        hybrid_max_text_length=_env_int(
+            "MASKINGTAPE_API_HYBRID_MAX_TEXT_LENGTH",
+            DEFAULT_HYBRID_MAX_TEXT_LENGTH,
+        ),
+        hybrid_rate_limit_requests=_env_int(
+            "MASKINGTAPE_API_HYBRID_RATE_LIMIT_REQUESTS",
+            DEFAULT_HYBRID_RATE_LIMIT_REQUESTS,
+        ),
+        hybrid_rate_limit_window_seconds=_env_int(
+            "MASKINGTAPE_API_HYBRID_RATE_LIMIT_WINDOW_SECONDS",
+            DEFAULT_HYBRID_RATE_LIMIT_WINDOW_SECONDS,
         ),
         trusted_client_ip_headers=_env_tuple(
             "MASKINGTAPE_API_TRUSTED_CLIENT_IP_HEADERS",
