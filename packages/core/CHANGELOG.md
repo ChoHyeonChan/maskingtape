@@ -48,25 +48,26 @@
 
 - **날짜 표기** ([#399](https://github.com/ChoHyeonChan/maskingtape/issues/399), [#493](https://github.com/ChoHyeonChan/maskingtape/issues/493)):
   `생년월일 95.03.22`(2자리 연도), `생년월일: 1999. 7. 21.`(공문서 날짜)
-- **8자리 앞자리 주민등록번호** ([#508](https://github.com/ChoHyeonChan/maskingtape/issues/508)): `생년월일 19800101-1234567`의 뒷자리가 남았다.
+- **8자리 앞자리 주민등록번호** ([#508](https://github.com/ChoHyeonChan/maskingtape/issues/508)): `생년월일 19800101-1234567`이 통째로 남았다.
 - **뒷자리를 가린 주민등록번호** ([#528](https://github.com/ChoHyeonChan/maskingtape/issues/528)): `주민번호 800101-1******`의 앞자리(생년월일)가 통째로 남았다.
 - **드문 구분자** ([#529](https://github.com/ChoHyeonChan/maskingtape/issues/529)): `800101/1234567`처럼 `/`·`·`·`_` 등으로 나눈 번호
 
 **전화·계좌·카드·여권**
 
 - 전화: `TEL 02)555-1234`([#493](https://github.com/ChoHyeonChan/maskingtape/issues/493)), `(+82) 10-1234-5678`·`+820212345678`([#509](https://github.com/ChoHyeonChan/maskingtape/issues/509))
-- 계좌: 은행 약칭만 붙은 `신한 110-123-456789`와 끝 묶음이 한 자리인 `9002-1234-5678-1`([#472](https://github.com/ChoHyeonChan/maskingtape/issues/472)),
+- 계좌: 은행 약칭만 붙은 `신한 110-123-456789`와 끝 묶음이 한 자리인 `새마을금고 9002-1234-5678-1`([#472](https://github.com/ChoHyeonChan/maskingtape/issues/472)),
   공백·점으로 나눈 `입금 계좌 1002 123 456789`([#474](https://github.com/ChoHyeonChan/maskingtape/issues/474)),
   라벨에 하이픈으로 붙은 `입금계좌-110-123-456789`([#493](https://github.com/ChoHyeonChan/maskingtape/issues/493))
-- 카드: 19자리 `6212 3456 7890 1234 569`([#493](https://github.com/ChoHyeonChan/maskingtape/issues/493)),
-  두 장을 이어 쓰면 뒤 카드가 남던 문제([#510](https://github.com/ChoHyeonChan/maskingtape/issues/510))
+- 카드: 19자리 `6212 3456 7890 1234 569`, 구분자가 섞인 `카드 4111-1111 1111-1111`([#493](https://github.com/ChoHyeonChan/maskingtape/issues/493)).
+  두 장을 이어 쓴 `카드 4111-1111 1111-1111 4111 1111 1111 1111`은 `4111-1111 1111-`과 끝 묶음 `1111`이 남았다([#510](https://github.com/ChoHyeonChan/maskingtape/issues/510))
 - 여권: `여권번호 M 12345678`([#493](https://github.com/ChoHyeonChan/maskingtape/issues/493))
 
 **로컬 LLM과 치환 전략**
 
 - **`--llm` 원문이 PC 밖으로 나갈 수 있던 경로** ([#468](https://github.com/ChoHyeonChan/maskingtape/issues/468)):
   프록시 설정(`HTTP_PROXY`, Windows 시스템 프록시)을 따라가거나, 클라우드 모델(`gpt-oss:120b-cloud` 등)이 원문을 ollama.com으로 넘기거나,
-  `http://evil.com@localhost:11434`처럼 검사한 주소와 실제 접속 주소가 다르거나, 리다이렉트를 따라갈 수 있었다. 원문을 보내기 전에 모두 막는다.
+  `http://evil.com@localhost:11434`처럼 검사한 주소와 실제 접속 주소가 다를 수 있었다. 원문을 보내기 전에 모두 막는다.
+  리다이렉트도 따라가지 않는다. 0.3.0은 302를 받으면 원문 없이 다른 곳에 다시 요청해 그 응답으로 이름을 덜 가릴 수 있었다.
 - **겹친 탐지를 치환하다 원문 글자를 남기던 문제** ([#494](https://github.com/ChoHyeonChan/maskingtape/issues/494)):
   탐지 목록을 직접 넘기는 라이브러리 호출에서 `LabelAnonymizer`가 `연락처 [전화번호]름]8 끝`처럼 원문 끝 글자를 남겼다.
   `PseudonymAnonymizer`도 같았다. 치환하기 전에 겹친 탐지를 합친다. `Pipeline`을 거친 결과는 원래 겹침이 없어 영향이 없었다.
@@ -96,7 +97,7 @@
 
 ### 기타
 
-- 모든 소스 파일에 저작권·라이선스 헤더(SPDX)를 넣었다 ([#437](https://github.com/ChoHyeonChan/maskingtape/issues/437)).
+- 모든 소스 파일에 저작권 줄(`SPDX-FileCopyrightText`)을 더했다 ([#437](https://github.com/ChoHyeonChan/maskingtape/issues/437)). 라이선스 줄(`SPDX-License-Identifier`)은 전부터 있었다.
 
 ## 0.3.0 (2026-09-15)
 
