@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import http.client
+import io
+import urllib.error
 
 import pytest
 from fastapi.testclient import TestClient
@@ -201,6 +203,23 @@ def test_hybrid_falls_back_when_openai_connection_breaks_mid_response(error) -> 
     assert payload["hybrid_failed"] is True
     assert payload["hybrid_failure_code"] == "network"
     assert [d["kind"] for d in payload["detections"]] == ["phone"]
+
+
+def test_hybrid_falls_back_when_a_rate_limit_error_body_breaks() -> None:
+    # 429 에러 본문을 읽다 연결이 끊겨도 500이 아니라 규칙 결과로 돌아간다(#625).
+    class BrokenBody(io.BytesIO):
+        def read(self, size: int = -1) -> bytes:
+            raise http.client.IncompleteRead(b'{"error": ')
+
+    error = urllib.error.HTTPError("https://api.openai.com/v1/responses", 429, "error", {}, BrokenBody())
+    judge = OpenAINameJudge("test-key-not-a-real-openai-key", opener=RaisingOpener(error))
+
+    response = _client(judge).post("/scan", json={"text": _TEXT, "mode": "hybrid"})
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["mode_used"] == "rule"
+    assert payload["hybrid_failure_code"] == "rate_limited"
 
 
 def _client(

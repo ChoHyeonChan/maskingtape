@@ -171,7 +171,9 @@ def _error_body_code(exc: urllib.error.HTTPError) -> str | None:
     """에러 본문에서 `error.code`만 꺼낸다. 메시지(가린 글이 섞일 수 있음)는 읽지 않는다."""
     try:
         data = json.loads(exc.read(_MAX_ERROR_BODY_BYTES))
-    except (OSError, ValueError):
+    except (OSError, ValueError, http.client.HTTPException):
+        # 본문을 읽다 끊기면(IncompleteRead) 구분을 포기하고 rate_limited로 본다. 이 함수는 _post의
+        # HTTPError 처리 안에서 불려서, 여기서 놓친 예외는 _post의 다른 except에 걸리지 않고 500이 된다(#625).
         return None
     error = data.get("error") if isinstance(data, dict) else None
     code = error.get("code") if isinstance(error, dict) else None

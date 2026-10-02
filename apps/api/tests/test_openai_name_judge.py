@@ -75,6 +75,17 @@ def _http_error(status: int, body: dict | None = None) -> urllib.error.HTTPError
     return urllib.error.HTTPError(OPENAI_RESPONSES_URL, status, "error", {}, fp)
 
 
+class _BrokenBody(io.BytesIO):
+    """에러 본문을 읽는 도중 연결이 끊긴다(#625 후속)."""
+
+    def read(self, size: int = -1) -> bytes:
+        raise http.client.IncompleteRead(b'{"error": {"code": "rate_')
+
+
+def _http_error_with_broken_body(status: int) -> urllib.error.HTTPError:
+    return urllib.error.HTTPError(OPENAI_RESPONSES_URL, status, "error", {}, _BrokenBody())
+
+
 def _assert_no_attached_details(error: NameJudgeError) -> None:
     # `raise ... from None`이 빠지면 원래 예외(응답 본문이 딸린 HTTPError 등)가 추적에 따라 붙는다.
     assert error.__cause__ is None
@@ -184,6 +195,8 @@ def test_bad_responses_raise_a_code_without_text_or_model_output(payload, raw, c
         # 응답을 읽다 끊기는 오류는 http.client.HTTPException 계열이라 OSError 그물에 걸리지 않았다(#625).
         (http.client.IncompleteRead(b"partial"), "network"),
         (http.client.BadStatusLine("bad status"), "network"),
+        # 429 에러 본문을 읽다 끊겨도 같은 그물에 걸려야 한다. 본문은 지출 한도 구분에만 쓴다(#625).
+        (_http_error_with_broken_body(429), "rate_limited"),
     ],
 )
 def test_transport_errors_become_codes_without_details(error, code) -> None:
