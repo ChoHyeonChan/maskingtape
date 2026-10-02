@@ -7,12 +7,18 @@ on:
   # branch-ci.yml이 PR 없는 브랜치 push에서 이 파일을 그대로 불러 쓴다(#573).
   workflow_call:
 
+# 이 워크플로는 저장소를 읽기만 한다. 기본 토큰 권한을 읽기로 좁혀 둔다(#500).
+# 액션은 태그 대신 커밋 SHA로 고정한다. 태그는 나중에 다른 커밋으로 옮겨질 수 있어서다.
+# 줄 끝 주석이 원래 태그다. 버전을 올릴 때는 그 태그의 커밋 SHA로 바꾼다.
+permissions:
+  contents: read
+
 jobs:
   core:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.11"
       - name: Install packages (core 먼저 — mcp-server가 로컬 core에 의존)
@@ -24,7 +30,7 @@ jobs:
           python scripts/check_license_headers.py
           pytest scripts -q
       - name: Lint
-        run: ruff check packages/core packages/mcp-server bench apps/api scripts/check_license_headers.py scripts/tests
+        run: ruff check packages/core packages/mcp-server bench apps/api scripts
       - name: Test core
         run: pytest packages/core -q
       - name: Test mcp-server
@@ -35,8 +41,8 @@ jobs:
   api:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.11"
       - name: Install packages (API wraps local core)
@@ -52,8 +58,8 @@ jobs:
       run:
         working-directory: apps/web
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "24"
           cache: "npm"
@@ -74,8 +80,8 @@ jobs:
       run:
         working-directory: apps/desktop
     steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
         with:
           # 공모전 기간에는 최신 stable 추종보다 고정이 안전하다 (apps/desktop/README 기준).
           flutter-version: "3.44.6"
