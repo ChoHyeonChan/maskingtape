@@ -19,6 +19,14 @@ import '../widgets/result_preview_dialog.dart';
 import '../widgets/status_pill.dart';
 import 'text_screen.dart';
 
+/// 라이선스 화면 머리말 — 앱 자체의 라이선스와 고지 파일 위치. 동봉물(Flutter 엔진·Dart 패키지)의
+/// 라이선스 전문은 Flutter 빌드가 모은 목록이 그 아래에 이어진다.
+const openSourceLegalese =
+    '© 2026 The maskingtape Authors · Apache-2.0\n'
+    '이 프로그램에 함께 실린 제3자 소프트웨어의 고지는 아래 목록과 저장소의 '
+    'THIRD_PARTY_NOTICES.md에 있습니다.\n'
+    'https://github.com/ChoHyeonChan/maskingtape';
+
 /// 홈 화면의 두 모드 — 파일을 끌어다 놓는 일괄 처리와, 문장을 직접 넣는 텍스트 입력.
 enum HomeMode { files, text }
 
@@ -181,6 +189,17 @@ class _HomeScreenState extends State<HomeScreen> {
           // LLM 상태는 파일이 없을 때도 보여야 한다 — 파일을 올리기 전에 Ollama를
           // 켜야 하는지 알 수 있어야 의미가 있다(#245 리뷰 메모).
           LlmStatusPill(status: _llmStatus, onRefresh: _refreshLlmStatus),
+          // 제3자 고지 — 설치판은 실행 화면에서 고지문을 보여줘야 한다(§2-8, #617).
+          // Flutter가 빌드에 넣은 모든 패키지의 LICENSE를 모아 보여주는 표준 화면을 쓴다.
+          IconButton(
+            tooltip: '오픈소스 고지·라이선스',
+            icon: const Icon(Icons.info_outline),
+            onPressed: () => showLicensePage(
+              context: context,
+              applicationName: '마스킹테이프',
+              applicationLegalese: openSourceLegalese,
+            ),
+          ),
           if (_mode == HomeMode.files && _tasks.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(left: 8),
