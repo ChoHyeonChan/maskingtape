@@ -31,6 +31,10 @@ static int g_active_window_count = 0;
 
 using EnableNonClientDpiScaling = BOOL __stdcall(HWND hwnd);
 
+// Minimum window size in logical pixels (see WM_GETMINMAXINFO below).
+constexpr int kMinWidth = 1024;
+constexpr int kMinHeight = 680;
+
 // Scale helper to convert logical scaler values to physical using passed in
 // scale factor
 int Scale(int source, double scale_factor) {
@@ -197,6 +201,18 @@ Win32Window::MessageHandler(HWND hwnd,
 
       return 0;
     }
+    case WM_GETMINMAXINFO: {
+      // Below roughly 1024x680 (logical px) the text-mode panels cannot fit
+      // their content (sample tabs wrap into too many rows, #587), so the
+      // window refuses to shrink further. Scaled for the monitor DPI like
+      // the initial size in Create().
+      auto* info = reinterpret_cast<MINMAXINFO*>(lparam);
+      double scale_factor = FlutterDesktopGetDpiForHWND(hwnd) / 96.0;
+      info->ptMinTrackSize.x = Scale(kMinWidth, scale_factor);
+      info->ptMinTrackSize.y = Scale(kMinHeight, scale_factor);
+      return 0;
+    }
+
     case WM_SIZE: {
       RECT rect = GetClientArea();
       if (child_content_ != nullptr) {
