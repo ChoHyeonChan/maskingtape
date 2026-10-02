@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2026 The maskingtape Authors
 # SPDX-License-Identifier: Apache-2.0
 
+import http.client
 import io
 import json
 import urllib.error
@@ -180,6 +181,9 @@ def test_bad_responses_raise_a_code_without_text_or_model_output(payload, raw, c
         (urllib.error.URLError(TimeoutError("timed out")), "timeout"),
         (TimeoutError("timed out"), "timeout"),
         (urllib.error.URLError("connection refused"), "network"),
+        # 응답을 읽다 끊기는 오류는 http.client.HTTPException 계열이라 OSError 그물에 걸리지 않았다(#625).
+        (http.client.IncompleteRead(b"partial"), "network"),
+        (http.client.BadStatusLine("bad status"), "network"),
     ],
 )
 def test_transport_errors_become_codes_without_details(error, code) -> None:

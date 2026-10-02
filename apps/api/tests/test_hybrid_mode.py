@@ -1,12 +1,15 @@
 # SPDX-FileCopyrightText: 2026 The maskingtape Authors
 # SPDX-License-Identifier: Apache-2.0
 
+import http.client
+
+import pytest
 from fastapi.testclient import TestClient
 from maskingtape.types import Detection
 from maskingtape_api.main import create_app
 from maskingtape_api.services.core_adapter import CoreEngineAdapter, get_core_adapter
 from maskingtape_api.services.name_judge import NameJudgeError
-from maskingtape_api.services.openai_name_judge import openai_name_judge_from_env
+from maskingtape_api.services.openai_name_judge import OpenAINameJudge, openai_name_judge_from_env
 from maskingtape_api.settings import ApiSettings
 
 _PHONE = "010-1234-5678"
@@ -171,6 +174,33 @@ def test_hybrid_rate_limit_falls_back_to_rule() -> None:
     assert second.json()["mode_used"] == "rule"
     assert second.json()["hybrid_failure_code"] == "rate_limited"
     assert len(judge.calls) == 1
+
+
+class RaisingOpener:
+    def __init__(self, error: Exception) -> None:
+        self.error = error
+
+    def open(self, request, timeout: float):
+        raise self.error
+
+
+@pytest.mark.parametrize(
+    "error",
+    [http.client.IncompleteRead(b"partial"), http.client.BadStatusLine("bad status")],
+    ids=["incomplete-read", "bad-status-line"],
+)
+def test_hybrid_falls_back_when_openai_connection_breaks_mid_response(error) -> None:
+    # 실제 판단기에 연결이 중간에 끊기는 오류를 넣어도 500이 아니라 규칙 결과로 돌아간다(#625).
+    judge = OpenAINameJudge("test-key-not-a-real-openai-key", opener=RaisingOpener(error))
+
+    response = _client(judge).post("/scan", json={"text": _TEXT, "mode": "hybrid"})
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["mode_used"] == "rule"
+    assert payload["hybrid_failed"] is True
+    assert payload["hybrid_failure_code"] == "network"
+    assert [d["kind"] for d in payload["detections"]] == ["phone"]
 
 
 def _client(

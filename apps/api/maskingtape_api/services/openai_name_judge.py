@@ -15,6 +15,7 @@ core·CLI·MCP 서버·데스크톱은 이 파일을 쓰지 않는다.
    NameJudgeError(code)로 올리고, 메시지에 가린 글·모델 응답·키를 넣지 않는다.
 """
 
+import http.client
 import json
 import os
 import re
@@ -133,6 +134,10 @@ class OpenAINameJudge:
         except TimeoutError:
             raise NameJudgeError("timeout") from None
         except OSError:
+            raise NameJudgeError("network") from None
+        except http.client.HTTPException:
+            # 응답을 읽다 끊기거나(IncompleteRead) 상태 줄이 깨진(BadStatusLine) 경우다. OSError가 아니라서
+            # 위 그물에 걸리지 않고 API 500으로 올라갔다 — 규칙 결과로 돌아가게 같은 코드로 바꾼다(#625).
             raise NameJudgeError("network") from None
         if len(body) > _MAX_RESPONSE_BYTES:
             raise NameJudgeError("response_too_large")
