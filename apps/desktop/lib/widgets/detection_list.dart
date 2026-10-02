@@ -60,7 +60,17 @@ class _DetectionRow extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final kindColor = KindColors.of(detection.kind);
-    return Container(
+    final kindLabel = Text(
+      detection.kindLabel,
+      style: textTheme.titleSmall,
+      overflow: TextOverflow.ellipsis,
+    );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // 종류명은 92px 고정 칸이라 값이 한 줄로 정렬된다. 행이 좁으면(창을 많이 줄였을 때 —
+        // 폴더 안쪽 여백이 생긴 #587 뒤로 더 쉽게 닿는다) 글자 폭만큼만 차지해 가로로 넘치지 않게 한다.
+        final narrow = constraints.maxWidth < 300;
+        return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: colors.surface,
@@ -75,14 +85,10 @@ class _DetectionRow extends StatelessWidget {
             decoration: BoxDecoration(color: kindColor, shape: BoxShape.circle),
           ),
           const SizedBox(width: 10),
-          SizedBox(
-            width: 92,
-            child: Text(
-              detection.kindLabel,
-              style: textTheme.titleSmall,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
+          if (narrow)
+            Flexible(child: kindLabel)
+          else
+            SizedBox(width: 92, child: kindLabel),
           Expanded(
             child: Text(
               detection.text,
@@ -108,6 +114,8 @@ class _DetectionRow extends StatelessWidget {
           MaskToggle(masked: masked, enabled: enabled, onChanged: onToggle),
         ],
       ),
+        );
+      },
     );
   }
 }

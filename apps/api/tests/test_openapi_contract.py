@@ -44,3 +44,16 @@ def test_openapi_contains_scan_and_anonymize_contracts() -> None:
 
     strategy_schema = schema["components"]["schemas"]["AnonymizeStrategy"]
     assert "pseudonym" in strategy_schema["enum"]
+
+    mode_schema = schema["components"]["schemas"]["ProcessingMode"]
+    assert mode_schema["enum"] == ["rule", "hybrid"]
+    scan_request_properties = schema["components"]["schemas"]["ScanRequest"]["properties"]
+    scan_response_properties = schema["components"]["schemas"]["ScanResponse"]["properties"]
+    anonymize_response_properties = schema["components"]["schemas"]["AnonymizeResponse"]["properties"]
+    assert "mode" in scan_request_properties
+    assert "mode_used" in scan_response_properties
+    assert "hybrid_failed" in scan_response_properties
+    assert "hybrid_failure_code" in scan_response_properties
+    assert "mode_used" in anonymize_response_properties
+    assert "hybrid_failed" in anonymize_response_properties
+    assert "hybrid_failure_code" in anonymize_response_properties

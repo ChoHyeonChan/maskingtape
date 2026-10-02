@@ -15,6 +15,48 @@
 
 ---
 
+## 처음 기여하는 길
+
+처음 오는 사람은 "좋은 아이디어"보다 **작게 성공하는 첫 PR**이 더 중요합니다. 아래 순서대로
+진행하면 저장소 규칙을 거의 다 지킬 수 있습니다.
+
+1. **쉬운 이슈를 고른다.** GitHub Issues에서 `good first issue` 라벨이 붙은 것부터 봅니다. 없으면
+   `documentation`, `test`, `part: ...` 라벨 중 자기 파트와 맞는 작은 이슈를 고릅니다.
+2. **읽을 문서를 정한다.**
+   - 공통: 이 문서, [CLAUDE.md](CLAUDE.md), [STRUCTURE.md](STRUCTURE.md)
+   - core: [packages/core/README.md](packages/core/README.md)
+   - MCP: [packages/mcp-server/README.md](packages/mcp-server/README.md)
+   - API: [apps/api/README.md](apps/api/README.md)
+   - web: [apps/web/README.md](apps/web/README.md)
+   - desktop: [apps/desktop/README.md](apps/desktop/README.md)
+   - bench: [bench/README.md](bench/README.md)
+3. **개발 환경을 최소로 설치한다.** 자기 파트 README의 로컬 실행 명령만 먼저 따라 합니다.
+   저장소 루트에서 `pip install .`을 하지 않습니다. Python 패키지는 `packages/core`,
+   `packages/mcp-server`, `apps/api`처럼 개별 경로로 설치합니다.
+4. **합성 데이터 하나로 재현한다.** 버그든 기능이든 실제 개인정보가 아닌 가짜 예시로 입력,
+   기대 결과, 실제 결과를 먼저 적습니다.
+5. **테스트 하나를 같이 고친다.** 문서만 바꾸는 PR이 아니라면 최소한 자기 파트 테스트를 돌립니다.
+   명령은 각 README의 "테스트" 절을 따릅니다.
+6. **작게 PR을 연다.** PR 본문에는 `Closes #이슈번호`, 한 줄 요약, 동작 원리 3줄, 실행한 검증 명령을
+   적습니다. 리뷰에서 막히면 채팅보다 PR 코멘트에 남기는 편이 기록으로 좋습니다.
+
+추천 첫 기여:
+
+| 하고 싶은 일 | 시작 지점 | 확인 방법 |
+|---|---|---|
+| 문서 오타·설명 보강 | `README.md`, 파트별 README | 링크가 깨지지 않는지 확인 |
+| API 계약 이해 | `apps/api/README.md`, `apps/api/tests/test_openapi_contract.py` | `ruff check apps/api`, `pytest apps/api -q` |
+| 탐지기 표기 하나 보강 | `packages/core/maskingtape/detectors/` | core 테스트 + bench 차등 검사 |
+| 웹 표시 라벨 추가 | `apps/web/src/types/` | `npm test`, `npm run build` |
+| 데스크톱 표시 라벨 추가 | `apps/desktop/lib/models/` | `flutter analyze`, `flutter test` |
+| 벤치 데이터 케이스 추가 | `bench/` | `python -m bench.evaluators.evaluate ...` |
+
+커뮤니티에 공유하기 전에는 팀원 GitHub 이메일이 비공개인지 확인합니다. 공유 글에는 실제로 저장소에
+있는 기능과 측정된 수치만 쓰고, 정확도 수치는 데이터셋·모드·커밋 조건을 함께 적습니다. 받은 피드백은
+채팅에 묻지 말고 이슈로 남깁니다.
+
+---
+
 ## 작업 흐름 — 이슈 → 브랜치 → PR → 머지
 
 ### 1단계. 이슈부터 만든다 (코드보다 먼저)

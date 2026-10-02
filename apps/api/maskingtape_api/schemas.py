@@ -33,6 +33,13 @@ class AnonymizeStrategy(str, Enum):
     PSEUDONYM = "pseudonym"
 
 
+class ProcessingMode(str, Enum):
+    """Detection mode requested by web clients."""
+
+    RULE = "rule"
+    HYBRID = "hybrid"
+
+
 class TextRequest(BaseModel):
     """Base request body for endpoints that process one text payload."""
 
@@ -49,6 +56,10 @@ class TextRequest(BaseModel):
         min_length=1,
         max_length=MAX_TEXT_LENGTH,
         description="합성 또는 사용자가 입력한 처리 대상 텍스트. 서버는 이 값을 저장하지 않는다.",
+    )
+    mode: ProcessingMode = Field(
+        default=ProcessingMode.RULE,
+        description="탐지 모드. rule은 규칙 전용, hybrid는 규칙 결과에 이름 판단기를 더한다.",
     )
 
 
@@ -97,6 +108,18 @@ class ScanResponse(BaseModel):
     """Response body for scan results."""
 
     detections: list[DetectionResponse] = Field(default_factory=list)
+    mode_used: ProcessingMode = Field(
+        default=ProcessingMode.RULE,
+        description="실제로 사용된 탐지 모드. 하이브리드 실패 시 rule로 내려간다.",
+    )
+    hybrid_failed: bool = Field(
+        default=False,
+        description="hybrid 요청이 규칙 모드로 폴백했는지 여부.",
+    )
+    hybrid_failure_code: str | None = Field(
+        default=None,
+        description="hybrid 폴백 사유 코드. 원문이나 판단기 응답은 담지 않는다.",
+    )
 
 
 class AnonymizeRequest(TextRequest):
@@ -114,6 +137,18 @@ class AnonymizeResponse(BaseModel):
 
     text: str = Field(..., description="비식별화가 적용된 텍스트.")
     detections: list[DetectionResponse] = Field(default_factory=list)
+    mode_used: ProcessingMode = Field(
+        default=ProcessingMode.RULE,
+        description="실제로 사용된 탐지 모드. 하이브리드 실패 시 rule로 내려간다.",
+    )
+    hybrid_failed: bool = Field(
+        default=False,
+        description="hybrid 요청이 규칙 모드로 폴백했는지 여부.",
+    )
+    hybrid_failure_code: str | None = Field(
+        default=None,
+        description="hybrid 폴백 사유 코드. 원문이나 판단기 응답은 담지 않는다.",
+    )
 
 
 class HealthResponse(BaseModel):
