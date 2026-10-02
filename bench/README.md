@@ -19,14 +19,17 @@ generator/
   documents.py    # 문장 템플릿에 값을 심어 문서 + 라벨(span) 생성
 generate_dataset.py  # CLI — JSONL 데이터셋 생성
 generate_attacks.py  # CLI — 프롬프트 공격 골든셋(#549) 생성 (generator/attacks.py)
+generate_open_misses.py  # CLI — 열린 미탐 세트(#610) 생성 (generator/open_misses.py)
 evaluators/           # 평가 도구 모음 — "무엇을 평가하는가"별로 파일 하나
   evaluate.py            # CLI — core Pipeline.scan() 결과 vs 정답 → precision/recall/F1/F2 리포트 (종류별+난이도별)
+  error_breakdown.py     # evaluate.py의 미탐·오탐을 유출 기준(가려짐/부분 유출/완전 유출, 경계 불일치/엉뚱한 곳)으로 다시 나눔 (#612)
   mask_quality.py        # 마스킹 결과물 자체의 개인정보 유출(완전/부분) 여부 검증 로직
   evaluate_masking.py    # CLI — 마스킹 결과에 개인정보가 실제로 남아있는지(유출률) 평가 (--strategy로 mask/label/pseudonym 선택)
   confidence_analysis.py # CLI — confidence 임계값별 precision/recall/F1 변화 분석
   compare_name_detectors.py  # CLI — 이름 탐지 규칙판 vs 하이브리드(LLM) 정확도 비교
   compare_open_source_tools.py # CLI — 로컬 오픈소스 PII 도구와 같은 데이터·채점기로 정확도 비교
   evaluate_attacks.py    # CLI — 프롬프트 공격 골든셋을 규칙 / LLM 단독 / 하이브리드 이름 재현율로 채점 (#549)
+  evaluate_open_misses.py  # CLI — 열린 미탐 세트를 core 이슈별·태그별 재현율로 채점 (#610)
 datasets/            # 생성된 평가셋 (정답 라벨 포함) — synth_v1(제출 수치 근거)·synth_v2(주소 확장)
 reports/             # evaluate.py --report로 저장한 마크다운 리포트 (결과보고서 첨부용)
 tests/               # 생성기·평가 로직 단위 테스트
@@ -429,6 +432,59 @@ docstring/주석에 명시하고 있다(`email.py`는 상한이 없던 시절 40
 `evaluate.py`는 종류(kind)별 표와 난이도별 표를 둘 다 출력한다 — 예를 들어 rrn의 전체 recall은
 높은데 hard 난이도에서만 떨어진다면 "구분자 없는 표기를 놓친다"는 구체적 원인을 알 수 있다.
 
+## 미탐·오탐 분해 — 그 미탐은 유출인가 ([#612](https://github.com/ChoHyeonChan/maskingtape/issues/612))
+
+`evaluate.py`는 예측과 정답이 (종류, 시작, 끝)까지 **완전히 같을 때만** 맞은 것으로 센다.
+그래서 성격이 다른 두 가지가 똑같이 미탐 1건으로 찍힌다.
+
+| 입력 | 정답 | 예측 | 완전 일치 집계 | 실제 |
+|---|---|---|---|---|
+| `환자 권연의 생년월일은 …` | `권연` | `권연의` | 미탐 1 + 오탐 1 | 이름은 전부 가려졌다. 조사 한 글자를 더 가렸을 뿐 |
+| `남원 팀장이 보고했습니다.` | `남원` | 없음 | 미탐 1 | 이름이 원문 그대로 남는다 |
+
+`evaluate.py`를 돌리면 기존 표 아래에 이 둘을 가르는 표가 하나 더 나온다(`--report`
+마크다운에도 들어간다). **기존 표와 precision/recall/F1/F2 값은 그대로다** — 같은 미탐·오탐을
+다시 나눈 것이라 분류의 합이 기존 `fn`·`fp`와 항상 같다(테스트로 확인).
+
+| 열 | 뜻 |
+|---|---|
+| 가려짐 (covered) | 정답의 모든 글자를 예측이 덮었다. 경계나 종류만 다르다 — **유출 없음** |
+| 부분 유출 (partial) | 일부 글자만 덮었다. 남은 글자가 원문으로 남는다 |
+| 완전 유출 (missed) | 겹치는 예측이 하나도 없다 |
+| 경계 불일치 (boundary) | 정답과 겹치는 오탐 — 위 "가려짐"·"부분 유출"의 반대쪽 |
+| 엉뚱한 곳 (spurious) | 어떤 정답과도 겹치지 않는 오탐 — 개인정보가 아닌 곳을 가렸다 |
+| 유출 기준 재현율 (leak_recall) | (적중 + 가려짐) / 정답 수 |
+
+덮였는지는 종류와 무관하게 본다. 주소로 가려졌든 이름으로 가려졌든 글자는 안 보인다.
+미탐은 정답의 종류에, 오탐은 예측의 종류에 센다.
+
+### 결과 (2026-10-01, main `a4db5e2`, 규칙 전용)
+
+이름을 뺀 10종은 미탐·오탐이 없어 이름 행과 전체만 적는다.
+
+| 데이터셋 | 행 | 미탐 | 가려짐 | 부분 유출 | 완전 유출 | 오탐 | 경계 불일치 | 엉뚱한 곳 | 완전 일치 재현율 | 유출 기준 재현율 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| synth_v1 | name | 26 | 12 | 0 | 14 | 12 | 12 | 0 | 0.932 | 0.963 |
+| synth_v1 | overall | 26 | 12 | 0 | 14 | 12 | 12 | 0 | 0.974 | 0.986 |
+| synth_v2 | name | 22 | 10 | 0 | 12 | 10 | 10 | 0 | 0.940 | 0.967 |
+| synth_v2 | overall | 22 | 10 | 0 | 12 | 10 | 10 | 0 | 0.978 | 0.988 |
+
+- **미탐의 절반 가까이(v1 12/26, v2 10/22)는 유출이 아니다.** 두 글자 이름 뒤 조사
+  (`이`·`의`)를 이름의 셋째 글자로 보고 한 글자 더 가린 경우다.
+- **오탐은 전부 그 반대쪽이다.** 엉뚱한 곳을 가린 오탐은 0건이다.
+- 실제로 원문이 남는 건 v1 14건, v2 12건이고 모양은 둘뿐이다 — 두 글자 이름 + 직함
+  ([#601](https://github.com/ChoHyeonChan/maskingtape/issues/601))과 "A에서 B로 변경"
+  ([#589](https://github.com/ChoHyeonChan/maskingtape/issues/589)).
+
+**읽는 법과 한계**
+
+- 유출 기준 재현율은 완전 일치 재현율을 **대신하지 않는다.** 루트 README의 정확도 표는
+  완전 일치 기준 그대로다. 이 표는 "남은 미탐 가운데 진짜 유출이 몇 건인가"를 답하는 보조 지표다.
+- "가려짐"이 좋은 것만은 아니다. 한 글자 더 가리는 건 안전한 실패지만, 주소 탐지가 옆 문장까지
+  삼키는 것도 "가려짐"으로 찍힌다. 얼마나 넓게 덮었는지는 이 표가 보지 않는다.
+- 아래 「마스킹 품질(유출) 검증」은 마스킹된 **결과 문자열**에 원문이 남았는지를 본다. 이 표는
+  **탐지 구간**을 종류별로 보고 `evaluate.py` 표의 미탐·오탐과 한 건씩 대응한다.
+
 ## 마스킹 품질(유출) 검증
 
 `evaluate.py`는 "core가 개인정보 위치를 정확히 예측했는가"를 보는 내부 지표(precision/recall)다.
@@ -802,6 +858,96 @@ editable install이 새 파일도 옛 커밋 환경에서 찾아내 버려서 �
 [#533](https://github.com/ChoHyeonChan/maskingtape/issues/533)으로 남겼다(bench 소관이
 아니라 코드는 고치지 않았다).
 
+## 열린 미탐 세트 — 아직 안 고친 미탐을 core 이슈별로 재기 ([#610](https://github.com/ChoHyeonChan/maskingtape/issues/610))
+
+**⚠️ 이 세트는 일반 정확도가 아니라 "열린 미탐을 얼마나 막았는지 보는 진행 지표"다.**
+우리가 찾은 미탐만 모았으므로 시작 재현율이 0에 가깝게 나오는 게 정상이다. 표기 변형
+세트(#531)가 **이미 고친** 표기가 되돌아가지 않는지 본다면, 이 세트는 **아직 안 고친**
+표기를 재서 core가 고칠 때마다 이슈별 재현율이 오르는 걸 보인다.
+
+만든 이유: v1·v2는 이름을 뺀 10종이 전부 1.000이고 이름에 남은 오류도 세 가지 모양뿐이라,
+core가 미탐을 더 막아도 점수가 거의 움직이지 않는다. 반대 방향도 안 보인다 —
+[#600](https://github.com/ChoHyeonChan/maskingtape/issues/600)은 예전에 잡히던 문장
+("담당자는 ○○○예요")이 새기 시작한 회귀인데 벤치 점수는 그대로였다.
+
+`bench/datasets/open_misses_v1.jsonl`은 core 이슈 13건의 재현 문장과 **같은 모양**으로 새로
+쓴 합성 문장 360건(18개 태그 × 20건)이다. 이슈 본문 문장을 복사하지 않고 값만 시드로 새로
+뽑았다. 조사는 받침에 맞춰 고른다(이/가, 은/는, 으로/로).
+
+```bash
+python -m bench.generate_open_misses --out bench/datasets/open_misses_v1.jsonl
+python -m bench.evaluators.evaluate_open_misses bench/datasets/open_misses_v1.jsonl
+# 두 커밋 비교(고치기 전 → 고친 뒤, 또는 언제부터 새는지)를 한 명령으로 재현:
+python -m bench.evaluators.compare_open_misses_across_commits bench/datasets/open_misses_v1.jsonl --before b1c79b5 --after HEAD
+```
+
+**채점 방식**
+
+- 행마다 `miss_tag`(모양)와 `issue`(core 이슈 번호)가 있다.
+- 라벨의 `target: false`는 "정답이지만 지금도 잡히는 자리"다(나열의 첫 이름, 다시 나오는
+  이름의 첫 언급). 재현율은 `target` 라벨로만 센다 — 넣으면 시작 수치가 부풀려진다.
+  `target`이 없으면 대상이다.
+- target 라벨마다 셋으로 나눈다. **적중**은 예측과 종류·위치가 완전히 같을 때, **부분**은
+  겹치는 예측은 있지만 완전히 같지 않을 때(주소가 번지까지만 가려짐), **미탐**은 겹치는
+  예측이 없을 때다. 재현율은 적중만 센다 — 부분은 남은 조각이 곧 유출이다.
+- 오탐은 어떤 정답 라벨과도 겹치지 않는 예측만 센다.
+
+### 결과 (2026-10-01, main `73d09c8`, 규칙 전용)
+
+| core 이슈 | 태그 | 재현율 | 적중 | 부분 | 미탐 |
+|---|---|---|---|---|---|
+| [#589](https://github.com/ChoHyeonChan/maskingtape/issues/589) "A에서 B로 변경" | name_change_log_second | 0.000 | 0 | 0 | 20 |
+| [#592](https://github.com/ChoHyeonChan/maskingtape/issues/592) 날짜 뒤 생년월일 단서 | birth_date_cue_after | 0.000 | 0 | 0 | 20 |
+| [#593](https://github.com/ChoHyeonChan/maskingtape/issues/593) 건물명 + 동·호만 | address_building_dong_ho_only | 0.000 | 0 | 0 | 20 |
+| [#594](https://github.com/ChoHyeonChan/maskingtape/issues/594) 지역 이름 운전면허 | driver_license_region_name | 0.000 | 0 | 6 | 14 |
+| [#600](https://github.com/ChoHyeonChan/maskingtape/issues/600) 목록에 없는 어미 | name_unlisted_ending | 0.000 | 0 | 0 | 20 |
+| [#601](https://github.com/ChoHyeonChan/maskingtape/issues/601) 두 글자 이름 + 직함 | name_two_syllable_title | 0.000 | 0 | 0 | 20 |
+| [#602](https://github.com/ChoHyeonChan/maskingtape/issues/602) 나열한 이름 | name_list_after_label | 0.000 | 0 | 0 | 31 |
+| [#603](https://github.com/ChoHyeonChan/maskingtape/issues/603) 단서 어휘 | name_cue_role_label | 0.000 | 0 | 0 | 20 |
+| | name_cue_title_after | 0.000 | 0 | 0 | 20 |
+| | name_cue_closing | 0.000 | 0 | 0 | 20 |
+| [#604](https://github.com/ChoHyeonChan/maskingtape/issues/604) 이름 뒤 괄호 | name_paren_after | 0.000 | 0 | 0 | 20 |
+| [#605](https://github.com/ChoHyeonChan/maskingtape/issues/605) 주소 꼬리 | address_tail_floor_unit | 0.000 | 0 | 20 | 0 |
+| | address_tail_building | 0.000 | 0 | 20 | 0 |
+| | address_tail_paren_dong | 0.000 | 0 | 20 | 0 |
+| [#606](https://github.com/ChoHyeonChan/maskingtape/issues/606) "시"를 뗀 시 이름 | address_city_without_si | 0.000 | 0 | 10 | 10 |
+| [#607](https://github.com/ChoHyeonChan/maskingtape/issues/607) 라벨 + 틀린 검증 숫자 | card_label_bad_checksum | 0.000 | 0 | 0 | 20 |
+| | biz_reg_label_bad_checksum | 0.000 | 0 | 0 | 20 |
+| [#608](https://github.com/ChoHyeonChan/maskingtape/issues/608) 다시 나오는 이름 | name_repeat_without_cue | 0.000 | 0 | 0 | 40 |
+| **전체** | | **0.000** | **0** | **76** | **315** |
+
+정답과 안 겹치는 오탐은 0건이다. #605는 전부 "부분"이다 — 번지까지는 가리고 층·호·건물명이
+남는다. #606은 주소 단서가 있으면 구부터 가려 시 이름만 남고(부분 10건), 단서가 없으면
+통째로 남는다(미탐 10건). #594의 부분 6건은 지역 이름 뒤 숫자 일부가 다른 종류(전화 등)로
+우연히 잡힌 경우다.
+
+### 회귀를 숫자로 보기 — #600 (`b1c79b5` → `a4db5e2`)
+
+`compare_open_misses_across_commits.py`는 두 커밋의 core를 각각 격리된 임시 가상환경에
+설치해 같은 세트를 잰다(표기 변형 세트의 비교 도구와 같은 방식). #484 수정(PR #571)이
+들어가기 직전 커밋과 지금 main을 비교하면 한 줄만 달라진다.
+
+| core 이슈 | 태그 | #571 직전 (`b1c79b5`) | main (`a4db5e2`) |
+|---|---|---|---|
+| #600 | name_unlisted_ending | **1.000** | **0.000** |
+| 나머지 17개 태그 | | 0.000 | 0.000 |
+
+"담당자는 ○○○예요"·"고객 ○○○께서는" 같은 문장 20건이 #571 전에는 전부 잡혔고 지금은 전부
+샌다. synth_v1·v2에는 이 어미를 쓰는 템플릿이 없어서(지금 main의 v1·v2 미탐에 이 모양이
+한 건도 없다) 이 회귀가 벤치 점수에 보이지 않았다.
+
+**읽는 법과 한계**
+
+- core PR이 이슈 하나를 고치면 그 줄이 1.000 쪽으로 움직인다. 고친 뒤에는 그 태그를
+  표기 변형 세트로 옮겨 회귀 지표로 쓴다.
+- **현재 동작을 테스트로 고정하지 않았다.** "지금 못 잡는다"를 테스트로 박으면 core PR이
+  미탐을 고칠 때마다 bench 테스트가 깨진다. 테스트는 생성기가 약속한 것(라벨 위치, 시드
+  재현성, 검증 숫자가 실제로 틀렸는지)과 `target`이 아닌 라벨을 지금 core가 잡는다는
+  전제만 확인한다.
+- 이 세트로 규칙을 맞추면 이 세트의 점수는 오르지만 그게 곧 일반 성능은 아니다
+  ([#456](https://github.com/ChoHyeonChan/maskingtape/issues/456)의 자기일관성 문제와 같다).
+  루트 README의 정확도 표(v1·v2)에는 이 세트를 섞지 않는다.
+
 ## 프롬프트 공격 골든셋 — 문서 속 지시문이 LLM 이름 마스킹을 약하게 만드는가 ([#549](https://github.com/ChoHyeonChan/maskingtape/issues/549))
 
 **⚠️ 이 세트는 정확도가 아니라 "하이브리드가 문서 안의 지시문에 얼마나 흔들리는지"를 재는
@@ -879,6 +1025,8 @@ JSONL — 한 줄에 문서 하나:
 - `start`/`end`는 파이썬 슬라이스 규약 (`text[start:end]` == 개인정보 원문)
 - `kind`는 core의 `Detection.kind`와 동일한 문자열: `rrn`, `phone`, `email`, `name`, `address`, `card`, `biz_reg`, `passport`, `account`, `birth_date`, `driver_license`
 - `difficulty`는 `easy`/`hard`/`negative` 중 하나 (없으면 evaluate.py가 `unknown`으로 취급 — 하위 호환)
+- 열린 미탐 세트(`open_misses_v1.jsonl`)에만 있는 필드: 행의 `miss_tag`·`issue`, 라벨의
+  `target`(없으면 `true`). synth_v1·v2의 포맷은 그대로다
 - 평가 기준: span 완전 일치(exact match)로 precision / recall / F1 / F2 산출
   (F2는 재현율에 F1보다 더 큰 가중치를 두는 Fβ, β=2 — PII 탐지는 미탐(FN)이 오탐(FP)보다
   위험하다는 게 이 도메인의 평가 관행이라 F1과 나란히 본다. 근거: `evaluate.py` 모듈 docstring)
