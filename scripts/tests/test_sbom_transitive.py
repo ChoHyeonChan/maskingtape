@@ -27,6 +27,12 @@ _SPEC.loader.exec_module(sbom)
         ("PSF-2.0", False),
         ("GPL-3.0-only", False),
         ("확인 필요", False),
+        # 괄호 우선순위(#500): AND가 걸린 쪽은 GPL을 피할 수 없다
+        ("GPL-3.0-only AND (MIT OR Apache-2.0)", False),
+        ("(MIT OR Apache-2.0) AND BSD-3-Clause", True),
+        ("Apache-2.0 OR BSD-3-Clause", True),  # cryptography
+        ("Apache-2.0 WITH LLVM-exception", False),  # 예외 조항은 사람이 본다
+        ("MIT OR", False),
     ],
 )
 def test_allow_list(expression, allowed):
@@ -84,3 +90,32 @@ def test_sbom_has_exactly_one_generated_section():
     text = sbom.SBOM.read_text(encoding="utf-8")
     assert text.count(sbom.BEGIN) == 1 and text.count(sbom.END) == 1
     assert text.index(sbom.BEGIN) < text.index(sbom.END)
+
+
+class _FakeDist:
+    def __init__(self, version, requires):
+        self.version = version
+        self.requires = requires
+
+
+def test_installed_rows_follow_extras_the_parent_requested(monkeypatch):
+    # mcp → pyjwt[crypto] → cryptography → cffi → pycparser. pyjwt의 dev extra는 아무도 요청하지 않았다(#500).
+    dists = {
+        "mcp": _FakeDist("1.0", ["pyjwt[crypto]>=2"]),
+        "pyjwt": _FakeDist("2.0", ['cryptography>=3.4; extra == "crypto"', 'pytest; extra == "dev"']),
+        "cryptography": _FakeDist("46.0", ["cffi>=1.12"]),
+        "cffi": _FakeDist("2.0", ["pycparser"]),
+        "pycparser": _FakeDist("2.22", []),
+    }
+
+    def distribution(name):
+        if name not in dists:
+            raise sbom.metadata.PackageNotFoundError(name)
+        return dists[name]
+
+    monkeypatch.setattr(sbom.metadata, "distribution", distribution)
+    monkeypatch.setattr(sbom, "pypi_meta", lambda name, version: ("MIT", ""))
+
+    names = [r["name"] for r in sbom.installed_rows(["mcp"], skip={"mcp"})]
+
+    assert names == ["cffi", "cryptography", "pycparser", "pyjwt"]

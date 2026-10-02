@@ -96,12 +96,52 @@ def clean_repo(url: str | None) -> str:
 
 
 def is_allowed(expression: str) -> bool:
-    """SPDX 식의 OR 선택지 중 하나라도 AND 항목이 전부 허용 목록이면 허용이다."""
-    for alternative in re.split(r"\s+OR\s+", expression.strip("() ")):
-        terms = [term.strip("() ") for term in re.split(r"\s+AND\s+", alternative)]
-        if all(term in ALLOWED for term in terms):
-            return True
-    return False
+    """SPDX 식을 괄호 우선순위대로 계산한다. OR는 선택지 중 하나만, AND는 전부 허용이어야 허용이다.
+
+    예전에는 괄호를 무시하고 OR로 먼저 쪼개서 `GPL-3.0-only AND (MIT OR Apache-2.0)`도 허용으로 봤다(#500).
+    `WITH` 예외가 붙은 항목과 식으로 읽히지 않는 문자열은 사람이 보도록 허용 밖으로 둔다.
+    """
+    tokens = re.findall(r"\(|\)|[^\s()]+", expression)
+    pos = 0
+    broken = False  # 식이 중간에 끝나거나 괄호가 닫히지 않으면 허용으로 보지 않는다
+
+    def parse_or() -> bool:
+        nonlocal pos
+        value = parse_and()
+        while pos < len(tokens) and tokens[pos].upper() == "OR":
+            pos += 1
+            value = parse_and() or value
+        return value
+
+    def parse_and() -> bool:
+        nonlocal pos
+        value = parse_atom()
+        while pos < len(tokens) and tokens[pos].upper() == "AND":
+            pos += 1
+            value = parse_atom() and value
+        return value
+
+    def parse_atom() -> bool:
+        nonlocal pos, broken
+        if pos >= len(tokens):
+            broken = True
+            return False
+        token = tokens[pos]
+        pos += 1
+        if token == "(":
+            value = parse_or()
+            if pos < len(tokens) and tokens[pos] == ")":
+                pos += 1
+                return value
+            broken = True
+            return False
+        if pos < len(tokens) and tokens[pos].upper() == "WITH":
+            pos += 2  # 예외 조항 이름까지 건너뛰고, 판단은 사람에게 넘긴다
+            return False
+        return token in ALLOWED
+
+    result = parse_or()
+    return result and not broken and pos == len(tokens)
 
 
 def row(name: str, version: str, license_: str, repo: str, note: str) -> dict:
@@ -244,25 +284,39 @@ def api_rows() -> list[dict]:
 
 
 def installed_rows(start: list[str], skip: set[str]) -> list[dict]:
-    """설치본 메타데이터로 그래프를 걷는다. extra(선택 기능) 요구사항은 따라가지 않는다."""
-    rows, seen = [], set()
-    queue = deque((canonicalize_name(name), [], "") for name in start)
+    """설치본 메타데이터로 그래프를 걷는다.
+
+    extra(선택 기능) 요구사항은 부모가 그 extra를 요청했을 때만 따라간다. 예전에는 extra 요구사항을
+    전부 건너뛰어, mcp가 `pyjwt[crypto]`로 직접 요청해 실제로 설치되는 cryptography → cffi → pycparser가
+    부록에서 빠졌다(#500). 같은 패키지를 다른 extra로 다시 만나면 새 extra의 요구사항만 더 따라간다.
+    """
+    rows, done = [], {}
+    queue = deque((canonicalize_name(name), [], "", frozenset()) for name in start)
     while queue:
-        name, via, marker = queue.popleft()
-        if name in seen:
+        name, via, marker, extras = queue.popleft()
+        first = name not in done
+        if not first and extras <= done[name]:
             continue
-        seen.add(name)
+        new_extras = extras - done.get(name, frozenset())
+        done[name] = done.get(name, frozenset()) | extras
         condition = f". 조건: `{marker}`" if marker else ""
         try:
             dist = metadata.distribution(name)
         except metadata.PackageNotFoundError:
-            rows.append(row(name, "-", "-", "", "이 환경에 설치되지 않음" + condition))
+            if first:
+                rows.append(row(name, "-", "-", "", "이 환경에 설치되지 않음" + condition))
             continue
         for text in dist.requires or []:
             req = Requirement(text)
-            if req.marker is None or "extra" not in str(req.marker):
-                queue.append((canonicalize_name(req.name), via + [name], str(req.marker or "")))
-        if name in skip:
+            req_marker = str(req.marker or "")
+            if "extra" in req_marker:
+                if not any(req.marker.evaluate({"extra": extra}) for extra in new_extras):
+                    continue
+            elif not first:
+                continue  # extra와 무관한 요구사항은 처음 만났을 때 이미 따라갔다
+            child_extras = frozenset(canonicalize_name(extra) for extra in req.extras)
+            queue.append((canonicalize_name(req.name), via + [name], req_marker, child_extras))
+        if not first or name in skip:
             continue
         license_, repo = pypi_meta(name, dist.version)
         note = "경로: " + " → ".join(via + [name]) if len(via) > 1 else "직접 의존성"
