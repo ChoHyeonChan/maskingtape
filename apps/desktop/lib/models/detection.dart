@@ -22,8 +22,6 @@ class Detection {
         end: json['end'] as int,
         // API는 원문 반향을 막으려고 `text`를 보내지 않는다(a376736) — 없으면 빈 값으로 두고,
         // 백엔드가 이 PC의 원문에서 잘라 채운다(`CodePointOffsets.convert`, #497).
-        // API는 원문 반향을 막으려고 `text`를 보내지 않는다(a376736) — 없으면 빈 값으로 두고,
-        // 백엔드가 이 PC의 원문에서 잘라 채운다(`CodePointOffsets.convert`, #497).
         text: json['text'] as String? ?? '',
         confidence: (json['confidence'] as num?)?.toDouble() ?? 1.0,
         detector: json['detector'] as String? ?? '',
@@ -72,7 +70,10 @@ class Detection {
   /// 처리했으므로 결과에 영향이 없다. 괄호 안에 원래 kind를 남기는 이유는, 라벨
   /// 누락을 "기타"로 완전히 뭉뚱그리면 어떤 종류가 빠졌는지 알 수 없어져서다 —
   /// 실제로 card·biz_reg·passport·account가 이 표시 덕분에 발견됐다.
-  String get kindLabel => _kindLabels[kind] ?? '기타($kind)';
+  String get kindLabel => labelOf(kind);
+
+  /// kind 하나의 라벨 — 탐지 항목이 없어도(샘플 서랍의 종류 태그) 같은 말을 쓰기 위해 공개한다.
+  static String labelOf(String kind) => _kindLabels[kind] ?? '기타($kind)';
 
   /// "주민번호 1 · 전화번호 2" 식 종류별 개수 요약. 빈 목록이면 "탐지 없음".
   static String summarize(List<Detection> detections) {
