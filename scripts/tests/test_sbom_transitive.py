@@ -80,6 +80,23 @@ def test_desktop_rows_cover_the_whole_lockfile(monkeypatch):
     assert rows["desktop_drop"]["note"] == "직접(런타임)"
 
 
+def test_checked_pub_license_replaces_registry_tag(monkeypatch):
+    # pub.dev 태그는 BSD-3-Clause 하나지만 vector_math 2.2.0 LICENSE에는 zlib 전문도 있다(#634)
+    monkeypatch.setattr(sbom, "pub_meta", lambda name, version: ("BSD-3-Clause", ""))
+    rows = {r["name"]: r for r in sbom.desktop_rows()}
+    assert rows["vector_math"]["license"] == "BSD-3-Clause AND Zlib"
+    assert not sbom.is_allowed(rows["vector_math"]["license"])  # 부록 A-6으로 모인다
+
+
+def test_checked_pub_license_needs_recheck_when_version_moves(monkeypatch):
+    # lock의 버전이 확인한 버전과 다르면 레지스트리 태그로 조용히 돌아가지 않는다
+    monkeypatch.setattr(sbom, "pub_meta", lambda name, version: ("BSD-3-Clause", ""))
+    monkeypatch.setitem(sbom.PUB_LICENSE_CHECKED, "vector_math", ("0.0.1", "BSD-3-Clause AND Zlib"))
+    rows = {r["name"]: r for r in sbom.desktop_rows()}
+    assert rows["vector_math"]["license"] == "확인 필요"
+    assert not sbom.is_allowed(rows["vector_math"]["license"])
+
+
 def test_sbom_has_exactly_one_generated_section():
     text = sbom.SBOM.read_text(encoding="utf-8")
     assert text.count(sbom.BEGIN) == 1 and text.count(sbom.END) == 1

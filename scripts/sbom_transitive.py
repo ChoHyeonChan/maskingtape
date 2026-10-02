@@ -52,6 +52,12 @@ FLUTTER_SDK = ("BSD-3-Clause", "https://github.com/flutter/flutter")
 NODE_ONLY_OPTIONAL = {
     "@napi-rs/canvas": "Node 전용 선택 의존성. 브라우저 번들에는 코드가 없다(불러오는 문자열만 있음)",
 }
+# pub.dev 태그가 놓친 라이선스. 그 버전 아카이브의 LICENSE를 직접 열어 확인한 사실이다(#634).
+# lock의 버전이 여기 적은 버전과 다르면 태그로 돌아가지 않고 "확인 필요"로 둔다.
+PUB_LICENSE_CHECKED = {
+    # 태그는 bsd-3-clause 하나지만 LICENSE에 Andrew Magill(2013)의 zlib 전문이 함께 있다
+    "vector_math": ("2.2.0", "BSD-3-Clause AND Zlib"),
+}
 _TEXT_TO_SPDX = {
     "mit": "MIT", "mit license": "MIT", "apache 2.0": "Apache-2.0", "apache-2.0": "Apache-2.0",
     "apache license 2.0": "Apache-2.0", "bsd": "BSD", "bsd-3-clause": "BSD-3-Clause",
@@ -287,6 +293,8 @@ def desktop_rows() -> list[dict]:
             note += ". Flutter SDK에 포함"
         else:
             license_, repo = pub_meta(entry["name"], entry["version"])
+            if checked := PUB_LICENSE_CHECKED.get(entry["name"]):
+                license_ = checked[1] if checked[0] == entry["version"] else "확인 필요"
         rows.append(row(entry["name"], entry["version"], license_, repo, note))
     return rows
 
@@ -351,7 +359,9 @@ def build() -> str:
         "### A-4. 데스크톱 앱 (Dart·Flutter, 소스로 배포, 빌드할 때 받음)",
         (
             "`apps/desktop/pubspec.lock` 전체다. 전이 의존성에는 `flutter_test`·`flutter_lints`가 끌어오는 "
-            "개발용 패키지도 섞여 있다. 라이선스는 pub.dev가 각 패키지의 LICENSE에서 판별한 값이다."
+            "개발용 패키지도 섞여 있다. 라이선스는 pub.dev가 각 패키지의 LICENSE에서 판별한 값이다. "
+            "pub.dev가 놓친 것은 그 버전의 LICENSE를 직접 열어 확인한 값으로 바꿨다"
+            f"({', '.join(sorted(PUB_LICENSE_CHECKED))})."
         ),
         table(desktop),
         "### A-5. 개발 도구 (배포물에 포함되지 않음)",
