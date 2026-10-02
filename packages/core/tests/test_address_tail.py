@@ -101,3 +101,34 @@ def test_building_unit_without_road_address_is_masked(text, expected):
 )
 def test_building_unit_needs_building_and_unit(text):
     assert spans(text) == []
+
+
+# ── 꼬리가 뒤의 다른 개인정보를 삼켜 종류가 숨지 않게 ──
+# 가리는 글자는 같아도, 주소가 번호·이름을 품으면 scan 결과에서 rrn·phone·name이 사라진다.
+# 웹은 종류마다 가림·보임을 바꿀 수 있어서 "주소"를 풀면 안의 번호도 같이 풀린다(#172와 같은 모양).
+
+
+@pytest.mark.parametrize(
+    "text, address, other_kind, other_text",
+    [
+        (
+            "서울특별시 강남구 테헤란로 123 (역삼동, 8001011234560)",
+            "서울특별시 강남구 테헤란로 123",
+            "rrn",
+            "8001011234560",
+        ),
+        (
+            "서울특별시 강남구 테헤란로 123 (역삼동, 01012345678)",
+            "서울특별시 강남구 테헤란로 123",
+            "phone",
+            "01012345678",
+        ),
+        ("서울특별시 강남구 테헤란로 123 홍길동님 3층", "서울특별시 강남구 테헤란로 123", "name", "홍길동"),
+    ],
+)
+def test_address_tail_does_not_swallow_other_pii(text, address, other_kind, other_text):
+    from maskingtape import Pipeline
+
+    found = [(d.kind, d.text) for d in Pipeline().scan(text)]
+    assert ("address", address) in found
+    assert (other_kind, other_text) in found
