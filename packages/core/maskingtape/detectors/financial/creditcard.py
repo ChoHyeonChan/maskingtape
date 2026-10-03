@@ -50,6 +50,14 @@ _MIXED_CARD_RE = re.compile(r"(?<!\d)\d{4}[ -]{1,3}\d{4}[ -]{1,3}\d{4}[ -]{1,3}\
 # 신용카드·체크카드는 "카드"로 잡힌다. "신용"·"체크"만 두면 "신용등급"·"체크리스트" 뒤 연도 목록도 받는다.
 _CARD_CUE_RE = re.compile(r"카드|card|결제", re.IGNORECASE)
 _CARD_CUE_WINDOW = 15
+# 카드 종류 라벨이 번호 바로 앞에 있으면 Luhn이 틀려도 받는다(#607). 손으로 옮기다 한 자리 틀리거나
+# OCR로 잘못 읽은 번호도 라벨이 "카드번호다"라고 말해 주므로 번호 전체를 가린다. 체크섬이 없는
+# 경우라 확신도는 계좌와 같은 0.6이다. 라벨 없이 형식만 맞는 숫자열은 여전히 버린다(#87).
+_CARD_LABEL_BEFORE_RE = re.compile(
+    r"(?:신용카드|체크카드|법인카드|카드 ?번호)[ \t]{0,3}[:：]?[ \t]{0,3}\Z"
+)
+_CARD_LABEL_WINDOW = 20
+_LABELED_CONFIDENCE = 0.6
 # 섞인 모양이 이미 찾은 카드 바로 뒤에 이어지면(구분자만 사이에 둠) 앞 카드의 문맥을 물려받는다(#510).
 # "카드 4111-1111 1111-1111 4111-1111 1111-1111"의 둘째 카드는 "카드"가 15자 밖이라 통째로 남았다.
 # 사이에 글자가 끼면 이어진 목록이 아니므로 받지 않는다 — 연도 목록 오탐 방지는 그대로다.
@@ -96,7 +104,8 @@ class CreditCardDetector(Detector):
     def detect(self, text: str) -> list[Detection]:
         """그룹 구조에 맞는 후보에서 숫자만 뽑아 자릿수(13~19)와 Luhn 체크섬을 확인한다.
 
-        체크섬이 우연히 맞을 수도 있어 확신도는 1.0이 아니라 0.95다.
+        체크섬이 우연히 맞을 수도 있어 확신도는 1.0이 아니라 0.95다. Luhn이 틀려도 카드 라벨이
+        바로 앞에 있으면 0.6으로 받는다(#607).
         """
         found: list[Detection] = []
         seen: set[tuple[int, int]] = set()
@@ -106,11 +115,15 @@ class CreditCardDetector(Detector):
         matches += [(m, True) for m in _search_every_start(_MIXED_CARD_RE, text)]
         for m, mixed in sorted(matches, key=lambda pair: pair[0].span()):
             digits = re.sub(r"\D", "", m.group(0))
-            if not (13 <= len(digits) <= 19):
+            if not (13 <= len(digits) <= 19) or m.span() in seen:
                 continue
-            if not _luhn_ok(digits) or m.span() in seen:
-                continue
-            if mixed and not self._has_card_context(text, m, found):
+            if _luhn_ok(digits):
+                if mixed and not self._has_card_context(text, m, found):
+                    continue
+                confidence = 0.95
+            elif self._has_card_label(text, m):
+                confidence = _LABELED_CONFIDENCE
+            else:
                 continue
             seen.add(m.span())
             found.append(
@@ -119,11 +132,20 @@ class CreditCardDetector(Detector):
                     start=m.start(),
                     end=m.end(),
                     text=m.group(0),
-                    confidence=0.95,
+                    confidence=confidence,
                     detector=self.__class__.__name__,
                 )
             )
         return found
+
+    @staticmethod
+    def _has_card_label(text: str, match: re.Match[str]) -> bool:
+        """번호 바로 앞(공백·쌍점 몇 자 이내)에 카드 종류 라벨이 있는지 본다(#607)."""
+        start = match.start()
+        return (
+            _CARD_LABEL_BEFORE_RE.search(text, max(0, start - _CARD_LABEL_WINDOW), start)
+            is not None
+        )
 
     @staticmethod
     def _has_card_context(text: str, match: re.Match[str], found: list[Detection]) -> bool:
