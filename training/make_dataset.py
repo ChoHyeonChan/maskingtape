@@ -53,6 +53,16 @@ _TRAIN_NOCUE_TEMPLATES = [
     "{name}랑 통화했는데 내일 온대요.",
     "발표는 {name}이 하고 질의응답은 {name}이 받는다.",
     "{name} 쪽에서 아직 답이 없습니다.",
+    # v2 — 1차 보고용 오류(2음절 이름 + 조사 은/도를 이름에 붙임) 보강: 조사 종류를 넓힌다.
+    "{name}은 오늘 재택이라 {name}이 대신 받습니다.",
+    "{name}도 같이 가기로 했어요.",
+    "{name}는 아직 출근 전입니다.",
+    "{name}만 빠지고 다 왔습니다.",
+    "{name}께 보고드렸습니다.",
+    "{name}에게도 알려 주세요.",
+    "{name}은 어제 퇴근 후 연락이 안 됐다.",
+    "다음 발표는 {name}도 함께 준비한다.",
+    "{name}은 회의실에, {name}도 곧 옵니다.",
 ]
 # 보고용 전용 — 학습에 없는 모양으로 "단서 없는 이름"을 잰다.
 _HELDOUT_NOCUE_TEMPLATES = [
@@ -98,6 +108,29 @@ _CONFUSER_SENTENCES = [
     "부산지점 매출이 늘었습니다.",
     "고객센터 운영 시간은 9시부터 18시까지입니다.",
 ]
+# v2 — 1차 보고용 오류("자택"·"안내"·"신주소"를 이름으로) 보강: 문장 첫머리·번호 앞에 오는 생활어·업무어. 학습에만 쓴다.
+_TRAIN_EXTRA_CONFUSERS = [
+    "자택 번호와 직장 번호를 모두 적어 주세요.",
+    "자택으로 우편을 보냈습니다.",
+    "자택 전화는 저녁에만 받습니다.",
+    "자택 근무로 전환되었습니다.",
+    "직장 전화는 근무 시간에만 받습니다.",
+    "직장 건강검진 일정이 나왔습니다.",
+    "신주소로 변경 신청이 접수되었습니다.",
+    "주소 변경 후 신주소가 반영되었습니다.",
+    "본사 이전으로 신주소 안내드립니다.",
+    "안내 문자가 발송되었습니다.",
+    "안내 데스크는 1층에 있습니다.",
+    "회신 기한은 금요일까지입니다.",
+    "접수 번호를 확인해 주세요.",
+    "재택 근무 신청서를 제출했습니다.",
+    "휴대폰 번호가 바뀌면 알려 주세요.",
+    "사무실 번호로 연락 주시면 됩니다.",
+    "배송지 변경은 출고 전까지 가능합니다.",
+    "수령인 정보가 비어 있습니다.",
+    "담당자 배정이 아직 안 됐습니다.",
+    "문의 사항은 게시판에 남겨 주세요.",
+]
 
 
 @dataclass(frozen=True)
@@ -106,6 +139,7 @@ class Split:
     other_templates: list[str]  # 이름 자리표시자가 없는 긍정 템플릿(다른 개인정보만 있음)
     negative_templates: list[str]
     nocue_templates: list[str]
+    confusers: list[str]
     attack_sentences: dict[str, tuple[str, ...]]
 
 
@@ -123,6 +157,7 @@ def split_templates(heldout: bool) -> Split:
         other_templates=other_t,
         negative_templates=neg_t,
         nocue_templates=_HELDOUT_NOCUE_TEMPLATES if heldout else _TRAIN_NOCUE_TEMPLATES,
+        confusers=_CONFUSER_SENTENCES if heldout else _CONFUSER_SENTENCES + _TRAIN_EXTRA_CONFUSERS,
         attack_sentences={k: tuple(v) for k, v in attacks.items()},
     )
 
@@ -159,8 +194,8 @@ def _sentence(split: Split, rng: random.Random) -> Document:
     return generate_negative_document(rng, template=rng.choice(split.negative_templates))
 
 
-def _confuser(rng: random.Random) -> Document:
-    return Document(text=rng.choice(_CONFUSER_SENTENCES), labels=[], difficulty="negative")
+def _confuser(split: Split, rng: random.Random) -> Document:
+    return Document(text=rng.choice(split.confusers), labels=[], difficulty="negative")
 
 
 def generate_documents(split: Split, seed: int, count: int) -> list[dict]:
@@ -175,12 +210,12 @@ def generate_documents(split: Split, seed: int, count: int) -> list[dict]:
             n = rng.choice([2, 2, 3, 4])
             parts = [_sentence(split, rng) for _ in range(n)]
             if rng.random() < 0.3:
-                parts.insert(rng.randrange(len(parts) + 1), _confuser(rng))
+                parts.insert(rng.randrange(len(parts) + 1), _confuser(split, rng))
             doc = _join(parts)
         elif r < 0.85:
-            doc = _confuser(rng)
+            doc = _confuser(split, rng)
         else:
-            doc = _join([_confuser(rng), _sentence(split, rng)] if rng.random() < 0.5 else [_sentence(split, rng), _confuser(rng)])
+            doc = _join([_confuser(split, rng), _sentence(split, rng)] if rng.random() < 0.5 else [_sentence(split, rng), _confuser(split, rng)])
         labels = [{"kind": lb.kind, "start": lb.start, "end": lb.end} for lb in doc.labels]
         text = doc.text
         attack_tag = "none"
