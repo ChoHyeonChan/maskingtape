@@ -50,7 +50,7 @@ git status --short --branch
 
 - PyPI 설치 검증은 인터넷이 필요하다. 인터넷이 없으면 전날 `pip download maskingtape -d wheelhouse`로
   wheelhouse를 만들어 두고 `pip install --no-index --find-links wheelhouse maskingtape`로 대체한다.
-- Ollama 모델은 크다. 전날 인터넷이 되는 곳에서 `ollama pull qwen2.5:7b`를 끝내고,
+- Ollama 모델(986MB)은 전날 인터넷이 되는 곳에서 `ollama pull hf.co/StayAlive1/maskingtape-name-1.5b-GGUF:Q4_K_M`를 끝내고,
   `ollama list`에 모델이 보이는지 확인한다.
 - Node 패키지는 인터넷이 필요하다. 전날 `apps/web`에서 `npm install`을 한 번 끝내 두거나,
   기능테스트 노트북에서 안정적인 네트워크를 확보한다.
@@ -207,14 +207,14 @@ ollama serve
 다른 터미널에서:
 
 ```powershell
-ollama pull qwen2.5:7b
+ollama pull hf.co/StayAlive1/maskingtape-name-1.5b-GGUF:Q4_K_M
 ollama list
 ```
 
 예열:
 
 ```powershell
-ollama run qwen2.5:7b "이름 판단 테스트"
+ollama run hf.co/StayAlive1/maskingtape-name-1.5b-GGUF:Q4_K_M "이름 판단 테스트"
 ```
 
 기능 확인:
@@ -238,7 +238,7 @@ maskingtape --llm --scan "회의 참석자: 박서준, 김서연. 연락처 010-
 실패 시:
 
 - `Ollama 미실행` 또는 연결 실패: `ollama serve`를 먼저 실행한다.
-- 모델 없음: `ollama pull qwen2.5:7b`.
+- 모델 없음: `ollama pull hf.co/StayAlive1/maskingtape-name-1.5b-GGUF:Q4_K_M`.
 - 첫 호출이 느리면 정상이다. 시연 전 예열 명령을 한 번 실행한다.
 - 인터넷이 없으면 전날 모델을 받아 둔 노트북을 사용한다. 기능테스트 현장에서 모델 다운로드부터 하지 않는다.
 - 메모리 부족이면 브라우저/IDE를 닫고 다시 시도한다. 그래도 안 되면 규칙 전용과 한계 설명으로 대체하고 이슈로 남긴다.
@@ -358,7 +358,7 @@ http://localhost:5173
 
 - Windows 개발자 모드 켬.
 - 로컬 CLI가 PATH에 있거나, API 서버가 `127.0.0.1:8000`에서 실행 중이어야 한다.
-- 이름 정밀 탐지를 보여 줄 경우 Ollama와 `qwen2.5:7b`가 준비되어 있어야 한다.
+- 이름 정밀 탐지를 보여 줄 경우 Ollama와 `hf.co/StayAlive1/maskingtape-name-1.5b-GGUF:Q4_K_M`가 준비되어 있어야 한다.
 
 개발 실행:
 
@@ -460,7 +460,7 @@ Invoke-RestMethod -Method POST https://maskingtape-lilac.vercel.app/api/scan -Co
 | 기능명세서 항목 | 검증 단계 | 표기 가이드 |
 |---|---|---|
 | Python 라이브러리/CLI 규칙 기반 비식별화 | 3, 5 | `pip install maskingtape` 및 소스 설치 모두 가능 |
-| CLI 로컬 LLM 이름 정밀 탐지 | 6 | 우리 노트북의 Ollama(`qwen2.5:7b`)에서 시연, 외부 상용 API 아님 |
+| CLI 로컬 LLM 이름 정밀 탐지 | 6 | 우리 노트북의 Ollama(`hf.co/StayAlive1/maskingtape-name-1.5b-GGUF:Q4_K_M`)에서 시연, 외부 상용 API 아님 |
 | 마스킹 전략 3종 | 5, 8, 9 | `mask`, `label`, `pseudonym` |
 | MCP 서버 | 7 | Claude Code에서 `scan_text`, `anonymize_text`, `anonymize_file` 확인 |
 | REST API | 8 | `POST /scan`, `POST /anonymize`, 웹·데스크톱 공용 계약 |

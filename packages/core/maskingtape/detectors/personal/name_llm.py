@@ -41,7 +41,12 @@ from maskingtape.detectors.base import Detector
 from maskingtape.detectors.personal.name import has_name_candidate
 from maskingtape.types import Detection
 
-DEFAULT_MODEL = "qwen2.5:7b"  # Apache-2.0 (Qwen2.5의 3B·72B만 비상업 제한이라 7B를 쓴다)
+# 우리가 합성 데이터로 파인튜닝한 1.5B 모델(#458) — Qwen2.5-1.5B-Instruct(Apache-2.0) 기반, Apache-2.0으로
+# 허깅페이스에 공개. Ollama가 hf.co 경로에서 GGUF를 바로 받는다(`ollama pull <이름>`). 보고용 세트에서
+# 이름 F1 0.944(하이브리드)·0.978(단독)로 qwen2.5:7b(0.907·0.920)보다 높고, 오탐도 규칙 전용보다 적으며
+# (13 vs 22), 문서 속 지시문 공격에 흔들리지 않고(재현율 1.00 vs 0.41), 크기는 1/5(986MB)다 —
+# training/results/compare_v2.md. 7B로 되돌리려면 --llm-model qwen2.5:7b.
+DEFAULT_MODEL = "hf.co/StayAlive1/maskingtape-name-1.5b-GGUF:Q4_K_M"
 # 기본 주소는 localhost가 아니라 127.0.0.1이다. Ollama는 기본으로 127.0.0.1에서만 기다리는데,
 # Windows는 localhost를 IPv6(::1)로 먼저 시도해 요청마다 약 2초를 기다린 뒤에야 붙는다
 # (실측: localhost 2.05초, 127.0.0.1 0.01~0.03초). 요청마다 모델 정보를 확인하므로 이 대기가
