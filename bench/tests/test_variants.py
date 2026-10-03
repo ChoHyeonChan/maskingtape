@@ -38,7 +38,7 @@ def test_generation_is_reproducible_from_seed():
 def test_different_tags_are_all_represented():
     rows = generate_variants_dataset(531, per_tag=3)
     tags = {row["variant_tag"] for row in rows}
-    assert len(tags) == 17, tags
+    assert len(tags) == 21, tags  # 17개 + 이름 뒤 어미·조사 4개(#614)
 
 
 @pytest.mark.parametrize("tag_fn_name", sorted(VARIANT_TAGS))
@@ -69,5 +69,5 @@ def test_cli_writes_a_new_file(tmp_path, monkeypatch):
     monkeypatch.setattr(sys, "argv", ["generate_variants", "--seed", "1", "--per-tag", "2", "--out", str(target)])
     main()
     rows = _load_rows(target)
-    assert len(rows) == 2 * len(VARIANT_TAGS)  # 생성 함수 수(20) 기준 — 일부는 같은 variant_tag를 공유한다
+    assert len(rows) == 2 * len(VARIANT_TAGS)  # 생성 함수 수(24) 기준 — 일부는 같은 variant_tag를 공유한다
     assert rows == generate_variants_dataset(1, per_tag=2)

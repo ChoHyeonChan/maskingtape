@@ -57,7 +57,11 @@ def _venv_python(venv_dir: Path) -> Path:
     return candidate if candidate.exists() else venv_dir / "bin" / "python"
 
 
-def _score_at_commit(commit: str, dataset: Path, workdir: Path) -> dict:
+def _score_at_commit(
+    commit: str, dataset: Path, workdir: Path, script: Path = _EVALUATE_VARIANTS_SCRIPT
+) -> dict:
+    """commit의 core만 설치한 임시 가상환경에서 채점 스크립트(script)를 돌려 JSON 결과를 받는다.
+    script는 `maskingtape`와 표준 라이브러리만 쓰는 파일이어야 한다(가상환경에 bench가 없다)."""
     core_src = _extract_core_at_commit(commit, workdir / "src")
     venv_dir = workdir / "venv"
     venv.create(venv_dir, with_pip=True)
@@ -66,15 +70,16 @@ def _score_at_commit(commit: str, dataset: Path, workdir: Path) -> dict:
     _run([str(python), "-m", "pip", "install", "-q", str(core_src)])
 
     result_json = workdir / "result.json"
-    _run([str(python), str(_EVALUATE_VARIANTS_SCRIPT), str(dataset), "--json", str(result_json)])
+    _run([str(python), str(script), str(dataset), "--json", str(result_json)])
     return json.loads(result_json.read_text(encoding="utf-8"))
 
 
-def compare(dataset: Path, before: str, after: str) -> dict:
+def compare(dataset: Path, before: str, after: str, script: Path = _EVALUATE_VARIANTS_SCRIPT) -> dict:
+    """두 커밋에서 같은 채점 스크립트를 돌린 결과를 {"before": …, "after": …}로 돌려준다."""
     with tempfile.TemporaryDirectory(prefix="maskingtape-variant-compare-") as tmp:
         tmp_path = Path(tmp)
-        before_result = _score_at_commit(before, dataset, tmp_path / "before")
-        after_result = _score_at_commit(after, dataset, tmp_path / "after")
+        before_result = _score_at_commit(before, dataset, tmp_path / "before", script)
+        after_result = _score_at_commit(after, dataset, tmp_path / "after", script)
     return {"before": before_result, "after": after_result}
 
 
