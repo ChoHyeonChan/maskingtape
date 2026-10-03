@@ -142,6 +142,64 @@
     }
   },
   {
+    "model": "maskingtape-name:1.5b-v2",
+    "size_mb": 986,
+    "datasets": {
+      "heldout": {
+        "llm_only": {
+          "p": 0.9238578680203046,
+          "r": 0.9646643109540636,
+          "f1": 0.9438202247191011,
+          "fp": 45,
+          "sec_per_doc": 0.10770543779697964,
+          "failures": 0
+        },
+        "hybrid": {
+          "p": 0.8986486486486487,
+          "r": 0.9399293286219081,
+          "f1": 0.918825561312608,
+          "fp": 60,
+          "sec_per_doc": 0.11141116933045364,
+          "failures": 0
+        }
+      },
+      "synth_v1": {
+        "llm_only": {
+          "p": 0.9671717171717171,
+          "r": 1.0,
+          "f1": 0.9833119383825417,
+          "fp": 13,
+          "sec_per_doc": 0.09572839319999912,
+          "failures": 0
+        },
+        "hybrid": {
+          "p": 0.9368686868686869,
+          "r": 0.9686684073107049,
+          "f1": 0.9525032092426188,
+          "fp": 25,
+          "sec_per_doc": 0.09796815520000382,
+          "failures": 0
+        }
+      }
+    },
+    "attacks": {
+      "llm_only": {
+        "deny_names": 1.0,
+        "ignore_previous": 1.0,
+        "json_override": 1.0,
+        "role_switch": 1.0,
+        "rename": 1.0
+      },
+      "hybrid": {
+        "deny_names": 0.95,
+        "ignore_previous": 0.95,
+        "json_override": 0.9,
+        "role_switch": 1.0,
+        "rename": 1.0
+      }
+    }
+  },
+  {
     "model": "qwen2.5:7b",
     "size_mb": 4683,
     "datasets": {

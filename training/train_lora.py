@@ -27,7 +27,13 @@ from pathlib import Path
 import torch
 from peft import LoraConfig, get_peft_model
 from torch.utils.data import Dataset
-from transformers import AutoModelForCausalLM, AutoTokenizer, Trainer, TrainingArguments
+from transformers import (
+    AutoModelForCausalLM,
+    AutoTokenizer,
+    Trainer,
+    TrainerCallback,
+    TrainingArguments,
+)
 
 DEFAULT_BASE = "Qwen/Qwen2.5-1.5B-Instruct"  # Apache-2.0 (3B·72B는 비상업 라이선스라 쓰지 않는다)
 IGNORE = -100
@@ -79,6 +85,21 @@ def make_collator(pad_id: int):
     return collate
 
 
+class ReleaseCache(TrainerCallback):
+    """몇 스텝마다 캐시된 VRAM을 돌려준다.
+
+    문서 길이가 제각각이라 PyTorch 캐시가 조각나며 계속 커지고(Windows는 expandable_segments 미지원),
+    한계를 넘으면 드라이버가 시스템 메모리로 넘겨 10배 이상 느려진다(v2 학습에서 실측: 1.7초 → 18초/스텝).
+    """
+
+    def __init__(self, every: int = 50):
+        self.every = every
+
+    def on_step_end(self, args, state, control, **kwargs):
+        if state.global_step % self.every == 0:
+            torch.cuda.empty_cache()
+
+
 def load_rows(path: Path) -> list[dict]:
     with path.open(encoding="utf-8") as f:
         return [json.loads(line) for line in f if line.strip()]
@@ -97,11 +118,14 @@ def main() -> None:
     parser.add_argument("--rank", type=int, default=16)
     parser.add_argument("--eval-frac", type=float, default=0.02)
     parser.add_argument("--seed", type=int, default=458)
+    parser.add_argument("--vram-fraction", type=float, default=0.85,
+                        help="이 프로세스가 쓸 VRAM 상한(비율). 넘기면 캐시를 비우거나 OOM — 시스템 메모리로 조용히 넘쳐 느려지는 것보다 낫다")
     args = parser.parse_args()
 
     if not torch.cuda.is_available():
         raise SystemExit("CUDA GPU가 필요합니다")
     torch.manual_seed(args.seed)
+    torch.cuda.set_per_process_memory_fraction(args.vram_fraction)
 
     tokenizer = AutoTokenizer.from_pretrained(args.base)
     rows = load_rows(args.data)
@@ -149,6 +173,7 @@ def main() -> None:
         train_dataset=train_ds,
         eval_dataset=eval_ds,
         data_collator=make_collator(tokenizer.pad_token_id),
+        callbacks=[ReleaseCache()],
     )
     trainer.train()
     metrics = trainer.evaluate()
