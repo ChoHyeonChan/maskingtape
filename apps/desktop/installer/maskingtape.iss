@@ -153,6 +153,7 @@ var
   App: String;
 begin
   Result := OllamaServerUp();
+  Log('Ollama server up at start: ' + IntToStr(Ord(Result)));
   if Result then exit;
   App := ExpandConstant('{localappdata}\Programs\Ollama\ollama app.exe');
   if FileExists(App) then
@@ -170,6 +171,7 @@ var
   ResultCode: Integer;
 begin
   if CurStep <> ssPostInstall then exit;
+  Log('PostInstall: ollama task=' + IntToStr(Ord(WizardIsTaskSelected('ollama'))) + ' model task=' + IntToStr(Ord(WizardIsTaskSelected('model'))) + ' downloaded=' + IntToStr(Ord(OllamaDownloaded)) + ' installed=' + IntToStr(Ord(OllamaInstalled())));
 
   // 1) Ollama 설치 (공식 설치파일, 조용히)
   if OllamaDownloaded and not OllamaInstalled() then begin
@@ -186,13 +188,16 @@ begin
       exit;
     end;
     WizardForm.StatusLabel.Caption := '이름 판정 모델을 받는 중 (986MB)…';
+    Log('Model: ensuring Ollama server');
     if not EnsureOllamaServer() then begin
       MsgBox('Ollama 서버가 응답하지 않아 모델을 받지 못했습니다. Ollama를 실행한 뒤 아래를 실행하면 됩니다:' + #13#10#13#10 +
              'ollama pull {#NameModel}', mbError, MB_OK);
       exit;
     end;
+    Log('Model: running ollama pull');
     if not Exec(OllamaExe(), 'pull {#NameModel}', '', SW_SHOWNORMAL, ewWaitUntilTerminated, ResultCode) or (ResultCode <> 0) then
       MsgBox('모델을 받지 못했습니다(코드 ' + IntToStr(ResultCode) + '). 인터넷 연결을 확인한 뒤 아래를 실행하면 됩니다:' + #13#10#13#10 +
              'ollama pull {#NameModel}', mbError, MB_OK);
+    Log('Model: pull exit code ' + IntToStr(ResultCode));
   end;
 end;
