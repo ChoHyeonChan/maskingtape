@@ -45,8 +45,14 @@ python apps/desktop/installer/build.py --version 0.1.0
   방법이고, 의존성이 생기면 `build.py`가 멈춘다.
 - **`-X utf8`이 필요한 이유**: 임베디드 Python은 `._pth` 파일 때문에 격리 모드로 떠서 `PYTHONUTF8`
   환경변수를 무시한다. 플래그가 없으면 한글이 cp949로 깨진다.
-- **Ollama와 모델은 넣지 않는다**(4.7GB). 설치 마지막 화면에 Ollama 설치 페이지를 여는 선택 항목이 있다.
-  없어도 규칙 탐지는 그대로 동작한다.
+- **Ollama와 모델은 설치파일에 넣지 않고 설치 시점에 내려받는다.** 작업 선택 화면의 두 항목(둘 다 선택, 인터넷 필요):
+  - **Ollama 설치** — 없을 때만 보인다. ollama.com의 공식 설치파일(약 1GB)을 받아 `/VERYSILENT`로 설치한다.
+  - **이름 판정 모델 받기** — Ollama 서버를 띄운 뒤(트레이 앱 실행, 최대 60초 대기) 콘솔 창에서
+    `ollama pull hf.co/StayAlive1/maskingtape-name-1.5b-GGUF:Q4_K_M`(986MB)을 돌린다. 이 이름은 core의
+    `DEFAULT_MODEL`과 같아야 한다(`.iss`의 `NameModel`).
+  - 어느 쪽이든 실패하면 앱 설치는 그대로 끝내고, 나중에 직접 실행할 명령을 안내한다. 둘 다 없어도 규칙 탐지는 동작한다.
+  - 설치파일에 묶지 않는 이유: 크기(+1GB)와 고지 대상(Ollama 설치파일 안의 CUDA 런타임 등)을 늘리지 않기 위해.
+    사용자가 설치 시점에 직접 받는 것이라 재배포가 아니다(모델도 같음).
 
 ## 제3자 고지 (§2-8)
 
@@ -74,3 +80,4 @@ python apps/desktop/installer/build.py --version 0.1.0
   이미 있고, 없으면 설치 프로그램이 내려받을 주소를 알려 준다.
 - **자동 업데이트가 없다.** 새 버전은 GitHub Releases에서 받아 다시 설치한다(같은 자리에 덮어 깔린다).
 - 지원 대상은 Windows 10/11 x64다.
+- Ollama 설치와 모델 받기는 제거(uninstall)할 때 지우지 않는다 — 사용자의 것이다.
