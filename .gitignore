@@ -32,3 +32,6 @@ Thumbs.db
 desktop.ini
 .idea/
 .vscode/
+
+# #458 학습 데이터 — make_dataset.py로 같은 시드에서 재현된다(6.9MB). 보고용 heldout_*.jsonl은 커밋한다.
+training/data/train.jsonl
