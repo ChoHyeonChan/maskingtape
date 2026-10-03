@@ -238,6 +238,65 @@ def gen_passport_spaced(rng: random.Random) -> VariantDoc:
     return _wrap("여권번호 ", value, "", "passport_forms", "passport")
 
 
+# ── 이름 뒤 어미·조사(#614) ────────────────────────────────────────
+# #600은 예전에 잡히던 "앞 단서 + 이름 + 어미"가 새기 시작한 회귀다. PR #571이 "뒤 단서가 없으면
+# 이름 뒤가 허용 목록의 어미여야 한다"는 조건을 넣었는데, 벤치에 이 조합을 재는 문장이 없어서
+# 목록에서 빠진 어미를 리뷰어가 눈으로 찾아야 했다. 아래 태그는 **지금 main이 잡는 조합만** 담아,
+# 그 조건을 건드리다 하나라도 빠지면 재현율이 떨어지게 한다. 지금 안 잡히는 어미(께서는·에게도·
+# 예요 등)는 여기 넣지 않는다 — 열린 미탐 세트(#610)가 맡고, 고쳐지면 이쪽으로 옮긴다.
+
+
+def _has_batchim(char: str) -> bool:
+    """한글 음절에 받침이 있는지. 음절 코드를 28로 나눈 나머지가 종성 번호다(0이면 받침 없음)."""
+    return (ord(char) - 0xAC00) % 28 != 0
+
+
+def _pick(word: str, ending: tuple[str, str]) -> str:
+    """(받침 있을 때, 없을 때) 두 모양 가운데 word 끝 글자에 맞는 쪽을 고른다(이/가, 으로/로)."""
+    return ending[0] if _has_batchim(word[-1]) else ending[1]
+
+
+_ENDING_ROLES = ["고객", "담당자", "환자", "신청자", "학생", "보호자"]
+_COPULA_ENDINGS = [("입니다", "입니다"), ("이며", "이며"), ("이고", "이고")]
+_SINGLE_JOSA = [
+    ("이", "가"), ("은", "는"), ("을", "를"), ("도", "도"), ("만", "만"), ("의", "의"), ("에", "에"),
+    ("과", "와"), ("께", "께"), ("이랑", "랑"),
+]
+_MULTI_JOSA = [
+    ("에게", "에게"), ("에게서", "에게서"), ("에서", "에서"), ("한테", "한테"), ("께서", "께서"),
+    ("하고", "하고"), ("처럼", "처럼"), ("부터", "부터"), ("까지", "까지"), ("보다", "보다"), ("으로", "로"),
+]
+# 존칭 "님" 뒤에는 겹친 조사도 지금 잡힌다(님이 뒤 단서라 어미 조건을 타지 않는다).
+_AFTER_HONORIFIC = [
+    "이", "은", "을", "의", "께", "과", "께서는", "에게는", "에게도", "한테서", "이나", "이라도", "으로서", "께서", "에게",
+]
+
+
+def _name_with_ending(rng: random.Random, endings: list[tuple[str, str]], tag: str) -> VariantDoc:
+    """"고객 ○○○<어미> 확인했습니다." — 정답은 이름 세 글자뿐이고 어미는 가리지 않는다."""
+    name = _gen_name_long(rng)
+    ending = _pick(name, rng.choice(endings))
+    return _wrap(f"{rng.choice(_ENDING_ROLES)} ", name, f"{ending} 확인했습니다.", tag, "name")
+
+
+def gen_name_ending_copula(rng: random.Random) -> VariantDoc:
+    return _name_with_ending(rng, _COPULA_ENDINGS, "name_ending_copula")
+
+
+def gen_name_ending_josa_single(rng: random.Random) -> VariantDoc:
+    return _name_with_ending(rng, _SINGLE_JOSA, "name_ending_josa_single")
+
+
+def gen_name_ending_josa_multi(rng: random.Random) -> VariantDoc:
+    return _name_with_ending(rng, _MULTI_JOSA, "name_ending_josa_multi")
+
+
+def gen_name_honorific_ending(rng: random.Random) -> VariantDoc:
+    """앞 단서 없이 "○○○님<조사>" — 존칭이 유일한 단서다."""
+    name = _gen_name_long(rng)
+    return _wrap("", name, f"님{rng.choice(_AFTER_HONORIFIC)} 확인했습니다.", "name_honorific_ending", "name")
+
+
 VARIANT_TAGS: dict[str, list] = {}
 for _fn in (
     gen_address_wide_spaces,
@@ -260,6 +319,10 @@ for _fn in (
     gen_account_attached_hyphen,
     gen_card_mixed_grouping,
     gen_passport_spaced,
+    gen_name_ending_copula,
+    gen_name_ending_josa_single,
+    gen_name_ending_josa_multi,
+    gen_name_honorific_ending,
 ):
     VARIANT_TAGS[_fn.__name__] = _fn
 
