@@ -3,6 +3,7 @@
 
 import 'anonymizer.dart';
 import 'cli_anonymizer.dart';
+import 'cli_locator.dart';
 import 'fallback_anonymizer.dart';
 import 'rest_anonymizer.dart';
 
@@ -11,7 +12,9 @@ import 'rest_anonymizer.dart';
 /// 로컬 CLI를 먼저 시도하고, 없으면 REST API로 넘어간다. 순서를 이렇게 둔 이유는
 /// [FallbackAnonymizer] 주석 참고 — 요약하면 로컬이 기능도 많고(가명처리·LLM)
 /// 텍스트가 PC를 벗어나지 않기 때문이다.
+///
+/// CLI는 설치판이 동봉한 것을 먼저, 없으면 PATH의 것을 쓴다([locateCli]).
 Anonymizer defaultAnonymizer() => FallbackAnonymizer([
-      const CliAnonymizer(),
+      CliAnonymizer(command: locateCli()),
       RestAnonymizer(),
     ]);

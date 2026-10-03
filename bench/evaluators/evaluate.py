@@ -26,6 +26,13 @@ from pathlib import Path
 
 from maskingtape.pipeline import Pipeline
 
+from bench.evaluators.error_breakdown import (
+    ErrorBreakdown,
+    breakdown_errors,
+    format_breakdown_table,
+    markdown_breakdown_table,
+)
+
 
 @dataclass(frozen=True)
 class Span:
@@ -196,15 +203,34 @@ def _markdown_table(results: dict[str, Counts]) -> str:
     return "\n".join(lines)
 
 
+def _markdown_breakdown_section(breakdown: dict[str, ErrorBreakdown] | None) -> str:
+    """미탐·오탐 분해(#612) 절. breakdown을 안 넘기면 빈 문자열이라 예전 리포트와 같은 모양이 된다."""
+    if breakdown is None:
+        return ""
+    return f"""
+## 미탐·오탐 분해 (유출 기준)
+
+{markdown_breakdown_table(breakdown)}
+
+- 위 표들의 미탐(fn)·오탐(fp)을 "개인정보가 실제로 남았는가"로 다시 나눈 것이다. 수치는 바뀌지 않는다.
+- `가려짐`: 정답의 모든 글자를 예측이 덮었다(경계나 종류만 다름) — 유출 없음.
+  `부분 유출`: 일부 글자만 덮었다. `완전 유출`: 겹치는 예측이 없다.
+- `경계 불일치`: 정답과 겹치는 오탐. `엉뚱한 곳`: 어떤 정답과도 겹치지 않는 오탐.
+- `유출 기준 재현율` = (적중 + 가려짐) / 정답 수.
+"""
+
+
 def write_markdown_report(
     out_path: Path,
     dataset_path: Path,
     doc_count: int,
     kind_results: dict[str, Counts],
     difficulty_results: dict[str, Counts],
+    breakdown: dict[str, ErrorBreakdown] | None = None,
 ) -> None:
     """결과보고서 첨부·회의 공유용 마크다운 파일을 만든다 — 생성 시각·데이터셋 경로를 같이
-    박아둬서, 나중에 수치만 보고도 "이게 언제 뭘로 잰 결과인지" 재현 조건을 알 수 있게 한다."""
+    박아둬서, 나중에 수치만 보고도 "이게 언제 뭘로 잰 결과인지" 재현 조건을 알 수 있게 한다.
+    breakdown을 넘기면 미탐·오탐 분해 절(#612)을 맨 끝에 붙인다."""
     generated_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     content = f"""# maskingtape 합성 벤치마크 정확도 리포트
 
@@ -228,14 +254,14 @@ def write_markdown_report(
   정답(tp가 될 대상)이 애초에 없어 precision/recall/F1/F2가 전부 0.000으로 찍히는데, 이는
   "탐지 실패"가 아니라 "계산이 성립하지 않음"이다(#498) — 이 행에서 의미 있는 값은 `fp`
   (오탐 건수) 하나뿐이다.
-"""
+{_markdown_breakdown_section(breakdown)}"""
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(content, encoding="utf-8")
 
 
 def main() -> None:
-    """CLI 진입점 — 데이터셋을 읽어 kind별·difficulty별로 평가하고, 콘솔에 표로 찍은 뒤
-    --report가 있으면 같은 결과를 마크다운으로도 저장한다."""
+    """CLI 진입점 — 데이터셋을 읽어 kind별·difficulty별로 평가하고, 미탐·오탐을 유출 기준으로
+    다시 나눈 표(#612)와 함께 콘솔에 찍은 뒤 --report가 있으면 같은 결과를 마크다운으로도 저장한다."""
     # #317: Windows 콘솔 기본 코드페이지(cp949)는 리포트 문구에 쓰일 수 있는 em dash(—) 등
     # 일부 구두점을 인코딩 못 해 print에서 크래시한다 — 플랫폼 기본 설정과 무관하게 항상
     # 성공하도록 stdout을 UTF-8로 강제한다.
@@ -249,10 +275,15 @@ def main() -> None:
     pipeline = Pipeline()
     kind_results = evaluate(rows, pipeline)
     difficulty_results = evaluate_by_difficulty(rows, pipeline)
+    breakdown = breakdown_errors(rows, pipeline)
     print_report(kind_results, difficulty_results)
+    print()
+    print(format_breakdown_table(breakdown))
 
     if args.report:
-        write_markdown_report(args.report, args.dataset, len(rows), kind_results, difficulty_results)
+        write_markdown_report(
+            args.report, args.dataset, len(rows), kind_results, difficulty_results, breakdown
+        )
         print(f"\n리포트 저장 완료: {args.report}")
 
 

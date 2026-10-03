@@ -13,7 +13,8 @@ import 'code_point_offsets.dart';
 class CliAnonymizer implements Anonymizer {
   const CliAnonymizer({this.command = 'maskingtape'});
 
-  /// 실행할 CLI 명령 — PATH에서 찾는다.
+  /// 실행할 CLI — 설치판이 동봉한 exe의 전체 경로이거나, PATH에서 찾는 `maskingtape`
+  /// (`cli_locator.dart`가 정한다).
   final String command;
 
   /// CLI 인자 조립 — 탐지(`--scan`)와 마스킹 호출이 같은 조건을 쓰도록 한 곳에서 만든다.
@@ -59,7 +60,8 @@ class CliAnonymizer implements Anonymizer {
     } on ProcessException {
       // CLI 자체가 없는 것이므로 다른 백엔드로 넘길 수 있다 (FallbackAnonymizer 참고).
       throw const AnonymizerUnavailableException(
-        'maskingtape CLI를 찾을 수 없습니다 — packages/core 설치와 PATH를 확인하세요',
+        'maskingtape CLI를 찾을 수 없습니다 — 설치판이면 다시 설치하고, '
+        '소스로 실행 중이면 packages/core 설치와 PATH를 확인하세요',
       );
     }
     final stdoutFuture = process.stdout.transform(utf8.decoder).join();

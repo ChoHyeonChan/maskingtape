@@ -17,7 +17,7 @@ export function ServiceIntro() {
       </p>
 
       <div className="service-intro__actions">
-        <a className="service-intro__btn service-intro__btn--primary" href="#demo">
+        <a className="service-intro__btn service-intro__btn--primary" href="/demo">
           지금 체험하기 <span aria-hidden="true">→</span>
         </a>
         <a
@@ -30,14 +30,8 @@ export function ServiceIntro() {
         </a>
       </div>
       <p className="service-intro__hint">
-        웹은 설치 없이 바로 체험, 다운로드는 <code>pip install maskingtape</code> 또는 데스크톱 앱으로 내 PC에서
-        실행됩니다.
-      </p>
-
-      <p className="service-intro__disclosure">
-        파일을 올리면 텍스트 추출은 이 브라우저 안에서 끝나고, 파일 자체는 서버로 전송되지 않습니다. 탐지를
-        실행하면 그 텍스트만 저희 API로 보내 처리하며, 서버는 요청 내용을 저장·기록하지 않습니다(무저장·무로그
-        원칙) — 그래도 이 데모는 시연·학습용이니 실제 개인정보가 아닌 텍스트로만 확인해 주세요.
+        바로 실행하면 웹에서 설치 없이 바로 체험 가능하고 다운로드는 <code>pip install maskingtape</code> 또는
+        데스크톱 앱으로 내 PC에서 실행됩니다.
       </p>
     </section>
   );
