@@ -37,10 +37,10 @@ from bench.evaluators.evaluate_attacks import evaluate_attacks
 
 DATA = Path(__file__).resolve().parent / "data"
 DEFAULT_DATASETS = {
-    "heldout": DATA / "heldout_v1.jsonl",  # 보고용 템플릿(학습에 안 쓴 것)
+    "heldout": DATA / "heldout_v2.jsonl",  # 보고용 템플릿(학습에 안 쓴 것) — v2 = 조사 교정본(v3 학습부터)
     "synth_v1": Path("bench/datasets/synth_v1.jsonl"),  # 제출 수치 근거(템플릿 일부가 학습과 겹침 — 참고용)
 }
-DEFAULT_ATTACKS = DATA / "heldout_attacks_v1.jsonl"
+DEFAULT_ATTACKS = DATA / "heldout_attacks_v2.jsonl"
 
 
 def model_sizes(host: str = "http://127.0.0.1:11434") -> dict[str, int]:

@@ -3,6 +3,9 @@
 
 """이름 판정 모델 학습 데이터와 보고용(held-out) 평가 세트를 만든다 (#458).
 
+v3부터 이름 뒤 조사를 받침에 맞게 고친다(fix_josa) — 생성기 템플릿의 고정 조사("{name}은")가 "서아은" 같은
+틀린 문장을 만들어 경계 오류의 절반을 차지했다. 보고용 파일은 heldout_v2(교정본)로 쓴다.
+
 동작 원리:
 1. bench 생성기의 문장 템플릿을 **학습용과 보고용으로 가른다**(#456 원칙 — 번호가 4로 나눠 3이
    남는 템플릿은 보고용). 학습 데이터는 학습용 템플릿으로만, 평가 세트는 보고용 템플릿으로만
@@ -133,6 +136,78 @@ _TRAIN_EXTRA_CONFUSERS = [
 ]
 
 
+# v3 — 1차·2차 보고용 오류의 큰 몫(2음절 이름 + 조사 경계)이 생성기 문장의 **틀린 조사** 때문이었다:
+# 템플릿이 `{name}은`처럼 조사를 고정해 "서아은"(받침 없는 이름 + 은)이 만들어졌고, 모델은 이를 3음절
+# 이름으로 읽었다 — 한국어로는 "서아는"이 맞다. 렌더된 문서에서 이름 라벨 바로 뒤의 조사를 받침에 맞게
+# 고친다(es-hangul의 josa와 같은 규칙, 우리가 쓴 코드). 받침 ㄹ 뒤는 "으로"가 아니라 "로"다.
+_JOSA_PAIRS: tuple[tuple[str, str], ...] = (  # (받침 있을 때, 없을 때) — 긴 것부터 본다
+    ("으로", "로"), ("이랑", "랑"), ("이나", "나"), ("이며", "며"), ("이고", "고"),
+    ("이", "가"), ("은", "는"), ("을", "를"), ("과", "와"), ("아", "야"),
+)
+_JOSA_VARIANTS = sorted({v for pair in _JOSA_PAIRS for v in pair}, key=len, reverse=True)
+_JOSA_BOUNDARY = " ,.!?)\n"
+
+
+def _batchim(ch: str) -> int | None:
+    """음절의 받침 번호(0이면 없음). 한글 음절이 아니면 None."""
+    code = ord(ch) - 0xAC00
+    return code % 28 if 0 <= code < 11172 else None
+
+
+def correct_josa(word: str, josa: str) -> str:
+    """word 뒤에 올 조사의 올바른 형태. josa는 _JOSA_PAIRS의 어느 한쪽."""
+    for with_b, without_b in _JOSA_PAIRS:
+        if josa in (with_b, without_b):
+            b = _batchim(word[-1])
+            if b is None:
+                return josa
+            if with_b == "으로":
+                return "로" if b in (0, 8) else "으로"  # ㄹ 받침(8)은 "로"
+            return with_b if b else without_b
+    return josa
+
+
+def fix_josa(text: str, labels: list[dict]) -> tuple[str, list[dict]]:
+    """이름 라벨 바로 뒤의 조사를 받침에 맞게 고치고, 길이가 달라지면 뒤 라벨 위치를 민다."""
+    labels = sorted((dict(lb) for lb in labels), key=lambda lb: lb["start"])
+    out = text
+    for i, lb in enumerate(labels):
+        if lb["kind"] != "name":
+            continue
+        end = lb["end"]
+        for josa in _JOSA_VARIANTS:
+            after = end + len(josa)
+            if out.startswith(josa, end) and (after == len(out) or out[after] in _JOSA_BOUNDARY):
+                fixed = correct_josa(out[lb["start"]:end], josa)
+                if fixed != josa:
+                    out = out[:end] + fixed + out[after:]
+                    delta = len(fixed) - len(josa)
+                    for later in labels[i + 1:]:
+                        later["start"] += delta
+                        later["end"] += delta
+                break
+    return out, labels
+
+
+# v3 — 직함 뒤 2음절 업무어("팀장 안내가", "구매 부장이")를 이름으로 보는 오탐 보강. 보고용 부정 템플릿에
+# 나오는 단어(안내·구매·전입·홍보·정기·안전·노무·차량·허가·성과)는 **일부러 빼고** 다른 업무어로 만든다 —
+# 단어를 외우는 게 아니라 "직함 + 업무어 + 조사" 모양을 배우는지가 보고용 세트에서 드러나게.
+_TRAIN_TITLE_WORD_CONFUSERS = [
+    "팀장 결재가 끝났습니다.", "과장 승인이 필요합니다.", "부장 보고가 늦어졌습니다.", "대리 출장이 잡혔습니다.",
+    "팀장 교육이 다음 주에 있습니다.", "부장 검수가 끝나야 출고됩니다.", "과장 점검이 매주 있습니다.",
+    "대표 결재가 나면 착수합니다.", "이사 승인을 받았습니다.", "실장 보고를 먼저 올리세요.",
+    "팀장 회의가 3시로 바뀌었습니다.", "부장 면담은 금요일입니다.", "과장 평가가 반영되었습니다.",
+    "영업 팀장이 방문했습니다.", "총무 과장이 안건을 올렸습니다.", "기획 부장이 발표했습니다.",
+    "회계 담당자가 확인 중입니다.", "법무 검토가 끝났습니다.", "전산 점검으로 접속이 끊깁니다.",
+    "시설 보수가 예정되어 있습니다.", "복지 안건은 다음 회의로 넘깁니다.", "채용 공고가 올라갔습니다.",
+    "급여 명세서는 25일에 나옵니다.", "세무 신고 기한이 다가옵니다.", "연구 과제가 선정되었습니다.",
+    "물류 창고가 이전합니다.", "품질 검사를 통과했습니다.", "생산 일정이 앞당겨졌습니다.",
+    "조달 계약이 체결되었습니다.", "발주 수량을 확인해 주세요.", "입고 처리가 완료되었습니다.",
+    "감사 결과가 공유되었습니다.", "연수 신청은 이번 주까지입니다.", "배송 지연이 발생했습니다.",
+    "설비 교체가 끝났습니다.", "계약 갱신 통지가 나갈 예정입니다.",
+]
+
+
 @dataclass(frozen=True)
 class Split:
     name_templates: list[str]
@@ -157,7 +232,7 @@ def split_templates(heldout: bool) -> Split:
         other_templates=other_t,
         negative_templates=neg_t,
         nocue_templates=_HELDOUT_NOCUE_TEMPLATES if heldout else _TRAIN_NOCUE_TEMPLATES,
-        confusers=_CONFUSER_SENTENCES if heldout else _CONFUSER_SENTENCES + _TRAIN_EXTRA_CONFUSERS,
+        confusers=_CONFUSER_SENTENCES if heldout else _CONFUSER_SENTENCES + _TRAIN_EXTRA_CONFUSERS + _TRAIN_TITLE_WORD_CONFUSERS,
         attack_sentences={k: tuple(v) for k, v in attacks.items()},
     )
 
@@ -217,7 +292,7 @@ def generate_documents(split: Split, seed: int, count: int) -> list[dict]:
         else:
             doc = _join([_confuser(split, rng), _sentence(split, rng)] if rng.random() < 0.5 else [_sentence(split, rng), _confuser(split, rng)])
         labels = [{"kind": lb.kind, "start": lb.start, "end": lb.end} for lb in doc.labels]
-        text = doc.text
+        text, labels = fix_josa(doc.text, labels)
         attack_tag = "none"
         if rng.random() < 0.2:
             attack_tag = rng.choice(list(split.attack_sentences))
@@ -253,11 +328,11 @@ def heldout_attack_pairs(split: Split, seed: int, per_tag: int) -> list[dict]:
         rng = random.Random(f"{seed}:attack:{tag}")
         for _ in range(per_tag):
             doc = generate_document(rng, template=rng.choice(split.name_templates))
-            labels = [{"kind": lb.kind, "start": lb.start, "end": lb.end} for lb in doc.labels]
+            text, labels = fix_josa(doc.text, [{"kind": lb.kind, "start": lb.start, "end": lb.end} for lb in doc.labels])
             position = rng.choice(["prefix", "suffix"])
-            attacked_text, attacked_labels = _attach(doc.text, labels, rng.choice(sentences), position)
+            attacked_text, attacked_labels = _attach(text, labels, rng.choice(sentences), position)
             base = {"difficulty": "attack", "attack_position": position, "pair_id": pair_id}
-            rows.append({"text": doc.text, "labels": labels, "attack_tag": "none", **base})
+            rows.append({"text": text, "labels": labels, "attack_tag": "none", **base})
             rows.append({"text": attacked_text, "labels": attacked_labels, "attack_tag": tag, **base})
             pair_id += 1
     return rows
@@ -285,10 +360,11 @@ def main() -> None:
     train_rows = generate_documents(train_split, args.seed, args.train_size)
     write_jsonl([to_sft(r) for r in train_rows], args.out_dir / "train.jsonl")
     heldout = generate_documents(heldout_split, args.seed + 1, args.heldout_size)
+    # v2: 조사 교정 적용본. v1(교정 전)은 1차·2차 결과의 근거로 그대로 둔다.
     write_jsonl([{k: v for k, v in r.items() if k != "attack_tag"} for r in heldout if r["attack_tag"] == "none"],
-                args.out_dir / "heldout_v1.jsonl")
+                args.out_dir / "heldout_v2.jsonl")
     write_jsonl(heldout_attack_pairs(heldout_split, args.seed, args.heldout_attack_per_tag),
-                args.out_dir / "heldout_attacks_v1.jsonl")
+                args.out_dir / "heldout_attacks_v2.jsonl")
 
     with_names = sum(1 for r in train_rows if names_of(r))
     attacked = sum(1 for r in train_rows if r["attack_tag"] != "none")
