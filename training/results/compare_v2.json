@@ -1,0 +1,260 @@
+[
+  {
+    "model": "규칙 전용",
+    "size_mb": 0,
+    "datasets": {
+      "heldout": {
+        "hybrid": {
+          "p": 0.946987951807229,
+          "r": 0.6943462897526502,
+          "f1": 0.8012232415902141,
+          "fp": 22,
+          "sec_per_doc": 0.00017372937365417462,
+          "failures": 0
+        }
+      },
+      "synth_v1": {
+        "hybrid": {
+          "p": 0.967479674796748,
+          "r": 0.9321148825065274,
+          "f1": 0.9494680851063829,
+          "fp": 12,
+          "sec_per_doc": 0.00012712860000465298,
+          "failures": 0
+        }
+      }
+    }
+  },
+  {
+    "model": "qwen2.5:1.5b",
+    "size_mb": 986,
+    "datasets": {
+      "heldout": {
+        "llm_only": {
+          "p": 0.70917225950783,
+          "r": 0.5600706713780919,
+          "f1": 0.6258637709772952,
+          "fp": 130,
+          "sec_per_doc": 0.17370320734341396,
+          "failures": 1
+        },
+        "hybrid": {
+          "p": 0.7573770491803279,
+          "r": 0.8162544169611308,
+          "f1": 0.7857142857142858,
+          "fp": 148,
+          "sec_per_doc": 0.17482639978401765,
+          "failures": 1
+        }
+      },
+      "synth_v1": {
+        "llm_only": {
+          "p": 0.6928746928746928,
+          "r": 0.7362924281984334,
+          "f1": 0.7139240506329113,
+          "fp": 125,
+          "sec_per_doc": 0.07029953899999965,
+          "failures": 0
+        },
+        "hybrid": {
+          "p": 0.7377049180327869,
+          "r": 0.9399477806788512,
+          "f1": 0.8266360505166477,
+          "fp": 128,
+          "sec_per_doc": 0.08719573719999607,
+          "failures": 0
+        }
+      }
+    },
+    "attacks": {
+      "llm_only": {
+        "deny_names": 0.1,
+        "ignore_previous": 0.15,
+        "json_override": 0.6,
+        "role_switch": 0.05,
+        "rename": 0.5
+      },
+      "hybrid": {
+        "deny_names": 0.9,
+        "ignore_previous": 0.95,
+        "json_override": 0.9,
+        "role_switch": 1.0,
+        "rename": 0.95
+      }
+    }
+  },
+  {
+    "model": "hf.co/StayAlive1/maskingtape-name-1.5b-GGUF:Q4_K_M",
+    "size_mb": 986,
+    "datasets": {
+      "heldout": {
+        "llm_only": {
+          "p": 0.9255499153976311,
+          "r": 0.9664310954063604,
+          "f1": 0.9455488331892826,
+          "fp": 44,
+          "sec_per_doc": 0.0939282233261303,
+          "failures": 0
+        },
+        "hybrid": {
+          "p": 0.8934010152284264,
+          "r": 0.9328621908127208,
+          "f1": 0.9127052722558341,
+          "fp": 63,
+          "sec_per_doc": 0.09738173671706511,
+          "failures": 0
+        }
+      },
+      "synth_v1": {
+        "llm_only": {
+          "p": 0.9671717171717171,
+          "r": 1.0,
+          "f1": 0.9833119383825417,
+          "fp": 13,
+          "sec_per_doc": 0.08397108019999723,
+          "failures": 0
+        },
+        "hybrid": {
+          "p": 0.9368686868686869,
+          "r": 0.9686684073107049,
+          "f1": 0.9525032092426188,
+          "fp": 25,
+          "sec_per_doc": 0.07658544540000002,
+          "failures": 0
+        }
+      }
+    },
+    "attacks": {
+      "llm_only": {
+        "deny_names": 1.0,
+        "ignore_previous": 1.0,
+        "json_override": 1.0,
+        "role_switch": 1.0,
+        "rename": 0.95
+      },
+      "hybrid": {
+        "deny_names": 0.95,
+        "ignore_previous": 0.95,
+        "json_override": 0.9,
+        "role_switch": 1.0,
+        "rename": 0.95
+      }
+    }
+  },
+  {
+    "model": "maskingtape-name:1.5b-v3",
+    "size_mb": 986,
+    "datasets": {
+      "heldout": {
+        "llm_only": {
+          "p": 0.9770723104056437,
+          "r": 0.9787985865724381,
+          "f1": 0.9779346866725507,
+          "fp": 13,
+          "sec_per_doc": 0.11074087840172922,
+          "failures": 0
+        },
+        "hybrid": {
+          "p": 0.9435626102292769,
+          "r": 0.9452296819787986,
+          "f1": 0.9443954104148279,
+          "fp": 32,
+          "sec_per_doc": 0.11279330799135875,
+          "failures": 0
+        }
+      },
+      "synth_v1": {
+        "llm_only": {
+          "p": 0.9871134020618557,
+          "r": 1.0,
+          "f1": 0.993514915693904,
+          "fp": 5,
+          "sec_per_doc": 0.10440255780000007,
+          "failures": 0
+        },
+        "hybrid": {
+          "p": 0.9561855670103093,
+          "r": 0.9686684073107049,
+          "f1": 0.9623865110246433,
+          "fp": 17,
+          "sec_per_doc": 0.08993734200000472,
+          "failures": 0
+        }
+      }
+    },
+    "attacks": {
+      "llm_only": {
+        "deny_names": 1.0,
+        "ignore_previous": 1.0,
+        "json_override": 1.0,
+        "role_switch": 1.0,
+        "rename": 1.0
+      },
+      "hybrid": {
+        "deny_names": 0.95,
+        "ignore_previous": 0.95,
+        "json_override": 0.9,
+        "role_switch": 1.0,
+        "rename": 0.95
+      }
+    }
+  },
+  {
+    "model": "qwen2.5:7b",
+    "size_mb": 4683,
+    "datasets": {
+      "heldout": {
+        "llm_only": {
+          "p": 0.9265232974910395,
+          "r": 0.9134275618374559,
+          "f1": 0.9199288256227758,
+          "fp": 41,
+          "sec_per_doc": 0.1339063172786243,
+          "failures": 0
+        },
+        "hybrid": {
+          "p": 0.8979238754325259,
+          "r": 0.9169611307420494,
+          "f1": 0.9073426573426573,
+          "fp": 59,
+          "sec_per_doc": 0.12619884341252766,
+          "failures": 0
+        }
+      },
+      "synth_v1": {
+        "llm_only": {
+          "p": 0.938337801608579,
+          "r": 0.9138381201044387,
+          "f1": 0.9259259259259258,
+          "fp": 23,
+          "sec_per_doc": 0.1055752513999978,
+          "failures": 0
+        },
+        "hybrid": {
+          "p": 0.9336734693877551,
+          "r": 0.9556135770234987,
+          "f1": 0.944516129032258,
+          "fp": 26,
+          "sec_per_doc": 0.10172249100000044,
+          "failures": 0
+        }
+      }
+    },
+    "attacks": {
+      "llm_only": {
+        "deny_names": 0.3,
+        "ignore_previous": 0.0,
+        "json_override": 0.8,
+        "role_switch": 0.8,
+        "rename": 0.15
+      },
+      "hybrid": {
+        "deny_names": 0.9,
+        "ignore_previous": 0.95,
+        "json_override": 0.9,
+        "role_switch": 1.0,
+        "rename": 0.9
+      }
+    }
+  }
+]
