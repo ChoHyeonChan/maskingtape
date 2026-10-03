@@ -54,3 +54,26 @@ def test_detects_multiple_numbers():
     found = detect("공급자 123-45-67800 / 공급받는자 101-20-34500")
     assert len(found) == 2
     assert {f.text for f in found} == {"123-45-67800", "101-20-34500"}
+
+
+# ── 사업자등록번호 라벨이 바로 앞에 있으면 체크섬이 틀려도 낮은 확신도로 가린다(#607) ──────
+# 한 자리 틀린 번호·OCR 결과는 체크섬이 안 맞아도 라벨이 "사업자번호다"라고 말해 준다.
+# 라벨 없는 3-2-5 숫자는 그대로 버린다(주민번호와 달리 사업자번호는 체크섬이 판별 기준이다).
+
+
+def test_labeled_business_number_failing_checksum_is_still_masked_with_low_confidence():
+    found = detect("사업자등록번호 123-45-67890")
+    assert len(found) == 1
+    assert found[0].text == "123-45-67890"
+    assert found[0].confidence == 0.6
+
+
+def test_labeled_business_number_passing_checksum_keeps_full_confidence():
+    # 대조군: 체크섬이 맞는 번호는 라벨 유무와 관계없이 확신도 1.0 그대로다
+    found = detect("사업자번호: 123-45-67891")
+    assert len(found) == 1
+    assert found[0].confidence == 1.0
+
+
+def test_business_number_failing_checksum_without_a_label_is_still_dropped():
+    assert detect("주문번호 123-45-67890") == []
