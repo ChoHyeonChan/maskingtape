@@ -10,6 +10,8 @@
    실력이고, 하이브리드가 제품 점수다.
 3. 속도는 보고용 세트에서 문서당 평균 시간(첫 호출은 로딩이라 빼고 잰다), 크기는 Ollama /api/tags의
    파일 크기다.
+4. 모델이 문서 하나에서 실패하면(JSON을 끝맺지 못하고 타임아웃 — 원본 1.5B에서 실제로 났다) 그 문서는
+   LLM 결과 없음으로 세고 실패 건수를 표에 적는다. core처럼 예외로 멈추면 비교표를 못 만든다.
 
 사용법 (프로젝트 venv, Ollama 실행 중):
     python -m training.benchmark --models qwen2.5:1.5b maskingtape-name:1.5b qwen2.5:7b --out training/results/compare.md
@@ -24,8 +26,10 @@ import time
 import urllib.request
 from pathlib import Path
 
-from maskingtape.detectors import NameDetector, default_detectors, llm_detectors
+from maskingtape.detectors import LLMNameDetector, NameDetector, default_detectors, llm_detectors
+from maskingtape.detectors.base import Detector
 from maskingtape.pipeline import Pipeline
+from maskingtape.types import Detection
 
 from bench.evaluators.compare_name_detectors import evaluate_name_only
 from bench.evaluators.evaluate import Counts, load_dataset
@@ -44,14 +48,34 @@ def model_sizes(host: str = "http://127.0.0.1:11434") -> dict[str, int]:
         return {m["name"]: m["size"] for m in json.load(resp)["models"]}
 
 
-def pipelines_for(model: str | None) -> dict[str, Pipeline]:
+LLM_TIMEOUT = 45.0  # core 기본 120초 — 벤치에서는 멈추지 않는 모델을 더 빨리 실패로 처리한다
+
+
+class TolerantLLM(Detector):
+    """LLMNameDetector를 감싸 문서 단위 실패(타임아웃·응답 형식 오류)를 빈 결과로 바꾸고 센다."""
+
+    def __init__(self, inner: LLMNameDetector):
+        self.inner = inner
+        self.failures = 0
+
+    def detect(self, text: str) -> list[Detection]:
+        try:
+            return self.inner.detect(text)
+        except (RuntimeError, TypeError, ValueError):
+            self.failures += 1
+            return []
+
+
+def pipelines_for(model: str | None) -> tuple[dict[str, Pipeline], TolerantLLM | None]:
     if model is None:
-        return {"hybrid": Pipeline(detectors=default_detectors())}
-    hybrid = llm_detectors(model)
+        return {"hybrid": Pipeline(detectors=default_detectors())}, None
+    llm = TolerantLLM(LLMNameDetector(model=model, timeout=LLM_TIMEOUT))
+    others = [d for d in llm_detectors(model) if not isinstance(d, LLMNameDetector)]
+    rules_only = [d for d in others if not isinstance(d, NameDetector)]
     return {
-        "llm_only": Pipeline(detectors=[d for d in hybrid if not isinstance(d, NameDetector)]),
-        "hybrid": Pipeline(detectors=hybrid),
-    }
+        "llm_only": Pipeline(detectors=[*rules_only, llm]),
+        "hybrid": Pipeline(detectors=[*others, llm]),
+    }, llm
 
 
 def timed_eval(rows: list[dict], pipeline: Pipeline) -> tuple[Counts, float]:
@@ -67,14 +91,17 @@ def run(models: list[str | None], datasets: dict[str, Path], attacks: Path | Non
     for model in models:
         label = model or "규칙 전용"
         print(f"== {label}", file=sys.stderr)
-        pipes = pipelines_for(model)
+        pipes, llm = pipelines_for(model)
         entry: dict = {"model": label, "size_mb": round(sizes.get(model, 0) / 1e6) if model else 0, "datasets": {}}
         for ds_name, path in datasets.items():
             rows = load_dataset(path)
             per = {}
             for cfg, pipe in pipes.items():
+                before = llm.failures if llm else 0
                 counts, sec = timed_eval(rows, pipe)
-                per[cfg] = {"p": counts.precision, "r": counts.recall, "f1": counts.f1, "fp": counts.fp, "sec_per_doc": sec}
+                per[cfg] = {"p": counts.precision, "r": counts.recall, "f1": counts.f1, "fp": counts.fp,
+                            "sec_per_doc": sec, "failures": (llm.failures - before) if llm else 0}
+                print(f"   {ds_name}/{cfg}: F1 {counts.f1:.3f} · {sec * 1000:.0f} ms/doc · 실패 {per[cfg]['failures']}", file=sys.stderr)
             entry["datasets"][ds_name] = per
         if attacks is not None and model is not None:
             rows = load_dataset(attacks)
@@ -87,7 +114,7 @@ def run(models: list[str | None], datasets: dict[str, Path], attacks: Path | Non
 
 
 def format_markdown(results: list[dict]) -> str:
-    lines = ["| 모델 | 크기 | 구성 | " + " | ".join(f"{ds} F1 (P/R, fp)" for ds in results[0]["datasets"]) + " | 문서당 시간 | 공격 판 재현율(평균) |",
+    lines = ["| 모델 | 크기 | 구성 | " + " | ".join(f"{ds} F1 (P/R, fp, 실패)" for ds in results[0]["datasets"]) + " | 문서당 시간 | 공격 판 재현율(평균) |",
              "|---|---|---|" + "---|" * len(results[0]["datasets"]) + "---|---|"]
     for r in results:
         for cfg in ("llm_only", "hybrid"):
@@ -96,7 +123,7 @@ def format_markdown(results: list[dict]) -> str:
             cells = []
             for ds in r["datasets"].values():
                 s = ds[cfg]
-                cells.append(f"**{s['f1']:.3f}** ({s['p']:.3f}/{s['r']:.3f}, {s['fp']})")
+                cells.append(f"**{s['f1']:.3f}** ({s['p']:.3f}/{s['r']:.3f}, {s['fp']}, {s.get('failures', 0)})")
             sec = next(iter(r["datasets"].values()))[cfg]["sec_per_doc"]
             att = r.get("attacks", {}).get(cfg)
             att_cell = f"{sum(att.values()) / len(att):.3f}" if att else "—"

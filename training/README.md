@@ -14,7 +14,7 @@ make_dataset.py ──► data/train.jsonl (학습, 12,000건)          ┐
                 ──► data/heldout_v1.jsonl (보고용 463건)        ├─ 같은 시드면 바이트 단위로 같다
                 ──► data/heldout_attacks_v1.jsonl (공격 쌍 100) ┘
 train_lora.py   ──► <run>/adapter (LoRA 어댑터)
-export_ollama.py──► <run>/merged (공개할 가중치) ──► model-f16.gguf ──► ollama `maskingtape-name:1.5b` (q4_K_M)
+export_ollama.py──► <run>/merged (공개할 가중치) ──► model-f16.gguf ──► model-q4_k_m.gguf ──► ollama `maskingtape-name:1.5b`
 benchmark.py    ──► results/compare.md (규칙 / 1.5B 원본 / 1.5B 학습 / 7B 비교표)
 ```
 
@@ -46,7 +46,9 @@ python training/export_ollama.py --run D:/dev/train/runs/name-1.5b-v1 --name mas
 maskingtape --llm --llm-model maskingtape-name:1.5b < 문서.txt
 ```
 
-어댑터를 기반 모델과 합쳐(`merged/` — 허깅페이스에 올릴 가중치) llama.cpp로 f16 GGUF를 만들고 `ollama create -q q4_K_M`으로 등록한다.
+어댑터를 기반 모델과 합쳐(`merged/` — 허깅페이스에 올릴 가중치) llama.cpp로 f16 GGUF를 만들고, `llama-quantize`로
+Q4_K_M(라이브러리 `qwen2.5:1.5b`와 같은 양자화, 986MB)으로 줄인 뒤 `ollama create`로 등록한다. Ollama 자체의
+`create -q`는 safetensors 경로만 지원하고 그 경로가 Qwen2를 아직 못 받아서(직접 확인) 쓰지 않는다.
 
 ### 4. 비교표 (프로젝트 venv, Ollama 실행 중)
 
@@ -64,7 +66,8 @@ bench의 채점기(`compare_name_detectors`, `evaluate_attacks`)를 그대로 �
 py -3.10 -m venv D:\dev\train\venv
 D:\dev\train\venv\Scripts\pip install torch --index-url https://download.pytorch.org/whl/cu124   # BSD-3
 D:\dev\train\venv\Scripts\pip install transformers peft accelerate huggingface_hub gguf          # Apache-2.0 / MIT(gguf)
-git clone --depth 1 https://github.com/ggml-org/llama.cpp D:\dev\llama.cpp                       # MIT — GGUF 변환 스크립트만 씀
+git clone --depth 1 https://github.com/ggml-org/llama.cpp D:\dev\llama.cpp                       # MIT — GGUF 변환 스크립트
+gh release download b11368 --repo ggml-org/llama.cpp --pattern "*bin-win-cpu-x64.zip" --dir D:\dev\llama.cpp-bin  # llama-quantize.exe (zip 풀기)
 $env:HF_HOME = "D:\dev\hf_cache"
 ```
 
