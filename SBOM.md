@@ -120,7 +120,7 @@ PyPI 코어 패키지(`maskingtape`)는 런타임 외부 의존성이 없어 표
 
 ### A-4. 데스크톱 앱 (Dart·Flutter, 소스로 배포, 빌드할 때 받음)
 
-`apps/desktop/pubspec.lock` 전체다. 전이 의존성에는 `flutter_test`·`flutter_lints`가 끌어오는 개발용 패키지도 섞여 있다. 라이선스는 pub.dev가 각 패키지의 LICENSE에서 판별한 값이다.
+`apps/desktop/pubspec.lock` 전체다. 전이 의존성에는 `flutter_test`·`flutter_lints`가 끌어오는 개발용 패키지도 섞여 있다. 라이선스는 pub.dev가 각 패키지의 LICENSE에서 판별한 값이다. pub.dev가 놓친 것은 그 버전의 LICENSE를 직접 열어 확인한 값으로 바꿨다(vector_math).
 
 | 패키지 | 버전 | 라이선스 | 저장소 | 비고 |
 |---|---|---|---|---|
@@ -135,7 +135,7 @@ PyPI 코어 패키지(`maskingtape`)는 런타임 외부 의존성이 없어 표
 | desktop_drop | 0.7.1 | Apache-2.0 | https://github.com/MixinNetwork/flutter-plugins/tree/main/packages/desktop_drop | 직접(런타임) |
 | fake_async | 1.3.3 | Apache-2.0 | https://github.com/dart-lang/test/tree/master/pkgs/fake_async | 전이 |
 | file_selector | 1.1.0 | BSD-3-Clause | https://github.com/flutter/packages/tree/main/packages/file_selector/file_selector | 직접(런타임) |
-| file_selector_android | 0.5.2+8 | Apache-2.0 OR BSD-3-Clause | https://github.com/flutter/packages/tree/main/packages/file_selector/file_selector_android | 전이 |
+| file_selector_android | 0.5.2+8 | Apache-2.0 AND BSD-3-Clause | https://github.com/flutter/packages/tree/main/packages/file_selector/file_selector_android | 전이 |
 | file_selector_ios | 0.5.3+5 | BSD-3-Clause | https://github.com/flutter/packages/tree/main/packages/file_selector/file_selector_ios | 전이 |
 | file_selector_linux | 0.9.4 | BSD-3-Clause | https://github.com/flutter/packages/tree/main/packages/file_selector/file_selector_linux | 전이 |
 | file_selector_macos | 0.9.5 | BSD-3-Clause | https://github.com/flutter/packages/tree/main/packages/file_selector/file_selector_macos | 전이 |
@@ -166,7 +166,7 @@ PyPI 코어 패키지(`maskingtape`)는 런타임 외부 의존성이 없어 표
 | test_api | 0.7.11 | BSD-3-Clause | https://github.com/dart-lang/test/tree/master/pkgs/test_api | 전이 |
 | typed_data | 1.4.0 | BSD-3-Clause | https://github.com/dart-lang/core/tree/main/pkgs/typed_data | 전이 |
 | universal_platform | 1.1.0 | MIT | https://github.com/gskinnerTeam/flutter-universal-platform | 전이 |
-| vector_math | 2.2.0 | BSD-3-Clause | https://github.com/google/vector_math.dart | 전이 |
+| vector_math | 2.2.0 | BSD-3-Clause AND Zlib | https://github.com/google/vector_math.dart | 전이 |
 | vm_service | 15.2.0 | BSD-3-Clause | https://github.com/dart-lang/sdk/tree/main/pkg/vm_service | 전이 |
 | web | 1.1.1 | BSD-3-Clause | https://github.com/dart-lang/web | 전이 |
 
@@ -188,6 +188,7 @@ Python 개발 도구(pytest·ruff·httpx2와 그 전이, Python 3.13.2, Windows)
 | certifi | 2026.7.22 | MPL-2.0 | https://github.com/certifi/python-certifi | MCP 서버. 경로: maskingtape-mcp → mcp → httpx → certifi |
 | pywin32 | 312 | PSF-2.0 | https://github.com/mhammond/pywin32 | MCP 서버. 경로: maskingtape-mcp → mcp → pywin32. 조건: `sys_platform == "win32" and python_version < "3.14"` |
 | typing-extensions | 4.16.0 | PSF-2.0 | https://github.com/python/typing_extensions | MCP 서버. 경로: maskingtape-mcp → mcp → typing-extensions |
+| vector_math | 2.2.0 | BSD-3-Clause AND Zlib | https://github.com/google/vector_math.dart | 데스크톱 앱. 전이 |
 | lightningcss | 1.33.0 | MPL-2.0 |  | 개발 도구(npm). 경로: vite → lightningcss |
 | lightningcss-android-arm64 | 1.33.0 | MPL-2.0 |  | 개발 도구(npm). 경로: vite → lightningcss → lightningcss-android-arm64 |
 | lightningcss-darwin-arm64 | 1.33.0 | MPL-2.0 |  | 개발 도구(npm). 경로: vite → lightningcss → lightningcss-darwin-arm64 |
@@ -222,6 +223,14 @@ Python 개발 도구(pytest·ruff·httpx2와 그 전이, Python 3.13.2, Windows)
 - PSF-2.0(Python Software Foundation License 2.0)은 파이썬 자체와 같은 계열의 **퍼미시브 라이선스**다. 카피레프트 조항이 없고, 라이선스와 저작권 고지를 유지하면 사용·수정·재배포할 수 있다.
 - 우리는 두 패키지를 재배포하지 않는다. REST API 서버에서는 공개 데모 서버에 설치될 뿐이고, MCP 서버는 사용자가 설치할 때 각자 받는다.
 - 결론: **의무 없음.**
+
+### vector_math (BSD-3-Clause AND Zlib) — 데스크톱 앱
+
+- **직접 의존이 아니다.** `apps/desktop/pubspec.lock`에 전이 의존성으로 들어 있고, 우리 Dart 코드는 vector_math를 import하지 않는다.
+- `LICENSE` 하나에 두 라이선스 전문이 함께 있다. Google(2015)의 BSD-3-Clause와 Andrew Magill(2013)의 zlib이다. pub.dev 태그는 BSD-3-Clause 하나뿐이라 생성기가 놓쳤다. OpenUP 사전 검증보고서(2026-10-01)가 두 라이선스로 판정해서, pub.dev에서 받은 2.2.0 아카이브를 열어 확인했다(2026-10-03, #634). 생성기는 이 결과를 `PUB_LICENSE_CHECKED`에 버전과 함께 적어 두고, lock의 버전이 바뀌면 「확인 필요」로 표시한다.
+- **zlib은 OSI 승인 퍼미시브 라이선스**다(SPDX 라이선스 목록 3.29). 카피레프트 조항이 없다. 조건은 셋이다. 원작자를 속이지 않는다, 수정한 소스는 수정했다고 밝힌다, 소스를 배포할 때 고지를 지우지 않는다. 제품 문서에 출처를 적는 것은 권장이고 의무가 아니다.
+- 우리는 vector_math를 수정하지 않고 소스를 재배포하지도 않는다. 데스크톱 앱은 소스로 배포되고, 빌드할 때 pub이 받아 온다.
+- 결론: **의무 없음.** 설치 파일로 배포하게 되면 BSD-3-Clause의 바이너리 고지 조건이 생기므로, 앱의 라이선스 화면에 이 고지가 들어가는지 그때 확인한다.
 
 ### lightningcss 계열 (MPL-2.0), lru-cache (BlueOak-1.0.0), mdn-data (CC0-1.0) — 개발 도구
 
