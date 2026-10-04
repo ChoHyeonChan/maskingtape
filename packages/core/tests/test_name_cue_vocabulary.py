@@ -127,3 +127,27 @@ def test_short_title_after_a_three_syllable_name_is_a_cue(text, name):
 )
 def test_short_title_inside_a_longer_word_is_not_a_cue(text):
     assert names(text) == []
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "발신: 홍보팀",
+        "손해 배상.",
+        "정신적 손해 배상!",
+        "피고인 진술",
+        "피해자 진술서",
+        "배우자 공제 대상",
+        "투숙객 안내문",
+        "정부의 책임이 크다.",
+        "오늘자 기사.",
+        "주문자 우대 혜택이 있습니다",
+    ],
+)
+def test_review_false_positives_from_new_cues_are_not_names(text):
+    assert names(text) == []
+
+
+def test_form_label_with_a_person_name_still_counts_after_the_org_rule():
+    # 대조군: 발신 칸에 사람 이름이 오면 기관 규칙이 막지 않는다
+    assert "김민수" in names("발신: 김민수")

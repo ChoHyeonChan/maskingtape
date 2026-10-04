@@ -121,6 +121,9 @@ _COMMON_WORDS = frozenset({
     # "이름" 단서 뒤에 흔히 오는 일반 명사·부사(#484) — "이름 정밀 탐지"의 "정밀"처럼
     # 서식·기술 문서에서 "이름"이라는 단서 바로 뒤에 자주 등장해 이름으로 오탐됐다.
     "정밀", "문맥", "전혀", "공식",
+    # 새 역할어·직함 뒤에 흔히 오는 일반 명사(#603 리뷰 — "피고인 진술", "배우자 공제 대상",
+    # "투숙객 안내문", "주문자 우대", "오늘자 기사")
+    "진술", "진술서", "공제", "안내문", "우대", "오늘자",
 })
 
 # 직함 전용 단서(존칭 '님' 제외). 이것만으로(다른 단서 없이) 이름을 잡을 땐 성+2자 풀네임을
@@ -164,6 +167,7 @@ _BOUNDED_SUFFIX_ALT = "|".join(sorted(_BOUNDED_SUFFIX_TITLES, key=len, reverse=T
 # 있으므로 dict.fromkeys로 중복을 없앤 뒤 긴 것부터 매칭한다.
 # 편지·공문 맺음말("김영수 귀하"·"홍길동 드림"·"홍길동 올림"·"홍길동 배상")은 이름 뒤에 올 때 강한
 # 단서다. 다만 "드림"·"귀하"는 낱말의 일부로도 쓰여("드림 행사") 줄 끝이나 문장부호 앞에서만 받는다.
+# "배상"은 법률 문서의 "손해 배상"과 겹쳐 세 글자 이름일 때만 받는다(#603 리뷰 — detect()에서 거른다).
 _CLOSING_SUFFIX_ALT = r"(?:귀하|드림|올림|배상)(?=[ \t]*(?:\r?\n|$|[.,!?)\]]))"
 _SUFFIX_ALT = (
     _SUFFIX_ALT_PLAIN
@@ -265,6 +269,13 @@ _FORM_LABELS = (
 # _PREFIX_CUES 나머지는 여기 포함하지 않는다 — 포함하면 "담당자 최근 변경"·"고객 문의
 # 접수" 같은 기존에 걸러야 했던 오탐까지 강한 단서로 승격돼 버린다(#446 회귀 테스트).
 _STRONG_LABEL_PREFIXES = frozenset(_FORM_LABELS) - {"이름"}
+# 두 글자 직함 앞의 세 글자 이름이 이 조사로 끝나면 낱말+조사다("정부의 책임"). 은·이·도·을은
+# 실명 끝 글자로도 흔해서("손인은"·"김가을") 뺀다(#603 리뷰).
+_TWO_CHAR_TITLE_JOSA_END_RE = re.compile(r"^[가-힣]{2}[의가는를와과]$")
+# 공문 발신·수신·참조 칸의 값이 부서·기관 이름이면 사람 이름이 아니다(#603 리뷰). 세 글자 이상만
+# 본다 — 두 글자 값("정국"처럼 이름 끝 글자와 겹치는 꼴)은 이름일 가능성이 커서 그대로 둔다.
+_ORG_VALUE_LABELS = frozenset({"발신", "수신", "참조"})
+_ORG_VALUE_END_RE = re.compile(r"(?:팀|실|부|과|국|처|청)$")
 # 양식 칸에 이름 대신 들어가는 값과 표 머리행에 흔한 열 이름 — 끝의 조사·"입니다"를 뗀 값이
 # 이것과 **완전히 같을 때만** 이름으로 보지 않는다. 앞부분 일치로 거르면 "기재민"처럼 이 말로
 # 시작하는 실명이 샌다(#491 독립 검증).
@@ -452,22 +463,29 @@ def _name_could_end_at(text: str, pos: int) -> bool:
 
 
 def _is_common_word_at(text: str, pos: int) -> bool:
-    """text[pos:]가 흔한 2음절 일반명사로 **단어가 끝나는지** — 뒤가 비한글(공백·문장부호·끝)이거나
+    """text[pos:]가 흔한 일반명사(2·3음절)로 **단어가 끝나는지** — 뒤가 비한글(공백·문장부호·끝)이거나
     단일 조사 뒤에 비한글이 올 때, 또는 #600에서 새로 받는 어미 꼴("정보예요"·"정보에게는")이
     올 때만 True. "정기훈"처럼 글자가 더 이어지면 실명일 수 있어 False."""
-    if text[pos : pos + 2] not in _COMMON_WORDS:
-        return False
-    after = text[pos + 2 : pos + 3]
+    for n in (3, 2):
+        if text[pos : pos + n] in _COMMON_WORDS:
+            return _common_word_ends_at(text, pos, n)
+    return False
+
+
+def _common_word_ends_at(text: str, pos: int, n: int) -> bool:
+    """text[pos:pos+n]이 일반명사일 때 그 낱말이 뒤에서 끝나는지 본다(_is_common_word_at의 판정)."""
+    end = pos + n
+    after = text[end : end + 1]
     if not after or not _is_hangul(after):
         return True
     if (
-        text.startswith(_OPEN_ENDING_STEMS, pos + 2)
-        and not _PRE600_NAME_END_RE.match(text, pos + 2)
-        and not _name_could_end_at(text, pos + 3)
+        text.startswith(_OPEN_ENDING_STEMS, end)
+        and not _PRE600_NAME_END_RE.match(text, end)
+        and not _name_could_end_at(text, end + 1)
     ):
         return True
     if after in _JOSA_CHARS:
-        after2 = text[pos + 3 : pos + 4]
+        after2 = text[end + 1 : end + 2]
         return not after2 or not _is_hangul(after2)
     return False
 
@@ -587,6 +605,10 @@ class NameDetector(Detector):
             )
             if title_only and len(m.group("name")) < 3:
                 continue
+            if suffix is not None and len(suffix) == 2 and _TWO_CHAR_TITLE_JOSA_END_RE.search(m.group("name")):
+                continue  # "정부의 책임"의 "정부의"처럼 낱말+조사를 두 글자 직함 앞 이름으로 보지 않는다(#603)
+            if suffix == "배상" and len(m.group("name")) < 3:
+                continue  # "손해 배상"의 두 글자 낱말을 이름으로 보지 않는다(#603)
             if m.group("paren") is not None and not has_prefix:
                 # 괄호 안이 숫자만 있는 나이·연락처·성별뿐이면 두 글자 낱말과 흔히 겹친다
                 # ("정원(35)", "문의(02-…)", 서식의 "구분(남/여)"). 세 글자 이름일 때만 받는다.
@@ -725,6 +747,8 @@ class NameDetector(Detector):
             # 직함+조사("신청자 : 차장은 …")도 값이 아니다. 뒤 이름은 위 규칙이 직함을 단서로 잡는다(#533)
             if value in _FORM_NOT_NAMES or _CUE_WITH_JOSA_RE.fullmatch(name) or all(covered[start:end]):
                 continue
+            if m.group("label") in _ORG_VALUE_LABELS and len(name) >= 3 and _ORG_VALUE_END_RE.search(name):
+                continue  # 공문 발신·수신·참조 칸은 사람보다 부서·기관이 흔하다("홍보팀")
             extra.append(
                 Detection(
                     kind=self.kind,
