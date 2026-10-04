@@ -12,7 +12,6 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urljoin, urlparse
 from urllib.request import Request, urlopen
 
-
 SAMPLE_TEXT = "passport M12345678 check"
 SAMPLE_PII = "M12345678"
 
