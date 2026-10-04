@@ -496,7 +496,7 @@ def gen_birth_date_cue_chulsaeng(rng: random.Random) -> MissDoc:
 # core가 고친 이슈. 이 이슈들의 태그는 지금 core가 전부 완전 일치로 잡아야 한다 — 되돌아가면
 # test_open_misses.py가 실패한다. 이슈가 고쳐지면 여기에 번호를 더한다(고쳐도 이 목록을 안 고치면
 # 테스트는 그대로 통과하므로 core PR을 막지 않는다).
-FIXED_ISSUES = frozenset({592, 593, 594, 600, 602, 605, 607, 636, 639})
+FIXED_ISSUES = frozenset({592, 593, 594, 600, 602, 604, 605, 607, 636, 639})
 
 
 MISS_TAGS = {
