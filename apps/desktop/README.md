@@ -132,7 +132,7 @@ test/
 순서를 이렇게 둔 이유:
 
 - 로컬 CLI는 기능이 온전하다 — 가명처리(`pseudonym`)는 #309 이후 API도 지원하지만, **로컬 LLM 사용(이름 탐지)은 여전히 CLI 전용**이다(배포 API는 규칙 기반 탐지만 제공한다). 텍스트가 이 PC를 벗어나지도 않는다.
-- CLI는 **앱 exe 옆에 동봉된 Python**(`python\python.exe -X utf8 -m maskingtape.cli` — 설치판, #617)을 먼저 찾고,
+- CLI는 **앱 exe 옆에 동봉된 Python**(`python\python.exe -B -X utf8 -m maskingtape.cli` — 설치판, #617)을 먼저 찾고,
   없으면 PATH의 `maskingtape`를 쓴다(`services/cli_locator.dart`). 소스에서 `flutter run`할 때는 venv를 활성화한
   셸에서 띄워야 PATH에 CLI가 있다 — 아니면 "CLI를 찾을 수 없습니다"가 뜬다.
 - 설치파일(setup.exe)을 만드는 법은 [installer/README.md](installer/README.md)에 있다.

@@ -19,8 +19,9 @@ void main() {
     );
     expect(cli.executable, r'C:\Program Files\maskingtape\python\python.exe');
     expect(asked, [cli.executable]);
-    // 임베디드 Python은 PYTHONUTF8을 무시하므로 -X utf8이 꼭 있어야 한글이 안 깨진다.
-    expect(cli.leadingArgs, ['-X', 'utf8', '-m', 'maskingtape.cli']);
+    // -B: 설치 폴더에 __pycache__를 남기지 않는다(제거 시 폴더가 깨끗이 사라지게).
+    // -X utf8: core CLI가 표준입출력을 UTF-8로 고정하지만 그 밖의 경로도 맞추려고 함께 준다.
+    expect(cli.leadingArgs, ['-B', '-X', 'utf8', '-m', 'maskingtape.cli']);
   });
 
   test('동봉 Python이 없으면 PATH의 maskingtape로 돌아간다 (개발 환경)', () {

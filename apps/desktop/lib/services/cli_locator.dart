@@ -17,9 +17,13 @@ class CliCommand {
 ///
 /// - `-m maskingtape.cli`: pip이 만드는 `Scripts\maskingtape.exe` 런처를 쓰지 않는다. 런처를
 ///   만들려면 pip을 동봉해야 하고, 그만큼 고지할 제3자 구성요소가 늘어난다.
-/// - `-X utf8`: 임베디드 Python은 `._pth` 파일 때문에 격리 모드로 떠서 `PYTHONUTF8`
-///   환경변수를 무시한다. 플래그로 줘야 파이프가 UTF-8이 된다(아니면 한글이 cp949로 깨진다).
-const bundledCliArgs = ['-X', 'utf8', '-m', 'maskingtape.cli'];
+/// - `-B`: `.pyc`(`__pycache__`)를 쓰지 않는다. 설치 폴더에 실행 중 생기는 파일이 없어야 제거할 때
+///   설치한 파일만 지우면 폴더가 깨끗이 사라진다(제거 단계에서 `python\` 폴더를 통째로 지우는 방식은
+///   사용자가 설치 경로를 다른 Python 폴더와 겹치게 잡으면 남의 파일까지 지울 수 있어 쓰지 않는다).
+///   캐시 없이 도는 비용은 호출당 0.03초쯤이다.
+/// - `-X utf8`: core CLI가 표준입출력을 UTF-8로 고정하지만(`cli.py`의 `_read_stdin`·`_use_utf8_output`),
+///   그 밖의 경로(파일 열기 기본 인코딩 등)도 UTF-8로 맞추려고 함께 준다.
+const bundledCliArgs = ['-B', '-X', 'utf8', '-m', 'maskingtape.cli'];
 
 /// 어떤 `maskingtape` CLI를 실행할지 정한다.
 ///

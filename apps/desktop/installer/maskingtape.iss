@@ -51,9 +51,10 @@ Name: "korean"; MessagesFile: "compiler:Languages\Korean.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-; Ollama가 이미 있으면 항목 자체를 숨긴다. 둘 다 인터넷이 필요하다.
-Name: "ollama"; Description: "Ollama 설치 — 로컬 LLM 실행기 (공식 설치파일 약 1GB를 지금 내려받음)"; GroupDescription: "로컬 LLM — 「로컬 LLM 사용」에 필요합니다. 없어도 규칙 탐지는 동작합니다:"; Check: not OllamaInstalled
-Name: "model"; Description: "이름 판정 모델 받기 — maskingtape-name-1.5b (986MB, 허깅페이스에서)"; GroupDescription: "로컬 LLM — 「로컬 LLM 사용」에 필요합니다. 없어도 규칙 탐지는 동작합니다:"
+; Ollama가 이미 있으면 항목 자체를 숨긴다. 둘 다 인터넷이 필요하고 **기본값은 꺼져 있다** — 제품의 중심은
+; 규칙 탐지이고 LLM은 선택 기능이다. 고르지 않았는데 약 2GB를 받고 다른 프로그램을 설치하지 않는다.
+Name: "ollama"; Description: "Ollama 설치 — 로컬 LLM 실행기 (공식 설치파일 약 1GB를 지금 내려받음)"; GroupDescription: "로컬 LLM — 「로컬 LLM 사용」에 필요합니다. 없어도 규칙 탐지는 동작합니다:"; Flags: unchecked; Check: not OllamaInstalled
+Name: "model"; Description: "이름 판정 모델 받기 — maskingtape-name-1.5b (986MB, 허깅페이스에서)"; GroupDescription: "로컬 LLM — 「로컬 LLM 사용」에 필요합니다. 없어도 규칙 탐지는 동작합니다:"; Flags: unchecked
 
 [Files]
 Source: "{#BundleDir}\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs ignoreversion
@@ -65,9 +66,9 @@ Name: "{autodesktop}\마스킹테이프"; Filename: "{app}\maskingtape_desktop.e
 [Run]
 Filename: "{app}\maskingtape_desktop.exe"; Description: "{cm:LaunchProgram,마스킹테이프}"; Flags: nowait postinstall skipifsilent
 
-[UninstallDelete]
-; 동봉 Python이 실행 중에 만든 __pycache__까지 지운다. Ollama와 모델은 사용자 것이므로 지우지 않는다.
-Type: filesandordirs; Name: "{app}\python"
+; [UninstallDelete]는 두지 않는다 — 앱이 동봉 Python을 -B로 불러 설치 폴더에 새 파일이 생기지 않으므로
+; 설치한 파일만 지우면 폴더가 사라진다. 폴더째 지우면 설치 경로가 다른 Python과 겹칠 때 남의 파일까지 지운다.
+; Ollama와 모델은 사용자 것이므로 지우지 않는다.
 
 [Code]
 var
