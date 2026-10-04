@@ -11,11 +11,17 @@ import 'code_point_offsets.dart';
 /// core CLI(`maskingtape`)를 서브프로세스로 호출하는 구현.
 /// 탐지 로직은 전부 core에 있고, 여기는 stdin으로 텍스트를 넘기고 stdout을 읽기만 한다.
 class CliAnonymizer implements Anonymizer {
-  const CliAnonymizer({this.command = 'maskingtape'});
+  const CliAnonymizer({
+    this.command = 'maskingtape',
+    this.leadingArgs = const [],
+  });
 
-  /// 실행할 CLI — 설치판이 동봉한 exe의 전체 경로이거나, PATH에서 찾는 `maskingtape`
+  /// 실행할 CLI — 설치판이 동봉한 Python의 전체 경로이거나, PATH에서 찾는 `maskingtape`
   /// (`cli_locator.dart`가 정한다).
   final String command;
+
+  /// 사용자 인자 앞에 붙는 고정 인자 — 동봉 Python으로 부를 때의 `-X utf8 -m maskingtape.cli`.
+  final List<String> leadingArgs;
 
   /// CLI 인자 조립 — 탐지(`--scan`)와 마스킹 호출이 같은 조건을 쓰도록 한 곳에서 만든다.
   /// 둘의 조건이 어긋나면 화면의 탐지 요약과 저장된 결과가 서로 다른 기준이 된다.
@@ -53,7 +59,7 @@ class CliAnonymizer implements Anonymizer {
     try {
       process = await Process.start(
         command,
-        args,
+        [...leadingArgs, ...args],
         // 파이썬이 콘솔 코드페이지(cp949) 대신 UTF-8로 파이프를 읽고 쓰게 한다.
         environment: {'PYTHONUTF8': '1'},
       );

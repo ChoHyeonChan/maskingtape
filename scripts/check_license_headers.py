@@ -48,7 +48,8 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 
 def is_target(path: str) -> bool:
     """검사 대상인지 판정한다. path는 git이 주는 저장소 기준 경로('/' 구분)다."""
-    return PurePosixPath(path).suffix in COMMENT_STYLE and not path.startswith(EXCLUDED_PREFIXES)
+    # 확장자는 대소문자를 가리지 않는다. 윈도에서 만든 `.PY`·`.TSX` 파일도 검사해야 한다(#500).
+    return PurePosixPath(path).suffix.lower() in COMMENT_STYLE and not path.startswith(EXCLUDED_PREFIXES)
 
 
 def has_header(text: str) -> bool:
@@ -105,7 +106,7 @@ def main() -> int:
     for rel in missing:
         print(f"  {rel}", file=sys.stderr)
     print("\n파일 맨 위에 아래 두 줄을 넣으세요 (CONTRIBUTING.md 「라이선스 규칙」).", file=sys.stderr)
-    for suffix in sorted({PurePosixPath(rel).suffix for rel in missing}):
+    for suffix in sorted({PurePosixPath(rel).suffix.lower() for rel in missing}):
         print(f"\n[{suffix}]\n{expected_header(suffix)}", file=sys.stderr)
     return 1
 

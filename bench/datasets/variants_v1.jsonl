@@ -163,6 +163,51 @@
 {"text": "전화 010-5832​-6995", "labels": [{"kind": "phone", "start": 3, "end": 17}], "difficulty": "variant", "variant_tag": "invisible_chars"}
 {"text": "전화 010-8768​-1330", "labels": [{"kind": "phone", "start": 3, "end": 17}], "difficulty": "variant", "variant_tag": "invisible_chars"}
 {"text": "전화 010-5101​-4123", "labels": [{"kind": "phone", "start": 3, "end": 17}], "difficulty": "variant", "variant_tag": "invisible_chars"}
+{"text": "담당자 신원서이고 확인했습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_ending_copula"}
+{"text": "담당자 박경도이며 확인했습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_ending_copula"}
+{"text": "학생 장정영입니다 확인했습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}], "difficulty": "variant", "variant_tag": "name_ending_copula"}
+{"text": "담당자 임율서이고 확인했습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_ending_copula"}
+{"text": "담당자 김군예입니다 확인했습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_ending_copula"}
+{"text": "고객 백호예입니다 확인했습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}], "difficulty": "variant", "variant_tag": "name_ending_copula"}
+{"text": "보호자 김원지입니다 확인했습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_ending_copula"}
+{"text": "고객 심연율입니다 확인했습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}], "difficulty": "variant", "variant_tag": "name_ending_copula"}
+{"text": "학생 윤영인이며 확인했습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}], "difficulty": "variant", "variant_tag": "name_ending_copula"}
+{"text": "보호자 심훈윤이며 확인했습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_ending_copula"}
+{"text": "보호자 서훈민이며 확인했습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_ending_copula"}
+{"text": "신청자 한영석이고 확인했습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_ending_copula"}
+{"text": "학생 허도경이고 확인했습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}], "difficulty": "variant", "variant_tag": "name_ending_copula"}
+{"text": "보호자 송우찬이며 확인했습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_ending_copula"}
+{"text": "보호자 백재서입니다 확인했습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_ending_copula"}
+{"text": "신청자 문민군하고 확인했습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_ending_josa_multi"}
+{"text": "신청자 허율하에서 확인했습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_ending_josa_multi"}
+{"text": "고객 강찬빈처럼 확인했습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}], "difficulty": "variant", "variant_tag": "name_ending_josa_multi"}
+{"text": "학생 고윤민한테 확인했습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}], "difficulty": "variant", "variant_tag": "name_ending_josa_multi"}
+{"text": "고객 심혜영까지 확인했습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}], "difficulty": "variant", "variant_tag": "name_ending_josa_multi"}
+{"text": "신청자 오재민보다 확인했습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_ending_josa_multi"}
+{"text": "학생 손경원처럼 확인했습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}], "difficulty": "variant", "variant_tag": "name_ending_josa_multi"}
+{"text": "고객 백양하하고 확인했습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}], "difficulty": "variant", "variant_tag": "name_ending_josa_multi"}
+{"text": "신청자 황현지께서 확인했습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_ending_josa_multi"}
+{"text": "보호자 유찬율한테 확인했습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_ending_josa_multi"}
+{"text": "학생 송윤예에서 확인했습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}], "difficulty": "variant", "variant_tag": "name_ending_josa_multi"}
+{"text": "담당자 홍수혜에서 확인했습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_ending_josa_multi"}
+{"text": "담당자 오은지에서 확인했습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_ending_josa_multi"}
+{"text": "환자 임진군처럼 확인했습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}], "difficulty": "variant", "variant_tag": "name_ending_josa_multi"}
+{"text": "학생 임찬예까지 확인했습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}], "difficulty": "variant", "variant_tag": "name_ending_josa_multi"}
+{"text": "신청자 안윤원만 확인했습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_ending_josa_single"}
+{"text": "환자 손민서의 확인했습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}], "difficulty": "variant", "variant_tag": "name_ending_josa_single"}
+{"text": "보호자 정진준을 확인했습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_ending_josa_single"}
+{"text": "환자 이도석이랑 확인했습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}], "difficulty": "variant", "variant_tag": "name_ending_josa_single"}
+{"text": "보호자 배훈연의 확인했습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_ending_josa_single"}
+{"text": "학생 안인재랑 확인했습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}], "difficulty": "variant", "variant_tag": "name_ending_josa_single"}
+{"text": "담당자 고영서만 확인했습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_ending_josa_single"}
+{"text": "환자 남연석을 확인했습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}], "difficulty": "variant", "variant_tag": "name_ending_josa_single"}
+{"text": "고객 홍정진만 확인했습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}], "difficulty": "variant", "variant_tag": "name_ending_josa_single"}
+{"text": "보호자 임재인이랑 확인했습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_ending_josa_single"}
+{"text": "보호자 허정지와 확인했습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_ending_josa_single"}
+{"text": "담당자 박하아께 확인했습니다.", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_ending_josa_single"}
+{"text": "환자 남서호를 확인했습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}], "difficulty": "variant", "variant_tag": "name_ending_josa_single"}
+{"text": "환자 양성우의 확인했습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}], "difficulty": "variant", "variant_tag": "name_ending_josa_single"}
+{"text": "환자 남석은만 확인했습니다.", "labels": [{"kind": "name", "start": 3, "end": 6}], "difficulty": "variant", "variant_tag": "name_ending_josa_single"}
 {"text": "예금주 :  심혜", "labels": [{"kind": "name", "start": 7, "end": 9}], "difficulty": "variant", "variant_tag": "name_form_colon"}
 {"text": "성명\t:\t강지정", "labels": [{"kind": "name", "start": 5, "end": 8}], "difficulty": "variant", "variant_tag": "name_form_colon"}
 {"text": "이름 :  백준석", "labels": [{"kind": "name", "start": 6, "end": 9}], "difficulty": "variant", "variant_tag": "name_form_colon"}
@@ -208,6 +253,21 @@
 {"text": "| 성명 | 백은석 |", "labels": [{"kind": "name", "start": 7, "end": 10}], "difficulty": "variant", "variant_tag": "name_form_table"}
 {"text": "| 이름 | 심율 |", "labels": [{"kind": "name", "start": 7, "end": 9}], "difficulty": "variant", "variant_tag": "name_form_table"}
 {"text": "| 성명 | 장호 |", "labels": [{"kind": "name", "start": 7, "end": 9}], "difficulty": "variant", "variant_tag": "name_form_table"}
+{"text": "서정석님이 확인했습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "variant", "variant_tag": "name_honorific_ending"}
+{"text": "손석성님을 확인했습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "variant", "variant_tag": "name_honorific_ending"}
+{"text": "심연인님이라도 확인했습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "variant", "variant_tag": "name_honorific_ending"}
+{"text": "윤도우님께서 확인했습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "variant", "variant_tag": "name_honorific_ending"}
+{"text": "강경정님이 확인했습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "variant", "variant_tag": "name_honorific_ending"}
+{"text": "송현하님이라도 확인했습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "variant", "variant_tag": "name_honorific_ending"}
+{"text": "송연지님으로서 확인했습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "variant", "variant_tag": "name_honorific_ending"}
+{"text": "양민연님한테서 확인했습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "variant", "variant_tag": "name_honorific_ending"}
+{"text": "양훈석님에게도 확인했습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "variant", "variant_tag": "name_honorific_ending"}
+{"text": "홍예호님이라도 확인했습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "variant", "variant_tag": "name_honorific_ending"}
+{"text": "오진하님께 확인했습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "variant", "variant_tag": "name_honorific_ending"}
+{"text": "임도현님을 확인했습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "variant", "variant_tag": "name_honorific_ending"}
+{"text": "한하도님을 확인했습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "variant", "variant_tag": "name_honorific_ending"}
+{"text": "정하지님께 확인했습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "variant", "variant_tag": "name_honorific_ending"}
+{"text": "남영하님에게도 확인했습니다.", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "variant", "variant_tag": "name_honorific_ending"}
 {"text": "담당자(전경준 군) 문의", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_paren_after_label"}
 {"text": "신청인(허현아 님) 문의", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_paren_after_label"}
 {"text": "담당자(장찬인 님) 문의", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "variant", "variant_tag": "name_paren_after_label"}

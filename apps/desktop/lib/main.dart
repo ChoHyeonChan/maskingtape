@@ -4,9 +4,12 @@
 import 'package:flutter/material.dart';
 
 import 'screens/home_screen.dart';
+import 'services/bundled_licenses.dart';
 import 'theme.dart';
 
 void main() {
+  // 설치판에 함께 실린 구성요소(임베디드 Python 등)의 고지문을 라이선스 화면에 보탠다.
+  registerBundledLicenses();
   runApp(const MaskingtapeApp());
 }
 

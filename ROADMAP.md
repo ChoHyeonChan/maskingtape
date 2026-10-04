@@ -1,13 +1,13 @@
 # 개발 로드맵
 
 > 팀 마스킹테이프의 개발 계획입니다. 진행 상황은 [Issues](https://github.com/ChoHyeonChan/maskingtape/issues)와 [Milestones](https://github.com/ChoHyeonChan/maskingtape/milestones)에서 확인할 수 있습니다.
-> 최종 갱신: 2026-09-30
+> 최종 갱신: 2026-10-02
 
 ## 우리가 만드는 것
 
 **한국어 개인정보 비식별화 엔진** — 한국어 문서에서 개인정보(주민등록번호·전화번호·주소·이름 등 11종)를 찾아 가려주는 오픈소스 도구입니다.
 
-**차별점**: 영어권 도구(Presidio 등)는 한국어 개인정보를 제대로 못 잡습니다. 한국어에 특화한 **규칙(정규식·사전·체크섬)**이 중심이라 무료로, 인터넷 없이 동작합니다. 이름처럼 문맥이 필요한 것은 원하면 **로컬 LLM(Ollama)**이 한 번 더 판단합니다. 라이브러리·CLI·MCP 서버는 **전부 로컬에서 처리**하고, 웹 데모만 시연용 서버에서 처리합니다([원문은 어디로 가나](README.md#원문은-어디로-가나)).
+**차별점**: 영어권 도구(Presidio 등)는 한국어 개인정보를 제대로 못 잡습니다. 한국어에 특화한 **규칙(정규식·사전·체크섬)**이 중심이라 무료로, 인터넷 없이 동작합니다. 이름처럼 문맥이 필요한 것은 원하면 **로컬 LLM(Ollama)**이 한 번 더 판단합니다. 라이브러리·CLI·MCP 서버는 **전부 로컬에서 처리**하고, 웹 데모만 시연용 서버에서 처리합니다. 웹 데모에는 하이브리드 모드를 고르면 규칙으로 가린 글을 OpenAI API로 보내는 선택 옵션이 있습니다. 운영사무국이 서면으로 확인해 주었고, 심사 시연은 로컬 구성으로 합니다([원문은 어디로 가나](README.md#원문은-어디로-가나)).
 
 ## 산출물 6종
 
@@ -125,6 +125,7 @@
 - [x] PyPI 배포 ([#48](https://github.com/ChoHyeonChan/maskingtape/issues/48))
 - [x] 새 탐지기: 운전면허 ([#267](https://github.com/ChoHyeonChan/maskingtape/issues/267)) + 보안 하드닝 (ReDoS [#289](https://github.com/ChoHyeonChan/maskingtape/issues/289))
 - [x] 0.3.0 배포 ([#429](https://github.com/ChoHyeonChan/maskingtape/issues/429)) — 주소 부분 유출 ([#423](https://github.com/ChoHyeonChan/maskingtape/issues/423))·주소 겹침 검사 O(n²) ([#426](https://github.com/ChoHyeonChan/maskingtape/issues/426)) 수정 포함
+- [x] 0.4.0 배포 ([#500](https://github.com/ChoHyeonChan/maskingtape/issues/500)): 표기 변형 ([#490](https://github.com/ChoHyeonChan/maskingtape/issues/490))·`--llm` 원문 외부 전송 경로 ([#468](https://github.com/ChoHyeonChan/maskingtape/issues/468))·이름·주소·번호 미탐 수정, 벤치 이름 재현율 0.668→0.932
 - [x] 시·군 뒤에 바로 오는 도로명 주소 ([#425](https://github.com/ChoHyeonChan/maskingtape/issues/425))
 - [x] 라이선스 정비: 모든 소스 파일 저작권 헤더 + CI 검사 ([#437](https://github.com/ChoHyeonChan/maskingtape/issues/437)), SBOM 전이 의존성·AI 모델 상세 ([#438](https://github.com/ChoHyeonChan/maskingtape/issues/438)), OpenUP 사전 검증 1차 스캔(2026-09-24)
 - 상시: 팀원 PR 리뷰·아키텍처
