@@ -101,3 +101,34 @@ def test_format_report_lists_each_tag_issue_subtotal_and_overall():
     report = format_report({(603, "a"): MissCounts(tp=1, miss=1), (604, "c"): MissCounts(tp=3)}, total_fp=2)
     assert "#603" in report and "#604" in report and "이슈 소계" in report
     assert "전체" in report and "오탐(fp): 2건" in report
+
+
+def test_fully_covered_with_different_kind_or_boundary_is_covered_not_partial():
+    """정답의 모든 글자를 덮었지만 종류나 경계가 다르면 '가려짐'이다(#653). 일부가 남는 '부분'과 다르다."""
+    kind_differs = "생년월일 42.04.02-2880343"
+    wider = "주민번호 800101-1234560A 확인"
+    rows = [
+        _row(kind_differs, [{"kind": "rrn", "start": 5, "end": 21}], tag="kind"),
+        _row(wider, [{"kind": "rrn", "start": 5, "end": 19}], tag="wider"),
+    ]
+    fixed = _FixedDetector({kind_differs: [("phone", 5, 21)], wider: [("rrn", 5, 20)]})
+    per_tag, total_fp = evaluate_open_misses(rows, Pipeline(detectors=[fixed]))
+    for tag in ("kind", "wider"):
+        c = per_tag[(1, tag)]
+        assert (c.tp, c.covered, c.partial, c.miss) == (0, 1, 0, 0), tag
+        assert c.recall == 0.0 and c.leak_recall == 1.0
+    assert total_fp == 0
+
+
+def test_two_predictions_that_jointly_cover_count_as_covered():
+    text = "생년월일 19800101-1234***"
+    rows = [_row(text, [{"kind": "rrn", "start": 5, "end": 21}])]
+    fixed = _FixedDetector({text: [("birth_date", 5, 13), ("rrn", 13, 21)]})
+    per_tag, _ = evaluate_open_misses(rows, Pipeline(detectors=[fixed]))
+    assert per_tag[(1, "t")].covered == 1
+
+
+def test_leak_recall_sums_through_issue_subtotals_and_report():
+    per_tag = {(637, "a"): MissCounts(tp=1, covered=1, miss=2)}
+    assert by_issue(per_tag)[637].leak_recall == 0.5
+    assert "leak_recall" in format_report(per_tag, total_fp=0)

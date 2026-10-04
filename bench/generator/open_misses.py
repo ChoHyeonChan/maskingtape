@@ -25,11 +25,14 @@ from dataclasses import dataclass
 
 from bench.generator.entities import (
     _BIZ_REG_WEIGHTS,
+    _CENTURY_CODES,
     _CITIES,
+    _DL_REGIONS,
     _GIVEN_SYLLABLES,
     _GU_DONG,
     _GU_NAMES,
     _ROAD_ADDRESSES,
+    _RRN_WEIGHTS,
     _SURNAMES,
     _biz_reg_check_digit,
     _luhn_check_digit,
@@ -334,6 +337,93 @@ def gen_name_repeat_without_cue(rng: random.Random) -> MissDoc:
     )
 
 
+# ── #636~#640 번호 구분자·경계(#631 보안 리체크) ─────────────────
+
+
+def _rrn(rng: random.Random) -> tuple[int, str, str]:
+    """(출생 연도, 앞 6자리, 뒷자리 7자리) — 검증 숫자까지 맞는 합성 주민등록번호."""
+    century = rng.choice([1900, 2000])
+    year = century + rng.randint(0, 99 if century == 1900 else 9)
+    front = f"{year % 100:02d}{rng.randint(1, 12):02d}{rng.randint(1, 28):02d}"
+    body = rng.choice(_CENTURY_CODES[century]) + f"{rng.randint(0, 99999):05d}"
+    check = (11 - sum(int(d) * w for d, w in zip(front + body, _RRN_WEIGHTS)) % 11) % 10
+    return year, front, f"{body}{check}"
+
+
+# 가운뎃점과 닮은 구분자. #636이 확인한 세 글자(가운뎃점 U+00B7, 가타카나 가운뎃점 U+30FB, 글머리 기호 U+2022).
+_MIDDLE_DOTS = ["·", "・", "•"]
+
+
+def gen_number_middle_dot_separator(rng: random.Random) -> MissDoc:
+    """전화·계좌·카드·운전면허 번호를 가운뎃점류로 나눈다(#636). 하이픈으로 나누면 지금도 잡힌다."""
+    dot = rng.choice(_MIDDLE_DOTS)
+    kind = rng.choice(["phone", "account", "card", "driver_license"])
+    if kind == "phone":
+        groups = rng.choice([["010", f"{rng.randint(1000, 9999)}"], ["02", f"{rng.randint(100, 999)}"]])
+        groups.append(f"{rng.randint(1000, 9999)}")
+        label = "전화 "
+    elif kind == "account":
+        groups = [f"{rng.randint(100, 999)}", f"{rng.randint(100, 999)}", f"{rng.randint(0, 999999):06d}"]
+        label = "계좌 "
+    elif kind == "card":
+        payload = "4" + "".join(str(rng.randint(0, 9)) for _ in range(14))
+        digits = payload + _luhn_check_digit(payload)
+        groups = [digits[i : i + 4] for i in range(0, 16, 4)]
+        label = "카드 "
+    else:
+        groups = [str(rng.choice(_DL_REGIONS)), f"{rng.randint(0, 99):02d}", f"{rng.randint(0, 999999):06d}",
+                  f"{rng.randint(0, 99):02d}"]
+        label = "면허 "
+    return _build([label, (kind, dot.join(groups))], "number_middle_dot_separator", 636)
+
+
+def gen_rrn_partial_back_after_date(rng: random.Random) -> MissDoc:
+    """8자리(또는 6자리) 생년월일 뒤에 일부만 가렸거나 짧은 뒷자리가 온다(#637). 날짜와 남은 숫자를 모두 가려야 한다."""
+    year, front, back = _rrn(rng)
+    lead = f"{year}{front[2:]}" if rng.random() < 0.7 else front
+    # 성별 숫자만 남기고 전부 가린 "-1******"는 #528이 이미 고쳐서 넣지 않는다.
+    tail = rng.choice([back[:4] + "***", back[:2]])
+    return _build([rng.choice(["생년월일 ", "주민번호 "]), ("rrn", f"{lead}-{tail}"), rng.choice(["", " 기재"])],
+                  "rrn_partial_back_after_date", 637)
+
+
+def gen_rrn_back_after_date_forms(rng: random.Random) -> MissDoc:
+    """생년월일을 2자리 연도 점·슬래시·한 자리 월일·한글 날짜로 쓰고 뒷자리를 이어 쓴다(#638)."""
+    year, front, back = _rrn(rng)
+    yy, mm, dd = front[:2], int(front[2:4]), int(front[4:])
+    forms = [f"{yy}.{mm:02d}.{dd:02d}", f"{year}/{mm:02d}/{dd:02d}", f"{year}년 {mm}월 {dd}일"]
+    # 한 자리 월일 표기는 월이나 일이 실제로 한 자리일 때만 쓴다. 둘 다 두 자리면 #529가 이미
+    # 고친 "YYYY.MM.DD"와 같은 글이 된다. 날짜는 바꾸지 않는다 — 뒷자리 검증 숫자가 이 날짜로 계산됐다.
+    if mm < 10 or dd < 10:
+        forms.append(f"{year}.{mm}.{dd}")
+    date = rng.choice(forms)
+    return _build(["생년월일 ", ("rrn", f"{date}-{back}")], "rrn_back_after_date_forms", 638)
+
+
+# #631이 받게 된 11자 밖의 점 닮은꼴(#639 표의 7자).
+_OTHER_DOT_LIKES = ["ᆞ", "·", "◦", "。", "⸱", "ꞏ", "°"]
+
+
+def gen_rrn_other_dot_like_separator(rng: random.Random) -> MissDoc:
+    _, front, back = _rrn(rng)
+    lead = rng.choice(["주민번호 ", "생년월일 ", ""])
+    return _build([lead, ("rrn", f"{front}{rng.choice(_OTHER_DOT_LIKES)}{back}")], "rrn_other_dot_like_separator", 639)
+
+
+def gen_rrn_trailing_latin(rng: random.Random) -> MissDoc:
+    """주민등록번호 바로 뒤에 영문 한 글자가 붙는다(#640). 정답은 번호 14자이고 영문은 넣지 않는다."""
+    _, front, back = _rrn(rng)
+    lead = rng.choice(["주민번호 ", ""])
+    return _build([lead, ("rrn", f"{front}-{back}"), rng.choice("ABXYZ"), rng.choice(["", " 확인"])],
+                  "rrn_trailing_latin", 640)
+
+
+# core가 고친 이슈. 이 이슈들의 태그는 지금 core가 전부 완전 일치로 잡아야 한다 — 되돌아가면
+# test_open_misses.py가 실패한다. 이슈가 고쳐지면 여기에 번호를 더한다(고쳐도 이 목록을 안 고치면
+# 테스트는 그대로 통과하므로 core PR을 막지 않는다).
+FIXED_ISSUES = frozenset({592, 593, 594, 600, 602, 605, 607})
+
+
 MISS_TAGS = {
     f.__name__: f
     for f in (
@@ -355,6 +445,11 @@ MISS_TAGS = {
         gen_card_label_bad_checksum,
         gen_biz_reg_label_bad_checksum,
         gen_name_repeat_without_cue,
+        gen_number_middle_dot_separator,
+        gen_rrn_partial_back_after_date,
+        gen_rrn_back_after_date_forms,
+        gen_rrn_other_dot_like_separator,
+        gen_rrn_trailing_latin,
     )
 }
 
