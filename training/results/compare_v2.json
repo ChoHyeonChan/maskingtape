@@ -84,7 +84,7 @@
     }
   },
   {
-    "model": "hf.co/StayAlive1/maskingtape-name-1.5b-GGUF:Q4_K_M",
+    "model": "maskingtape-name-1.5b v2 (GGUF 14f856e1, 당시 hf.co 공개판)",
     "size_mb": 986,
     "datasets": {
       "heldout": {
@@ -142,7 +142,7 @@
     }
   },
   {
-    "model": "maskingtape-name:1.5b-v3",
+    "model": "maskingtape-name-1.5b v3 (GGUF d728d0f6, 현재 hf.co 공개판)",
     "size_mb": 986,
     "datasets": {
       "heldout": {
