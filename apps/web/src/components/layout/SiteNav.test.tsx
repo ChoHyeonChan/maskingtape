@@ -5,11 +5,19 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SiteNav } from "./SiteNav";
 
-describe("SiteNav help button tooltip", () => {
+describe("SiteNav help button (체험하기/demo 페이지에서만 뜬다)", () => {
   it("carries a data-tooltip so its label shows immediately on hover, not the browser's delayed title tooltip", () => {
-    render(<SiteNav onHelpClick={() => {}} />);
+    render(<SiteNav onHelpClick={() => {}} variant="demo" />);
     const helpButton = screen.getByRole("button", { name: "사용 안내 다시 보기" });
     expect(helpButton).toHaveAttribute("data-tooltip", "도움말");
+  });
+
+  it("is not shown on the landing page or the /accuracy page — there is no coachmark there", () => {
+    const { rerender } = render(<SiteNav onHelpClick={() => {}} />);
+    expect(screen.queryByRole("button", { name: "사용 안내 다시 보기" })).not.toBeInTheDocument();
+
+    rerender(<SiteNav onHelpClick={() => {}} variant="accuracy" />);
+    expect(screen.queryByRole("button", { name: "사용 안내 다시 보기" })).not.toBeInTheDocument();
   });
 });
 
@@ -45,35 +53,44 @@ describe("SiteNav 오픈소스 고지 링크 (#439)", () => {
 });
 
 describe("SiteNav section links", () => {
-  it("links to every landing page section by id, and 정확도 to its own page", () => {
+  it("links 소개·탐지 범위 to landing anchors, and 정확도·체험하기 to their own real pages", () => {
     render(<SiteNav onHelpClick={() => {}} />);
 
     expect(screen.getByRole("link", { name: "소개" })).toHaveAttribute("href", "#intro");
     expect(screen.getByRole("link", { name: "탐지 범위" })).toHaveAttribute("href", "#coverage");
-    // 정확도는 랜딩 안의 앵커가 아니라 별도 페이지(/accuracy)로 이동한다(#553 후속).
+    // 정확도·체험하기(입력/결과 체험)는 랜딩 밖 별도 페이지로 이동한다(#553 후속).
     expect(screen.getByRole("link", { name: "정확도" })).toHaveAttribute("href", "/accuracy");
-    expect(screen.getByRole("link", { name: "체험하기" })).toHaveAttribute("href", "#demo");
-    expect(screen.getByRole("link", { name: "웹에서 체험하기" })).toHaveAttribute("href", "#demo");
+    expect(screen.getByRole("link", { name: "체험하기" })).toHaveAttribute("href", "/demo");
+    expect(screen.getByRole("link", { name: "웹에서 체험하기" })).toHaveAttribute("href", "/demo");
   });
 });
 
-describe("SiteNav variant='page' (예: /accuracy에서 쓰는 랜딩 복귀용 nav)", () => {
-  it("points section links back to the landing page instead of bare anchors", () => {
-    render(<SiteNav onHelpClick={() => {}} variant="page" />);
+describe("SiteNav variant='accuracy' (예: /accuracy에서 쓰는 랜딩 복귀용 nav)", () => {
+  it("points 소개·탐지 범위 back to the landing page instead of bare anchors", () => {
+    render(<SiteNav onHelpClick={() => {}} variant="accuracy" />);
 
     expect(screen.getByRole("link", { name: "소개" })).toHaveAttribute("href", "/#intro");
     expect(screen.getByRole("link", { name: "탐지 범위" })).toHaveAttribute("href", "/#coverage");
-    expect(screen.getByRole("link", { name: "체험하기" })).toHaveAttribute("href", "/#demo");
-    expect(screen.getByRole("link", { name: "웹에서 체험하기" })).toHaveAttribute("href", "/#demo");
+    expect(screen.getByRole("link", { name: "체험하기" })).toHaveAttribute("href", "/demo");
+    expect(screen.getByRole("link", { name: "웹에서 체험하기" })).toHaveAttribute("href", "/demo");
     expect(screen.getByRole("link", { name: "맨 위로" })).toHaveAttribute("href", "/");
   });
 
   it("marks 정확도 as the current page", () => {
-    render(<SiteNav onHelpClick={() => {}} variant="page" />);
+    render(<SiteNav onHelpClick={() => {}} variant="accuracy" />);
 
     const link = screen.getByRole("link", { name: "정확도" });
     expect(link).toHaveAttribute("href", "/accuracy");
     expect(link.className).toContain("site-nav__link--active");
+  });
+});
+
+describe("SiteNav variant='demo' (/demo 페이지 자신의 nav)", () => {
+  it("marks 체험하기 as the current page, not 정확도", () => {
+    render(<SiteNav onHelpClick={() => {}} variant="demo" />);
+
+    expect(screen.getByRole("link", { name: "체험하기" }).className).toContain("site-nav__link--active");
+    expect(screen.getByRole("link", { name: "정확도" }).className).not.toContain("site-nav__link--active");
   });
 });
 
@@ -87,12 +104,12 @@ describe("SiteNav accuracy bubble (도움말 옆에 잠깐 뜨는 정확도 안�
   });
 
   it("shows the rule-based-detection caveat next to the help button on mount", () => {
-    render(<SiteNav onHelpClick={() => {}} />);
+    render(<SiteNav onHelpClick={() => {}} variant="demo" />);
     expect(screen.getByRole("status")).toHaveTextContent("로컬 설치를 권장합니다");
   });
 
   it("does not dismiss just because the page was clicked elsewhere", () => {
-    render(<SiteNav onHelpClick={() => {}} />);
+    render(<SiteNav onHelpClick={() => {}} variant="demo" />);
     expect(screen.getByRole("status")).toBeInTheDocument();
 
     fireEvent.click(document.body);
@@ -101,7 +118,7 @@ describe("SiteNav accuracy bubble (도움말 옆에 잠깐 뜨는 정확도 안�
   });
 
   it("dismisses when its own X (close) button is clicked", () => {
-    render(<SiteNav onHelpClick={() => {}} />);
+    render(<SiteNav onHelpClick={() => {}} variant="demo" />);
     expect(screen.getByRole("status")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "정확도 안내 닫기" }));
@@ -110,7 +127,7 @@ describe("SiteNav accuracy bubble (도움말 옆에 잠깐 뜨는 정확도 안�
   });
 
   it("auto-dismisses after 30 seconds even without a click", () => {
-    render(<SiteNav onHelpClick={() => {}} />);
+    render(<SiteNav onHelpClick={() => {}} variant="demo" />);
     expect(screen.getByRole("status")).toBeInTheDocument();
 
     act(() => {
@@ -121,34 +138,34 @@ describe("SiteNav accuracy bubble (도움말 옆에 잠깐 뜨는 정확도 안�
   });
 
   it("shows again when a scan result first appears, even if it already timed out on the first page", () => {
-    const { rerender } = render(<SiteNav onHelpClick={() => {}} hasResult={false} />);
+    const { rerender } = render(<SiteNav onHelpClick={() => {}} variant="demo" hasResult={false} />);
 
     act(() => {
       vi.advanceTimersByTime(30_000);
     });
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
 
-    rerender(<SiteNav onHelpClick={() => {}} hasResult={true} />);
+    rerender(<SiteNav onHelpClick={() => {}} variant="demo" hasResult={true} />);
 
     expect(screen.getByRole("status")).toBeInTheDocument();
   });
 
   it("does not re-show on every re-render while a result is already displayed", () => {
-    const { rerender } = render(<SiteNav onHelpClick={() => {}} hasResult={true} />);
+    const { rerender } = render(<SiteNav onHelpClick={() => {}} variant="demo" hasResult={true} />);
 
     fireEvent.click(screen.getByRole("button", { name: "정확도 안내 닫기" }));
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
 
-    rerender(<SiteNav onHelpClick={() => {}} hasResult={true} />);
+    rerender(<SiteNav onHelpClick={() => {}} variant="demo" hasResult={true} />);
 
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
 
   it("hides while the coachmark overlay is active, since both use the same red dismiss-hint styling and clash", () => {
-    const { rerender } = render(<SiteNav onHelpClick={() => {}} coachMarkActive={true} />);
+    const { rerender } = render(<SiteNav onHelpClick={() => {}} variant="demo" coachMarkActive={true} />);
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
 
-    rerender(<SiteNav onHelpClick={() => {}} coachMarkActive={false} />);
+    rerender(<SiteNav onHelpClick={() => {}} variant="demo" coachMarkActive={false} />);
     expect(screen.getByRole("status")).toBeInTheDocument();
   });
 });
