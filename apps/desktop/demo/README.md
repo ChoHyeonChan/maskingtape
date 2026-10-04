@@ -58,7 +58,7 @@ core `Pipeline.scan()`으로 실측한 값이다:
 2. **로컬 LLM 사용**를 켜고 같은 파일을 다시 돌린다
 3. 잡히는 이름이 늘어나는 걸 보여준다
 
-> 켜려면 이 PC에 Ollama가 실행 중이고 모델(`ollama pull qwen2.5:7b`)이 있어야 한다.
+> 켜려면 이 PC에 Ollama가 실행 중이고 모델(`ollama pull hf.co/StayAlive1/maskingtape-name-1.5b-GGUF:Q4_K_M`)이 있어야 한다.
 > 준비가 안 됐으면 해당 파일만 실패로 표시되고 코어가 준 안내 문구가 그대로 보인다.
 > **영상 촬영 전에 반드시 미리 한 번 돌려볼 것** — 현장에서 처음 켜면 모델 다운로드로 시간이 간다.
 

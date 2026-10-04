@@ -54,11 +54,11 @@ void main() {
 
     expect(status.readiness, LlmReadiness.modelMissing);
     expect(status.usable, isFalse);
-    expect(status.detail, contains('ollama pull qwen2.5:7b'));
+    expect(status.detail, contains('ollama pull ${OllamaProbe.defaultModel}'));
   });
 
   test('받아만 뒀으면 downloaded — 쓸 수는 있다', () async {
-    final server = await _fakeOllama(installed: ['qwen2.5:7b'], loaded: []);
+    final server = await _fakeOllama(installed: [OllamaProbe.defaultModel], loaded: []);
     addTearDown(() => server.close(force: true));
 
     final status = await OllamaProbe(host: _uriOf(server)).check();
@@ -70,8 +70,8 @@ void main() {
 
   test('메모리에 올라가 있으면 loaded', () async {
     final server = await _fakeOllama(
-      installed: ['qwen2.5:7b'],
-      loaded: ['qwen2.5:7b'],
+      installed: [OllamaProbe.defaultModel],
+      loaded: [OllamaProbe.defaultModel],
     );
     addTearDown(() => server.close(force: true));
 
@@ -87,7 +87,8 @@ void main() {
     final server = await _fakeOllama(installed: ['qwen2.5:7b-instruct-q4_K_M']);
     addTearDown(() => server.close(force: true));
 
-    final status = await OllamaProbe(host: _uriOf(server)).check();
+    final status =
+        await OllamaProbe(host: _uriOf(server), model: 'qwen2.5:7b').check();
 
     expect(status.readiness, LlmReadiness.downloaded);
   });
