@@ -47,16 +47,22 @@ class Pipeline:
         바꾸거나 보이지 않는 문자만 지우는 정리는 이름 글자가 그대로라서다. 자모를 합치거나
         결합 부호를 지워 글자 자체가 바뀌는 정리에서는 원문에서도 돌린다 — 정리본에서는 모델이
         원문의 이름 모양을 볼 수 없어서다.
+
+        숫자 사이 가운뎃점·점 닮은꼴(`010·1234·5678`)을 하이픈으로 읽은 글(#636)은 규칙 탐지기만
+        한 번 더 훑어 결과에 더한다. 위 결과를 그대로 두고 더하기만 하며 겹치면 합치므로, 이것
+        때문에 덜 가리는 일은 없다. 모델 탐지기에는 넘기지 않는다(번호 표기가 이름 판단에 쓸모없다).
         """
         prepared = normalize(text)
         found: list[Detection] = []
         for detector in self.detectors:
             if prepared.text == text:
                 found.extend(detector.detect(text))
-                continue
-            if not detector.calls_model or prepared.letters_changed:
-                found.extend(detector.detect(text))
-            found.extend(prepared.restore(d) for d in detector.detect(prepared.text))
+            else:
+                if not detector.calls_model or prepared.letters_changed:
+                    found.extend(detector.detect(text))
+                found.extend(prepared.restore(d) for d in detector.detect(prepared.text))
+            if prepared.hyphenated is not None and not detector.calls_model:
+                found.extend(prepared.restore(d) for d in detector.detect(prepared.hyphenated))
         return _resolve_overlaps(found, text)
 
     def anonymize(self, text: str) -> AnonymizeResult:

@@ -18,6 +18,11 @@
 
 NFKC를 통째로 쓰지는 않는다. `①`·`²`가 숫자가 되고 `㈜`가 `(주)`가 되는 식으로 글자가
 바뀌면 오탐이 늘고, 로컬 LLM에 가는 문장도 원문과 멀어진다.
+
+숫자 사이(공백 한 칸까지)의 가운뎃점·점 닮은꼴(`010·1234·5678`)은 정리본을 바꾸지 않고, 하이픈으로
+읽은 글을 따로 만든다(`hyphenated`, #636). 정리본에서 바꾸면 en-dash·전각 숫자로 쓴 번호 바로 옆의
+점까지 하이픈이 되어 번호에 들러붙고, 하이픈이 붙은 번호를 거부하는 탐지기(운전면허·계좌)가 정리본에서
+찾던 번호를 놓친다.
 """
 
 from __future__ import annotations
@@ -44,6 +49,16 @@ _DROP = (
     "\U0001bca0-\U0001bca3\U0001d173-\U0001d17a\U000e0000-\U000e0fff"
 )
 _JAMO = "\u1100-\u11ff\ua960-\ua97f\ud7b0-\ud7ff"
+# 숫자 사이에서 하이픈으로 읽는 점 닮은꼴(#636·#639): 가운뎃점과, 눈으로는 그것과 구분이 안 되는
+# 문자들. 하이픈·점·공백만 받는 탐지기(전화·계좌·카드·운전면허·사업자등록번호)가 이것으로 나눈
+# 번호를 통째로 놓쳤다. 숫자 사이(공백 한 칸까지)만 본다. "서울·경기", "김민수·이서연"처럼
+# 낱말을 잇는 가운뎃점은 건드리지 않는다.
+_DIGIT_DOTS = (
+    "\u00b7\u0387\u318d\u2027"
+    "\u30fb\uff65\u2022\u2219\u22c5\u2024\ufe52\u2981\u25cf\u00b8\u02d9"
+    "\u119e\u25e6\u3002\u2e31\ua78f\u00b0"
+)
+_DIGIT_DOT_RE = re.compile(r"(?:(?<=[0-9])|(?<=[0-9][ \t]))[" + _DIGIT_DOTS + r"](?=[ \t]?[0-9])")
 
 # 한 글자를 한 글자로 바꾸는 대상. (?![0-9])\d는 ASCII가 아닌 십진 숫자다.
 _SAME_LENGTH_RE = re.compile("[" + _DASHES + _SPACES + "\uff01-\uff5e]|" + r"(?![0-9])\d")
@@ -86,6 +101,8 @@ class NormalizedText:
 
     starts[i]·ends[i]는 text[i]가 온 원문 구간이다. 위치가 원문과 같으면 둘 다 None이다.
     letters_changed는 자모 합치기·결합 부호 삭제로 글자 자체가 바뀌었는지다.
+    hyphenated는 text에서 숫자 사이 점 닮은꼴만 하이픈으로 바꾼 글이다(#636). text와 길이가 같아
+    같은 대응표로 되돌린다. 바꿀 점이 없으면 None이다.
     """
 
     original: str
@@ -93,6 +110,7 @@ class NormalizedText:
     starts: Sequence[int] | None = None
     ends: Sequence[int] | None = None
     letters_changed: bool = False
+    hyphenated: str | None = None
 
     def restore(self, detection: Detection) -> Detection:
         """탐지용 문자열 기준 탐지를 원문 기준으로 되돌린다. text도 원문 조각으로 바꾼다."""
@@ -113,12 +131,23 @@ def _same_length(text: str) -> str:
     return _SAME_LENGTH_RE.sub(lambda m: _replace_one(m.group()), text)
 
 
+def _hyphenate_digit_dots(text: str) -> str | None:
+    """숫자 사이 점 닮은꼴을 하이픈으로 바꾼 글을 만든다(#636). 바꿀 것이 없으면 None.
+
+    한 글자를 한 글자로 바꿔 위치가 그대로다. 다른 정리를 마친 정리본에 건다. 앞뒤 글자를 봐야
+    해서, 전각 숫자가 ASCII로 바뀌고 지우는 문자가 빠진 뒤라야 "숫자 사이"를 제대로 판정한다.
+    """
+    hyphenated, count = _DIGIT_DOT_RE.subn("-", text)
+    return hyphenated if count else None
+
+
 def normalize(text: str) -> NormalizedText:
     """탐지용으로 정리한 문자열과 원문 위치 대응표를 만든다."""
     if text.isascii():
         return NormalizedText(original=text, text=text)
     if not _NEEDS_MAP_RE.search(text):
-        return NormalizedText(original=text, text=_same_length(text))
+        cleaned = _same_length(text)
+        return NormalizedText(original=text, text=cleaned, hyphenated=_hyphenate_digit_dots(cleaned))
     return _normalize_with_map(text)
 
 
@@ -160,10 +189,12 @@ def _normalize_with_map(text: str) -> NormalizedText:
         ends.extend([j] * len(piece))
         done = j
     add_plain(done, n)
+    cleaned = "".join(pieces)
     return NormalizedText(
         original=text,
-        text="".join(pieces),
+        text=cleaned,
         starts=starts,
         ends=ends,
         letters_changed=_LETTERS_CHANGE_RE.search(text) is not None,
+        hyphenated=_hyphenate_digit_dots(cleaned),
     )
