@@ -60,7 +60,7 @@
 {"text": "다음 정기 점검일은 2026.04.10입니다.", "labels": [], "difficulty": "negative"}
 {"text": "세금계산서 발행을 위해 사업자등록번호 652-73-71727를 확인했습니다. 문의: +821752809891", "labels": [{"kind": "biz_reg", "start": 21, "end": 33}, {"kind": "phone", "start": 47, "end": 60}], "difficulty": "hard"}
 {"text": "여권번호 M23513701로 출입국 기록을 조회했습니다. 결제 금액 분당구에서, 영수증은 7gvxsdmm@sample.org로 발송됩니다. 이체할 계좌: 4722-678-991107, 은행 확인 부탁드립니다.", "labels": [{"kind": "passport", "start": 5, "end": 14}, {"kind": "email", "start": 50, "end": 69}, {"kind": "account", "start": 86, "end": 101}], "difficulty": "easy"}
-{"text": "사업자등록번호 422-42-52961 / 담당자 손석민 / 이메일 6rctxsqbje@corp.mail-sample.kr", "labels": [{"kind": "name", "start": 27, "end": 30}, {"kind": "email", "start": 37, "end": 67}], "difficulty": "easy"}
+{"text": "사업자등록번호 422-42-52961 / 담당자 손석민 / 이메일 6rctxsqbje@corp.mail-sample.kr", "labels": [{"kind": "biz_reg", "start": 8, "end": 20}, {"kind": "name", "start": 27, "end": 30}, {"kind": "email", "start": 37, "end": 67}], "difficulty": "easy"}
 {"text": "본사는 강원특별자치도 홍천군 화촌면 구성포리 664에 위치하며, 담당자는 황영진입니다.", "labels": [{"kind": "address", "start": 4, "end": 28}, {"kind": "name", "start": 41, "end": 44}], "difficulty": "easy"}
 {"text": "전입신고 대상자: 권아, 신주소: 부산광역시 테헤란로142길 54 푸르지오아파트 130동 1714호, 연락처: 010—4634—4891", "labels": [{"kind": "name", "start": 10, "end": 12}, {"kind": "address", "start": 19, "end": 55}, {"kind": "phone", "start": 62, "end": 75}], "difficulty": "hard"}
 {"text": "이력서 접수: 정정, 생일 1984/08/12, 연락처 053—714—3912", "labels": [{"kind": "name", "start": 8, "end": 10}, {"kind": "birth_date", "start": 15, "end": 25}, {"kind": "phone", "start": 31, "end": 43}], "difficulty": "hard"}
