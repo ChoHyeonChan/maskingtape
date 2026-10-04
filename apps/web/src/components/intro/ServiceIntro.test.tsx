@@ -6,19 +6,14 @@ import { describe, expect, it } from "vitest";
 import { ServiceIntro } from "./ServiceIntro";
 
 describe("ServiceIntro (#455)", () => {
-  it("discloses that input is sent to the server for analysis, without overclaiming pure-browser processing", () => {
-    render(<ServiceIntro />);
-    const section = screen.getByRole("region", { name: "서비스 소개" });
-
-    // 탐지는 실제로 API 서버를 거치므로("브라우저 안에서만 처리"라고 하면 사실과 다르다),
-    // 무엇이 브라우저에 남고 무엇이 서버로 가는지 정확히 구분해 설명해야 한다.
-    expect(section).toHaveTextContent("저장·기록하지 않습니다");
-  });
-
-  it("links the primary CTA to the demo section and the download button to GitHub Releases", () => {
+  // 서버 전송·무저장 원칙 고지는 DemoPage.test.tsx의 privacy-note(#154, #499)가 이미
+  // 검증한다 — ServiceIntro에는 더 이상 중복해서 두지 않는다.
+  it("links the primary CTA to the /demo page and the download button to GitHub Releases", () => {
     render(<ServiceIntro />);
 
-    expect(screen.getByRole("link", { name: /지금 체험하기/ })).toHaveAttribute("href", "#demo");
+    // 탐지 범위·입력·결과 체험이 랜딩 페이지에서 /demo로 옮겨가면서(#553 후속) 이 버튼도
+    // 같은 페이지 앵커(#demo)가 아니라 실제 경로를 가리킨다.
+    expect(screen.getByRole("link", { name: /지금 체험하기/ })).toHaveAttribute("href", "/demo");
     expect(screen.getByRole("link", { name: /다운로드/ })).toHaveAttribute(
       "href",
       "https://github.com/ChoHyeonChan/maskingtape/releases",

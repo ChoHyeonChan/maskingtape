@@ -6,6 +6,7 @@ import { scanText } from "../../api/scanClient";
 import { EXTRACT_ERROR_MESSAGES, extractTextFromFile } from "../../lib/extractText";
 import type { MaskMode } from "../../lib/masking";
 import type { Detection, HighlightRange } from "../../types/detection";
+import { SamplePickerModal } from "./SamplePickerModal";
 
 const PLACEHOLDER = "예: 고객 홍길동님은 010-1234-5678 또는 hong@example.com으로 연락 가능합니다.";
 const MAX_TEXT_LENGTH = 100_000;
@@ -41,6 +42,7 @@ export function InputPanel({
   const [revealingResult, setRevealingResult] = useState(false);
   const [extracting, setExtracting] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  const [showSamplePicker, setShowSamplePicker] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const highlightOverlayRef = useRef<HTMLPreElement>(null);
@@ -170,6 +172,12 @@ export function InputPanel({
     setCopied(false);
   }
 
+  function handlePickSample(sampleText: string) {
+    onTextChange(sampleText);
+    setError(null);
+    setCopied(false);
+  }
+
   async function handleCopy() {
     if (!text) return;
     await navigator.clipboard.writeText(text);
@@ -250,6 +258,10 @@ export function InputPanel({
           </div>
         )}
         <div className={hasResult ? "input-panel__tools input-panel__tools--hidden" : "input-panel__tools"}>
+          <button type="button" className="input-panel__upload" onClick={() => setShowSamplePicker(true)}>
+            <span>샘플 넣기</span>
+            <span aria-hidden="true">▦</span>
+          </button>
           <button
             type="button"
             className="input-panel__upload"
@@ -366,6 +378,10 @@ export function InputPanel({
         <p className="input-panel__error" role="alert">
           {error}
         </p>
+      )}
+
+      {showSamplePicker && (
+        <SamplePickerModal onPick={handlePickSample} onClose={() => setShowSamplePicker(false)} />
       )}
     </div>
   );
