@@ -145,7 +145,8 @@ SOFTWARE.
 | PyPI 코어 패키지(`maskingtape`) | 런타임 외부 의존성이 0개라 제3자 코드가 들어가지 않는다 |
 | MCP 서버, 데스크톱 앱 | 소스로 배포한다. 의존성은 사용자가 설치·빌드할 때 각 패키지 저장소에서 받는다. 단, 저장소에 들어 있는 Flutter 템플릿은 위 「저장소 소스에 들어 있는 제3자 템플릿」에 적었다 |
 | REST API 공개 데모 | 서버에서만 실행되고 코드가 방문자에게 전달되지 않는다 |
-| Qwen2.5-7B-Instruct 모델 | 재배포하지 않는다. 사용자가 Ollama로 직접 받는다 |
+| AI 모델(기본 maskingtape-name-1.5b, 선택 Qwen2.5-7B-Instruct) | 재배포하지 않는다. 사용자가 Ollama로 허깅페이스·Ollama 라이브러리에서 직접 받는다 |
+| 학습 도구(`training/`의 torch·transformers·peft 등) | 모델을 학습할 때만 쓰고 배포물과 가중치 파일에 들어가지 않는다 |
 
 각 의존성의 버전과 라이선스는 [SBOM.md](SBOM.md)에 있다.
 
