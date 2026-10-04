@@ -42,10 +42,16 @@ from maskingtape.detectors.personal.name import has_name_candidate
 from maskingtape.types import Detection
 
 # 우리가 합성 데이터로 파인튜닝한 1.5B 모델(#458) — Qwen2.5-1.5B-Instruct(Apache-2.0) 기반, Apache-2.0으로
-# 허깅페이스에 공개. Ollama가 hf.co 경로에서 GGUF를 바로 받는다(`ollama pull <이름>`). 보고용 세트에서
-# 이름 F1 0.944(하이브리드)·0.978(단독)로 qwen2.5:7b(0.907·0.920)보다 높고, 오탐도 규칙 전용보다 적으며
-# (13 vs 22), 문서 속 지시문 공격에 흔들리지 않고(재현율 1.00 vs 0.41), 크기는 1/5(986MB)다 —
-# training/results/compare_v2.md. 7B로 되돌리려면 --llm-model qwen2.5:7b.
+# 허깅페이스에 공개. Ollama가 hf.co 경로에서 GGUF를 바로 받는다(`ollama pull <이름>`). 크기는 qwen2.5:7b의
+# 1/5(986MB)다.
+#
+# 수치는 전부 하이브리드(제품 구성) 기준이다.
+# - 학습에 쓰지 않은 외부 데이터(KDPII 500문장): 재현율은 qwen2.5:7b와 같고(0.825) 정밀도는 7B가 높다
+#   (0.527 대 0.471). 1.5B가 약 3배 빠르다. 저장소 README의 정확도 절(#645)에 측정 조건이 있다.
+# - 학습과 같은 생성기로 만든 보고용 세트: 이름 F1 0.944(7B 0.907), 오탐 32(7B 59), 문서 속 지시문 공격 판
+#   재현율 0.95(7B 0.93). 학습 분포 안쪽 평가라 낙관적이다 — training/README.md 「평가 한계」.
+# 그래서 요약은 "7B보다 정확하다"가 아니라 "재현율은 같고, 더 작고 빠르다"이다.
+# 7B로 되돌리려면 --llm-model qwen2.5:7b.
 DEFAULT_MODEL = "hf.co/StayAlive1/maskingtape-name-1.5b-GGUF:Q4_K_M"
 # 기본 주소는 localhost가 아니라 127.0.0.1이다. Ollama는 기본으로 127.0.0.1에서만 기다리는데,
 # Windows는 localhost를 IPv6(::1)로 먼저 시도해 요청마다 약 2초를 기다린 뒤에야 붙는다
