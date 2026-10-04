@@ -52,6 +52,12 @@ FLUTTER_SDK = ("BSD-3-Clause", "https://github.com/flutter/flutter")
 NODE_ONLY_OPTIONAL = {
     "@napi-rs/canvas": "Node 전용 선택 의존성. 브라우저 번들에는 코드가 없다(불러오는 문자열만 있음)",
 }
+# pub.dev 태그가 놓친 라이선스. 그 버전 아카이브의 LICENSE를 직접 열어 확인한 사실이다(#634).
+# lock의 버전이 여기 적은 버전과 다르면 태그로 돌아가지 않고 "확인 필요"로 둔다.
+PUB_LICENSE_CHECKED = {
+    # 태그는 bsd-3-clause 하나지만 LICENSE에 Andrew Magill(2013)의 zlib 전문이 함께 있다
+    "vector_math": ("2.2.0", "BSD-3-Clause AND Zlib"),
+}
 _TEXT_TO_SPDX = {
     "mit": "MIT", "mit license": "MIT", "apache 2.0": "Apache-2.0", "apache-2.0": "Apache-2.0",
     "apache license 2.0": "Apache-2.0", "bsd": "BSD", "bsd-3-clause": "BSD-3-Clause",
@@ -96,12 +102,52 @@ def clean_repo(url: str | None) -> str:
 
 
 def is_allowed(expression: str) -> bool:
-    """SPDX 식의 OR 선택지 중 하나라도 AND 항목이 전부 허용 목록이면 허용이다."""
-    for alternative in re.split(r"\s+OR\s+", expression.strip("() ")):
-        terms = [term.strip("() ") for term in re.split(r"\s+AND\s+", alternative)]
-        if all(term in ALLOWED for term in terms):
-            return True
-    return False
+    """SPDX 식을 괄호 우선순위대로 계산한다. OR는 선택지 중 하나만, AND는 전부 허용이어야 허용이다.
+
+    예전에는 괄호를 무시하고 OR로 먼저 쪼개서 `GPL-3.0-only AND (MIT OR Apache-2.0)`도 허용으로 봤다(#500).
+    `WITH` 예외가 붙은 항목과 식으로 읽히지 않는 문자열은 사람이 보도록 허용 밖으로 둔다.
+    """
+    tokens = re.findall(r"\(|\)|[^\s()]+", expression)
+    pos = 0
+    broken = False  # 식이 중간에 끝나거나 괄호가 닫히지 않으면 허용으로 보지 않는다
+
+    def parse_or() -> bool:
+        nonlocal pos
+        value = parse_and()
+        while pos < len(tokens) and tokens[pos].upper() == "OR":
+            pos += 1
+            value = parse_and() or value
+        return value
+
+    def parse_and() -> bool:
+        nonlocal pos
+        value = parse_atom()
+        while pos < len(tokens) and tokens[pos].upper() == "AND":
+            pos += 1
+            value = parse_atom() and value
+        return value
+
+    def parse_atom() -> bool:
+        nonlocal pos, broken
+        if pos >= len(tokens):
+            broken = True
+            return False
+        token = tokens[pos]
+        pos += 1
+        if token == "(":
+            value = parse_or()
+            if pos < len(tokens) and tokens[pos] == ")":
+                pos += 1
+                return value
+            broken = True
+            return False
+        if pos < len(tokens) and tokens[pos].upper() == "WITH":
+            pos += 2  # 예외 조항 이름까지 건너뛰고, 판단은 사람에게 넘긴다
+            return False
+        return token in ALLOWED
+
+    result = parse_or()
+    return result and not broken and pos == len(tokens)
 
 
 def row(name: str, version: str, license_: str, repo: str, note: str) -> dict:
@@ -131,7 +177,12 @@ def npm_repo(name: str, version: str) -> str:
 
 
 def pub_meta(name: str, version: str) -> tuple[str, str]:
-    """라이선스는 pub.dev가 LICENSE 파일에서 판별한 태그(최신 버전 기준)를 쓴다."""
+    """라이선스는 pub.dev가 LICENSE 파일에서 판별한 태그(최신 버전 기준)를 쓴다.
+
+    태그가 여럿이면 LICENSE 한 파일에 라이선스 여러 개가 함께 들어 있다는 뜻이라 AND로 잇는다.
+    골라 쓰는 이중 라이선스(OR)로 단정하지 않는다(file_selector_android: Flutter 코드 BSD-3-Clause +
+    함께 든 aFileChooser Apache-2.0).
+    """
     tags = fetch_json(f"https://pub.dev/api/packages/{name}/score").get("tags", [])
     found = {
         _PUB_TAG_TO_SPDX.get(tag.split(":", 1)[1], tag.split(":", 1)[1])
@@ -140,7 +191,7 @@ def pub_meta(name: str, version: str) -> tuple[str, str]:
     }
     pubspec = fetch_json(f"https://pub.dev/api/packages/{name}/versions/{version}")["pubspec"]
     repo = clean_repo(pubspec.get("repository") or pubspec.get("homepage"))
-    return " OR ".join(sorted(found)) or "확인 필요", repo
+    return " AND ".join(sorted(found)) or "확인 필요", repo
 
 
 # --- 배포물별 의존성 그래프 ---
@@ -244,25 +295,39 @@ def api_rows() -> list[dict]:
 
 
 def installed_rows(start: list[str], skip: set[str]) -> list[dict]:
-    """설치본 메타데이터로 그래프를 걷는다. extra(선택 기능) 요구사항은 따라가지 않는다."""
-    rows, seen = [], set()
-    queue = deque((canonicalize_name(name), [], "") for name in start)
+    """설치본 메타데이터로 그래프를 걷는다.
+
+    extra(선택 기능) 요구사항은 부모가 그 extra를 요청했을 때만 따라간다. 예전에는 extra 요구사항을
+    전부 건너뛰어, mcp가 `pyjwt[crypto]`로 직접 요청해 실제로 설치되는 cryptography → cffi → pycparser가
+    부록에서 빠졌다(#500). 같은 패키지를 다른 extra로 다시 만나면 새 extra의 요구사항만 더 따라간다.
+    """
+    rows, done = [], {}
+    queue = deque((canonicalize_name(name), [], "", frozenset()) for name in start)
     while queue:
-        name, via, marker = queue.popleft()
-        if name in seen:
+        name, via, marker, extras = queue.popleft()
+        first = name not in done
+        if not first and extras <= done[name]:
             continue
-        seen.add(name)
+        new_extras = extras - done.get(name, frozenset())
+        done[name] = done.get(name, frozenset()) | extras
         condition = f". 조건: `{marker}`" if marker else ""
         try:
             dist = metadata.distribution(name)
         except metadata.PackageNotFoundError:
-            rows.append(row(name, "-", "-", "", "이 환경에 설치되지 않음" + condition))
+            if first:
+                rows.append(row(name, "-", "-", "", "이 환경에 설치되지 않음" + condition))
             continue
         for text in dist.requires or []:
             req = Requirement(text)
-            if req.marker is None or "extra" not in str(req.marker):
-                queue.append((canonicalize_name(req.name), via + [name], str(req.marker or "")))
-        if name in skip:
+            req_marker = str(req.marker or "")
+            if "extra" in req_marker:
+                if not any(req.marker.evaluate({"extra": extra}) for extra in new_extras):
+                    continue
+            elif not first:
+                continue  # extra와 무관한 요구사항은 처음 만났을 때 이미 따라갔다
+            child_extras = frozenset(canonicalize_name(extra) for extra in req.extras)
+            queue.append((canonicalize_name(req.name), via + [name], req_marker, child_extras))
+        if not first or name in skip:
             continue
         license_, repo = pypi_meta(name, dist.version)
         note = "경로: " + " → ".join(via + [name]) if len(via) > 1 else "직접 의존성"
@@ -287,6 +352,8 @@ def desktop_rows() -> list[dict]:
             note += ". Flutter SDK에 포함"
         else:
             license_, repo = pub_meta(entry["name"], entry["version"])
+            if checked := PUB_LICENSE_CHECKED.get(entry["name"]):
+                license_ = checked[1] if checked[0] == entry["version"] else "확인 필요"
         rows.append(row(entry["name"], entry["version"], license_, repo, note))
     return rows
 
@@ -351,7 +418,9 @@ def build() -> str:
         "### A-4. 데스크톱 앱 (Dart·Flutter, 소스로 배포, 빌드할 때 받음)",
         (
             "`apps/desktop/pubspec.lock` 전체다. 전이 의존성에는 `flutter_test`·`flutter_lints`가 끌어오는 "
-            "개발용 패키지도 섞여 있다. 라이선스는 pub.dev가 각 패키지의 LICENSE에서 판별한 값이다."
+            "개발용 패키지도 섞여 있다. 라이선스는 pub.dev가 각 패키지의 LICENSE에서 판별한 값이다. "
+            "pub.dev가 놓친 것은 그 버전의 LICENSE를 직접 열어 확인한 값으로 바꿨다"
+            f"({', '.join(sorted(PUB_LICENSE_CHECKED))})."
         ),
         table(desktop),
         "### A-5. 개발 도구 (배포물에 포함되지 않음)",

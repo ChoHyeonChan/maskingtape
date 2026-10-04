@@ -14,7 +14,10 @@ import 'rest_anonymizer.dart';
 /// 텍스트가 PC를 벗어나지 않기 때문이다.
 ///
 /// CLI는 설치판이 동봉한 것을 먼저, 없으면 PATH의 것을 쓴다([locateCli]).
-Anonymizer defaultAnonymizer() => FallbackAnonymizer([
-      CliAnonymizer(command: locateCli()),
-      RestAnonymizer(),
-    ]);
+Anonymizer defaultAnonymizer() {
+  final cli = locateCli();
+  return FallbackAnonymizer([
+    CliAnonymizer(command: cli.executable, leadingArgs: cli.leadingArgs),
+    RestAnonymizer(),
+  ]);
+}
