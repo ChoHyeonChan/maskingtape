@@ -15,6 +15,7 @@ core·CLI·MCP 서버·데스크톱은 이 파일을 쓰지 않는다.
    NameJudgeError(code)로 올리고, 메시지에 가린 글·모델 응답·키를 넣지 않는다.
 """
 
+import http.client
 import json
 import os
 import re
@@ -134,6 +135,10 @@ class OpenAINameJudge:
             raise NameJudgeError("timeout") from None
         except OSError:
             raise NameJudgeError("network") from None
+        except http.client.HTTPException:
+            # 응답을 읽다 끊기거나(IncompleteRead) 상태 줄이 깨진(BadStatusLine) 경우다. OSError가 아니라서
+            # 위 그물에 걸리지 않고 API 500으로 올라갔다 — 규칙 결과로 돌아가게 같은 코드로 바꾼다(#625).
+            raise NameJudgeError("network") from None
         if len(body) > _MAX_RESPONSE_BYTES:
             raise NameJudgeError("response_too_large")
         return body
@@ -166,7 +171,9 @@ def _error_body_code(exc: urllib.error.HTTPError) -> str | None:
     """에러 본문에서 `error.code`만 꺼낸다. 메시지(가린 글이 섞일 수 있음)는 읽지 않는다."""
     try:
         data = json.loads(exc.read(_MAX_ERROR_BODY_BYTES))
-    except (OSError, ValueError):
+    except (OSError, ValueError, http.client.HTTPException):
+        # 본문을 읽다 끊기면(IncompleteRead) 구분을 포기하고 rate_limited로 본다. 이 함수는 _post의
+        # HTTPError 처리 안에서 불려서, 여기서 놓친 예외는 _post의 다른 except에 걸리지 않고 500이 된다(#625).
         return None
     error = data.get("error") if isinstance(data, dict) else None
     code = error.get("code") if isinstance(error, dict) else None
