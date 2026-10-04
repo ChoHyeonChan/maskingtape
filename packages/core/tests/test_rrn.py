@@ -243,3 +243,36 @@ def test_full_seven_digit_back_with_a_loose_separator_is_still_masked():
     found = RRNDetector().detect("800101 1234567")
     assert len(found) == 1
     assert found[0].text == "800101 1234567"
+
+
+# ── 날짜 앞자리를 다른 꼴로 쓰고 뒷자리를 이어 쓴 표기(#638) ─────────────────────
+# 생년월일 탐지기는 날짜만 가리고, 주민번호 탐지기는 2자리 연도·슬래시·한 자리 월일·한글 날짜
+# 앞자리를 받지 않아 뒷자리 7개가 샜다.
+
+
+def test_two_digit_year_dotted_front_with_a_full_back_is_still_an_rrn():
+    found = RRNDetector().detect("생년월일 80.01.01-1234567")
+    assert len(found) == 1
+    assert found[0].text == "80.01.01-1234567"
+
+
+def test_slash_separated_front_with_a_full_back_is_still_an_rrn():
+    found = RRNDetector().detect("생년월일 1980/01/01-1234567")
+    assert len(found) == 1
+    assert found[0].text == "1980/01/01-1234567"
+
+
+def test_single_digit_month_and_day_front_with_a_full_back_is_still_an_rrn():
+    found = RRNDetector().detect("생년월일 1980.1.1-1234567")
+    assert len(found) == 1
+    assert found[0].text == "1980.1.1-1234567"
+
+
+def test_korean_date_front_with_a_full_back_is_still_an_rrn():
+    found = RRNDetector().detect("생년월일 1980년 1월 1일-1234567")
+    assert len(found) == 1
+    assert found[0].text == "1980년 1월 1일-1234567"
+
+
+def test_dated_front_that_is_not_a_real_date_is_still_rejected():
+    assert RRNDetector().detect("주문번호 2024.13.45-1234567") == []

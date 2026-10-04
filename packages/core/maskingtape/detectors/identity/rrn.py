@@ -36,7 +36,11 @@ _MASK_CHAR = r"[*Xx●○■#]"
 # #529)도 받는다 — "생년월일 1980.01.01-1234567"처럼 날짜 표기 뒤에 주민등록번호 뒷자리가
 # 바로 이어지는 문서가 실제로 있다.
 _FRONT_PLAIN = r"(?:19|20)?(?P<front>\d{6})"
-_FRONT_DATED = r"(?P<front_dated>\d{4}[.\-]\d{2}[.\-]\d{2})"
+# 날짜 앞자리 꼴(#529·#638): 4자리 또는 2자리 연도를 점·하이픈·슬래시로 나누거나 한글 날짜로 쓴
+# 표기("1980.1.1", "80.01.01", "1980/01/01", "1980년 1월 1일"). 월·일은 한 자리도 받는다.
+_FRONT_DATED = (
+    r"(?P<front_dated>(?:\d{4}|\d{2})(?:[./\-]\d{1,2}[./\-]\d{1,2}|년\s?\d{1,2}월\s?\d{1,2}일))"
+)
 
 # 뒷자리가 실제 숫자 7개일 때의 구분자 — 하이픈/점/공백에 더해 en-dash·em-dash(Word·HWP
 # 자동서식이 하이픈을 바꿈), 슬래시·밑줄·쉼표·쌍점·가운뎃점(·, ㆍ, ‧)·물결·세로줄까지
@@ -95,22 +99,28 @@ def _valid_birthdate(front: str) -> bool:
 
 
 def _valid_dated_front(front_dated: str) -> bool:
-    """"1980.01.01"·"1980-01-01"처럼 점·하이픈으로 나눠 쓴 4자리 연도 앞자리가 실제 존재하는
-    날짜인지 확인한다(#529). 4자리 연도가 이미 있으므로 두 세기를 다 시도할 필요는 없다."""
-    year, month, day = (int(part) for part in re.split(r"[.\-]", front_dated))
-    try:
-        date(year, month, day)
-    except ValueError:
-        return False
-    return True
+    """점·하이픈·슬래시·한글로 나눠 쓴 날짜 앞자리가 실제 존재하는 날짜인지 확인한다(#529, #638).
+
+    4자리 연도는 그대로 쓰고, 2자리 연도는 1900년대와 2000년대 가운데 하나라도 실제 날짜면
+    통과시킨다(_valid_birthdate와 같은 기준).
+    """
+    year_text, month, day = re.findall(r"\d+", front_dated)
+    years = [int(year_text)] if len(year_text) == 4 else [1900 + int(year_text), 2000 + int(year_text)]
+    for year in years:
+        try:
+            date(year, int(month), int(day))
+        except ValueError:
+            continue
+        return True
+    return False
 
 
 def _checksum_front(front: str | None, front_dated: str | None) -> str:
     """체크섬 계산용 앞 6자리(YYMMDD)를 얻는다 — 점·하이픈 표기는 4자리 연도의 뒤 2자리만 쓴다."""
     if front is not None:
         return front
-    year, month, day = re.split(r"[.\-]", front_dated)  # type: ignore[arg-type]
-    return year[-2:] + month + day
+    year_text, month, day = re.findall(r"\d+", front_dated)  # type: ignore[arg-type]
+    return year_text[-2:] + f"{int(month):02d}" + f"{int(day):02d}"
 
 
 def _checksum_ok(digits: str) -> bool:
