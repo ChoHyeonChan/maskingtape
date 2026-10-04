@@ -276,3 +276,32 @@ def test_korean_date_front_with_a_full_back_is_still_an_rrn():
 
 def test_dated_front_that_is_not_a_real_date_is_still_rejected():
     assert RRNDetector().detect("주문번호 2024.13.45-1234567") == []
+
+
+# ── 뒷자리 바로 뒤에 영문 한 글자가 붙은 표기(#640) ─────────────────────────
+# 뒷자리 경계를 (?![\dA-Za-z])로 두면 "800101-1234560A"처럼 뒤에 영문 한 글자가 붙은 번호가
+# 통째로 샜다. 영문 한 글자 뒤에 영숫자가 더 이어지는 긴 코드는 여전히 받지 않는다.
+
+
+def test_full_back_followed_by_one_english_letter_is_still_an_rrn():
+    found = RRNDetector().detect("800101-1234567A")
+    assert len(found) == 1
+    assert found[0].text == "800101-1234567A"
+
+
+def test_valid_checksum_with_trailing_letter_keeps_full_confidence():
+    found = RRNDetector().detect("주민번호 800101-1234560A")
+    assert len(found) == 1
+    assert found[0].text == "800101-1234560A"
+    assert found[0].confidence == 1.0
+
+
+def test_trailing_letter_followed_by_more_alphanumerics_is_still_not_an_rrn():
+    # 영문이 두 글자 이상 이어지는 영숫자 코드는 주민번호가 아니다(오탐 방지)
+    assert RRNDetector().detect("주문번호 800101-1234560AB") == []
+    assert RRNDetector().detect("800101-1234560A1") == []
+
+
+def test_trailing_letter_followed_by_a_hyphenated_code_is_not_an_rrn():
+    # "…-B" 같은 하이픈 이어짐은 주민번호 뒤의 다른 코드 조각이므로 받지 않는다
+    assert RRNDetector().detect("운송장 800101-1234560A-B") == []

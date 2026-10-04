@@ -43,6 +43,13 @@ _SURNAMES = [
 # #394: 기업 임원·전문직·현장 직함을 넓혔다. 실서버로 확인한 흔한 직함(총무·매니저·상무·전무·
 # 국장·지점장·간호사·변호사·회계사·코치·감독·강사·인턴·팀원) 옆 이름은 풀네임도 통째로 새고
 # 있었다. "부사장"은 "사장"의 부분 문자열로 우연히 잡히던 것을 정식 항목으로 둔다.
+# 이름 뒤에 오는 직함(#603). 두 글자 이하는 직함 전용이라 세 글자 이름일 때만 받는다("피고"·"원고").
+# 짧은 직함 중 낱말 앞부분으로도 흔한 것("프로젝트"·"선수단")은 _BOUNDED_SUFFIX_TITLES로
+# 뒤 글자 경계를 본다. #603 단서는 따로 묶어 둔다(_CUES_603 참고).
+_TITLE_CUES_603 = [
+    "책임", "선임", "수석", "박사", "여사", "어르신", "피고", "원고",
+    "프로", "기사", "선수",
+]
 _TITLE_CUES = [
     "팀장", "과장", "부장", "차장", "대리", "사원", "실장", "본부장",
     "이사", "대표", "원장", "교수", "주임", "반장", "사장", "회장", "님",
@@ -54,11 +61,17 @@ _TITLE_CUES = [
     # "상담원"(#580): 고객센터 상담 기록에 흔한데 "상담사"만 있어 "담당 상담원 김민수"를 놓쳤다.
     "상담원",
     "연구원", "조교", "기자", "코치", "감독", "인턴", "팀원",
-]
+] + _TITLE_CUES_603
 
 # 이름 앞에 오는 역할어 — 뒤에 공백/콜론이 붙어 이름으로 이어진다.
 # 서식에서 사람 칸 앞에 붙는 라벨은 이 밖에도 많다 — 환자명·명의자·예금주·서명자·대상자·채용자·
 # 지원자·가입자·민원인·학생이 벤치 미탐의 절반 이상이었다(규칙판 FN 127건 중 약 80건).
+# 배송·주문·법률·결재 문서의 역할어(#603). "받는 분"·"보내는 사람"은 띄어쓰기된 라벨이다.
+_PREFIX_CUES_603 = [
+    "주문자", "구매자", "예약자", "투숙객", "받는 분", "받는사람", "보내는 사람",
+    "피고인", "채무자", "피해자", "신고인", "세대주", "배우자", "소유자", "운전자",
+    "검토자", "승인자", "기안자",
+]
 _PREFIX_CUES = [
     "고객", "환자", "신청자", "작성자", "담당자", "수령인", "수신인", "성명", "이름", "저는",
     "환자명", "고객명", "회원명", "성함", "실명",
@@ -66,7 +79,7 @@ _PREFIX_CUES = [
     "서명자", "대상자", "채용자", "지원자", "가입자", "신청인", "청구인", "계약자",
     "피보험자", "보호자", "대리인", "의뢰인", "내담자", "민원인",
     "학생", "응시자", "참석자", "참가자", "면접자", "근로자", "임차인", "임대인",
-]
+] + _PREFIX_CUES_603
 
 # 이름 뒤에 오는 존칭·역할어 — 공백 없이 붙거나(님께) 공백을 두고(환자분) 이어질 수 있다.
 _SUFFIX_CUES = [
@@ -114,6 +127,12 @@ _COMMON_WORDS = frozenset({
     "정밀", "문맥", "전혀", "공식",
 })
 
+# #603 단서 뒤에 흔히 오는 일반 명사("피고인 진술", "배우자 공제 대상", "투숙객 안내문", "주문자 우대",
+# "오늘자 기사"). 단서가 #603에서 더한 것뿐일 때만 거른다. _COMMON_WORDS에 넣으면 모든 단서 경로가
+# 함께 걸러 "공제 씨"·"고객 우대"처럼 전부터 가리던 이름까지 놓친다(#603 리뷰).
+_CUES_603 = frozenset(_TITLE_CUES_603) | frozenset(_PREFIX_CUES_603)
+_CUE_603_COMMON_WORDS = frozenset({"진술", "진술서", "공제", "안내문", "우대", "오늘자"})
+
 # 직함 전용 단서(존칭 '님' 제외). 이것만으로(다른 단서 없이) 이름을 잡을 땐 성+2자 풀네임을
 # 요구한다 — 부서·업무어("구매 부장"의 구매, "대표 이사"의 이사)가 직함과 붙어 이름으로
 # 오탐되는 걸 막는다. 존칭(님)은 강한 단서라 이 제약을 걸지 않는다. (앞·뒤 직함 공용)
@@ -135,22 +154,35 @@ _PREFIX_ALT = "|".join(
 # 낱말의 첫 글자와 겹친다 — 뒤가 조사 한 글자 이내이거나 낱말 끝일 때만 존칭으로 받는다
 # (#484). 나머지 존칭·직함은 여러 글자라 이런 오탐이 없어 기존대로 둔다.
 _AMBIGUOUS_SUFFIX_TITLES = frozenset({"양", "군"})
+# 낱말의 앞부분으로도 흔한 짧은 직함(#603). 뒤가 존칭·조사 한 글자 이내이거나 낱말 끝일 때만 받는다.
+_BOUNDED_SUFFIX_TITLES = frozenset({"프로", "기사", "선수"})
 _JOSA_CHARS_STR = "".join(sorted(_JOSA_CHARS))
 _SUFFIX_ALT_PLAIN = "|".join(
     sorted(
-        dict.fromkeys(c for c in (_SUFFIX_CUES + _TITLE_CUES) if c not in _AMBIGUOUS_SUFFIX_TITLES),
+        dict.fromkeys(
+            c
+            for c in (_SUFFIX_CUES + _TITLE_CUES)
+            if c not in _AMBIGUOUS_SUFFIX_TITLES and c not in _BOUNDED_SUFFIX_TITLES
+        ),
         key=len,
         reverse=True,
     )
 )
 _AMBIGUOUS_SUFFIX_ALT = "|".join(sorted(_AMBIGUOUS_SUFFIX_TITLES, key=len, reverse=True))
+_BOUNDED_SUFFIX_ALT = "|".join(sorted(_BOUNDED_SUFFIX_TITLES, key=len, reverse=True))
 # 이름 뒤 단서 = 존칭·역할어 + 직함. 직함도 규칙 매칭 단서로 편입한다(#213). "님"은 양쪽에
 # 있으므로 dict.fromkeys로 중복을 없앤 뒤 긴 것부터 매칭한다.
+# 편지·공문 맺음말("김영수 귀하"·"홍길동 드림"·"홍길동 올림"·"홍길동 배상")은 이름 뒤에 올 때 강한
+# 단서다. 다만 "드림"·"귀하"는 낱말의 일부로도 쓰여("드림 행사") 줄 끝이나 문장부호 앞에서만 받는다.
+# "배상"은 법률 문서의 "손해 배상"과 겹쳐 세 글자 이름일 때만 받는다(#603 리뷰 — detect()에서 거른다).
+_CLOSING_SUFFIX_ALT = r"(?:귀하|드림|올림|배상)(?=[ \t]*(?:\r?\n|$|[.,!?)\]]))"
 _SUFFIX_ALT = (
     _SUFFIX_ALT_PLAIN
     + r"|(?:"
     + _AMBIGUOUS_SUFFIX_ALT
     + r")(?=[" + _JOSA_CHARS_STR + r"]?(?![가-힣]))"
+    + r"|(?:" + _BOUNDED_SUFFIX_ALT + r")(?=(?:님|씨)?(?:께서|께|[" + _JOSA_CHARS_STR + r"])?(?![가-힣]))"
+    + r"|" + _CLOSING_SUFFIX_ALT
 )
 
 # 이름 바로 뒤 괄호 안의 단서(#604): "김민수(대리)"·"김민수(35세, 남)"·"김민수(인)"·"김민수 (010-…)".
@@ -231,6 +263,9 @@ _FORM_LABELS = (
     "성명", "이름", "성함", "실명", "예금주", "명의자", "환자명", "고객명", "회원명",
     "수취인", "송금인", "입금자", "신청인", "신청자", "보호자", "대표자",
     "이력서 접수", "면허 갱신 신청",
+    # 서식의 짧은 라벨은 쌍점·세로줄이 있을 때만 이름 단서다(#603). "작성 완료"·"서명 요청" 같은
+    # 일반 문장이 많아서 역할어 목록에 넣지 않는다.
+    "작성", "서명", "발신", "수신", "참조", "결재",
 )
 
 # "이름"은 사람 이름 그 자체를 가리키는 범용 메타 단서라 비인명 문맥("이름 정밀 탐지",
@@ -241,6 +276,15 @@ _FORM_LABELS = (
 # _PREFIX_CUES 나머지는 여기 포함하지 않는다 — 포함하면 "담당자 최근 변경"·"고객 문의
 # 접수" 같은 기존에 걸러야 했던 오탐까지 강한 단서로 승격돼 버린다(#446 회귀 테스트).
 _STRONG_LABEL_PREFIXES = frozenset(_FORM_LABELS) - {"이름"}
+# 두 글자 직함 앞의 세 글자 이름이 이 조사로 끝나면 낱말+조사다("정부의 책임"). 은·이·도·을은
+# 실명 끝 글자로도 흔해서("손인은"·"김가을") 뺀다(#603 리뷰). #603 직함 앞이고 기존 앞 단서가 없을
+# 때만 쓴다. 그 밖에는 두 글자 이름+조사("이준의 팀장"·"고객 김민의 선임")라 거르면 전부터 가리던
+# 이름이 샌다.
+_TWO_CHAR_TITLE_JOSA_END_RE = re.compile(r"^[가-힣]{2}[의가는를와과]$")
+# 공문 발신·수신·참조 칸의 값이 부서·기관 이름이면 사람 이름이 아니다(#603 리뷰). 세 글자 이상만
+# 본다 — 두 글자 값("정국"처럼 이름 끝 글자와 겹치는 꼴)은 이름일 가능성이 커서 그대로 둔다.
+_ORG_VALUE_LABELS = frozenset({"발신", "수신", "참조"})
+_ORG_VALUE_END_RE = re.compile(r"(?:팀|실|부|과|국|처|청)$")
 # 양식 칸에 이름 대신 들어가는 값과 표 머리행에 흔한 열 이름 — 끝의 조사·"입니다"를 뗀 값이
 # 이것과 **완전히 같을 때만** 이름으로 보지 않는다. 앞부분 일치로 거르면 "기재민"처럼 이 말로
 # 시작하는 실명이 샌다(#491 독립 검증).
@@ -254,6 +298,8 @@ _FORM_NOT_NAMES = frozenset({
     "설명", "소속", "직위", "직책", "연락처", "부서", "역할", "비고", "상태", "형식", "경로", "기본값",
     "버전", "관계", "은행", "학번", "타입", "번호", "주소", "전화", "날짜", "금액", "수량", "내용",
     "항목", "구분", "법인", "개인", "회사명", "팀명", "부모", "모친", "부친", "배우자", "대리인",
+    # 결재·발송 양식의 처리 상태 값(#603 — "작성: 완료", "결재: 대기", "참조: 관련 부서")
+    "완료", "요청", "대기", "전체", "관련", "본사", "접수", "진행", "반려", "보류",
 })
 # 은·이·가·도는 이름 끝 글자로도 흔해서("기재은", "재이") 떼지 않는다 — 떼면 "기재"가 되어 걸러지고 샌다.
 _FORM_VALUE_ENDING_RE = re.compile(r"(?:입니다|이며|이고|님|씨|[는을를의와과])$")
@@ -425,23 +471,30 @@ def _name_could_end_at(text: str, pos: int) -> bool:
     return bool(_PRE600_NAME_END_RE.match(text, pos)) or text.startswith(_OPEN_ENDING_STEMS, pos)
 
 
-def _is_common_word_at(text: str, pos: int) -> bool:
-    """text[pos:]가 흔한 2음절 일반명사로 **단어가 끝나는지** — 뒤가 비한글(공백·문장부호·끝)이거나
+def _is_common_word_at(text: str, pos: int, words: frozenset[str] = _COMMON_WORDS) -> bool:
+    """text[pos:]가 흔한 일반명사(words의 2·3음절)로 **단어가 끝나는지** — 뒤가 비한글(공백·문장부호·끝)이거나
     단일 조사 뒤에 비한글이 올 때, 또는 #600에서 새로 받는 어미 꼴("정보예요"·"정보에게는")이
     올 때만 True. "정기훈"처럼 글자가 더 이어지면 실명일 수 있어 False."""
-    if text[pos : pos + 2] not in _COMMON_WORDS:
-        return False
-    after = text[pos + 2 : pos + 3]
+    for n in (3, 2):
+        if text[pos : pos + n] in words:
+            return _common_word_ends_at(text, pos, n)
+    return False
+
+
+def _common_word_ends_at(text: str, pos: int, n: int) -> bool:
+    """text[pos:pos+n]이 일반명사일 때 그 낱말이 뒤에서 끝나는지 본다(_is_common_word_at의 판정)."""
+    end = pos + n
+    after = text[end : end + 1]
     if not after or not _is_hangul(after):
         return True
     if (
-        text.startswith(_OPEN_ENDING_STEMS, pos + 2)
-        and not _PRE600_NAME_END_RE.match(text, pos + 2)
-        and not _name_could_end_at(text, pos + 3)
+        text.startswith(_OPEN_ENDING_STEMS, end)
+        and not _PRE600_NAME_END_RE.match(text, end)
+        and not _name_could_end_at(text, end + 1)
     ):
         return True
     if after in _JOSA_CHARS:
-        after2 = text[pos + 3 : pos + 4]
+        after2 = text[end + 1 : end + 2]
         return not after2 or not _is_hangul(after2)
     return False
 
@@ -561,6 +614,23 @@ class NameDetector(Detector):
             )
             if title_only and len(m.group("name")) < 3:
                 continue
+            if (
+                suffix in _TITLE_CUES_603
+                and len(suffix) == 2
+                and (prefix is None or prefix in _CUES_603)
+                and _TWO_CHAR_TITLE_JOSA_END_RE.search(m.group("name"))
+            ):
+                continue  # "정부의 책임"의 "정부의"처럼 낱말+조사를 두 글자 직함 앞 이름으로 보지 않는다(#603)
+            if suffix == "배상" and len(m.group("name")) < 3:
+                continue  # "손해 배상"의 두 글자 낱말을 이름으로 보지 않는다(#603)
+            cues = {c for c in (prefix, suffix) if c is not None}
+            if (
+                cues
+                and cues <= _CUES_603
+                and m.group("paren") is None
+                and _is_common_word_at(text, name_start, _CUE_603_COMMON_WORDS)
+            ):
+                continue  # "피고인 진술"처럼 #603 단서 뒤의 일반 명사는 이름이 아니다
             if m.group("paren") is not None and not has_prefix:
                 # 괄호 안이 숫자만 있는 나이·연락처·성별뿐이면 두 글자 낱말과 흔히 겹친다
                 # ("정원(35)", "문의(02-…)", 서식의 "구분(남/여)"). 세 글자 이름일 때만 받는다.
@@ -699,6 +769,8 @@ class NameDetector(Detector):
             # 직함+조사("신청자 : 차장은 …")도 값이 아니다. 뒤 이름은 위 규칙이 직함을 단서로 잡는다(#533)
             if value in _FORM_NOT_NAMES or _CUE_WITH_JOSA_RE.fullmatch(name) or all(covered[start:end]):
                 continue
+            if m.group("label") in _ORG_VALUE_LABELS and len(name) >= 3 and _ORG_VALUE_END_RE.search(name):
+                continue  # 공문 발신·수신·참조 칸은 사람보다 부서·기관이 흔하다("홍보팀")
             extra.append(
                 Detection(
                     kind=self.kind,

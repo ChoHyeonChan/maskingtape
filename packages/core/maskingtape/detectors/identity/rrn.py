@@ -59,7 +59,10 @@ _BACK = r"(?P<back>[1-8]\d{6})"
 # 첫 갈래(구분자 + 실제 숫자 7개 + 끝 경계)와 글자 하나까지 같아야 한다 — 생년월일 쪽이
 # 넘긴 자리를 여기서 받지 않으면 두 탐지기 모두 버려 통째로 새고(#508), 여기서 받는
 # 구분자를 생년월일 쪽이 모르면 체크섬이 안 맞는 번호의 종류가 생년월일로 바뀐다(#631).
-RRN_BACK_AHEAD = _BACK_SEP + r"[1-8]\d{6}(?![\dA-Za-z])"
+# 뒷자리 7자리 바로 뒤에 영문 한 글자가 붙은 표기("800101-1234560A", #640)는 받되, 그 영문 뒤에
+# 영숫자가 더 이어지면 긴 영숫자 코드의 일부이므로 받지 않는다.
+_TRAILING_LETTER = r"(?:[A-Za-z](?![A-Za-z\d]|-[A-Za-z\d]))?"
+RRN_BACK_AHEAD = _BACK_SEP + r"[1-8]\d{6}" + _TRAILING_LETTER + r"(?![\dA-Za-z])"
 
 # 뒷자리가 가려졌거나(*, X, 동그라미 등) 성별 숫자만 남은 경우(#528)는 훨씬 흔한 문자열
 # (날짜+건수 등)과 우연히 겹치기 쉬워, 구분자를 하이픈류 문자 하나로 좁힌다 — 공백만으로는
@@ -74,7 +77,7 @@ _BACK_PARTIAL = r"(?P<back_partial>[1-8](?:" + _MASK_CHAR + r"{1,6})?)"
 # 탐지기는 뒤에 뒷자리가 오는 8자리를 넘기므로, 여기서 안 잡으면 통째로 샌다.
 _RRN_RE = re.compile(
     r"(?<!\d)(?:" + _FRONT_PLAIN + r"|" + _FRONT_DATED + r")"
-    r"(?:" + _BACK_SEP + _BACK + r"|" + _BACK_PARTIAL_SEP + _BACK_PARTIAL + r")"
+    r"(?:" + _BACK_SEP + _BACK + _TRAILING_LETTER + r"|" + _BACK_PARTIAL_SEP + _BACK_PARTIAL + r")"
     r"(?![\dA-Za-z])"
 )
 
