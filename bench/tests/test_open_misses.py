@@ -22,6 +22,7 @@ from maskingtape.pipeline import Pipeline
 from bench.generate_open_misses import V1_DATASET_NAME, V1_PER_TAG, V1_SEED, main
 from bench.generator.entities import _biz_reg_check_digit, _luhn_check_digit
 from bench.generator.open_misses import (
+    FIXED_ISSUES,
     MISS_TAGS,
     _has_batchim,
     _josa,
@@ -119,3 +120,24 @@ def test_cli_writes_a_new_file(tmp_path, monkeypatch):
     rows = _load_rows(target)
     assert len(rows) == 2 * len(MISS_TAGS)
     assert rows == generate_open_misses_dataset(1, per_tag=2)
+
+
+_FIXED_TAGS = sorted(name for name, gen in MISS_TAGS.items() if gen(random.Random(0)).issue in FIXED_ISSUES)
+
+
+@pytest.mark.parametrize("tag_fn_name", _FIXED_TAGS)
+def test_tags_of_fixed_issues_are_still_detected(tag_fn_name):
+    """core가 고친 이슈(FIXED_ISSUES)의 모양은 지금 core가 전부 완전 일치로 잡아야 한다 — 되돌아가면
+    실패한다(#653). 아직 안 고친 이슈의 태그는 여기서 보지 않으므로, core가 미탐을 고쳐도 깨지지 않는다."""
+    rng = random.Random(f"fixed:{tag_fn_name}")
+    pipeline = Pipeline()
+    for _ in range(30):
+        doc = MISS_TAGS[tag_fn_name](rng)
+        pred = {(d.kind, d.start, d.end) for d in pipeline.scan(doc.text)}
+        for label in doc.labels:
+            assert (label["kind"], label["start"], label["end"]) in pred, (doc.issue, doc.text)
+
+
+def test_fixed_issues_all_have_tags():
+    issues = {MISS_TAGS[name](random.Random(0)).issue for name in MISS_TAGS}
+    assert FIXED_ISSUES <= issues
