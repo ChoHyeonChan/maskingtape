@@ -84,9 +84,7 @@ class OpenAINameJudge:
         timeout: float = DEFAULT_TIMEOUT_SECONDS,
         opener: _Opener | None = None,
     ) -> None:
-        if not api_key.strip():
-            raise ValueError("OpenAI API key is empty")
-        self._api_key = api_key.strip()
+        self._api_key = _clean_api_key(api_key)
         self.model = model
         self.timeout = timeout
         self._opener = opener or urllib.request.build_opener(_NoRedirect)
@@ -151,7 +149,19 @@ def openai_name_judge_from_env() -> OpenAINameJudge | None:
         return None
     model = os.getenv("MASKINGTAPE_API_OPENAI_MODEL", "").strip() or DEFAULT_MODEL
     timeout = _env_positive_float("MASKINGTAPE_API_OPENAI_TIMEOUT_SECONDS", DEFAULT_TIMEOUT_SECONDS)
-    return OpenAINameJudge(api_key, model=model, timeout=timeout)
+    try:
+        return OpenAINameJudge(api_key, model=model, timeout=timeout)
+    except ValueError:
+        return None
+
+
+def _clean_api_key(api_key: str) -> str:
+    key = api_key.strip()
+    if not key:
+        raise ValueError("OpenAI API key is empty")
+    if not all(0x21 <= ord(char) <= 0x7E for char in key):
+        raise ValueError("OpenAI API key contains invalid characters")
+    return key
 
 
 def _http_error_code(exc: urllib.error.HTTPError) -> str:
