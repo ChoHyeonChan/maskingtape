@@ -5,6 +5,7 @@
 
 import pytest
 
+from maskingtape import Pipeline
 from maskingtape.detectors import RRNDetector
 
 # 체크섬까지 유효하게 계산해 만든 합성 번호 (실존 인물과 무관)
@@ -163,6 +164,50 @@ def test_pure_slash_date_without_a_back_is_not_falsely_grabbed():
     # 대조군: 순수 날짜 표기("1999/07/21")는 뒷자리 모양이 없으므로 주민등록번호가 아니다 —
     # 구분자를 슬래시까지 넓히면서 평범한 날짜까지 오탐하면 안 된다.
     assert RRNDetector().detect("1999/07/21") == []
+
+
+# ── 가운뎃점과 닮은 점 문자(#631) ─────────────────────────────────────
+# 가운뎃점(·, ㆍ, ‧)은 #529로 받았지만 모양이 비슷한 다른 점 문자는 구분자 목록에도 입력
+# 정규화에도 없어 번호가 통째로 샜다. "생년월일" 뒤에서는 생년월일 탐지기가 앞 6자리만 잡아
+# 뒷자리 7개가 남았다. 눈으로 헷갈리므로 코드값으로 만든다.
+
+_DOT_LIKE_CODEPOINTS = [
+    0x30FB,  # 가타카나 가운뎃점
+    0xFF65,  # 반각 가타카나 가운뎃점
+    0x2022,  # 글머리 기호
+    0x2219,  # 글머리 연산자
+    0x22C5,  # 점 연산자
+    0x2024,  # 한 점 리더
+    0xFE52,  # 작은 마침표
+    0x2981,  # Z 표기 점
+    0x25CF,  # 검은 동그라미
+    0x00B8,  # 세딜라
+    0x02D9,  # 윗점
+]
+
+
+@pytest.mark.parametrize("codepoint", _DOT_LIKE_CODEPOINTS, ids=lambda c: f"U+{c:04X}")
+@pytest.mark.parametrize("prefix", ["주민번호 ", "생년월일 ", ""], ids=["rrn-label", "birth-label", "bare"])
+def test_dot_like_separators_mask_the_whole_number(prefix, codepoint):
+    number = f"800101{chr(codepoint)}1234560"
+    text = prefix + number
+    assert [(d.kind, d.text) for d in Pipeline().scan(text)] == [("rrn", number)], text
+    assert Pipeline().anonymize(text).text == prefix + "*" * len(number)
+
+
+@pytest.mark.parametrize("sep", ["/", "·", "ㆍ", "‧", "~", "|", chr(0x30FB), chr(0x2022)])
+def test_birth_label_hands_a_checksumless_number_to_rrn(sep):
+    # 체크섬이 없는 번호(2020-10 이후 발급분)는 확신도가 0.85라, 생년월일 탐지기(0.9)가 앞
+    # 6자리를 잡으면 종류가 생년월일로 바뀌었다(#529 구분자부터 그랬다). 생년월일 쪽이 주민등록번호
+    # 탐지기와 같은 구분자 판정(RRN_BACK_AHEAD)을 쓰므로 이제 주민등록번호로 남는다.
+    number = f"800101{sep}1234567"
+    assert [(d.kind, d.text) for d in Pipeline().scan(f"생년월일 {number}")] == [("rrn", number)]
+
+
+def test_bullets_around_dates_are_not_grabbed():
+    # 대조군: 글머리 기호로 시작하는 날짜 목록은 뒷자리 모양이 없으므로 주민등록번호가 아니다.
+    text = f"{chr(0x2022)} 2024.01.01 회의\n{chr(0x2022)} 2024.01.02 보고"
+    assert Pipeline().scan(text) == []
 
 
 # ── 가려지거나 성별 숫자만 남은 뒷자리는 하이픈류 구분자일 때만(#528 후속) ──
