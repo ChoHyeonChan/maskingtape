@@ -185,3 +185,35 @@ def test_year_list_right_after_a_card_is_not_taken_as_a_second_card():
     # 같은 모양이라도 앞에 카드 문맥어가 직접 있으면 예전처럼 문맥어 규칙을 따른다(변화 없음).
     assert detect("카드 1999-2009 2014-2004") != []
 
+
+
+# ── 카드 종류 라벨이 바로 앞에 있으면 Luhn이 틀려도 낮은 확신도로 가린다(#607) ──────
+# 손으로 옮겨 적다 한 자리 틀린 번호, OCR·음성 받아쓰기 결과는 라벨이 "이건 카드번호다"라고
+# 말해 주는데 검증 숫자 하나 때문에 번호 전체가 남았다. 라벨 없는 형식만 맞는 숫자열은 그대로 버린다(#87).
+
+
+def test_labeled_card_failing_luhn_is_still_masked_with_low_confidence():
+    found = detect("카드번호 4111-1111-1111-1112")
+    assert len(found) == 1
+    assert found[0].text == "4111-1111-1111-1112"
+    assert found[0].confidence == 0.6
+
+
+def test_labeled_card_with_colon_failing_luhn_is_still_masked():
+    found = detect("카드번호: 1234-5678-9012-3456")
+    assert len(found) == 1
+    assert found[0].text == "1234-5678-9012-3456"
+    assert found[0].confidence == 0.6
+
+
+def test_labeled_card_passing_luhn_keeps_full_confidence():
+    # 대조군: 체크섬이 맞는 카드는 라벨 유무와 관계없이 확신도 0.95 그대로다
+    found = detect("카드번호 4111-1111-1111-1111")
+    assert len(found) == 1
+    assert found[0].confidence == 0.95
+
+
+def test_card_failing_luhn_without_a_card_label_is_still_dropped():
+    # 라벨이 없으면 검증 숫자가 틀린 숫자열은 여전히 카드가 아니다(#87 오탐 가드 유지)
+    assert detect("주문 4111-1111-1111-1112") == []
+    assert detect("결제 4111-1111-1111-1112") == []
