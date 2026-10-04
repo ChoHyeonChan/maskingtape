@@ -153,6 +153,26 @@ _SUFFIX_ALT = (
     + r")(?=[" + _JOSA_CHARS_STR + r"]?(?![가-힣]))"
 )
 
+# 이름 바로 뒤 괄호 안의 단서(#604): "김민수(대리)"·"김민수(35세, 남)"·"김민수(인)"·"김민수 (010-…)".
+# 괄호 안 첫머리만 보고, 단서 낱말 뒤는 괄호 닫힘·쉼표·가운뎃점·슬래시여야 한다("(대리점)"·
+# "(35세 이상)"은 받지 않는다). 숫자만 있는 나이, 성별만 있는 괄호, 연락처는 두 글자 낱말과
+# 흔히 겹쳐서("정원(35)"·"구분(남/여)"·"문의(02-555-1234)") 세 글자 이름일 때만 받는다
+# (detect 참고). 성별 뒤에 나이가 이어지면("이준(여, 28세)") 나이처럼 두 글자도 받는다.
+_PAREN_CUE_END = r"(?=[ \t]*[),·/])"
+_PAREN_TITLE_TAIL = r"(?:님)?" + _PAREN_CUE_END
+_PAREN_PERSON = (
+    r"(?:(?:(?:남|여)(?:성|자)?[ \t]?[,/·][ \t]?)?(?:만[ \t]?)?\d{1,3}[ \t]?세"
+    r"|인|서명(?:[ \t]?또는[ \t]?(?:날)?인)?|직인|날인|사인)" + _PAREN_CUE_END
+)
+_PAREN_SEX = r"(?:남|여)(?:성|자)?" + _PAREN_CUE_END
+_PAREN_LONG_ONLY = r"\d{1,3}" + _PAREN_CUE_END + r"|0\d{1,2}[-.\s]?\d{3,4}[-.\s]?\d{4}|\+82|[A-Za-z0-9._%+-]+@"
+# 괄호 하나만 단서일 때 이름 자리에 흔히 오는 말("정정(인)"·"문의처 (02-…)"). _COMMON_WORDS에
+# 넣으면 다른 단서 경로에서도 거르게 돼 "공정은 씨"·"고객 임원이" 같은 실명이 샜다(#604 검증).
+_PAREN_COMMON_WORDS = frozenset({
+    "구분", "정정", "남녀", "임원", "주의", "유의", "방법", "우편", "정답", "공정", "김치", "하단",
+    "문의처",
+})
+
 # 이름의 2번째 글자로 삼키면 안 되는 글자 — 뒤 suffix 그룹이 잡거나 이름 밖으로 남긴다(#147).
 # 탐욕적 매칭이 "고객 심진님"의 "심진님"을 통째로 삼켜 gold("심진")와 어긋나던 문제.
 # 님·씨: 이름 음절로 거의 안 쓰인다. 입·는·을·를·과·와·에·께: 이름 끝음절로 쓰이지 않는다
@@ -287,7 +307,11 @@ _NAME_RE = re.compile(
     # 성씨 + 1글자, 2번째 글자는 이름 끝에 올 수 없는 글자가 아닐 때만 붙인다(#147).
     r"(?P<name>(?:" + _SURNAME_ALT + r")[가-힣]"
     r"(?:(?![" + _NAME_TAIL_STOP + r"])[가-힣]|" + _EUL_AS_LAST_SYLLABLE + r")?)"
-    r"(?:\s?(?P<suffix>" + _SUFFIX_ALT + r"))?"
+    r"(?:\s?(?P<suffix>" + _SUFFIX_ALT + r")"
+    r"|(?P<paren>[ \t]?)(?=\([ \t]*(?:(?P<paren_title>" + _SUFFIX_ALT_PLAIN + r")" + _PAREN_TITLE_TAIL
+    + r"|" + _PAREN_PERSON
+    + r"|(?P<paren_sex>" + _PAREN_SEX + r")"
+    + r"|(?P<paren_long>" + _PAREN_LONG_ONLY + r"))))?"
     # suffix가 없으면(뒤 단서를 못 찾았으면) 이름이 낱말 끝에서 끝나야 한다 — 없으면 "하이
     # 브리드"의 "하이브"처럼 더 긴 낱말의 앞부분만 잘라 이름으로 오탐한다(#484). suffix가
     # 있으면(예: "님께"처럼 존칭 뒤에 조사가 더 붙는 경우) 이 조건을 걸지 않는다 — 그 경계는
@@ -303,9 +327,9 @@ _NAME_RE = re.compile(
     # 받는다(리뷰, PR #571 — main도 "김가"까지만 가렸으니 최소한 그만큼은 가린다).
     # 그래도 목록이 닫혀 있어 "예요"·"였"·"라고"·"께서는" 같은 어미가 붙으면 통째로 샜다 —
     # 그런 어미는 첫머리(_OPEN_ENDING_STEMS)만 보고 받는다(#600). 반말 "야"도 낱말 끝일 때 받는다.
-    r"(?(suffix)|(?=(?:" + _OPEN_ENDING_ALT + r")|(?:입니다|이며|이고|에게서|에게|에서|한테|께서"
+    r"(?(suffix)|(?(paren)|(?=(?:" + _OPEN_ENDING_ALT + r")|(?:입니다|이며|이고|에게서|에게|에서|한테|께서"
     r"|이랑|하고|처럼|부터|까지|보다|으로|로서|야|[" + _JOSA_CHARS_STR + r"]{1,2}(?:님|씨)?)?"
-    r"(?![가-힣])))"
+    r"(?![가-힣]))))"
 )
 
 # LLM에 보낼지 정하는 후보 판정용: 한글 두 글자가 붙은 자리. 한국어 이름은 두 글자 이상이다.
@@ -457,7 +481,9 @@ class NameDetector(Detector):
                 continue
 
             has_prefix = prefix is not None
-            has_suffix = suffix is not None
+            # 이름 바로 뒤 괄호 안의 직함·나이·서명·연락처도 뒤 단서다(#604).
+            paren_title = m.group("paren_title")
+            has_suffix = suffix is not None or m.group("paren") is not None
             if not has_prefix and not has_suffix:
                 continue  # 문맥 단서가 하나도 없으면 일반 단어와 구분 못 하므로 버린다
 
@@ -465,11 +491,21 @@ class NameDetector(Detector):
             # 직함에 붙어 이름으로 오탐되는 걸 막는다(#213 뒤 직함, #239 앞 직함).
             # 부서어+조사("정기가")가 3글자로 둔갑하는 우회(#247)는 위 _COMMON_WORDS 경계
             # 판정이 먼저 거른다.
-            title_only = (suffix in _TITLE_ONLY_CUES and not has_prefix) or (
-                prefix in _TITLE_ONLY_CUES and not has_suffix
+            # 앞 직함은 괄호 안 직함일 때만 짝이 된다. "부장 전결(인)"처럼 결재란의 업무어가
+            # 서명 괄호 덕에 두 글자로 잡히지 않게, 괄호가 직함이 아니면 앞 직함만 있는 것으로 본다.
+            title_only = ((suffix or paren_title) in _TITLE_ONLY_CUES and not has_prefix) or (
+                prefix in _TITLE_ONLY_CUES and suffix is None and paren_title is None
             )
             if title_only and len(m.group("name")) < 3:
                 continue
+            if m.group("paren") is not None and not has_prefix:
+                # 괄호 안이 숫자만 있는 나이·연락처·성별뿐이면 두 글자 낱말과 흔히 겹친다
+                # ("정원(35)", "문의(02-…)", 서식의 "구분(남/여)"). 세 글자 이름일 때만 받는다.
+                paren_weak = m.group("paren_long") is not None or m.group("paren_sex") is not None
+                if paren_weak and len(m.group("name")) < 3:
+                    continue
+                if m.group("name") in _PAREN_COMMON_WORDS:
+                    continue
 
             confidence = 0.75 if (has_prefix and has_suffix) else 0.5
             if confidence < self.min_confidence:
