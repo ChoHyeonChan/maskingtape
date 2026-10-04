@@ -151,3 +151,28 @@ def test_review_false_positives_from_new_cues_are_not_names(text):
 def test_form_label_with_a_person_name_still_counts_after_the_org_rule():
     # 대조군: 발신 칸에 사람 이름이 오면 기관 규칙이 막지 않는다
     assert "김민수" in names("발신: 김민수")
+
+
+@pytest.mark.parametrize(
+    "text, name",
+    [
+        # 기존 직함 앞의 두 글자 이름 + 의·가는 전처럼 이름째 가린다(#603 리뷰 회귀)
+        ("담당자 이준의 팀장", "이준"),
+        ("이준가 대리로 승진했다", "이준"),
+        ("김민의 과장", "김민"),
+        ("최한의 부장님", "최한"),
+        ("정민가 부장님께 서류를 전달했습니다.", "정민"),
+        # 기존 앞 단서가 있으면 #603 직함 앞이어도 전처럼 가린다
+        ("고객 김민의 선임", "김민"),
+        ("담당자: 이준가 수석으로", "이준"),
+        # #603 정지어는 #603 단서 뒤에서만 거른다. 기존 단서 옆이면 전처럼 이름으로 본다
+        ("공제 씨", "공제"),
+        ("고객 우대", "우대"),
+        ("담당자 우대", "우대"),
+        ("진술 씨가", "진술"),
+    ],
+)
+def test_names_masked_before_the_review_fix_are_still_masked(text, name):
+    start = text.index(name)
+    spans = [(d.start, d.end) for d in NameDetector().detect(text)]
+    assert any(s <= start and start + len(name) <= e for s, e in spans), spans
