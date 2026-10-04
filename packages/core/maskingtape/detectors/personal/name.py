@@ -174,6 +174,26 @@ _SUFFIX_ALT = (
     + r"|" + _CLOSING_SUFFIX_ALT
 )
 
+# 이름 바로 뒤 괄호 안의 단서(#604): "김민수(대리)"·"김민수(35세, 남)"·"김민수(인)"·"김민수 (010-…)".
+# 괄호 안 첫머리만 보고, 단서 낱말 뒤는 괄호 닫힘·쉼표·가운뎃점·슬래시여야 한다("(대리점)"·
+# "(35세 이상)"은 받지 않는다). 숫자만 있는 나이, 성별만 있는 괄호, 연락처는 두 글자 낱말과
+# 흔히 겹쳐서("정원(35)"·"구분(남/여)"·"문의(02-555-1234)") 세 글자 이름일 때만 받는다
+# (detect 참고). 성별 뒤에 나이가 이어지면("이준(여, 28세)") 나이처럼 두 글자도 받는다.
+_PAREN_CUE_END = r"(?=[ \t]*[),·/])"
+_PAREN_TITLE_TAIL = r"(?:님)?" + _PAREN_CUE_END
+_PAREN_PERSON = (
+    r"(?:(?:(?:남|여)(?:성|자)?[ \t]?[,/·][ \t]?)?(?:만[ \t]?)?\d{1,3}[ \t]?세"
+    r"|인|서명(?:[ \t]?또는[ \t]?(?:날)?인)?|직인|날인|사인)" + _PAREN_CUE_END
+)
+_PAREN_SEX = r"(?:남|여)(?:성|자)?" + _PAREN_CUE_END
+_PAREN_LONG_ONLY = r"\d{1,3}" + _PAREN_CUE_END + r"|0\d{1,2}[-.\s]?\d{3,4}[-.\s]?\d{4}|\+82|[A-Za-z0-9._%+-]+@"
+# 괄호 하나만 단서일 때 이름 자리에 흔히 오는 말("정정(인)"·"문의처 (02-…)"). _COMMON_WORDS에
+# 넣으면 다른 단서 경로에서도 거르게 돼 "공정은 씨"·"고객 임원이" 같은 실명이 샜다(#604 검증).
+_PAREN_COMMON_WORDS = frozenset({
+    "구분", "정정", "남녀", "임원", "주의", "유의", "방법", "우편", "정답", "공정", "김치", "하단",
+    "문의처",
+})
+
 # 이름의 2번째 글자로 삼키면 안 되는 글자 — 뒤 suffix 그룹이 잡거나 이름 밖으로 남긴다(#147).
 # 탐욕적 매칭이 "고객 심진님"의 "심진님"을 통째로 삼켜 gold("심진")와 어긋나던 문제.
 # 님·씨: 이름 음절로 거의 안 쓰인다. 입·는·을·를·과·와·에·께: 이름 끝음절로 쓰이지 않는다
@@ -313,7 +333,11 @@ _NAME_RE = re.compile(
     # 성씨 + 1글자, 2번째 글자는 이름 끝에 올 수 없는 글자가 아닐 때만 붙인다(#147).
     r"(?P<name>(?:" + _SURNAME_ALT + r")[가-힣]"
     r"(?:(?![" + _NAME_TAIL_STOP + r"])[가-힣]|" + _EUL_AS_LAST_SYLLABLE + r")?)"
-    r"(?:\s?(?P<suffix>" + _SUFFIX_ALT + r"))?"
+    r"(?:\s?(?P<suffix>" + _SUFFIX_ALT + r")"
+    r"|(?P<paren>[ \t]?)(?=\([ \t]*(?:(?P<paren_title>" + _SUFFIX_ALT_PLAIN + r")" + _PAREN_TITLE_TAIL
+    + r"|" + _PAREN_PERSON
+    + r"|(?P<paren_sex>" + _PAREN_SEX + r")"
+    + r"|(?P<paren_long>" + _PAREN_LONG_ONLY + r"))))?"
     # suffix가 없으면(뒤 단서를 못 찾았으면) 이름이 낱말 끝에서 끝나야 한다 — 없으면 "하이
     # 브리드"의 "하이브"처럼 더 긴 낱말의 앞부분만 잘라 이름으로 오탐한다(#484). suffix가
     # 있으면(예: "님께"처럼 존칭 뒤에 조사가 더 붙는 경우) 이 조건을 걸지 않는다 — 그 경계는
@@ -329,9 +353,70 @@ _NAME_RE = re.compile(
     # 받는다(리뷰, PR #571 — main도 "김가"까지만 가렸으니 최소한 그만큼은 가린다).
     # 그래도 목록이 닫혀 있어 "예요"·"였"·"라고"·"께서는" 같은 어미가 붙으면 통째로 샜다 —
     # 그런 어미는 첫머리(_OPEN_ENDING_STEMS)만 보고 받는다(#600). 반말 "야"도 낱말 끝일 때 받는다.
-    r"(?(suffix)|(?=(?:" + _OPEN_ENDING_ALT + r")|(?:입니다|이며|이고|에게서|에게|에서|한테|께서"
+    r"(?(suffix)|(?(paren)|(?=(?:" + _OPEN_ENDING_ALT + r")|(?:입니다|이며|이고|에게서|에게|에서|한테|께서"
     r"|이랑|하고|처럼|부터|까지|보다|으로|로서|야|[" + _JOSA_CHARS_STR + r"]{1,2}(?:님|씨)?)?"
-    r"(?![가-힣])))"
+    r"(?![가-힣]))))"
+)
+
+# 라벨 뒤에 나열한 이름 목록("참석자: 김민수, 이서연, 박지훈", #602). 라벨은 첫 이름에만 붙어서
+# 둘째 이름부터는 단서 없는 후보가 되어 버려졌다. 단서를 달고 잡힌 이름 바로 뒤에 나열 구분자와
+# 이름 모양이 이어지면 같은 단서를 이어받는다(_list_names). 줄은 넘지 않는다.
+# 앞 이름에 붙은 존칭·직함("이서연님, …", "김민수 과장, …", "김민수 군, …")은 건너뛴다. 구분자는
+# 쉼표·가운뎃점(점 닮은꼴 포함)·슬래시 같은 문장부호, 이름에 붙은 "와·과·랑·이랑·하고", 띄어 쓴
+# "및·그리고·또는"이다.
+_LIST_SUFFIX = r"(?:[ \t]?(?:" + _SUFFIX_ALT + r"))?"
+_LIST_GAP_RE = re.compile(
+    _LIST_SUFFIX
+    + r"(?:[ \t]*[,，、·ㆍ・･•/][ \t]*|(?:와|과|이랑|랑|하고)[ \t]+|[ \t]+(?:및|그리고|또는)[ \t]+)"
+)
+# 문장부호 구분자는 그 칸이 끝났다는 표시다. "와·과·및" 같은 잇는 말은 다음 칸으로 이어 줄 뿐이라,
+# 그 뒤 칸이 받아질 때만 앞 칸을 받는다 — "환자: 김민수, 정신과 진료 중"의 "정신"을 막는다.
+_LIST_PUNCT_GAP_RE = re.compile(_LIST_SUFFIX + r"[ \t]*[,，、·ㆍ\u30fb\uff65\u2022/]")
+# 공백만으로 이어 쓴 목록("참석자: 김민수 이서연 박지훈")은 "환자 김민수 진료비"처럼 이름 뒤에
+# 일반 낱말이 오는 문장과 모양이 같다. 그래서 라벨에 쌍점·세로줄이 있을 때만, 성+이름 두 자인
+# 세 글자 칸만 받는다.
+_LIST_SPACE_GAP_RE = re.compile(_LIST_SUFFIX + r"[ \t]+")
+# 이어받는 칸의 이름 모양 — _NAME_RE의 이름·끝 조건과 같고, 뒤에 존칭·직함이 와도 된다.
+_LIST_NAME_RE = re.compile(
+    r"(?<![가-힣])(?P<name>(?:" + _SURNAME_ALT + r")[가-힣]"
+    r"(?:(?![" + _NAME_TAIL_STOP + r"])[가-힣]|" + _EUL_AS_LAST_SYLLABLE + r")?)"
+    r"(?=[ \t]?(?:" + _SUFFIX_ALT + r")|(?:" + _OPEN_ENDING_ALT + r")|(?:입니다|이며|이고|에게서|에게|에서"
+    r"|한테|께서|이랑|하고|처럼|부터|까지|보다|으로|로서|야|[" + _JOSA_CHARS_STR + r"]{1,2}(?:님|씨)?)?"
+    r"(?![가-힣]))"
+)
+_LIST_SPACE_NAME_LEN = 3
+# 목록 칸에 이름 대신 흔히 오는 말 — 관계·성별·상태어(#602 독립 검증: "보호자: 김민수, 남편"). 성씨
+# 글자로 시작해 이름 모양과 같다. 완전 일치로만 거른다. 완전한 목록은 아니다 — 여기 없는 말이 더
+# 가려지는 쪽(안전한 쪽)으로 틀린다.
+_LIST_NOT_NAMES = frozenset({
+    "남편", "아내", "장남", "장녀", "차남", "차녀", "손자", "손녀", "조카", "지인", "오빠", "언니", "누나",
+    "형님", "동생", "이웃", "모친", "부친", "자녀", "아들", "남성", "여성", "남자", "여자",
+    "정상", "양호", "고열", "지각", "조퇴", "신입", "전세", "월세", "전결", "정규직", "임시직",
+    "주부", "한국인", "외국인", "우수", "최우수", "전원", "정리", "신협", "우체국",
+    "장학생", "전학생", "재학생", "휴학생",
+})
+# 이름 끝 글자로 쓰이지 않는 부서·장소·서술의 끝 글자("홍보팀"·"강의실"·"양호함"·"진정됨"·"안정적").
+_LIST_NOT_NAME_LAST = frozenset("팀실함됨적")
+# 두 글자 칸에 공백 없이 붙은 직함은 부서+직함 한 낱말이다("홍보팀장"의 "홍보", "총무과장"의 "총무").
+_TITLE_ONLY_PREFIXES = tuple(sorted(_TITLE_ONLY_CUES, key=len, reverse=True))
+# 이어받은 칸이 목록의 한 칸으로 끝나는지 보는 꼬리. "대상자: 윤은성, 신주소 대구"처럼 쉼표 뒤에 다른 칸
+# 라벨과 값이 오는 꼴("라벨: 이름, 뒤정보", #537)을 이름 목록으로 읽지 않으려고, 칸 뒤에 목록다운 끝이
+# 와야 받는다 — 존칭·직함, 다음 구분자, 이름 뒤에 흔한 조사·어미, 줄·문장 끝, 목록을 닫는 꼴.
+# 붙어 쓴 한글은 을·를·의·(으)로까지 받으면 "환자: 김민수, 진료를 거부함"의 "진료", "김민수와 공동으로"의
+# "공동"이 이름이 된다(#602 독립 검증). 그래서 이름 뒤에 흔한 것만 받는다.
+_LIST_TAIL_SUFFIX_RE = re.compile(r"[ \t]?(?:" + _SUFFIX_ALT + r")")
+_LIST_TAIL_JOSA_RE = re.compile(
+    r"(?:입니다|이며|이고|에게|께서|한테|이었|였|이라|이다|[이가은는도께만](?![가-힣]))"
+)
+_LIST_TAIL_PUNCT = frozenset(".)]」』>!?;|\"'…*#")
+# 마지막 칸 뒤에서 목록을 닫는 꼴: 닫는 말(등·외·총·이상·귀하는 낱말 끝까지, 참석·불참·드림·올림은
+# 어간), 인원수("3명"), 괄호 설명, 줄 끝 공백, 띄운 대시. 쌍점은 받지 않는다 — "진료과: 내과"처럼
+# 다음 칸 라벨이라는 표시다.
+_LIST_CLOSING_RE = re.compile(
+    r"[ \t]+(?:(?:등|외|총|이상|귀하)(?![가-힣])|참석|불참|드림|올림)"
+    r"|[ \t]+\d+[ \t]?(?:명|인)|[ \t]*\(|[ \t]+(?=\r?\n|$)|[ \t]+[-–—][ \t]"
+    # 표 칸 끝(" |")처럼 공백 뒤에 닫는 문장부호가 오는 꼴
+    r"|[ \t]+[|\"'…*#.)\]」』>!?;]"
 )
 
 # LLM에 보낼지 정하는 후보 판정용: 한글 두 글자가 붙은 자리. 한국어 이름은 두 글자 이상이다.
@@ -440,6 +525,8 @@ class NameDetector(Detector):
         확신도 0.75, 하나면 0.5를 주고, min_confidence보다 낮으면 버린다.
         """
         found: list[Detection] = []
+        # 라벨을 달고 잡힌 이름의 끝 위치 — 뒤에 나열한 이름을 이어받는 출발점이다(#602)
+        list_seeds: list[tuple[int, bool]] = []
         pos = 0
         # finditer 대신 직접 이어 찾는다: "신청자 성명 김하늘"에서 "성명"이 이름 후보로 잡혀
         # 버려질 때, 그 "성명"이 실제로는 다음 이름의 앞 단서다. finditer는 "신청자 성명"을
@@ -483,7 +570,9 @@ class NameDetector(Detector):
                 continue
 
             has_prefix = prefix is not None
-            has_suffix = suffix is not None
+            # 이름 바로 뒤 괄호 안의 직함·나이·서명·연락처도 뒤 단서다(#604).
+            paren_title = m.group("paren_title")
+            has_suffix = suffix is not None or m.group("paren") is not None
             if not has_prefix and not has_suffix:
                 continue  # 문맥 단서가 하나도 없으면 일반 단어와 구분 못 하므로 버린다
 
@@ -491,11 +580,21 @@ class NameDetector(Detector):
             # 직함에 붙어 이름으로 오탐되는 걸 막는다(#213 뒤 직함, #239 앞 직함).
             # 부서어+조사("정기가")가 3글자로 둔갑하는 우회(#247)는 위 _COMMON_WORDS 경계
             # 판정이 먼저 거른다.
-            title_only = (suffix in _TITLE_ONLY_CUES and not has_prefix) or (
-                prefix in _TITLE_ONLY_CUES and not has_suffix
+            # 앞 직함은 괄호 안 직함일 때만 짝이 된다. "부장 전결(인)"처럼 결재란의 업무어가
+            # 서명 괄호 덕에 두 글자로 잡히지 않게, 괄호가 직함이 아니면 앞 직함만 있는 것으로 본다.
+            title_only = ((suffix or paren_title) in _TITLE_ONLY_CUES and not has_prefix) or (
+                prefix in _TITLE_ONLY_CUES and suffix is None and paren_title is None
             )
             if title_only and len(m.group("name")) < 3:
                 continue
+            if m.group("paren") is not None and not has_prefix:
+                # 괄호 안이 숫자만 있는 나이·연락처·성별뿐이면 두 글자 낱말과 흔히 겹친다
+                # ("정원(35)", "문의(02-…)", 서식의 "구분(남/여)"). 세 글자 이름일 때만 받는다.
+                paren_weak = m.group("paren_long") is not None or m.group("paren_sex") is not None
+                if paren_weak and len(m.group("name")) < 3:
+                    continue
+                if m.group("name") in _PAREN_COMMON_WORDS:
+                    continue
 
             confidence = 0.75 if (has_prefix and has_suffix) else 0.5
             if confidence < self.min_confidence:
@@ -510,13 +609,95 @@ class NameDetector(Detector):
                     detector=self.__class__.__name__,
                 )
             )
+            if has_prefix:
+                list_seeds.append((m.end("name"), has_explicit_sep or prefix in _STRONG_LABEL_PREFIXES))
         form_extra = self._form_names(text, found)
         table_extra = self._table_names(text, found + form_extra)
         slash_extra = self._slash_record_names(text, found + form_extra + table_extra)
         found.extend(form_extra)
         found.extend(table_extra)
         found.extend(slash_extra)
+        # 양식 라벨(쌍점·세로줄) 뒤 이름도 목록의 출발점이다. 공백 구분까지 받는다.
+        list_seeds.extend((d.end, True) for d in form_extra)
+        found.extend(self._list_names(text, list_seeds, found))
         return found
+
+    def _list_names(
+        self, text: str, seeds: list[tuple[int, bool]], found: list[Detection]
+    ) -> list[Detection]:
+        """라벨을 달고 잡힌 이름 뒤에 나열한 이름들을 찾는다(#602).
+
+        seeds는 (이름 끝 위치, 공백 구분도 받을지)다. 이름 뒤에 나열 구분자와 이름 모양이 이어지는
+        동안 칸을 모은다. 칸마다 흔한 낱말·라벨 단어·단서 단어·양식 자리표시 값 거르기를 그대로
+        건다. 모은 칸 가운데 목록다운 끝(_list_tail_ok)을 가진 마지막 칸까지만 받는다 — 공백으로만
+        나열한 "김민수 이서연 박지훈"은 끝 칸 뒤가 문장 끝이라 앞 칸까지 받고, "윤은성, 신주소 대구"는
+        "신주소" 뒤에 다른 낱말이 와서 받지 않는다. 이미 다른 규칙이 잡은 칸은 다시 넣지 않는다.
+        확신도는 단서 하나짜리와 같은 0.5다. 한 칸마다 앞으로 나아가므로 선형이다.
+        """
+        if self.min_confidence > 0.5:
+            return []
+        covered = bytearray(len(text))
+        for d in found:
+            covered[d.start : d.end] = b"\x01" * (d.end - d.start)
+
+        extra: list[Detection] = []
+        for pos, allow_space in seeds:
+            cells: list[tuple[int, int, str, bool]] = []
+            while True:
+                gap = _LIST_GAP_RE.match(text, pos)
+                space_only = False
+                if gap is None and allow_space:
+                    gap = _LIST_SPACE_GAP_RE.match(text, pos)
+                    space_only = True
+                if gap is None:
+                    break
+                m = _LIST_NAME_RE.match(text, gap.end())
+                if m is None:
+                    break
+                start, end = m.span("name")
+                name = m.group("name")
+                if (
+                    (space_only and len(name) < _LIST_SPACE_NAME_LEN)
+                    or name in _CUE_WORDS
+                    or _is_label_word_at(text, start)
+                    or _FORM_VALUE_ENDING_RE.sub("", name) in _FORM_NOT_NAMES
+                    or _CUE_WITH_JOSA_RE.fullmatch(name)
+                    or name in _LIST_NOT_NAMES
+                    or name[-1] in _LIST_NOT_NAME_LAST
+                    or (len(name) == 2 and text.startswith(_TITLE_ONLY_PREFIXES, end))
+                ):
+                    break
+                cells.append((start, end, name, self._list_tail_ok(text, end)))
+                pos = end
+            last = max((i for i, cell in enumerate(cells) if cell[3]), default=-1)
+            for start, end, name, _tail_ok in cells[: last + 1]:
+                if all(covered[start:end]):
+                    continue
+                covered[start:end] = b"\x01" * (end - start)
+                extra.append(
+                    Detection(
+                        kind=self.kind,
+                        start=start,
+                        end=end,
+                        text=name,
+                        confidence=0.5,
+                        detector=self.__class__.__name__,
+                    )
+                )
+        return extra
+
+    @staticmethod
+    def _list_tail_ok(text: str, end: int) -> bool:
+        """이름 칸 뒤가 목록의 한 칸으로 끝나는 꼴인지 본다(#602)."""
+        if (
+            _LIST_TAIL_SUFFIX_RE.match(text, end)
+            or _LIST_PUNCT_GAP_RE.match(text, end)
+            or _LIST_TAIL_JOSA_RE.match(text, end)
+            or _LIST_CLOSING_RE.match(text, end)
+        ):
+            return True
+        nxt = text[end : end + 1]
+        return not nxt or nxt in "\r\n" or nxt in _LIST_TAIL_PUNCT
 
     def _form_names(self, text: str, found: list[Detection]) -> list[Detection]:
         """양식 라벨(성명·예금주 등)과 쌍점·세로줄 뒤의 이름을 찾는다(#491).

@@ -132,9 +132,10 @@ test/
 순서를 이렇게 둔 이유:
 
 - 로컬 CLI는 기능이 온전하다 — 가명처리(`pseudonym`)는 #309 이후 API도 지원하지만, **로컬 LLM 사용(이름 탐지)은 여전히 CLI 전용**이다(배포 API는 규칙 기반 탐지만 제공한다). 텍스트가 이 PC를 벗어나지도 않는다.
-- CLI는 **앱 exe 옆 `python\Scripts\maskingtape.exe`**(설치판이 동봉, #617)를 먼저 찾고, 없으면 PATH의
-  `maskingtape`를 쓴다(`services/cli_locator.dart`). 소스에서 `flutter run`할 때는 venv를 활성화한 셸에서 띄워야
-  PATH에 CLI가 있다 — 아니면 "CLI를 찾을 수 없습니다"가 뜬다.
+- CLI는 **앱 exe 옆에 동봉된 Python**(`python\python.exe -B -X utf8 -m maskingtape.cli` — 설치판, #617)을 먼저 찾고,
+  없으면 PATH의 `maskingtape`를 쓴다(`services/cli_locator.dart`). 소스에서 `flutter run`할 때는 venv를 활성화한
+  셸에서 띄워야 PATH에 CLI가 있다 — 아니면 "CLI를 찾을 수 없습니다"가 뜬다.
+- 설치파일(setup.exe)을 만드는 법은 [installer/README.md](installer/README.md)에 있다.
 - CLI를 설치하지 않은 PC에서도 앱이 그냥 동작해야 한다 — 설치 없이 실행하는 배포판·시연 상황.
 
 백엔드를 넘기는 건 **닿지 못했을 때뿐**이다(`AnonymizerUnavailableException` — CLI가 PATH에 없거나 API 서버가 안 떠 있음). 처리 중 발생한 오류(예: Ollama 미실행)는 백엔드를 바꿔도 같은 결과라 그대로 보여준다 — 넘기면 원인만 가려진다.
@@ -178,7 +179,7 @@ API 경로에서 지원하지 않는 옵션을 고르면 네트워크를 타기 
 |---|---|---|
 | `LLM 확인 중…` | 확인 중 | — |
 | `Ollama 미실행` | 연결 실패 | Ollama를 실행한다 |
-| `모델 없음` | Ollama는 떠 있는데 모델이 없다 | `ollama pull qwen2.5:7b` |
+| `모델 없음` | Ollama는 떠 있는데 모델이 없다 | `ollama pull hf.co/StayAlive1/maskingtape-name-1.5b-GGUF:Q4_K_M` |
 | `LLM 준비됨` | 모델은 받아뒀지만 메모리에 없다 | 그대로 써도 된다 (첫 호출에서 로딩 시간) |
 | `LLM 로드됨` | 메모리에 올라가 있다 | 바로 응답한다 |
 
@@ -187,7 +188,7 @@ API 경로에서 지원하지 않는 옵션을 고르면 네트워크를 타기 
 `DEFAULT_MODEL`과 같은 값을 유지해야 한다.
 
 - **꺼짐이 기본** — 끈 상태에서는 규칙 전용이라 Ollama 없이도 그대로 동작한다.
-- 켜려면 이 PC에서 **Ollama가 실행 중**이고 모델(`ollama pull qwen2.5:7b`)이 있어야 한다.
+- 켜려면 이 PC에서 **Ollama가 실행 중**이고 모델(`ollama pull hf.co/StayAlive1/maskingtape-name-1.5b-GGUF:Q4_K_M`)이 있어야 한다.
 - 준비가 안 됐으면 해당 파일만 실패로 표시되고 **core가 준 안내 문구가 그대로** 보인다(앱이 덮어쓰지 않는다). 나머지 파일 처리는 계속된다.
 - CLI를 탐지·마스킹 두 번 호출하므로 LLM 모드에서는 파일당 모델 호출도 두 번이다 — 그만큼 느리다.
 

@@ -8,9 +8,11 @@
    더 붙으면(더 긴 숫자열의 일부) 제외한다.
 2. 국세청 검증 알고리즘(가중치 1,3,7,1,3,7,1,3,5 + 9번째 자리 보정)으로 마지막
    검증 자리를 확인한다.
-3. **체크섬이 맞는 번호만** 탐지한다(확신도 1.0). 체크섬 없는 3-2-5 숫자는 버린다 —
+3. **체크섬이 맞는 번호는** 확신도 1.0으로 탐지한다. 체크섬 없는 3-2-5 숫자는 버린다 —
    주민번호(6-7 표기)와 달리 사업자번호는 예외 없이 모두 체크섬이 있어, 체크섬이 곧
    판별 기준이다. (실측: bench의 체크섬 없는 3-2-5 난수 12건이 오탐되던 것을 막는다.)
+   단, "사업자등록번호"·"사업자번호" 라벨이 바로 앞에 있으면 체크섬이 틀려도 확신도 0.6으로
+   받는다(#607 — 옮겨 적다 한 자리 틀린 번호도 가린다).
 
 사업자등록번호는 개인정보보호법상 '개인 고유식별정보'는 아니지만(사업자=기관 식별),
 개인사업자는 개인과 연결되고 계약서·세금계산서에 흔히 등장해 마스킹 대상이다.
@@ -25,6 +27,11 @@ from maskingtape.types import Detection
 
 # XXX-XX-XXXXX (3-2-5) 하이픈 표기. 앞뒤에 숫자가 더 붙으면 더 긴 숫자열이므로 제외.
 _BRN_RE = re.compile(r"(?<!\d)(\d{3})-(\d{2})-(\d{5})(?!\d)")
+# 사업자등록번호 라벨이 번호 바로 앞에 있으면 체크섬이 틀려도 받는다(#607). 한 자리 틀린 번호나
+# OCR 오류도 라벨이 "사업자번호다"라고 말해 주므로 가린다. 체크섬이 없는 경우라 확신도는 0.6이다.
+_BRN_LABEL_BEFORE_RE = re.compile(r"(?:사업자 ?등록번호|사업자번호)[ \t]{0,3}[:：]?[ \t]{0,3}\Z")
+_BRN_LABEL_WINDOW = 20
+_LABELED_CONFIDENCE = 0.6
 
 # 국세청 검증 가중치 — 앞 9자리에 곱한다.
 _WEIGHTS = (1, 3, 7, 1, 3, 7, 1, 3, 5)
@@ -47,23 +54,34 @@ class BusinessRegistrationDetector(Detector):
     kind = "biz_reg"
 
     def detect(self, text: str) -> list[Detection]:
-        """3-2-5 표기 후보 중 국세청 체크섬이 맞는 것만 확신도 1.0으로 돌려준다.
-
-        사업자등록번호는 모두 체크섬이 있어서, 체크섬이 틀린 후보는 사업자번호가 아니다.
+        """3-2-5 표기 후보 중 국세청 체크섬이 맞는 것은 확신도 1.0으로, 틀린 것은 라벨이 바로
+        앞에 있을 때만 0.6으로 돌려준다(#607). 라벨 없이 체크섬만 틀린 후보는 사업자번호가 아니다.
         """
         found: list[Detection] = []
         for m in _BRN_RE.finditer(text):
             digits = m.group(1) + m.group(2) + m.group(3)
-            if not _checksum_ok(digits):
-                continue  # 체크섬 없는 3-2-5 숫자는 사업자번호가 아니다
+            if _checksum_ok(digits):
+                confidence = 1.0
+            elif self._has_business_label(text, m):
+                confidence = _LABELED_CONFIDENCE
+            else:
+                continue  # 체크섬 없는 3-2-5 숫자는 라벨이 없으면 사업자번호가 아니다
             found.append(
                 Detection(
                     kind=self.kind,
                     start=m.start(),
                     end=m.end(),
                     text=m.group(0),
-                    confidence=1.0,
+                    confidence=confidence,
                     detector=self.__class__.__name__,
                 )
             )
         return found
+
+    @staticmethod
+    def _has_business_label(text: str, match: re.Match[str]) -> bool:
+        """번호 바로 앞(공백·쌍점 몇 자 이내)에 사업자등록번호 라벨이 있는지 본다(#607)."""
+        start = match.start()
+        return (
+            _BRN_LABEL_BEFORE_RE.search(text, max(0, start - _BRN_LABEL_WINDOW), start) is not None
+        )

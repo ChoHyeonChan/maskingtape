@@ -25,7 +25,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from maskingtape.detectors import default_detectors, llm_detectors
+from maskingtape.detectors import DEFAULT_MODEL, default_detectors, llm_detectors
 from maskingtape.pipeline import Pipeline
 
 from bench.evaluators.evaluate import Counts, evaluate, load_dataset
@@ -77,7 +77,7 @@ def main() -> None:
     sys.stdout.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(description="이름 탐지 방식(규칙판 vs 하이브리드) 정확도 비교")
     parser.add_argument("dataset", type=Path, help="평가할 JSONL 데이터셋 경로")
-    parser.add_argument("--model", type=str, default="qwen2.5:7b", help="비교에 쓸 로컬 Ollama 모델")
+    parser.add_argument("--model", type=str, default=DEFAULT_MODEL, help="비교에 쓸 로컬 Ollama 모델")
     args = parser.parse_args()
 
     rows = load_dataset(args.dataset)

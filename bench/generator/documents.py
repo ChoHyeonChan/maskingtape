@@ -25,6 +25,22 @@ _PLACEHOLDER_RE = re.compile(
 )
 _NON_LABEL_KINDS = frozenset({"distractor"})
 
+# 사업자등록번호 오답지(체크섬을 일부러 틀린 ddd-dd-ddddd)가 라벨 바로 뒤에 놓이면 정답으로 친다(#650).
+# core는 #607(PR #646)부터 "사업자등록번호"·"사업자번호" 라벨이 번호 바로 앞에 있으면 체크섬이 틀려도
+# 확신도 0.6으로 가린다 — 오타 난 실제 번호일 수 있어서다. 그 자리의 번호를 계속 오답지로 채점하면
+# 엔진이 맞게 가린 것이 오탐으로 집계된다. 라벨 모양은 core의 규칙과 같게 둔다: 라벨 뒤에 공백·쌍점만
+# 오고 조사가 끼면("사업자등록번호는 …") 라벨로 보지 않는다. 값은 이미 뽑은 것을 그대로 쓰고 판정만
+# 하므로 난수를 더 쓰지 않는다 — 같은 시드로 만든 글은 그대로이고 라벨만 늘어난다.
+_BIZ_REG_SHAPE_RE = re.compile(r"\d{3}-\d{2}-\d{5}")
+_BIZ_REG_LABEL_BEFORE_RE = re.compile(r"(?:사업자 ?등록번호|사업자번호)[ 	]{0,3}[:：]?[ 	]{0,3}\Z")
+
+
+def _labeled_distractor_kind(text_before: str, value: str) -> str | None:
+    """라벨 바로 뒤라서 core가 개인정보로 가리는 오답지면 그 종류를, 아니면 None을 돌려준다."""
+    if _BIZ_REG_SHAPE_RE.fullmatch(value) and _BIZ_REG_LABEL_BEFORE_RE.search(text_before):
+        return "biz_reg"
+    return None
+
 # 개인정보가 실제로 포함된 템플릿 — 다양한 업무 맥락(고객센터/병원/학교/관공서/인사/배송/금융)을 커버한다.
 _TEMPLATES = [
     "고객 {name}님 {phone}로 연락 부탁드립니다.",
@@ -181,6 +197,7 @@ def _render(template: str, rng: random.Random, difficulty: str, address_extended
 
     {distractor}는 개인정보가 아니므로 텍스트에는 삽입하되 라벨은 남기지 않는다 —
     core가 이 구간을 잘못 탐지하면 evaluate.py에서 그대로 FP(오탐)로 집계된다.
+    예외: 사업자등록번호 라벨 바로 뒤의 사업자번호 모양 오답지는 core가 가리는 게 맞아 정답으로 친다(#650).
     """
     text_parts: list[str] = []
     labels: list[Label] = []
@@ -193,6 +210,7 @@ def _render(template: str, rng: random.Random, difficulty: str, address_extended
         kind = m.group(1)
         if kind in _NON_LABEL_KINDS:
             value = generate_distractor(rng)
+            kind = _labeled_distractor_kind("".join(text_parts), value) or kind
         else:
             value = generate_entity(kind, rng, difficulty, address_extended=address_extended).text
         start = cursor

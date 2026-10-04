@@ -27,6 +27,12 @@ _SPEC.loader.exec_module(sbom)
         ("PSF-2.0", False),
         ("GPL-3.0-only", False),
         ("확인 필요", False),
+        # 괄호 우선순위(#500): AND가 걸린 쪽은 GPL을 피할 수 없다
+        ("GPL-3.0-only AND (MIT OR Apache-2.0)", False),
+        ("(MIT OR Apache-2.0) AND BSD-3-Clause", True),
+        ("Apache-2.0 OR BSD-3-Clause", True),  # cryptography
+        ("Apache-2.0 WITH LLVM-exception", False),  # 예외 조항은 사람이 본다
+        ("MIT OR", False),
     ],
 )
 def test_allow_list(expression, allowed):
@@ -80,7 +86,66 @@ def test_desktop_rows_cover_the_whole_lockfile(monkeypatch):
     assert rows["desktop_drop"]["note"] == "직접(런타임)"
 
 
+def test_pub_meta_joins_several_license_tags_with_and(monkeypatch):
+    # 태그가 여럿이면 LICENSE 한 파일에 함께 든 라이선스라 둘 다 지켜야 한다(#634)
+    def fake_fetch(url):
+        if url.endswith("/score"):
+            tags = ["license:apache-2.0", "license:bsd-3-clause", "license:fsf-libre", "license:osi-approved"]
+            return {"tags": tags}
+        return {"pubspec": {"repository": "https://github.com/flutter/packages"}}
+
+    monkeypatch.setattr(sbom, "fetch_json", fake_fetch)
+    license_, _ = sbom.pub_meta("file_selector_android", "0.5.2+8")
+    assert license_ == "Apache-2.0 AND BSD-3-Clause"
+
+
+def test_checked_pub_license_replaces_registry_tag(monkeypatch):
+    # pub.dev 태그는 BSD-3-Clause 하나지만 vector_math 2.2.0 LICENSE에는 zlib 전문도 있다(#634)
+    monkeypatch.setattr(sbom, "pub_meta", lambda name, version: ("BSD-3-Clause", ""))
+    rows = {r["name"]: r for r in sbom.desktop_rows()}
+    assert rows["vector_math"]["license"] == "BSD-3-Clause AND Zlib"
+    assert not sbom.is_allowed(rows["vector_math"]["license"])  # 부록 A-6으로 모인다
+
+
+def test_checked_pub_license_needs_recheck_when_version_moves(monkeypatch):
+    # lock의 버전이 확인한 버전과 다르면 레지스트리 태그로 조용히 돌아가지 않는다
+    monkeypatch.setattr(sbom, "pub_meta", lambda name, version: ("BSD-3-Clause", ""))
+    monkeypatch.setitem(sbom.PUB_LICENSE_CHECKED, "vector_math", ("0.0.1", "BSD-3-Clause AND Zlib"))
+    rows = {r["name"]: r for r in sbom.desktop_rows()}
+    assert rows["vector_math"]["license"] == "확인 필요"
+    assert not sbom.is_allowed(rows["vector_math"]["license"])
+
+
 def test_sbom_has_exactly_one_generated_section():
     text = sbom.SBOM.read_text(encoding="utf-8")
     assert text.count(sbom.BEGIN) == 1 and text.count(sbom.END) == 1
     assert text.index(sbom.BEGIN) < text.index(sbom.END)
+
+
+class _FakeDist:
+    def __init__(self, version, requires):
+        self.version = version
+        self.requires = requires
+
+
+def test_installed_rows_follow_extras_the_parent_requested(monkeypatch):
+    # mcp → pyjwt[crypto] → cryptography → cffi → pycparser. pyjwt의 dev extra는 아무도 요청하지 않았다(#500).
+    dists = {
+        "mcp": _FakeDist("1.0", ["pyjwt[crypto]>=2"]),
+        "pyjwt": _FakeDist("2.0", ['cryptography>=3.4; extra == "crypto"', 'pytest; extra == "dev"']),
+        "cryptography": _FakeDist("46.0", ["cffi>=1.12"]),
+        "cffi": _FakeDist("2.0", ["pycparser"]),
+        "pycparser": _FakeDist("2.22", []),
+    }
+
+    def distribution(name):
+        if name not in dists:
+            raise sbom.metadata.PackageNotFoundError(name)
+        return dists[name]
+
+    monkeypatch.setattr(sbom.metadata, "distribution", distribution)
+    monkeypatch.setattr(sbom, "pypi_meta", lambda name, version: ("MIT", ""))
+
+    names = [r["name"] for r in sbom.installed_rows(["mcp"], skip={"mcp"})]
+
+    assert names == ["cffi", "cryptography", "pycparser", "pyjwt"]

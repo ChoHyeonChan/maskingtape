@@ -69,7 +69,7 @@ class OllamaProbe {
 
   /// core의 name_llm.py DEFAULT_MODEL과 **같은 값을 유지해야 한다**.
   /// 코어가 기본 모델을 바꾸면 여기도 따라와야 한다 — 자동 동기화 수단이 없다(#187과 같은 종류의 문제).
-  static const defaultModel = 'qwen2.5:7b';
+  static const defaultModel = 'hf.co/StayAlive1/maskingtape-name-1.5b-GGUF:Q4_K_M';
 
   final Uri host;
   final String model;
