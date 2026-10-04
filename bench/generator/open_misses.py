@@ -418,10 +418,85 @@ def gen_rrn_trailing_latin(rng: random.Random) -> MissDoc:
                   "rrn_trailing_latin", 640)
 
 
+# ── #655~#658 최근 고친 기능의 주변 모양(#659) ─────────────────────
+
+# core 성씨 사전 밖의 실제 성씨(류·탁·변 등). 이 성씨로 시작하는 이름은 단서를 이어받지 못한다(#655).
+_RARE_SURNAMES = ["류", "탁", "변", "추", "석", "설", "길", "표", "왕", "옥", "맹"]
+
+
+def gen_name_list_newline(rng: random.Random) -> MissDoc:
+    """라벨 뒤 첫 이름은 같은 줄, 나머지는 한 줄에 한 명씩(#655). 첫 이름은 지금도 잡힌다(target 아님)."""
+    label = rng.choice(["참석자", "담당자", "수신인", "보호자"])
+    names = [_name3(rng) for _ in range(rng.choice([2, 3]))]
+    parts: list[Part] = [f"{label}: ", ("name", names[0], False)]
+    for name in names[1:]:
+        parts += ["\n", ("name", name)]
+    return _build(parts, "name_list_newline", 655)
+
+
+def gen_name_list_rare_surname(rng: random.Random) -> MissDoc:
+    """나열한 둘째 이름이 core 성씨 사전 밖의 성씨로 시작한다(#655)."""
+    rare = rng.choice(_RARE_SURNAMES) + "".join(rng.sample(_GIVEN_SYLLABLES, k=2))
+    return _build(
+        [f"{rng.choice(['참석자', '담당자', '보호자'])}: ", ("name", _name3(rng), False), rng.choice([", ", "·"]), ("name", rare)],
+        "name_list_rare_surname",
+        655,
+    )
+
+
+def gen_name_list_roster_label(rng: random.Random) -> MissDoc:
+    """"○○ 명단:" 라벨 뒤 나열(#655). 라벨이 단서 목록에 없어 첫 이름부터 샌다."""
+    label = rng.choice(["참석자", "수강생", "응시자", "수상자"])
+    names = [_name3(rng) for _ in range(rng.choice([2, 3]))]
+    parts: list[Part] = [f"{label} 명단: ", ("name", names[0])]
+    for name in names[1:]:
+        parts += [", ", ("name", name)]
+    return _build(parts, "name_list_roster_label", 655)
+
+
+def gen_address_dong_ho_variants(rng: random.Random) -> MissDoc:
+    """동·호를 하이픈으로·붙여서·호만 쓰거나 층을 영문으로 쓴다(#656)."""
+    stem = rng.choice(_BUILDING_STEMS)
+    dong, ho = rng.randint(101, 120), f"{rng.randint(1, 20)}{rng.randint(1, 9):02d}"
+    value = rng.choice([
+        f"{stem}{rng.choice(['아파트', '빌라', '맨션'])} {dong}-{ho}호",
+        f"{_base_address(rng)} {dong}-{ho}",
+        f"{stem}{rng.choice(['아파트', '빌라', '맨션'])} {dong}동{ho}호",
+        f"{stem}오피스텔 {ho}호",
+        f"{_base_address(rng)} {rng.randint(2, 20)}F",
+    ])
+    return _build(["주소: ", ("address", value), rng.choice(["", "로 보내 주세요."])], "address_dong_ho_variants", 656)
+
+
+def gen_number_label_gap_variants(rng: random.Random) -> MissDoc:
+    """라벨과 검증 숫자가 틀린 번호 사이에 줄바꿈·괄호가 오거나 "사업자 번호"로 띄어 쓴다(#657)."""
+    if rng.random() < 0.5:
+        payload = "4" + "".join(str(rng.randint(0, 9)) for _ in range(14))
+        digits = payload + _wrong_digit(_luhn_check_digit(payload), rng)
+        value = "-".join(digits[i : i + 4] for i in range(0, 16, 4))
+        label, kind, tail = rng.choice([("카드번호\n", "card", ""), ("신용카드\n", "card", ""), ("카드번호(", "card", ")")])
+    else:
+        front9 = "".join(str(rng.randint(0 if i else 1, 9)) for i in range(len(_BIZ_REG_WEIGHTS)))
+        digits = front9 + _wrong_digit(_biz_reg_check_digit(front9), rng)
+        value = f"{digits[:3]}-{digits[3:5]}-{digits[5:]}"
+        label, kind, tail = rng.choice([
+            ("사업자등록번호(", "biz_reg", ")"), ("사업자 번호: ", "biz_reg", ""), ("사업자등록번호\n", "biz_reg", ""),
+        ])
+    return _build([label, (kind, value), tail], "number_label_gap_variants", 657)
+
+
+def gen_birth_date_cue_chulsaeng(rng: random.Random) -> MissDoc:
+    """날짜 뒤에 띄어 쓴 "출생"(#658). 붙여 쓴 "~일생"은 #592가 이미 고쳤다."""
+    year, month, day = rng.randint(1950, 2015), rng.randint(1, 12), rng.randint(1, 28)
+    date = rng.choice([f"{year}년 {month}월 {day}일", f"{year}-{month:02d}-{day:02d}", f"{year}.{month:02d}.{day:02d}"])
+    lead, tail = rng.choice([("", " 출생"), ("", " 출생자"), ("김씨는 ", " 출생으로 확인됐다."), ("(", " 출생)")])
+    return _build([lead, ("birth_date", date), tail], "birth_date_cue_chulsaeng", 658)
+
+
 # core가 고친 이슈. 이 이슈들의 태그는 지금 core가 전부 완전 일치로 잡아야 한다 — 되돌아가면
 # test_open_misses.py가 실패한다. 이슈가 고쳐지면 여기에 번호를 더한다(고쳐도 이 목록을 안 고치면
 # 테스트는 그대로 통과하므로 core PR을 막지 않는다).
-FIXED_ISSUES = frozenset({592, 593, 594, 600, 602, 605, 607})
+FIXED_ISSUES = frozenset({592, 593, 594, 600, 602, 604, 605, 607, 636, 639})
 
 
 MISS_TAGS = {
@@ -450,6 +525,12 @@ MISS_TAGS = {
         gen_rrn_back_after_date_forms,
         gen_rrn_other_dot_like_separator,
         gen_rrn_trailing_latin,
+        gen_name_list_newline,
+        gen_name_list_rare_surname,
+        gen_name_list_roster_label,
+        gen_address_dong_ho_variants,
+        gen_number_label_gap_variants,
+        gen_birth_date_cue_chulsaeng,
     )
 }
 
