@@ -272,6 +272,36 @@ def test_abbreviated_province_with_dong_only_is_over_masked():
     assert [(d.text, d.confidence) for d in found] == [("서울 중구 명동", 0.7)]
 
 
+def test_detects_gu_city_address_without_si_suffix():
+    """일반구가 있는 시 이름은 일상 문서에서 '시'를 떼고도 주소 시작점으로 쓴다."""
+    for text in [
+        "수원 영통구 광교로 107",
+        "성남 분당구 정자일로 95",
+        "청주 흥덕구 가경동 1234",
+        "주소: 수원 영통구 광교로 107",
+        "주소는 고양 일산동구 중앙로 1275",
+    ]:
+        found = detect(text)
+        assert len(found) == 1, f"{text!r} 미탐지"
+        assert found[0].text == text.removeprefix("주소: ").removeprefix("주소는 "), (
+            f"{text!r} 범위 오류: {found[0].text}"
+        )
+
+
+def test_gu_city_address_controls_are_unchanged():
+    assert [d.text for d in detect("수원시 영통구 광교로 107")] == ["수원시 영통구 광교로 107"]
+    assert [d.text for d in detect("서울 강남구 테헤란로 123")] == ["서울 강남구 테헤란로 123"]
+
+
+def test_gu_city_names_without_gu_are_not_addresses():
+    for text in [
+        "수원 삼성",
+        "성남 일화",
+        "고양 국제꽃박람회",
+    ]:
+        assert detect(text) == [], f"{text!r}는 주소가 아니다"
+
+
 # --- #423: 동/도로명 자리에서 구간이 끊기는 부분 유출 ---
 # 이 자리에서 구간이 끊기면 뒤따르는 도로명·건물번호가 원문 그대로 남는다.
 # 주소에서 가장 구체적인 부분이 새므로, 입력 전체가 한 구간으로 잡혀야 한다.
