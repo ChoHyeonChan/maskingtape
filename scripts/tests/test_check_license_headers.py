@@ -53,6 +53,9 @@ def test_target_selection():
     assert not chk.is_target("apps/desktop/windows/runner/fake.dart")  # 생성 파일 폴더는 확장자와 무관하게 제외
     assert not chk.is_target("README.md")
     assert not chk.is_target("apps/web/package.json")
+    # 대문자 확장자도 대상이다(#500)
+    assert chk.is_target("packages/core/maskingtape/OLD.PY")
+    assert chk.is_target("apps/web/src/Legacy.TSX")
 
 
 def test_find_missing_reports_only_tracked_files_without_header(tmp_path):
