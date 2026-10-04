@@ -17,9 +17,11 @@
   color: var(--text-primary);
 }
 
-/* 히어로는 nav바처럼 app-shell의 좌우 여백을 상쇄해 가장자리까지 배경이 번지는 전체 폭
-   섹션이다(디자인 아티팩트의 중앙 정렬 히어로를 그대로 옮김) — 나머지 섹션(탐지 범위·
-   정확도·예제)은 세로로 쌓이는 카드 모양을 그대로 쓴다. */
+/* 히어로는 nav바처럼 app-shell의 좌우 padding을 상쇄해 가장자리까지 배경이 번지는 전체 폭
+   섹션이다(디자인 아티팩트의 중앙 정렬 히어로를 그대로 옮김) — app-shell 자체는 콘텐츠가
+   화면 끝에 붙지 않도록 padding을 그대로 두고, 이 히어로만 그 padding을 상쇄해 배경을
+   가장자리까지 번지게 한다. 나머지 섹션(탐지 범위·정확도·예제)은 세로로 쌓이는 카드 모양을
+   그대로 쓴다. */
 .service-intro {
   margin: -1.1rem -1.75rem 0;
   padding: 3.6rem 1.75rem 3.2rem;
@@ -125,15 +127,6 @@
   font-size: 0.76rem;
 }
 
-.service-intro p.service-intro__disclosure {
-  max-width: 36rem;
-  margin: 1.8rem auto 0;
-  padding-top: 1.2rem;
-  border-top: 1px solid var(--border);
-  font-size: 0.78rem;
-  line-height: 1.55;
-}
-
 .coverage-section__lead,
 .example-gallery__lead {
   margin: 0 0 0.9rem;
@@ -150,6 +143,7 @@
 }
 
 .coverage-section {
+  margin: 0 70px;
   text-align: center;
 }
 

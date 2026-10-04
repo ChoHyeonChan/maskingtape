@@ -63,6 +63,21 @@ _BIRTHDATE_RE = re.compile(
     + r")"
 )
 
+# 날짜 뒤에 오는 생년월일 단서(#592) — "1992년 10월 31일생입니다", "92년 7월 3일생이에요",
+# "2019년 4월 23일에 태어났어요", "1995년 6월 21일이 제 생일이에요"처럼 말로 할 때는 라벨이
+# 날짜보다 먼저 오지 않고, "생"·"태어"·"생일" 같은 단서가 날짜 뒤에 붙는 어순이 더 흔하다.
+# "생"은 뒤에 특정 종결 어미가 없으면 "생산"·"생활"·"생각"·"생기다"·"생명" 같은 낱말의
+# 앞부분과 구별이 안 된다 — 그래서 흔한 종결 어미 화이트리스트를 두고, 그 뒤에 한글이 더
+# 이어지면("생산"의 "산") 실패하도록 (?![가-힣])로 막는다. 세 단서 모두 반복에 상한을 둔다
+# (ReDoS 방지, 위 _BIRTHDATE_RE 주석과 같은 관례).
+_TRAILING_CUE = (
+    r"(?:생(?:이에요|이었|이고|이야|이다|이네요|이죠|입니다|으로)?(?![가-힣])"
+    r"|에\s{0,2}태어"
+    r"|(?:이|가)?\s{0,2}(?:제\s{0,2})?생일)"
+)
+
+_BIRTHDATE_TRAILING_RE = re.compile(r"(?P<date>" + _DATE + r")" + _TRAILING_CUE)
+
 
 def _valid_date(date_str: str) -> bool:
     """날짜 문자열(년·월·일 숫자 3개)이 실제 존재하는 날짜인지 확인한다."""
@@ -92,23 +107,31 @@ class BirthDateDetector(Detector):
     kind = "birth_date"
 
     def detect(self, text: str) -> list[Detection]:
-        """앵커 뒤 날짜 가운데 실제로 있는 날짜만 확신도 0.9로 돌려준다.
+        """앵커(앞) 또는 단서(뒤) 곁의 날짜 가운데 실제로 있는 날짜만 확신도 0.9로 돌려준다.
 
-        구간은 날짜 부분만 잡는다. 앵커('생년월일' 등)는 개인정보가 아니라서 가리지 않는다.
+        구간은 날짜 부분만 잡는다. 앵커·단서('생년월일'·'생'·'태어'·'생일' 등)는 개인정보가
+        아니라서 가리지 않는다. 라벨이 앞에 오든(#493) 뒤에 오든(#592) 식별력은 같으므로
+        확신도는 같은 0.9를 쓴다. 두 정규식이 같은 날짜를 중복으로 잡을 수 있어 스팬으로
+        걸러낸다.
         """
         found: list[Detection] = []
-        for m in _BIRTHDATE_RE.finditer(text):
-            date_text = m.group("date")
-            if not _valid_date(date_text):
-                continue
-            found.append(
-                Detection(
-                    kind=self.kind,
-                    start=m.start("date"),
-                    end=m.end("date"),
-                    text=date_text,
-                    confidence=0.9,
-                    detector=self.__class__.__name__,
+        seen: set[tuple[int, int]] = set()
+        for pattern in (_BIRTHDATE_RE, _BIRTHDATE_TRAILING_RE):
+            for m in pattern.finditer(text):
+                date_text = m.group("date")
+                span = (m.start("date"), m.end("date"))
+                if span in seen or not _valid_date(date_text):
+                    continue
+                seen.add(span)
+                found.append(
+                    Detection(
+                        kind=self.kind,
+                        start=span[0],
+                        end=span[1],
+                        text=date_text,
+                        confidence=0.9,
+                        detector=self.__class__.__name__,
+                    )
                 )
-            )
+        found.sort(key=lambda d: d.start)
         return found
