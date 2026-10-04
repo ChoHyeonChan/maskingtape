@@ -59,14 +59,17 @@ python -m pip install -e "packages/core[bench-baselines]"
 python -m bench.evaluators.compare_open_source_tools bench/datasets/synth_v1.jsonl --report bench/reports/open_source_baselines_v1.md
 ```
 
-500건 기준 실측(#406 발표용 대비표, 2026-10-01, `synth_v1.jsonl`):
+500건 기준 실측(#406 발표용 대비표, `synth_v1.jsonl`). 2026-10-01에 재고, #650으로 정답 라벨이 2건 늘어
+2026-10-04 main `c526000`에서 maskingtape 행을 다시 쟀다:
 
 | tool | precision | recall | F1 | F2 | tp | fp | fn |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| maskingtape-rules | 0.988 | 0.974 | **0.981** | 0.977 | 969 | 12 | 26 |
-| scrubadub | 0.569 | 0.062 | **0.112** | 0.076 | 62 | 47 | 933 |
+| maskingtape-rules | 0.988 | 0.974 | **0.981** | 0.977 | 971 | 12 | 26 |
+| scrubadub | 0.569 | 0.062 | **0.112** | 0.076 | 62 | 47 | 935 |
 
-종류별 표와 매핑표는 `bench/reports/open_source_baselines_v1.md`에 저장돼 있다. Presidio 같은
+scrubadub 행은 다시 돌리지 않았다. #650은 글을 바꾸지 않고 사업자등록번호 정답만 2건 더했고 scrubadub은
+사업자등록번호를 예측하지 않으므로, 예측은 그대로이고 fn만 2 늘어난다(반올림한 비율은 같다). 종류별 표와
+매핑표는 `bench/reports/open_source_baselines_v1.md`에 저장돼 있다(2026-10-01 측정본). Presidio 같은
 무거운 NLP 기반 도구는 후보로 볼 수 있지만, 이 저장소에 비교 기준선으로 넣으려면 설치·모델 다운로드·
 라이선스·로컬 재현 절차가 먼저 안정적으로 정리돼야 한다.
 
@@ -460,7 +463,8 @@ docstring/주석에 명시하고 있다(`email.py`는 상한이 없던 시절 40
 
 ### 결과 (2026-10-01, main `a4db5e2`, 규칙 전용)
 
-이름을 뺀 10종은 미탐·오탐이 없어 이름 행과 전체만 적는다.
+이름을 뺀 10종은 미탐·오탐이 없어 이름 행과 전체만 적는다. 2026-10-04 main `c526000`에서 다시 재도
+아래 칸은 같다(#650으로 사업자등록번호 적중만 v1 2건, v2 1건 늘었다).
 
 | 데이터셋 | 행 | 미탐 | 가려짐 | 부분 유출 | 완전 유출 | 오탐 | 경계 불일치 | 엉뚱한 곳 | 완전 일치 재현율 | 유출 기준 재현율 |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -772,7 +776,7 @@ kind를 차지한다.** 재현해보니 confidence 1.0짜리 rrn이 confidence 0
 |---|---|---|
 | 만드는 법 | `python -m bench.generate_dataset --count 500 --seed 42 --out bench/datasets/synth_v1.jsonl` | 위에 `--address-extended`를 더하고 `--out bench/datasets/synth_v2.jsonl` |
 | 용도 | README·제출 보고서의 정확도 수치(전체 F1 0.981 등)의 근거 | v1이 못 재는 주소 형태의 경계를 잰다 |
-| 기존 수치 | 그대로 | 해당 없음(별도 측정) |
+| 기존 수치 | 그대로(#650에서 라벨 2건 추가, 아래) | 해당 없음(별도 측정, #650에서 라벨 1건 추가) |
 
 **왜 v2가 필요한가**([#431](https://github.com/ChoHyeonChan/maskingtape/issues/431)): core가 #423(PR #427)에서
 "주소가 동/도로명 자리에서 끊겨 건물번호가 새던" 문제를 고쳤는데, v1 생성기는 그 형태를 한 건도 만들지
@@ -797,6 +801,14 @@ v2 주소 59건 중 37건이 새 형태이고 형태별로는 2~8건이다(500�
 `--address-extended`로 `synth_v1.jsonl`에 저장하려 하면 CLI가 거부하며, (3) `test_generate_dataset.py`가
 커밋된 v1·v2를 시드로 재생성해 한 줄이라도 다르면 CI에서 실패시킨다. 생성기를 바꾸는 후속 작업은 v2처럼
 옵션 뒤로 옮기거나, v1을 일부러 갱신할 땐 수치를 함께 갱신해야 한다.
+
+**v1을 일부러 바꾼 기록 — #650(2026-10-04)**: core #607(PR #646)부터 "사업자등록번호"·"사업자번호" 라벨이
+번호 바로 앞에 있으면 체크섬이 틀린 번호도 가린다. 생성기는 그 자리의 사업자번호 모양 오답지를 비개인정보로
+채점해, 엔진이 맞게 가린 것이 오탐으로 집계됐다. 이제 그 오답지에 `biz_reg` 정답 라벨을 붙인다
+(`documents.py`의 `_labeled_distractor_kind`). 이미 뽑은 값으로 판정만 하고 난수를 더 쓰지 않아서, 시드 42로
+다시 만든 v1·v2는 **글이 그대로이고 라벨만 늘었다**(v1 2건, v2 1건). 사업자등록번호 precision은 v1·v2 모두
+1.000, v1 전체는 0.988 / 0.974 / 0.981 / 0.977(P / R / F1 / F2)이다. 라벨과 번호 사이에 조사가 끼는 틀
+("사업자등록번호는 …이며")은 core도 가리지 않으므로 오답지로 남겼다.
 
 ## 표기 변형 평가 세트 — 9/28 이후 막은 누출을 숫자로 보이기 ([#531](https://github.com/ChoHyeonChan/maskingtape/issues/531))
 
@@ -897,8 +909,8 @@ core가 미탐을 더 막아도 점수가 거의 움직이지 않는다. 반대 
 [#600](https://github.com/ChoHyeonChan/maskingtape/issues/600)은 예전에 잡히던 문장
 ("담당자는 ○○○예요")이 새기 시작한 회귀인데 벤치 점수는 그대로였다.
 
-`bench/datasets/open_misses_v1.jsonl`은 core 이슈 13건의 재현 문장과 **같은 모양**으로 새로
-쓴 합성 문장 360건(18개 태그 × 20건)이다. 이슈 본문 문장을 복사하지 않고 값만 시드로 새로
+`bench/datasets/open_misses_v1.jsonl`은 core 이슈 18건의 재현 문장과 **같은 모양**으로 새로
+쓴 합성 문장 460건(23개 태그 × 20건)이다. 처음(#610)에는 13건 360건이었고, #653에서 #636~#640을 더했다. 이슈 본문 문장을 복사하지 않고 값만 시드로 새로
 뽑았다. 조사는 받침에 맞춰 고른다(이/가, 은/는, 으로/로).
 
 ```bash
@@ -914,12 +926,15 @@ python -m bench.evaluators.compare_open_misses_across_commits bench/datasets/ope
 - 라벨의 `target: false`는 "정답이지만 지금도 잡히는 자리"다(나열의 첫 이름, 다시 나오는
   이름의 첫 언급). 재현율은 `target` 라벨로만 센다 — 넣으면 시작 수치가 부풀려진다.
   `target`이 없으면 대상이다.
-- target 라벨마다 셋으로 나눈다. **적중**은 예측과 종류·위치가 완전히 같을 때, **부분**은
-  겹치는 예측은 있지만 완전히 같지 않을 때(주소가 번지까지만 가려짐), **미탐**은 겹치는
-  예측이 없을 때다. 재현율은 적중만 센다 — 부분은 남은 조각이 곧 유출이다.
+- target 라벨마다 넷으로 나눈다. **적중**은 예측과 종류·위치가 완전히 같을 때, **가려짐**은
+  모든 글자를 덮었지만 경계나 종류만 다를 때(#653), **부분**은 일부 글자만 덮었을 때(주소가
+  번지까지만 가려짐), **미탐**은 겹치는 예측이 없을 때다. 재현율은 적중만 센다 — 부분은 남은
+  조각이 곧 유출이다. 유출 기준 재현율((적중 + 가려짐) / 전체)도 함께 낸다.
+- core가 고친 이슈는 `FIXED_ISSUES`에 넣는다. 그 이슈의 태그는 지금 core가 전부 완전 일치로
+  잡아야 한다는 테스트가 있어, 되돌아가면 CI가 실패한다(안 고친 태그는 보지 않는다).
 - 오탐은 어떤 정답 라벨과도 겹치지 않는 예측만 센다.
 
-### 결과 (2026-10-01, main `73d09c8`, 규칙 전용)
+### 시작 수치 (2026-10-01, main `73d09c8`, 규칙 전용)
 
 | core 이슈 | 태그 | 재현율 | 적중 | 부분 | 미탐 |
 |---|---|---|---|---|---|
@@ -947,6 +962,39 @@ python -m bench.evaluators.compare_open_misses_across_commits bench/datasets/ope
 남는다. #606은 주소 단서가 있으면 구부터 가려 시 이름만 남고(부분 10건), 단서가 없으면
 통째로 남는다(미탐 10건). #594의 부분 6건은 지역 이름 뒤 숫자 일부가 다른 종류(전화 등)로
 우연히 잡힌 경우다.
+
+### 지금 수치 (2026-10-04, main `c526000`, 규칙 전용)
+
+core가 이 세트의 이슈를 하나씩 고치면서 바뀐 수치다. "시작"은 그 태그를 세트에 넣었을 때의
+재현율이다(#636~#640은 #653에서 넣은 `6b54a75` 기준).
+
+| core 이슈 | 태그 | 시작 | 지금 | 상태 |
+|---|---|---|---|---|
+| [#589](https://github.com/ChoHyeonChan/maskingtape/issues/589) "A에서 B로 변경" | name_change_log_second | 0.000 | 0.000 | 열림 |
+| [#592](https://github.com/ChoHyeonChan/maskingtape/issues/592) 날짜 뒤 생년월일 단서 | birth_date_cue_after | 0.000 | **1.000** | 고침(이슈는 열림) |
+| [#593](https://github.com/ChoHyeonChan/maskingtape/issues/593) 건물명 + 동·호만 | address_building_dong_ho_only | 0.000 | **1.000** | 고침 (PR #624) |
+| [#594](https://github.com/ChoHyeonChan/maskingtape/issues/594) 지역 이름 운전면허 | driver_license_region_name | 0.000 | **1.000** | 고침(이슈는 열림) |
+| [#600](https://github.com/ChoHyeonChan/maskingtape/issues/600) 목록에 없는 어미 | name_unlisted_ending | 0.000 | **1.000** | 고침 (PR #620) |
+| [#601](https://github.com/ChoHyeonChan/maskingtape/issues/601) 두 글자 이름 + 직함 | name_two_syllable_title | 0.000 | 0.000 | 열림 |
+| [#602](https://github.com/ChoHyeonChan/maskingtape/issues/602) 나열한 이름 | name_list_after_label | 0.000 | **1.000** | 고침 (PR #642) |
+| [#603](https://github.com/ChoHyeonChan/maskingtape/issues/603) 단서 어휘 (태그 3개) | name_cue_* | 0.000 | 0.000 | PR #647 리뷰 중 |
+| [#604](https://github.com/ChoHyeonChan/maskingtape/issues/604) 이름 뒤 괄호 | name_paren_after | 0.000 | **1.000** | 고침 (PR #651) |
+| [#605](https://github.com/ChoHyeonChan/maskingtape/issues/605) 주소 꼬리 (태그 3개) | address_tail_* | 0.000 | **1.000** | 고침 (PR #624) |
+| [#606](https://github.com/ChoHyeonChan/maskingtape/issues/606) "시"를 뗀 시 이름 | address_city_without_si | 0.000 | 0.000 | 열림 (부분 10, 미탐 10) |
+| [#607](https://github.com/ChoHyeonChan/maskingtape/issues/607) 라벨 + 틀린 검증 숫자 (태그 2개) | *_label_bad_checksum | 0.000 | **1.000** | 고침 (PR #646, 이슈는 열림) |
+| [#608](https://github.com/ChoHyeonChan/maskingtape/issues/608) 다시 나오는 이름 | name_repeat_without_cue | 0.000 | 0.000 | 열림 |
+| [#636](https://github.com/ChoHyeonChan/maskingtape/issues/636) 가운뎃점으로 나눈 번호 | number_middle_dot_separator | 0.000 | **1.000** | 고침 (PR #649) |
+| [#637](https://github.com/ChoHyeonChan/maskingtape/issues/637) 날짜 뒤 일부만 가린 뒷자리 | rrn_partial_back_after_date | 0.000 | 0.000 | 열림 (부분 2, 미탐 18) |
+| [#638](https://github.com/ChoHyeonChan/maskingtape/issues/638) 날짜 표기 + 뒷자리 | rrn_back_after_date_forms | 0.000 | 0.000 | 열림 (가려짐 1, 부분 19) |
+| [#639](https://github.com/ChoHyeonChan/maskingtape/issues/639) 다른 점 닮은꼴 | rrn_other_dot_like_separator | 0.000 | **1.000** | 고침 (PR #649) |
+| [#640](https://github.com/ChoHyeonChan/maskingtape/issues/640) 뒤에 영문이 붙은 주민번호 | rrn_trailing_latin | 0.000 | 0.000 | 열림 |
+| **전체 23개 태그** | | **0.000** | **0.552** | 적중 271 · 가려짐 1 · 부분 31 · 미탐 188 |
+
+- **고친 10건(#592·#593·#594·#600·#602·#604·#605·#607·#636·#639)의 태그 13개가 전부 1.000이다.**
+  이 이슈들은 `FIXED_ISSUES`에 넣어 되돌아가면 CI가 실패하게 했다(#604는 PR #660에서 넣는다).
+- 남은 미탐은 이름(#589·#601·#603·#608)과 주민번호 경계(#637·#638·#640), 시 이름 축약(#606)이다.
+- 정답과 안 겹치는 오탐은 그대로 0건이다.
+- #655~#658 태그(120건)는 PR #660에서 더한다.
 
 ### 회귀를 숫자로 보기 — #600 (`b1c79b5` → `a4db5e2`)
 
