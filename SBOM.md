@@ -93,34 +93,37 @@ PyPI 코어 패키지(`maskingtape`)는 런타임 외부 의존성이 없어 표
 | anyio | 4.15.1 | MIT | https://github.com/agronholm/anyio | 경로: maskingtape-mcp → mcp → anyio |
 | attrs | 26.1.0 | MIT | https://github.com/python-attrs/attrs | 경로: maskingtape-mcp → mcp → jsonschema → attrs |
 | certifi | 2026.7.22 | MPL-2.0 | https://github.com/certifi/python-certifi | 경로: maskingtape-mcp → mcp → httpx → certifi |
+| cffi | 2.1.1 | MIT-0 | https://github.com/python-cffi/cffi | 경로: maskingtape-mcp → mcp → pyjwt → cryptography → cffi. 조건: `platform_python_implementation != "PyPy"` |
 | click | 8.5.0 | BSD-3-Clause | https://github.com/pallets/click/ | 경로: maskingtape-mcp → mcp → uvicorn → click |
+| cryptography | 50.0.2 | Apache-2.0 OR BSD-3-Clause | https://github.com/pyca/cryptography/ | 경로: maskingtape-mcp → mcp → pyjwt → cryptography. 조건: `extra == "crypto"` |
 | exceptiongroup | - | - |  | 이 환경에 설치되지 않음. 조건: `python_version < "3.11"` |
 | h11 | 0.16.0 | MIT | https://github.com/python-hyper/h11 | 경로: maskingtape-mcp → mcp → uvicorn → h11 |
 | httpcore | 1.0.9 | BSD-3-Clause | https://github.com/encode/httpcore | 경로: maskingtape-mcp → mcp → httpx → httpcore |
 | httpx | 0.28.1 | BSD-3-Clause | https://github.com/encode/httpx | 경로: maskingtape-mcp → mcp → httpx |
 | httpx-sse | 0.4.3 | MIT | https://github.com/florimondmanca/httpx-sse | 경로: maskingtape-mcp → mcp → httpx-sse |
-| idna | 3.19 | BSD-3-Clause | https://github.com/kjd/idna | 경로: maskingtape-mcp → mcp → anyio → idna |
+| idna | 3.20 | BSD-3-Clause | https://github.com/kjd/idna | 경로: maskingtape-mcp → mcp → anyio → idna |
 | jsonschema | 4.26.0 | MIT | https://github.com/python-jsonschema/jsonschema | 경로: maskingtape-mcp → mcp → jsonschema |
 | jsonschema-specifications | 2025.9.1 | MIT | https://github.com/python-jsonschema/jsonschema-specifications | 경로: maskingtape-mcp → mcp → jsonschema → jsonschema-specifications |
 | mcp | 1.30.0 | MIT | https://github.com/modelcontextprotocol/python-sdk | 직접 의존성 |
+| pycparser | 3.0 | BSD-3-Clause | https://github.com/eliben/pycparser | 경로: maskingtape-mcp → mcp → pyjwt → cryptography → cffi → pycparser. 조건: `implementation_name != "PyPy"` |
 | pydantic | 2.13.5 | MIT | https://github.com/pydantic/pydantic | 경로: maskingtape-mcp → mcp → pydantic. 조건: `python_version < "3.14"` |
 | pydantic-core | 2.46.5 | MIT | https://github.com/pydantic/pydantic/tree/main/pydantic-core | 경로: maskingtape-mcp → mcp → pydantic → pydantic-core |
 | pydantic-settings | 2.15.0 | MIT | https://github.com/pydantic/pydantic-settings | 경로: maskingtape-mcp → mcp → pydantic-settings |
-| pyjwt | 2.14.0 | MIT | https://github.com/jpadilla/pyjwt | 경로: maskingtape-mcp → mcp → pyjwt |
-| python-dotenv | 1.2.3 | BSD-3-Clause | https://github.com/theskumar/python-dotenv | 경로: maskingtape-mcp → mcp → pydantic-settings → python-dotenv |
+| pyjwt | 2.15.1 | MIT | https://github.com/jpadilla/pyjwt | 경로: maskingtape-mcp → mcp → pyjwt |
+| python-dotenv | 1.2.4 | BSD-3-Clause | https://github.com/theskumar/python-dotenv | 경로: maskingtape-mcp → mcp → pydantic-settings → python-dotenv |
 | python-multipart | 0.0.32 | Apache-2.0 | https://github.com/Kludex/python-multipart | 경로: maskingtape-mcp → mcp → python-multipart |
 | pywin32 | 312 | PSF-2.0 | https://github.com/mhammond/pywin32 | 경로: maskingtape-mcp → mcp → pywin32. 조건: `sys_platform == "win32" and python_version < "3.14"` |
 | referencing | 0.37.0 | MIT | https://github.com/python-jsonschema/referencing | 경로: maskingtape-mcp → mcp → jsonschema → referencing |
 | rpds-py | 2026.6.3 | MIT | https://github.com/crate-py/rpds | 경로: maskingtape-mcp → mcp → jsonschema → rpds-py |
-| sse-starlette | 3.4.11 | BSD-3-Clause | https://github.com/sysid/sse-starlette | 경로: maskingtape-mcp → mcp → sse-starlette |
-| starlette | 1.6.0 | BSD-3-Clause | https://github.com/Kludex/starlette | 경로: maskingtape-mcp → mcp → starlette. 조건: `python_version < "3.14"` |
+| sse-starlette | 3.5.0 | BSD-3-Clause | https://github.com/sysid/sse-starlette | 경로: maskingtape-mcp → mcp → sse-starlette |
+| starlette | 1.7.0 | BSD-3-Clause | https://github.com/Kludex/starlette | 경로: maskingtape-mcp → mcp → starlette. 조건: `python_version < "3.14"` |
 | typing-extensions | 4.16.0 | PSF-2.0 | https://github.com/python/typing_extensions | 경로: maskingtape-mcp → mcp → typing-extensions |
 | typing-inspection | 0.4.4 | MIT | https://github.com/pydantic/typing-inspection | 경로: maskingtape-mcp → mcp → typing-inspection |
-| uvicorn | 0.53.0 | BSD-3-Clause | https://github.com/Kludex/uvicorn | 경로: maskingtape-mcp → mcp → uvicorn. 조건: `sys_platform != "emscripten"` |
+| uvicorn | 0.54.0 | BSD-3-Clause | https://github.com/Kludex/uvicorn | 경로: maskingtape-mcp → mcp → uvicorn. 조건: `sys_platform != "emscripten"` |
 
 ### A-4. 데스크톱 앱 (Dart·Flutter, 소스로 배포, 빌드할 때 받음)
 
-`apps/desktop/pubspec.lock` 전체다. 전이 의존성에는 `flutter_test`·`flutter_lints`가 끌어오는 개발용 패키지도 섞여 있다. 라이선스는 pub.dev가 각 패키지의 LICENSE에서 판별한 값이다.
+`apps/desktop/pubspec.lock` 전체다. 전이 의존성에는 `flutter_test`·`flutter_lints`가 끌어오는 개발용 패키지도 섞여 있다. 라이선스는 pub.dev가 각 패키지의 LICENSE에서 판별한 값이다. pub.dev가 놓친 것은 그 버전의 LICENSE를 직접 열어 확인한 값으로 바꿨다(vector_math).
 
 | 패키지 | 버전 | 라이선스 | 저장소 | 비고 |
 |---|---|---|---|---|
@@ -135,7 +138,7 @@ PyPI 코어 패키지(`maskingtape`)는 런타임 외부 의존성이 없어 표
 | desktop_drop | 0.7.1 | Apache-2.0 | https://github.com/MixinNetwork/flutter-plugins/tree/main/packages/desktop_drop | 직접(런타임) |
 | fake_async | 1.3.3 | Apache-2.0 | https://github.com/dart-lang/test/tree/master/pkgs/fake_async | 전이 |
 | file_selector | 1.1.0 | BSD-3-Clause | https://github.com/flutter/packages/tree/main/packages/file_selector/file_selector | 직접(런타임) |
-| file_selector_android | 0.5.2+8 | Apache-2.0 OR BSD-3-Clause | https://github.com/flutter/packages/tree/main/packages/file_selector/file_selector_android | 전이 |
+| file_selector_android | 0.5.2+8 | Apache-2.0 AND BSD-3-Clause | https://github.com/flutter/packages/tree/main/packages/file_selector/file_selector_android | 전이 |
 | file_selector_ios | 0.5.3+5 | BSD-3-Clause | https://github.com/flutter/packages/tree/main/packages/file_selector/file_selector_ios | 전이 |
 | file_selector_linux | 0.9.4 | BSD-3-Clause | https://github.com/flutter/packages/tree/main/packages/file_selector/file_selector_linux | 전이 |
 | file_selector_macos | 0.9.5 | BSD-3-Clause | https://github.com/flutter/packages/tree/main/packages/file_selector/file_selector_macos | 전이 |
@@ -166,7 +169,7 @@ PyPI 코어 패키지(`maskingtape`)는 런타임 외부 의존성이 없어 표
 | test_api | 0.7.11 | BSD-3-Clause | https://github.com/dart-lang/test/tree/master/pkgs/test_api | 전이 |
 | typed_data | 1.4.0 | BSD-3-Clause | https://github.com/dart-lang/core/tree/main/pkgs/typed_data | 전이 |
 | universal_platform | 1.1.0 | MIT | https://github.com/gskinnerTeam/flutter-universal-platform | 전이 |
-| vector_math | 2.2.0 | BSD-3-Clause | https://github.com/google/vector_math.dart | 전이 |
+| vector_math | 2.2.0 | BSD-3-Clause AND Zlib | https://github.com/google/vector_math.dart | 전이 |
 | vm_service | 15.2.0 | BSD-3-Clause | https://github.com/dart-lang/sdk/tree/main/pkg/vm_service | 전이 |
 | web | 1.1.1 | BSD-3-Clause | https://github.com/dart-lang/web | 전이 |
 
@@ -188,6 +191,7 @@ Python 개발 도구(pytest·ruff·httpx2와 그 전이, Python 3.13.2, Windows)
 | certifi | 2026.7.22 | MPL-2.0 | https://github.com/certifi/python-certifi | MCP 서버. 경로: maskingtape-mcp → mcp → httpx → certifi |
 | pywin32 | 312 | PSF-2.0 | https://github.com/mhammond/pywin32 | MCP 서버. 경로: maskingtape-mcp → mcp → pywin32. 조건: `sys_platform == "win32" and python_version < "3.14"` |
 | typing-extensions | 4.16.0 | PSF-2.0 | https://github.com/python/typing_extensions | MCP 서버. 경로: maskingtape-mcp → mcp → typing-extensions |
+| vector_math | 2.2.0 | BSD-3-Clause AND Zlib | https://github.com/google/vector_math.dart | 데스크톱 앱. 전이 |
 | lightningcss | 1.33.0 | MPL-2.0 |  | 개발 도구(npm). 경로: vite → lightningcss |
 | lightningcss-android-arm64 | 1.33.0 | MPL-2.0 |  | 개발 도구(npm). 경로: vite → lightningcss → lightningcss-android-arm64 |
 | lightningcss-darwin-arm64 | 1.33.0 | MPL-2.0 |  | 개발 도구(npm). 경로: vite → lightningcss → lightningcss-darwin-arm64 |
@@ -223,12 +227,28 @@ Python 개발 도구(pytest·ruff·httpx2와 그 전이, Python 3.13.2, Windows)
 - 우리는 두 패키지를 재배포하지 않는다. REST API 서버에서는 공개 데모 서버에 설치될 뿐이고, MCP 서버는 사용자가 설치할 때 각자 받는다.
 - 결론: **의무 없음.**
 
+### vector_math (BSD-3-Clause AND Zlib) — 데스크톱 앱
+
+- **직접 의존이 아니다.** `apps/desktop/pubspec.lock`에 전이 의존성으로 들어 있고, 우리 Dart 코드는 vector_math를 import하지 않는다.
+- `LICENSE` 하나에 두 라이선스 전문이 함께 있다. Google(2015)의 BSD-3-Clause와 Andrew Magill(2013)의 zlib이다. pub.dev 태그는 BSD-3-Clause 하나뿐이라 생성기가 놓쳤다. OpenUP 사전 검증보고서(2026-10-01)가 두 라이선스로 판정해서, pub.dev에서 받은 2.2.0 아카이브를 열어 확인했다(2026-10-03, #634). 생성기는 이 결과를 `PUB_LICENSE_CHECKED`에 버전과 함께 적어 두고, lock의 버전이 바뀌면 「확인 필요」로 표시한다.
+- **zlib은 OSI 승인 퍼미시브 라이선스**다(SPDX 라이선스 목록 3.29). 카피레프트 조항이 없다. 조건은 셋이다. 원작자를 속이지 않는다, 수정한 소스는 수정했다고 밝힌다, 소스를 배포할 때 고지를 지우지 않는다. 제품 문서에 출처를 적는 것은 권장이고 의무가 아니다.
+- 우리는 vector_math를 수정하지 않고 소스를 재배포하지도 않는다. 데스크톱 앱은 소스로 배포되고, 빌드할 때 pub이 받아 온다.
+- 결론: **의무 없음.** 설치 파일로 배포하게 되면 BSD-3-Clause의 바이너리 고지 조건이 생기므로, 앱의 라이선스 화면에 이 고지가 들어가는지 그때 확인한다.
+
 ### lightningcss 계열 (MPL-2.0), lru-cache (BlueOak-1.0.0), mdn-data (CC0-1.0) — 개발 도구
 
 - 셋 다 웹 데모의 **빌드·테스트 도구**(vite, jsdom)가 끌어오는 패키지라 **배포물에 포함되지 않는다.** 빌드 결과물(`apps/web/dist/`)에 이 패키지들의 코드가 없다. CSS에 남는 `--lightningcss-light`·`--lightningcss-dark`는 lightningcss가 CSS를 변환하면서 붙인 변수 이름이다(2026-09-17 빌드로 확인).
 - lightningcss는 빌드할 때 CSS를 변환하는 도구로만 실행된다. MPL-2.0은 파일 단위 카피레프트라, 수정 없이 도구로 쓰는 한 우리 코드에 영향이 없다.
 - BlueOak-1.0.0은 배포할 때 라이선스 문구를 함께 전달하는 조건의 퍼미시브 라이선스이고, CC0-1.0은 퍼블릭 도메인 헌정이다. 둘 다 배포하지 않으므로 해당 조건이 생기지 않는다.
 - 결론: **배포물 미포함, 의무 없음.**
+
+### cffi (MIT-0), cryptography (Apache-2.0 OR BSD-3-Clause) — MCP 서버
+
+- 부록 A-6에는 없지만(생성기가 허용으로 판정), 팀 허용 목록의 표기(MIT·Apache-2.0·BSD·ISC)와 글자가 달라 근거를 남긴다(#500).
+- **직접 의존이 아니다.** mcp가 `pyjwt[crypto]`로 요청한 extra를 따라 cryptography → cffi → pycparser가 설치된다. 생성기가 extra 요구사항을 따라가지 않아 이번 수정 전까지 부록 A에서 빠져 있었다.
+- MIT-0은 MIT에서 "저작권·허가 고지를 사본에 포함해야 한다"는 조건까지 뺀 라이선스다(OSI 승인). MIT보다 조건이 적으므로 MIT를 허용하는 팀 기준을 그대로 만족한다.
+- cryptography는 Apache-2.0과 BSD-3-Clause 중 하나를 고르는 이중 라이선스이고, 둘 다 허용 목록 안이다.
+- 결론: **허용 목록 안, 의무 없음.**
 
 ## 부록 C: AI 모델 상세 (Qwen2.5-7B-Instruct)
 
