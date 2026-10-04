@@ -72,7 +72,7 @@ print(result.detections)   # [Detection(kind='rrn', start=5, end=19, ...)]
 문맥까지 보려면 **로컬 Ollama**를 띄우고 `--llm`을 준다 (외부 API 호출 없음):
 
 ```bash
-ollama pull qwen2.5:7b       # Apache-2.0 (Qwen2.5는 3B·72B만 비상업 제한이라 7B를 쓴다)
+ollama pull hf.co/StayAlive1/maskingtape-name-1.5b-GGUF:Q4_K_M   # 우리가 학습한 1.5B 모델(986MB, Apache-2.0)
 maskingtape --llm --strategy label "작성자 정보 참고: 최지훈 담당자(010-1234-5678)"
 # → 작성자 정보 참고: [이름] 담당자([전화번호])   ← '정보'는 오탐하지 않고 '최지훈'만 잡는다
 ```
