@@ -558,23 +558,23 @@
 {"text": "생년월일 20050307-4338*** 기재", "labels": [{"kind": "rrn", "start": 5, "end": 21}], "difficulty": "open_miss", "miss_tag": "rrn_partial_back_after_date", "issue": 637}
 {"text": "주민번호 19560205-1421*** 기재", "labels": [{"kind": "rrn", "start": 5, "end": 21}], "difficulty": "open_miss", "miss_tag": "rrn_partial_back_after_date", "issue": 637}
 {"text": "생년월일 20031227-40 기재", "labels": [{"kind": "rrn", "start": 5, "end": 16}], "difficulty": "open_miss", "miss_tag": "rrn_partial_back_after_date", "issue": 637}
-{"text": "260116-2578621A 확인", "labels": [{"kind": "rrn", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "970503-1426937B", "labels": [{"kind": "rrn", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "주민번호 000819-2786467Y 확인", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "주민번호 520217-1893341X 확인", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "주민번호 470620-2256265Y", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "020117-4035733Y 확인", "labels": [{"kind": "rrn", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "주민번호 040705-4677150Y 확인", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "450513-2736857X", "labels": [{"kind": "rrn", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "011122-4967846B 확인", "labels": [{"kind": "rrn", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "주민번호 030217-3327190X 확인", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "주민번호 050708-3170337A", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "주민번호 520809-2390353A", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "주민번호 050508-3837748A 확인", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "주민번호 000420-3933871A", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "020619-4967851A", "labels": [{"kind": "rrn", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "080915-3331737Z", "labels": [{"kind": "rrn", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "주민번호 041102-4811570Y 확인", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "주민번호 580422-1378379Z", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "주민번호 090107-4787759Y", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "280210-1102473A", "labels": [{"kind": "rrn", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "260116-2578621A 확인", "labels": [{"kind": "rrn", "start": 0, "end": 15}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "970503-1426937B", "labels": [{"kind": "rrn", "start": 0, "end": 15}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "주민번호 000819-2786467Y 확인", "labels": [{"kind": "rrn", "start": 5, "end": 20}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "주민번호 520217-1893341X 확인", "labels": [{"kind": "rrn", "start": 5, "end": 20}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "주민번호 470620-2256265Y", "labels": [{"kind": "rrn", "start": 5, "end": 20}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "020117-4035733Y 확인", "labels": [{"kind": "rrn", "start": 0, "end": 15}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "주민번호 040705-4677150Y 확인", "labels": [{"kind": "rrn", "start": 5, "end": 20}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "450513-2736857X", "labels": [{"kind": "rrn", "start": 0, "end": 15}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "011122-4967846B 확인", "labels": [{"kind": "rrn", "start": 0, "end": 15}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "주민번호 030217-3327190X 확인", "labels": [{"kind": "rrn", "start": 5, "end": 20}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "주민번호 050708-3170337A", "labels": [{"kind": "rrn", "start": 5, "end": 20}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "주민번호 520809-2390353A", "labels": [{"kind": "rrn", "start": 5, "end": 20}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "주민번호 050508-3837748A 확인", "labels": [{"kind": "rrn", "start": 5, "end": 20}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "주민번호 000420-3933871A", "labels": [{"kind": "rrn", "start": 5, "end": 20}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "020619-4967851A", "labels": [{"kind": "rrn", "start": 0, "end": 15}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "080915-3331737Z", "labels": [{"kind": "rrn", "start": 0, "end": 15}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "주민번호 041102-4811570Y 확인", "labels": [{"kind": "rrn", "start": 5, "end": 20}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "주민번호 580422-1378379Z", "labels": [{"kind": "rrn", "start": 5, "end": 20}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "주민번호 090107-4787759Y", "labels": [{"kind": "rrn", "start": 5, "end": 20}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "280210-1102473A", "labels": [{"kind": "rrn", "start": 0, "end": 15}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}

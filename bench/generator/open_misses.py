@@ -411,10 +411,16 @@ def gen_rrn_other_dot_like_separator(rng: random.Random) -> MissDoc:
 
 
 def gen_rrn_trailing_latin(rng: random.Random) -> MissDoc:
-    """주민등록번호 바로 뒤에 영문 한 글자가 붙는다(#640). 정답은 번호 14자이고 영문은 넣지 않는다."""
+    """주민등록번호 바로 뒤에 영문 한 글자가 붙는다(#640).
+
+    정답 구간은 뒤 영문 글자까지다. core가 #640을 고치며(PR #668) 번호에 붙은 영문 한 글자를 번호
+    구간에 넣어 함께 가리기로 했다 — 더 가리는 쪽이라 안전하다. 난수는 예전과 같은 순서로 쓰므로 글은
+    그대로이고 라벨 끝만 한 글자 늘어난다.
+    """
     _, front, back = _rrn(rng)
     lead = rng.choice(["주민번호 ", ""])
-    return _build([lead, ("rrn", f"{front}-{back}"), rng.choice("ABXYZ"), rng.choice(["", " 확인"])],
+    letter = rng.choice("ABXYZ")
+    return _build([lead, ("rrn", f"{front}-{back}{letter}"), rng.choice(["", " 확인"])],
                   "rrn_trailing_latin", 640)
 
 
@@ -496,7 +502,7 @@ def gen_birth_date_cue_chulsaeng(rng: random.Random) -> MissDoc:
 # core가 고친 이슈. 이 이슈들의 태그는 지금 core가 전부 완전 일치로 잡아야 한다 — 되돌아가면
 # test_open_misses.py가 실패한다. 이슈가 고쳐지면 여기에 번호를 더한다(고쳐도 이 목록을 안 고치면
 # 테스트는 그대로 통과하므로 core PR을 막지 않는다).
-FIXED_ISSUES = frozenset({592, 593, 594, 600, 602, 604, 605, 607, 636, 639})
+FIXED_ISSUES = frozenset({592, 593, 594, 600, 602, 603, 604, 605, 607, 636, 639, 640})
 
 
 MISS_TAGS = {
