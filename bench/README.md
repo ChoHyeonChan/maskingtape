@@ -20,6 +20,7 @@ generator/
 generate_dataset.py  # CLI — JSONL 데이터셋 생성
 generate_attacks.py  # CLI — 프롬프트 공격 골든셋(#549) 생성 (generator/attacks.py)
 generate_open_misses.py  # CLI — 열린 미탐 세트(#610) 생성 (generator/open_misses.py)
+generate_doc_types.py  # CLI — 문서 성격별 이름 세트(#661) 생성 (generator/doc_types.py)
 evaluators/           # 평가 도구 모음 — "무엇을 평가하는가"별로 파일 하나
   evaluate.py            # CLI — core Pipeline.scan() 결과 vs 정답 → precision/recall/F1/F2 리포트 (종류별+난이도별)
   error_breakdown.py     # evaluate.py의 미탐·오탐을 유출 기준(가려짐/부분 유출/완전 유출, 경계 불일치/엉뚱한 곳)으로 다시 나눔 (#612)
@@ -30,6 +31,7 @@ evaluators/           # 평가 도구 모음 — "무엇을 평가하는가"별�
   compare_open_source_tools.py # CLI — 로컬 오픈소스 PII 도구와 같은 데이터·채점기로 정확도 비교
   evaluate_attacks.py    # CLI — 프롬프트 공격 골든셋을 규칙 / LLM 단독 / 하이브리드 이름 재현율로 채점 (#549)
   evaluate_open_misses.py  # CLI — 열린 미탐 세트를 core 이슈별·태그별 재현율로 채점 (#610)
+  evaluate_doc_types.py  # CLI — 문서 성격별 이름 세트를 문서 종류별 이름·전체 지표로 채점 (#661)
 datasets/            # 생성된 평가셋 (정답 라벨 포함) — synth_v1(제출 수치 근거)·synth_v2(주소 확장)
 reports/             # evaluate.py --report로 저장한 마크다운 리포트 (결과보고서 첨부용)
 tests/               # 생성기·평가 로직 단위 테스트
@@ -909,8 +911,9 @@ core가 미탐을 더 막아도 점수가 거의 움직이지 않는다. 반대 
 [#600](https://github.com/ChoHyeonChan/maskingtape/issues/600)은 예전에 잡히던 문장
 ("담당자는 ○○○예요")이 새기 시작한 회귀인데 벤치 점수는 그대로였다.
 
-`bench/datasets/open_misses_v1.jsonl`은 core 이슈 18건의 재현 문장과 **같은 모양**으로 새로
-쓴 합성 문장 460건(23개 태그 × 20건)이다. 처음(#610)에는 13건 360건이었고, #653에서 #636~#640을 더했다. 이슈 본문 문장을 복사하지 않고 값만 시드로 새로
+`bench/datasets/open_misses_v1.jsonl`은 core 이슈 24건의 재현 문장과 **같은 모양**으로 새로
+쓴 합성 문장 620건(31개 태그 × 20건)이다. 처음(#610)에는 13건 360건이었고, #653에서 #636~#640을,
+#659에서 #655~#658을, #680에서 #685·#686을 더했다. 이슈 본문 문장을 복사하지 않고 값만 시드로 새로
 뽑았다. 조사는 받침에 맞춰 고른다(이/가, 은/는, 으로/로).
 
 ```bash
@@ -963,10 +966,10 @@ python -m bench.evaluators.compare_open_misses_across_commits bench/datasets/ope
 통째로 남는다(미탐 10건). #594의 부분 6건은 지역 이름 뒤 숫자 일부가 다른 종류(전화 등)로
 우연히 잡힌 경우다.
 
-### 지금 수치 (2026-10-04, main `c526000`, 규칙 전용)
+### 지금 수치 (2026-10-05, main `5744f73`, 규칙 전용)
 
 core가 이 세트의 이슈를 하나씩 고치면서 바뀐 수치다. "시작"은 그 태그를 세트에 넣었을 때의
-재현율이다(#636~#640은 #653에서 넣은 `6b54a75` 기준).
+재현율이다(#636~#640은 #653에서 넣은 `6b54a75`, #655~#658은 #659에서 넣은 `911c27c`, #685·#686은 `5744f73` 기준).
 
 | core 이슈 | 태그 | 시작 | 지금 | 상태 |
 |---|---|---|---|---|
@@ -977,24 +980,35 @@ core가 이 세트의 이슈를 하나씩 고치면서 바뀐 수치다. "시작
 | [#600](https://github.com/ChoHyeonChan/maskingtape/issues/600) 목록에 없는 어미 | name_unlisted_ending | 0.000 | **1.000** | 고침 (PR #620) |
 | [#601](https://github.com/ChoHyeonChan/maskingtape/issues/601) 두 글자 이름 + 직함 | name_two_syllable_title | 0.000 | 0.000 | 열림 |
 | [#602](https://github.com/ChoHyeonChan/maskingtape/issues/602) 나열한 이름 | name_list_after_label | 0.000 | **1.000** | 고침 (PR #642) |
-| [#603](https://github.com/ChoHyeonChan/maskingtape/issues/603) 단서 어휘 (태그 3개) | name_cue_* | 0.000 | 0.000 | PR #647 리뷰 중 |
+| [#603](https://github.com/ChoHyeonChan/maskingtape/issues/603) 단서 어휘 (태그 3개) | name_cue_* | 0.000 | **1.000** | 고침 (PR #647) |
 | [#604](https://github.com/ChoHyeonChan/maskingtape/issues/604) 이름 뒤 괄호 | name_paren_after | 0.000 | **1.000** | 고침 (PR #651) |
 | [#605](https://github.com/ChoHyeonChan/maskingtape/issues/605) 주소 꼬리 (태그 3개) | address_tail_* | 0.000 | **1.000** | 고침 (PR #624) |
-| [#606](https://github.com/ChoHyeonChan/maskingtape/issues/606) "시"를 뗀 시 이름 | address_city_without_si | 0.000 | 0.000 | 열림 (부분 10, 미탐 10) |
+| [#606](https://github.com/ChoHyeonChan/maskingtape/issues/606) "시"를 뗀 시 이름 | address_city_without_si | 0.000 | **1.000** | 고침 (PR #671) |
 | [#607](https://github.com/ChoHyeonChan/maskingtape/issues/607) 라벨 + 틀린 검증 숫자 (태그 2개) | *_label_bad_checksum | 0.000 | **1.000** | 고침 (PR #646, 이슈는 열림) |
 | [#608](https://github.com/ChoHyeonChan/maskingtape/issues/608) 다시 나오는 이름 | name_repeat_without_cue | 0.000 | 0.000 | 열림 |
 | [#636](https://github.com/ChoHyeonChan/maskingtape/issues/636) 가운뎃점으로 나눈 번호 | number_middle_dot_separator | 0.000 | **1.000** | 고침 (PR #649) |
-| [#637](https://github.com/ChoHyeonChan/maskingtape/issues/637) 날짜 뒤 일부만 가린 뒷자리 | rrn_partial_back_after_date | 0.000 | 0.000 | 열림 (부분 2, 미탐 18) |
-| [#638](https://github.com/ChoHyeonChan/maskingtape/issues/638) 날짜 표기 + 뒷자리 | rrn_back_after_date_forms | 0.000 | 0.000 | 열림 (가려짐 1, 부분 19) |
+| [#637](https://github.com/ChoHyeonChan/maskingtape/issues/637) 날짜 뒤 일부만 가린 뒷자리 | rrn_partial_back_after_date | 0.000 | **0.950** | PR #669 머지, `030123-45` 꼴 1건 남음 |
+| [#638](https://github.com/ChoHyeonChan/maskingtape/issues/638) 날짜 표기 + 뒷자리 | rrn_back_after_date_forms | 0.000 | **1.000** | 고침 (PR #670) |
 | [#639](https://github.com/ChoHyeonChan/maskingtape/issues/639) 다른 점 닮은꼴 | rrn_other_dot_like_separator | 0.000 | **1.000** | 고침 (PR #649) |
-| [#640](https://github.com/ChoHyeonChan/maskingtape/issues/640) 뒤에 영문이 붙은 주민번호 | rrn_trailing_latin | 0.000 | 0.000 | 열림 |
-| **전체 23개 태그** | | **0.000** | **0.552** | 적중 271 · 가려짐 1 · 부분 31 · 미탐 188 |
+| [#640](https://github.com/ChoHyeonChan/maskingtape/issues/640) 뒤에 영문이 붙은 주민번호 | rrn_trailing_latin | 0.000 | **1.000** | 고침 (PR #668) |
+| [#655](https://github.com/ChoHyeonChan/maskingtape/issues/655) 줄마다 한 명·사전 밖 성씨·"명단" 라벨 (태그 3개) | name_list_* | 0.000 | 0.000 | 열림 |
+| [#656](https://github.com/ChoHyeonChan/maskingtape/issues/656) 동-호 하이픈·붙여 쓴 동호·건물명+호·영문 층 | address_dong_ho_variants | 0.000 | 0.000 | 열림 (부분 11, 미탐 9) |
+| [#657](https://github.com/ChoHyeonChan/maskingtape/issues/657) 라벨과 번호 사이 줄바꿈·괄호 | number_label_gap_variants | 0.000 | 0.000 | 열림 |
+| [#658](https://github.com/ChoHyeonChan/maskingtape/issues/658) 날짜 뒤 띄어 쓴 "출생" | birth_date_cue_chulsaeng | 0.000 | 0.000 | 열림 |
+| [#685](https://github.com/ChoHyeonChan/maskingtape/issues/685) "담당:"·"외 N명"·뒤 존칭 나눠 쓰기·대괄호·"원고들" | name_cue_followups | 0.000 | 0.000 | 열림 |
+| [#686](https://github.com/ChoHyeonChan/maskingtape/issues/686) 일반구 없는 시의 축약 | address_city_no_gu_abbr | 0.000 | 0.000 | 열림 |
+| **전체 31개 태그** | | **0.000** | **0.586** | 적중 410 · 가려짐 0 · 부분 11 · 미탐 279 |
 
-- **고친 10건(#592·#593·#594·#600·#602·#604·#605·#607·#636·#639)의 태그 13개가 전부 1.000이다.**
-  이 이슈들은 `FIXED_ISSUES`에 넣어 되돌아가면 CI가 실패하게 했다(#604는 PR #660에서 넣는다).
-- 남은 미탐은 이름(#589·#601·#603·#608)과 주민번호 경계(#637·#638·#640), 시 이름 축약(#606)이다.
+- **고친 14건(#592·#593·#594·#600·#602·#603·#604·#605·#606·#607·#636·#638·#639·#640)의 태그 19개가
+  전부 1.000이다.** 이 이슈들은 `FIXED_ISSUES`에 넣어 되돌아가면 CI가 실패하게 했다. #637은 PR #669가
+  머지됐지만 1건(`주민번호 030123-45`)이 남아 아직 넣지 않았다.
+- 전체 재현율은 태그를 더할 때마다 내려갔다가 core가 고치면 오른다(23개 0.552 `c526000` → 29개 0.538 `fafefa8` → 31개 0.586 `5744f73`).
+  아직 안 고친 태그를 새로 넣기 때문이고, 고친 이슈가 줄어든 게 아니다.
+- 남은 미탐은 이름(#589·#601·#608·#655·#685), 주소(#656·#686), 라벨 뒤 번호(#657), 생년월일 단서(#658),
+  주민번호 6자리 + 숫자 둘(#637 1건)이다.
+- #640은 core가 번호에 붙은 영문 한 글자까지 번호 구간으로 가리기로 해서(PR #668), 정답 구간도 그에
+  맞췄다(#680). 글은 그대로이고 라벨 끝만 한 글자 늘었다.
 - 정답과 안 겹치는 오탐은 그대로 0건이다.
-- #655~#658 태그(120건)는 PR #660에서 더한다.
 
 ### 회귀를 숫자로 보기 — #600 (`b1c79b5` → `a4db5e2`)
 
@@ -1022,6 +1036,49 @@ core가 이 세트의 이슈를 하나씩 고치면서 바뀐 수치다. "시작
 - 이 세트로 규칙을 맞추면 이 세트의 점수는 오르지만 그게 곧 일반 성능은 아니다
   ([#456](https://github.com/ChoHyeonChan/maskingtape/issues/456)의 자기일관성 문제와 같다).
   루트 README의 정확도 표(v1·v2)에는 이 세트를 섞지 않는다.
+
+## 문서 성격별 이름 세트 — 판결문에서 이름을 얼마나 잡는가 ([#661](https://github.com/ChoHyeonChan/maskingtape/issues/661))
+
+2026-10-04 멘토링에서 받은 의견을 그대로 재려고 만들었다.
+
+- 이름이 개인정보인지는 **문서 성격에 따라 달라진다.** 이름만 적힌 명단은 개인정보로 보기 어렵지만,
+  판결문에서는 이름이 곧 개인정보이고 실제로 이름을 못 걸러 문제가 된다.
+- 이름 정확도를 최대한 높이고 **어디까지 높였는지 설명할 수 있어야 한다.**
+
+synth_v1·v2는 업무 문장 한두 줄짜리라 문서 종류를 구분하지 않는다. `bench/datasets/doc_types_v1.jsonl`은
+문서 종류 5가지(판결문 민사·형사, 상담 기록 서식·대화, 사내 메일, 회의록, 엑셀 명단)의 합성 문서
+200건(종류당 40건, seed 661)이다. 틀은 각 문서의 실제 구조(판결문의 당사자 표시·주문·이유·판사 서명,
+메일의 받는 사람·참조·맺음말 등)를 따라 새로 썼고, 이름·연락처·주소는 시드로 뽑는다.
+
+- 문서 안의 **모든** 개인정보에 정답 라벨이 있어 precision도 의미가 있다. "피고 측"·"법무법인 다온"
+  같은 말은 라벨이 없어 가리면 오탐이다.
+- 이름은 세 글자를 주로, 두 글자를 15% 섞는다. 이름 뒤 조사는 받침에 맞춘다.
+- **측정용 세트다.** core 규칙을 이 세트에 맞추면 이 세트 점수만 오를 수 있다(#456과 같은 문제).
+
+```bash
+python -m bench.generate_doc_types --out bench/datasets/doc_types_v1.jsonl
+python -m bench.evaluators.evaluate_doc_types bench/datasets/doc_types_v1.jsonl
+```
+
+### 결과 (규칙 전용, 이름 기준)
+
+| 문서 종류 | 재현율 `c526000` (#647 전) | 재현율 `5744f73` (지금) | precision 지금 | F2 지금 | 유출 기준 재현율 지금 |
+|---|---|---|---|---|---|
+| 판결문 | 0.130 | **0.680** | 0.949 | 0.721 | 0.717 |
+| 사내 메일 | 0.417 | **0.625** | 1.000 | 0.676 | 0.633 |
+| 상담 기록 | 0.719 | 0.719 | 1.000 | 0.762 | 0.719 |
+| 회의록 | 0.807 | 0.807 | 1.000 | 0.840 | 0.807 |
+| 엑셀 명단 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
+
+- **멘토님이 짚은 대로, 이름이 가장 무거운 판결문에서 가장 약했다.** #603(PR #647)이 원고·피고·
+  피고인·피해자 같은 법률 역할어를 단서로 넣으면서 0.130 → 0.680으로 올랐다.
+- 판결문의 오탐 11건은 전부 경계 문제다. 두 글자 이름 뒤 조사를 이름의 셋째 글자로 함께 가린
+  경우라(`원고 백민은 …` → `백민은`) 유출이 아니고, 엉뚱한 곳을 가린 오탐은 0건이다.
+- 남은 미탐은 core 이슈로 올렸다. 판결문의 판사·검사·증인, 자기소개("영업팀 ○○○입니다")는
+  [#663](https://github.com/ChoHyeonChan/maskingtape/issues/663)이다. 회의록 머리(`참석자: …⏎작성자: …`)처럼
+  다음 줄 라벨을 앞 이름의 뒤 단서로 먹는 문제는
+  [#662](https://github.com/ChoHyeonChan/maskingtape/issues/662)이다. 저장소 밖 사본에서 이 문제만 고치면
+  회의록이 0.807 → 0.950이 된다.
 
 ## 프롬프트 공격 골든셋 — 문서 속 지시문이 LLM 이름 마스킹을 약하게 만드는가 ([#549](https://github.com/ChoHyeonChan/maskingtape/issues/549))
 
@@ -1101,7 +1158,8 @@ JSONL — 한 줄에 문서 하나:
 - `kind`는 core의 `Detection.kind`와 동일한 문자열: `rrn`, `phone`, `email`, `name`, `address`, `card`, `biz_reg`, `passport`, `account`, `birth_date`, `driver_license`
 - `difficulty`는 `easy`/`hard`/`negative` 중 하나 (없으면 evaluate.py가 `unknown`으로 취급 — 하위 호환)
 - 열린 미탐 세트(`open_misses_v1.jsonl`)에만 있는 필드: 행의 `miss_tag`·`issue`, 라벨의
-  `target`(없으면 `true`). synth_v1·v2의 포맷은 그대로다
+  `target`(없으면 `true`). 문서 성격별 세트(`doc_types_v1.jsonl`)에만 있는 필드: 행의 `doc_type`
+  (`judgment`·`counseling`·`email`·`minutes`·`roster`). synth_v1·v2의 포맷은 그대로다
 - 평가 기준: span 완전 일치(exact match)로 precision / recall / F1 / F2 산출
   (F2는 재현율에 F1보다 더 큰 가중치를 두는 Fβ, β=2 — PII 탐지는 미탐(FN)이 오탐(FP)보다
   위험하다는 게 이 도메인의 평가 관행이라 F1과 나란히 본다. 근거: `evaluate.py` 모듈 docstring)
