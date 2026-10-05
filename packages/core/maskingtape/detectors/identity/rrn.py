@@ -55,17 +55,24 @@ _BACK = r"(?P<back>[1-8]\d{6})"
 # 첫 갈래(구분자 + 실제 숫자 7개 + 끝 경계)와 글자 하나까지 같아야 한다 — 생년월일 쪽이
 # 넘긴 자리를 여기서 받지 않으면 두 탐지기 모두 버려 통째로 새고(#508), 여기서 받는
 # 구분자를 생년월일 쪽이 모르면 체크섬이 안 맞는 번호의 종류가 생년월일로 바뀐다(#631).
-# 뒷자리 7자리 바로 뒤에 영문 한 글자가 붙은 표기("800101-1234560A", #640)는 받되, 그 영문 뒤에
-# 영숫자가 더 이어지면 긴 영숫자 코드의 일부이므로 받지 않는다.
-_TRAILING_LETTER = r"(?:[A-Za-z](?![A-Za-z\d]|-[A-Za-z\d]))?"
-RRN_BACK_AHEAD = _BACK_SEP + r"[1-8]\d{6}" + _TRAILING_LETTER + r"(?![\dA-Za-z])"
-
 # 뒷자리가 가려졌거나(*, X, 동그라미 등) 성별 숫자만 남은 경우(#528)는 훨씬 흔한 문자열
 # (날짜+건수 등)과 우연히 겹치기 쉬워, 구분자를 하이픈류 문자 하나로 좁힌다 — 공백만으로는
 # 안 받는다. 그래야 "작성일 240101 3건"의 "3"을 성별 숫자로 오인하지 않는다(팀장 리뷰,
 # PR #564 후속).
 _BACK_PARTIAL_SEP = r"[ \t]?[-–—‐－][ \t]?"
-_BACK_PARTIAL = r"(?P<back_partial>[1-8](?:" + _MASK_CHAR + r"{1,6})?)"
+# 뒷자리 일부만 적고 나머지를 가린 표기("19800101-1234***", #637)도 받는다 — 성별 숫자 뒤에
+# 실제 숫자가 0~6개 오고 그 뒤에 가림 문자가 0~6개 온다. 점·하이픈 날짜와 붙여 쓴 날짜 모두 앞자리가
+# 실제 날짜일 때만 받으므로, 날짜가 아닌 숫자 뒤의 하이픈 번호는 여전히 버린다.
+_BACK_PARTIAL_BODY = r"[1-8]\d{0,6}(?:" + _MASK_CHAR + r"{0,6})?"
+_BACK_PARTIAL = r"(?P<back_partial>" + _BACK_PARTIAL_BODY + r")"
+
+# 뒷자리 7자리 바로 뒤에 영문 한 글자가 붙은 표기("800101-1234560A", #640)는 받되, 그 영문 뒤에
+# 영숫자가 더 이어지면 긴 영숫자 코드의 일부이므로 받지 않는다.
+_TRAILING_LETTER = r"(?:[A-Za-z](?![A-Za-z\d]|-[A-Za-z\d]))?"
+RRN_BACK_AHEAD = (
+    r"(?:" + _BACK_SEP + r"[1-8]\d{6}" + _TRAILING_LETTER + r"|" + _BACK_PARTIAL_SEP
+    + _BACK_PARTIAL_BODY + r")(?![\dA-Za-z])"
+)
 
 # (① 붙여 쓴 6·8자리 앞자리 | ② 점·하이픈 날짜 앞자리) + (① 구분자(넓게) + 실제 숫자
 # 7개 | ② 하이픈류 구분자(좁게) + 가려진/성별 숫자만 남은 뒷자리). 앞뒤에 숫자·영문이
@@ -108,6 +115,27 @@ def _valid_dated_front(front_dated: str) -> bool:
     return True
 
 
+_RRN_LABEL_RE = re.compile(r"주민|생년월일|출생|생일")
+_RRN_LABEL_WINDOW = 20
+
+
+def _partial_back_ok(text: str, match: re.Match[str], back: str) -> bool:
+    """일부만 적은 뒷자리를 받을지 본다(#637).
+
+    가림 문자가 있거나 성별 숫자 하나만 있으면 받는다. 가림 문자 없이 실제 숫자 2~6개만 적은
+    꼴은 8자리 앞자리(19·20으로 시작하는 생년월일)이면서 앞에 주민번호·생년월일 라벨이 있을
+    때만 받는다. "ORD-20250408-2110"·"240101-1234" 같은 날짜형 주문·운송장 번호에 흔해서,
+    라벨 없이 받으면 오탐이 크다.
+    """
+    if re.search(_MASK_CHAR, back) or len(back) == 1:
+        return True
+    eight_digit_front = match.group("front") is not None and match.start("front") > match.start()
+    if not eight_digit_front:
+        return False
+    start = match.start()
+    return _RRN_LABEL_RE.search(text, max(0, start - _RRN_LABEL_WINDOW), start) is not None
+
+
 def _checksum_front(front: str | None, front_dated: str | None) -> str:
     """체크섬 계산용 앞 6자리(YYMMDD)를 얻는다 — 점·하이픈 표기는 4자리 연도의 뒤 2자리만 쓴다."""
     if front is not None:
@@ -138,7 +166,11 @@ class RRNDetector(Detector):
         found: list[Detection] = []
         for m in _RRN_RE.finditer(text):
             front, front_dated = m.group("front"), m.group("front_dated")
-            back = m.group("back") or m.group("back_partial")
+            back = m.group("back")
+            if back is None:
+                back = m.group("back_partial")
+                if not _partial_back_ok(text, m, back):
+                    continue
             if front is not None:
                 if not _valid_birthdate(front):
                     continue

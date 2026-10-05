@@ -109,11 +109,24 @@ def test_gender_digit_alone_with_no_tail_is_still_an_rrn():
     assert found[0].text == "19800101-1"
 
 
-def test_gender_digit_alone_does_not_swallow_a_longer_number():
-    # 성별 숫자 뒤에 진짜 숫자·영문이 더 붙으면(다른 번호의 일부일 수 있으므로) "성별 숫자만
-    # 남은 표기"로 오인해 앞부분만 잘라 잡으면 안 된다 — 뒤에 뭐가 더 있으면 형태가 안 맞는
-    # 것이므로 통째로 버린다(오탐 방지). 7자리(가짜 뒷자리 자리수)가 아니면 온전한 RRN도 아니다.
-    assert RRNDetector().detect("생년월일 19800101-12") == []
+def test_partial_back_with_a_few_real_digits_and_masks_is_still_an_rrn():
+    # 뒷자리 일부만 적고 나머지를 가린 표기(#637) — 생년월일 날짜와 남은 숫자가 모두 가려져야 한다
+    found = RRNDetector().detect("생년월일 19800101-1234***")
+    assert len(found) == 1
+    assert found[0].text == "19800101-1234***"
+    assert found[0].confidence == 0.85
+
+
+def test_short_real_back_digits_after_a_date_are_still_an_rrn():
+    found = RRNDetector().detect("생년월일 19800101-12 기재")
+    assert len(found) == 1
+    assert found[0].text == "19800101-12"
+
+
+def test_six_digit_front_with_a_partial_back_is_still_an_rrn():
+    found = RRNDetector().detect("생년월일 800101-1234***")
+    assert len(found) == 1
+    assert found[0].text == "800101-1234***"
 
 
 def test_bare_gender_digit_without_any_separator_context_is_not_falsely_grabbed():
@@ -272,3 +285,16 @@ def test_trailing_letter_followed_by_more_alphanumerics_is_still_not_an_rrn():
 def test_trailing_letter_followed_by_a_hyphenated_code_is_not_an_rrn():
     # "…-B" 같은 하이픈 이어짐은 주민번호 뒤의 다른 코드 조각이므로 받지 않는다
     assert RRNDetector().detect("운송장 800101-1234560A-B") == []
+
+
+def test_short_unmasked_digits_after_a_six_digit_date_are_not_an_rrn():
+    # "240101-1234"처럼 6자리 날짜 뒤에 일련번호가 짧게 붙은 것은 주문·운송장 번호에 흔하다 — 가림
+    # 문자가 없으면 8자리 생년월일 앞자리일 때만 뒷자리 일부를 받는다(#637 오탐 방지)
+    assert RRNDetector().detect("운송장 240101-12345") == []
+    assert RRNDetector().detect("제품 240101-1234 입고") == []
+    assert RRNDetector().detect("주문번호 2024-01-01-12") == []
+
+
+def test_short_digits_after_an_order_number_date_are_not_an_rrn_without_a_label():
+    # "ORD-20250408-2110"처럼 8자리 날짜형 주문번호의 짧은 일련번호는 주민번호 라벨이 없으면 받지 않는다
+    assert RRNDetector().detect("주문번호 ORD-20250408-2110") == []
