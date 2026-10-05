@@ -269,6 +269,9 @@ _FORM_LABELS = (
     "수취인", "송금인", "입금자", "신청인", "신청자", "보호자", "대표자",
     "이력서 접수", "면허 갱신 신청",
 ) + _FORM_LABELS_603
+# 띄어 쓴 양식 라벨("면허 갱신 신청"). 값 자리가 이걸로 시작하면 값이 아니라 다음 라벨이다 —
+# "서명: 면허 갱신 신청: 김민수"에서 "면허"를 값으로 먹으면 뒤 라벨과 이름이 샌다(#674).
+_MULTIWORD_FORM_LABELS = tuple(label for label in _FORM_LABELS if " " in label)
 # 표 머리행은 이름 전용 라벨이 있는 줄로 먼저 본다. 수신·서명·작성 같은 #603 짧은 라벨만 있는 줄은
 # 그런 줄이 없을 때만 머리행으로 쓴다. 머리행에서는 라벨 칸을 전부 이름 열로 본다 — 라벨 하나만 고르면
 # "번호,수신,성명,연락처"의 성명 열처럼 다른 이름 열이 통째로 샌다(#674).
@@ -705,9 +708,11 @@ class NameDetector(Detector):
                 if m.group("name") in _PAREN_COMMON_WORDS:
                     continue
 
-            if prefix in _CUES_603 and suffix is not None:
-                # #603 앞 단서로 받은 후보 뒤의 단서는 다음 이름의 앞 단서일 수 있다("구매자 문의 담당자
-                # 이서연"). #603 전처럼 그 단서 자리부터 다시 찾는다(#674).
+            if prefix in _CUES_603 and suffix is not None and _is_label_word_at(text, name_start):
+                # #603 앞 단서 덕에 일반어를 받았으면("구매자 문의 담당자 이서연"의 문의), #603 전처럼 뒤
+                # 단서 자리부터 다시 찾아 그 단서가 다음 이름의 앞 단서가 되게 한다. 실명을 받았을 때는
+                # 다시 찾지 않는다 — "구매자 김민수 대표 이준(인)"의 대표를 이준의 앞 단서로 읽으면 직함만
+                # 단서인 두 글자 이름이 되어 버려진다(#674).
                 pos = m.start("suffix")
             confidence = 0.75 if (has_prefix and has_suffix) else 0.5
             if confidence < self.min_confidence:
@@ -833,7 +838,12 @@ class NameDetector(Detector):
             start, end = m.span("name")
             name = m.group("name")
             value = _FORM_VALUE_ENDING_RE.sub("", name)
-            if name in _FORM_LABELS or value in _FORM_LABELS or _is_label_word_at(text, start, strong=True):
+            if (
+                name in _FORM_LABELS
+                or value in _FORM_LABELS
+                or text.startswith(_MULTIWORD_FORM_LABELS, start)
+                or _is_label_word_at(text, start, strong=True)
+            ):
                 # 값 자리에 다른 라벨이 왔다("성명: 예금주: 류서윤") — 그 라벨부터 다시 찾는다
                 if value in _FORM_LABELS_603:
                     list_seeds.append((end, True))  # "보호자: 결재, 김도현"의 뒤 나열은 #603 전처럼 받는다(#674)

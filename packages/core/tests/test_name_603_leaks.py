@@ -120,3 +120,22 @@ def test_table_name_columns_and_603_gains(text, name, nth):
 )
 def test_603_cues_do_not_take_over_old_paths(text, name):
     assert covered(text, name), NameDetector().detect(text)
+
+
+@pytest.mark.parametrize(
+    "text, name",
+    [
+        # #603 앞 단서로 실명을 받은 뒤 그 뒤 직함을 다음 이름의 앞 단서로 빼앗지 않는다
+        ("구매자 김민수 대표 이준(인)", "이준"),
+        ("피고인 김도현 대리 이준(42세)은 범행을 부인했다.", "이준"),
+        ("피해자 박서윤 팀장\n최한(서명)", "최한"),
+        ("주문자 김도현 과장\n문의 담당자 이서연", "이서연"),
+        ("구매자: 김도현 대리\n배송 담당자: 이서연", "이서연"),
+        ("피보험자 피고인 이은실 양이 전무열(남, 41세)", "전무열"),
+        # 값 자리가 띄어 쓴 양식 라벨로 시작하면 그 라벨부터 다시 본다
+        ("서명: 면허 갱신 신청: 김민수", "김민수"),
+        ("서명(한글) : 면허 갱신 신청(한글)| 곽민재", "곽민재"),
+    ],
+)
+def test_603_prefix_does_not_steal_the_next_cue(text, name):
+    assert covered(text, name), NameDetector().detect(text)
