@@ -40,6 +40,11 @@ class ApiSettings:
 
 
 def get_api_settings() -> ApiSettings:
+    """환경변수를 앱 내부 설정 객체로 모은다.
+
+    FastAPI 시작 지점이 환경변수를 직접 읽지 않게 해, 테스트가 설정을 주입하기 쉽고 배포
+    환경별 기본값(CORS, 신뢰 프록시 헤더)을 한 곳에서 검토할 수 있다.
+    """
     environment = _env_value("MASKINGTAPE_API_ENV", "development")
     default_cors_origins = (
         DEFAULT_PRODUCTION_CORS_ALLOWED_ORIGINS
@@ -103,6 +108,7 @@ def _default_trusted_client_ip_headers() -> tuple[str, ...]:
 
 
 def _env_value(name: str, default: str) -> str:
+    """빈 문자열을 설정값으로 보지 않아 잘못된 배포 변수를 기본값으로 되돌린다."""
     value = os.getenv(name)
     if value is None:
         return default
@@ -111,6 +117,11 @@ def _env_value(name: str, default: str) -> str:
 
 
 def _env_tuple(name: str, default: tuple[str, ...]) -> tuple[str, ...]:
+    """쉼표 목록 환경변수를 중복 없는 tuple로 정리한다.
+
+    CORS origin과 신뢰 헤더 목록은 순서가 안정적이어야 테스트와 OpenAPI 문서가 흔들리지
+    않는다. 빈 칸은 운영자가 실수로 넣은 여분 쉼표로 보고 버린다.
+    """
     value = os.getenv(name)
     if value is None:
         return default
@@ -118,6 +129,7 @@ def _env_tuple(name: str, default: tuple[str, ...]) -> tuple[str, ...]:
 
 
 def _env_int(name: str, default: int) -> int:
+    """양수 정수만 설정값으로 받아 보안 상한이 0이나 음수로 꺼지지 않게 한다."""
     value = os.getenv(name)
     if value is None:
         return default

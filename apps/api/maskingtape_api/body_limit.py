@@ -34,6 +34,7 @@ class RequestBodyTooLarge(HTTPException):
     """
 
     def __init__(self, max_bytes: int) -> None:
+        """응답 본문에서 제한값을 알려주려고 상한만 따로 보존한다."""
         super().__init__(
             status_code=status.HTTP_413_CONTENT_TOO_LARGE,
             detail="request body too large",
@@ -50,6 +51,7 @@ async def request_body_too_large_handler(
 
 
 def _too_large_response(max_bytes: int) -> JSONResponse:
+    """바디 크기 초과도 나머지 API 오류와 같은 JSON 계약으로 맞춘다."""
     return error_response(
         status.HTTP_413_CONTENT_TOO_LARGE,
         "request_body_too_large",
@@ -67,10 +69,16 @@ class BodySizeLimitMiddleware:
     """
 
     def __init__(self, app: ASGIApp, max_bytes: int) -> None:
+        """앱 시작 때 정해진 상한을 보관해 요청마다 환경변수를 다시 읽지 않는다."""
         self.app = app
         self.max_bytes = max_bytes
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        """HTTP 요청만 감싸고, 웹소켓 등 다른 ASGI scope는 그대로 통과시킨다.
+
+        Content-Length가 믿을 만하면 빠르게 끊고, 없거나 이상하면 receive를 감싸 실제로
+        들어오는 바이트 수를 센다. 이렇게 해야 chunked 전송으로 상한을 우회하지 못한다.
+        """
         if scope["type"] != "http":
             await self.app(scope, receive, send)
             return
@@ -84,6 +92,7 @@ class BodySizeLimitMiddleware:
         response_started = False
 
         async def counting_receive() -> Message:
+            """하위 앱이 바디를 읽는 순간마다 누적 크기를 검사한다."""
             nonlocal received
             message = await receive()
             if message["type"] == "http.request":
@@ -93,6 +102,7 @@ class BodySizeLimitMiddleware:
             return message
 
         async def send_wrapper(message: Message) -> None:
+            """이미 응답이 시작된 뒤에는 413을 새로 보낼 수 없어서 상태만 기록한다."""
             nonlocal response_started
             if message["type"] == "http.response.start":
                 response_started = True
@@ -106,6 +116,7 @@ class BodySizeLimitMiddleware:
                 await self._send_too_large(scope, receive, send)
 
     async def _send_too_large(self, scope: Scope, receive: Receive, send: Send) -> None:
+        """ASGI 앱처럼 호출해 미들웨어 단계에서도 동일한 413 본문을 보낸다."""
         await _too_large_response(self.max_bytes)(scope, receive, send)
 
 
