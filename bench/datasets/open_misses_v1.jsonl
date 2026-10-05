@@ -18,6 +18,26 @@
 {"text": "다온아파트 74동 303호입니다.", "labels": [{"kind": "address", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
 {"text": "가온빌라 34동 903호 사시는 분이죠?", "labels": [{"kind": "address", "start": 0, "end": 13}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
 {"text": "누리빌라 98동 1407호입니다.", "labels": [{"kind": "address", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "address_building_dong_ho_only", "issue": 593}
+{"text": "배송지 화성 동탄대로 100입니다.", "labels": [{"kind": "address", "start": 4, "end": 15}], "difficulty": "open_miss", "miss_tag": "address_city_no_gu_abbr", "issue": 686}
+{"text": "주소: 파주 통일로 135", "labels": [{"kind": "address", "start": 4, "end": 14}], "difficulty": "open_miss", "miss_tag": "address_city_no_gu_abbr", "issue": 686}
+{"text": "배송지 화성 동탄대로 273입니다.", "labels": [{"kind": "address", "start": 4, "end": 15}], "difficulty": "open_miss", "miss_tag": "address_city_no_gu_abbr", "issue": 686}
+{"text": "배송지 김해 장유로 181", "labels": [{"kind": "address", "start": 4, "end": 14}], "difficulty": "open_miss", "miss_tag": "address_city_no_gu_abbr", "issue": 686}
+{"text": "배송지 남양주 경춘로 217", "labels": [{"kind": "address", "start": 4, "end": 15}], "difficulty": "open_miss", "miss_tag": "address_city_no_gu_abbr", "issue": 686}
+{"text": "주소: 김포 김포대로 115입니다.", "labels": [{"kind": "address", "start": 4, "end": 15}], "difficulty": "open_miss", "miss_tag": "address_city_no_gu_abbr", "issue": 686}
+{"text": "주소는 김해 장유로 41", "labels": [{"kind": "address", "start": 4, "end": 13}], "difficulty": "open_miss", "miss_tag": "address_city_no_gu_abbr", "issue": 686}
+{"text": "주소는 파주 통일로 256", "labels": [{"kind": "address", "start": 4, "end": 14}], "difficulty": "open_miss", "miss_tag": "address_city_no_gu_abbr", "issue": 686}
+{"text": "주소는 김포 김포대로 175", "labels": [{"kind": "address", "start": 4, "end": 15}], "difficulty": "open_miss", "miss_tag": "address_city_no_gu_abbr", "issue": 686}
+{"text": "배송지 시흥 시흥대로 291", "labels": [{"kind": "address", "start": 4, "end": 15}], "difficulty": "open_miss", "miss_tag": "address_city_no_gu_abbr", "issue": 686}
+{"text": "주소: 파주 통일로 299", "labels": [{"kind": "address", "start": 4, "end": 14}], "difficulty": "open_miss", "miss_tag": "address_city_no_gu_abbr", "issue": 686}
+{"text": "배송지 김해 장유로 156입니다.", "labels": [{"kind": "address", "start": 4, "end": 14}], "difficulty": "open_miss", "miss_tag": "address_city_no_gu_abbr", "issue": 686}
+{"text": "주소는 시흥 시흥대로 259입니다.", "labels": [{"kind": "address", "start": 4, "end": 15}], "difficulty": "open_miss", "miss_tag": "address_city_no_gu_abbr", "issue": 686}
+{"text": "주소는 김해 장유로 48", "labels": [{"kind": "address", "start": 4, "end": 13}], "difficulty": "open_miss", "miss_tag": "address_city_no_gu_abbr", "issue": 686}
+{"text": "주소: 김포 김포대로 44입니다.", "labels": [{"kind": "address", "start": 4, "end": 14}], "difficulty": "open_miss", "miss_tag": "address_city_no_gu_abbr", "issue": 686}
+{"text": "주소는 평택 평택로 30입니다.", "labels": [{"kind": "address", "start": 4, "end": 13}], "difficulty": "open_miss", "miss_tag": "address_city_no_gu_abbr", "issue": 686}
+{"text": "주소: 김해 장유로 52입니다.", "labels": [{"kind": "address", "start": 4, "end": 13}], "difficulty": "open_miss", "miss_tag": "address_city_no_gu_abbr", "issue": 686}
+{"text": "주소: 화성 동탄대로 131입니다.", "labels": [{"kind": "address", "start": 4, "end": 15}], "difficulty": "open_miss", "miss_tag": "address_city_no_gu_abbr", "issue": 686}
+{"text": "배송지 파주 통일로 128", "labels": [{"kind": "address", "start": 4, "end": 14}], "difficulty": "open_miss", "miss_tag": "address_city_no_gu_abbr", "issue": 686}
+{"text": "배송지 시흥 시흥대로 244", "labels": [{"kind": "address", "start": 4, "end": 15}], "difficulty": "open_miss", "miss_tag": "address_city_no_gu_abbr", "issue": 686}
 {"text": "용인 기흥구 동성로 106입니다.", "labels": [{"kind": "address", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "address_city_without_si", "issue": 606}
 {"text": "배송지 청주 흥덕구 센텀중앙로 194", "labels": [{"kind": "address", "start": 4, "end": 20}], "difficulty": "open_miss", "miss_tag": "address_city_without_si", "issue": 606}
 {"text": "배송지 청주 흥덕구 센텀중앙로 289", "labels": [{"kind": "address", "start": 4, "end": 20}], "difficulty": "open_miss", "miss_tag": "address_city_without_si", "issue": 606}
@@ -258,6 +278,26 @@
 {"text": "이상입니다.\n고석혜 배상", "labels": [{"kind": "name", "start": 7, "end": 10}], "difficulty": "open_miss", "miss_tag": "name_cue_closing", "issue": 603}
 {"text": "이상입니다.\n윤군양 귀하", "labels": [{"kind": "name", "start": 7, "end": 10}], "difficulty": "open_miss", "miss_tag": "name_cue_closing", "issue": 603}
 {"text": "남재연 올림", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_cue_closing", "issue": 603}
+{"text": "담당 : 허양원", "labels": [{"kind": "name", "start": 5, "end": 8}], "difficulty": "open_miss", "miss_tag": "name_cue_followups", "issue": 685}
+{"text": "한정찬·고영아 님께", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "name", "start": 4, "end": 7, "target": false}], "difficulty": "open_miss", "miss_tag": "name_cue_followups", "issue": 685}
+{"text": "피고들 전아민, 배아경", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "name", "start": 9, "end": 12}], "difficulty": "open_miss", "miss_tag": "name_cue_followups", "issue": 685}
+{"text": "피고들 문영하, 심민아", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "name", "start": 9, "end": 12}], "difficulty": "open_miss", "miss_tag": "name_cue_followups", "issue": 685}
+{"text": "담당: 임경호", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "open_miss", "miss_tag": "name_cue_followups", "issue": 685}
+{"text": "원고들 문현연, 정혜양", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "name", "start": 9, "end": 12}], "difficulty": "open_miss", "miss_tag": "name_cue_followups", "issue": 685}
+{"text": "양인서 외 5명", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_cue_followups", "issue": 685}
+{"text": "최아윤 외 4명", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_cue_followups", "issue": 685}
+{"text": "담당 : 조군석", "labels": [{"kind": "name", "start": 5, "end": 8}], "difficulty": "open_miss", "miss_tag": "name_cue_followups", "issue": 685}
+{"text": "원고들 유원정, 한예도", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "name", "start": 9, "end": 12}], "difficulty": "open_miss", "miss_tag": "name_cue_followups", "issue": 685}
+{"text": "담당 : 정찬빈", "labels": [{"kind": "name", "start": 5, "end": 8}], "difficulty": "open_miss", "miss_tag": "name_cue_followups", "issue": 685}
+{"text": "백예원, 홍민성 님 앞", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "name", "start": 5, "end": 8, "target": false}], "difficulty": "open_miss", "miss_tag": "name_cue_followups", "issue": 685}
+{"text": "고성지 등 2명", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_cue_followups", "issue": 685}
+{"text": "피고들 박재도, 김경빈", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "name", "start": 9, "end": 12}], "difficulty": "open_miss", "miss_tag": "name_cue_followups", "issue": 685}
+{"text": "피고들 허연빈, 허호연", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "name", "start": 9, "end": 12}], "difficulty": "open_miss", "miss_tag": "name_cue_followups", "issue": 685}
+{"text": "원고들 최예석, 허훈원", "labels": [{"kind": "name", "start": 4, "end": 7}, {"kind": "name", "start": 9, "end": 12}], "difficulty": "open_miss", "miss_tag": "name_cue_followups", "issue": 685}
+{"text": "한경영 등 5명", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_cue_followups", "issue": 685}
+{"text": "심도율·박현빈 님 앞", "labels": [{"kind": "name", "start": 0, "end": 3}, {"kind": "name", "start": 4, "end": 7, "target": false}], "difficulty": "open_miss", "miss_tag": "name_cue_followups", "issue": 685}
+{"text": "[전혜도] 주간 보고", "labels": [{"kind": "name", "start": 1, "end": 4}], "difficulty": "open_miss", "miss_tag": "name_cue_followups", "issue": 685}
+{"text": "손정아 외 2명", "labels": [{"kind": "name", "start": 0, "end": 3}], "difficulty": "open_miss", "miss_tag": "name_cue_followups", "issue": 685}
 {"text": "보내는 사람 남연군", "labels": [{"kind": "name", "start": 7, "end": 10}], "difficulty": "open_miss", "miss_tag": "name_cue_role_label", "issue": 603}
 {"text": "피고인 백원재", "labels": [{"kind": "name", "start": 4, "end": 7}], "difficulty": "open_miss", "miss_tag": "name_cue_role_label", "issue": 603}
 {"text": "보내는 사람 백규진", "labels": [{"kind": "name", "start": 7, "end": 10}], "difficulty": "open_miss", "miss_tag": "name_cue_role_label", "issue": 603}
@@ -558,23 +598,23 @@
 {"text": "생년월일 20050307-4338*** 기재", "labels": [{"kind": "rrn", "start": 5, "end": 21}], "difficulty": "open_miss", "miss_tag": "rrn_partial_back_after_date", "issue": 637}
 {"text": "주민번호 19560205-1421*** 기재", "labels": [{"kind": "rrn", "start": 5, "end": 21}], "difficulty": "open_miss", "miss_tag": "rrn_partial_back_after_date", "issue": 637}
 {"text": "생년월일 20031227-40 기재", "labels": [{"kind": "rrn", "start": 5, "end": 16}], "difficulty": "open_miss", "miss_tag": "rrn_partial_back_after_date", "issue": 637}
-{"text": "260116-2578621A 확인", "labels": [{"kind": "rrn", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "970503-1426937B", "labels": [{"kind": "rrn", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "주민번호 000819-2786467Y 확인", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "주민번호 520217-1893341X 확인", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "주민번호 470620-2256265Y", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "020117-4035733Y 확인", "labels": [{"kind": "rrn", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "주민번호 040705-4677150Y 확인", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "450513-2736857X", "labels": [{"kind": "rrn", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "011122-4967846B 확인", "labels": [{"kind": "rrn", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "주민번호 030217-3327190X 확인", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "주민번호 050708-3170337A", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "주민번호 520809-2390353A", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "주민번호 050508-3837748A 확인", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "주민번호 000420-3933871A", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "020619-4967851A", "labels": [{"kind": "rrn", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "080915-3331737Z", "labels": [{"kind": "rrn", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "주민번호 041102-4811570Y 확인", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "주민번호 580422-1378379Z", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "주민번호 090107-4787759Y", "labels": [{"kind": "rrn", "start": 5, "end": 19}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
-{"text": "280210-1102473A", "labels": [{"kind": "rrn", "start": 0, "end": 14}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "260116-2578621A 확인", "labels": [{"kind": "rrn", "start": 0, "end": 15}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "970503-1426937B", "labels": [{"kind": "rrn", "start": 0, "end": 15}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "주민번호 000819-2786467Y 확인", "labels": [{"kind": "rrn", "start": 5, "end": 20}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "주민번호 520217-1893341X 확인", "labels": [{"kind": "rrn", "start": 5, "end": 20}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "주민번호 470620-2256265Y", "labels": [{"kind": "rrn", "start": 5, "end": 20}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "020117-4035733Y 확인", "labels": [{"kind": "rrn", "start": 0, "end": 15}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "주민번호 040705-4677150Y 확인", "labels": [{"kind": "rrn", "start": 5, "end": 20}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "450513-2736857X", "labels": [{"kind": "rrn", "start": 0, "end": 15}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "011122-4967846B 확인", "labels": [{"kind": "rrn", "start": 0, "end": 15}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "주민번호 030217-3327190X 확인", "labels": [{"kind": "rrn", "start": 5, "end": 20}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "주민번호 050708-3170337A", "labels": [{"kind": "rrn", "start": 5, "end": 20}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "주민번호 520809-2390353A", "labels": [{"kind": "rrn", "start": 5, "end": 20}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "주민번호 050508-3837748A 확인", "labels": [{"kind": "rrn", "start": 5, "end": 20}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "주민번호 000420-3933871A", "labels": [{"kind": "rrn", "start": 5, "end": 20}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "020619-4967851A", "labels": [{"kind": "rrn", "start": 0, "end": 15}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "080915-3331737Z", "labels": [{"kind": "rrn", "start": 0, "end": 15}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "주민번호 041102-4811570Y 확인", "labels": [{"kind": "rrn", "start": 5, "end": 20}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "주민번호 580422-1378379Z", "labels": [{"kind": "rrn", "start": 5, "end": 20}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "주민번호 090107-4787759Y", "labels": [{"kind": "rrn", "start": 5, "end": 20}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
+{"text": "280210-1102473A", "labels": [{"kind": "rrn", "start": 0, "end": 15}], "difficulty": "open_miss", "miss_tag": "rrn_trailing_latin", "issue": 640}
