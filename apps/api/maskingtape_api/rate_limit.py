@@ -6,6 +6,7 @@ from __future__ import annotations
 from collections import OrderedDict, deque
 from collections.abc import Callable
 from dataclasses import dataclass
+from ipaddress import ip_address, ip_network
 from math import ceil
 from threading import Lock
 from time import monotonic
@@ -150,11 +151,22 @@ def _client_key(request: Request, trusted_headers: tuple[str, ...] = ()) -> str:
     for header in trusted_headers:
         client_ip = _first_header_value(request.headers.get(header))
         if client_ip:
-            return client_ip
+            return _client_ip_bucket_key(client_ip)
 
     if request.client:
-        return request.client.host
+        return _client_ip_bucket_key(request.client.host)
     return "unknown"
+
+
+def _client_ip_bucket_key(value: str) -> str:
+    try:
+        address = ip_address(value)
+    except ValueError:
+        return value
+
+    if address.version == 6:
+        return str(ip_network(f"{address}/64", strict=False))
+    return str(address)
 
 
 def _first_header_value(value: str | None) -> str | None:

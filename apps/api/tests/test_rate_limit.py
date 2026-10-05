@@ -151,6 +151,29 @@ def test_rate_limit_uses_client_ip_header_when_configured_as_trusted() -> None:
     ).status_code == 429
 
 
+def test_rate_limit_groups_ipv6_clients_by_64_prefix() -> None:
+    client = TestClient(
+        _rate_limited_app(limit=1, trusted_client_ip_headers=("x-vercel-forwarded-for",))
+    )
+    body = {"text": "합성 테스트 문장입니다"}
+
+    assert client.post(
+        "/scan",
+        json=body,
+        headers={"x-vercel-forwarded-for": "2001:db8:abcd:12::1"},
+    ).status_code == 200
+    assert client.post(
+        "/scan",
+        json=body,
+        headers={"x-vercel-forwarded-for": "2001:db8:abcd:12::ffff"},
+    ).status_code == 429
+    assert client.post(
+        "/scan",
+        json=body,
+        headers={"x-vercel-forwarded-for": "2001:db8:abcd:13::1"},
+    ).status_code == 200
+
+
 def test_rate_limiter_caps_bucket_count_with_lru_eviction() -> None:
     clock = Clock()
     limiter = InMemoryRateLimiter(
