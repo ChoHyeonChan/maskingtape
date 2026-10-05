@@ -604,6 +604,8 @@ class NameDetector(Detector):
         # 라벨을 달고 잡힌 이름의 끝 위치 — 뒤에 나열한 이름을 이어받는 출발점이다(#602)
         list_seeds: list[tuple[int, bool]] = []
         pos = 0
+        # #603 앞 단서 뒤 일반어를 버리고 뒤 단서 자리부터 다시 찾을 때 그 자리(#676)
+        resume_cue = -1
         # finditer 대신 직접 이어 찾는다: "신청자 성명 김하늘"에서 "성명"이 이름 후보로 잡혀
         # 버려질 때, 그 "성명"이 실제로는 다음 이름의 앞 단서다. finditer는 "신청자 성명"을
         # 통째로 소비하고 지나가 "김하늘"이 단서 없는 이름이 돼 새어나갔다.
@@ -677,9 +679,10 @@ class NameDetector(Detector):
                 prefix in _TITLE_ONLY_CUES and suffix is None and paren_title is None
             )
             if title_only and len(m.group("name")) < 3:
-                if prefix in _TITLE_CUES_603:
+                if prefix in _TITLE_CUES_603 or (prefix is not None and m.start() == resume_cue):
                     # #603 직함을 앞 단서로 읽어 버린 두 글자 이름은 이름 자리부터 다시 찾는다. 괄호 같은
-                    # 다른 단서로 전처럼 잡히게 한다("피고 김민(35세)", #674).
+                    # 다른 단서로 전처럼 잡히게 한다("피고 김민(35세)", #674). 아래에서 다시 찾은 뒤 단서가
+                    # 앞 단서가 된 자리도 같다("구매자 정보⏎대표 이준(인)", #676).
                     pos = name_start
                 continue
             if (
@@ -713,7 +716,7 @@ class NameDetector(Detector):
                 # 단서 자리부터 다시 찾아 그 단서가 다음 이름의 앞 단서가 되게 한다. 실명을 받았을 때는
                 # 다시 찾지 않는다 — "구매자 김민수 대표 이준(인)"의 대표를 이준의 앞 단서로 읽으면 직함만
                 # 단서인 두 글자 이름이 되어 버려진다(#674).
-                pos = m.start("suffix")
+                pos = resume_cue = m.start("suffix")
             confidence = 0.75 if (has_prefix and has_suffix) else 0.5
             if confidence < self.min_confidence:
                 continue
