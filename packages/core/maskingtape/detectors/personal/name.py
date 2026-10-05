@@ -252,6 +252,8 @@ _EUL_AS_LAST_SYLLABLE = (
 # 더한 쪽은 줄을 넘지 않는다. 괄호 설명은 여기서 받지 않는다 — 괄호를 통째로 소비하면
 # "담당자(김민수 대리)"처럼 괄호 안에 든 이름을 다시 찾지 않아 샌다(#491 독립 검증).
 _LABEL_SEP = r"(?:[:\s]{1,2}|[ \t]{1,3}|[ \t]{0,3}[:|][ \t]{0,3})"
+# 성씨로 시작해 실명 앞부분과 겹치는 #603 직함("원고은"·"박사랑"의 원고·박사).
+_NAME_LIKE_TITLES_603 = tuple(t for t in _TITLE_CUES_603 if t.startswith(tuple(_SURNAMES)))
 
 # 이름 전용 양식 라벨. 이 라벨 뒤에 쌍점·세로줄이 오면 성씨 사전 밖 이름도 받는다(#491).
 # 공백만 있는 문장("이름 표기 규칙")까지 받으면 일반 낱말이 이름으로 잡히므로 쌍점·세로줄을 요구한다.
@@ -259,14 +261,19 @@ _LABEL_SEP = r"(?:[:\s]{1,2}|[ \t]{1,3}|[ \t]{0,3}[:|][ \t]{0,3})"
 # 이름, 뒤정보"(뒤에 콤마로 다른 정보가 이어지는) 형태의 미탐 20건 중 8건이 이 두 라벨
 # 뒤였다. 이름 음절 수와 무관하게(2·3음절 모두) 라벨 자체가 어휘에 없어 통째로 샜다 —
 # "콤마 뒤 경계 판정 실패"가 아니라 순수한 어휘 누락이었다(라벨을 추가하면 그대로 잡힌다).
+# 서식의 짧은 라벨은 쌍점·세로줄이 있을 때만 이름 단서다(#603). "작성 완료"·"서명 요청" 같은
+# 일반 문장이 많아서 역할어 목록에 넣지 않는다.
+_FORM_LABELS_603 = ("작성", "서명", "발신", "수신", "참조", "결재")
 _FORM_LABELS = (
     "성명", "이름", "성함", "실명", "예금주", "명의자", "환자명", "고객명", "회원명",
     "수취인", "송금인", "입금자", "신청인", "신청자", "보호자", "대표자",
     "이력서 접수", "면허 갱신 신청",
-    # 서식의 짧은 라벨은 쌍점·세로줄이 있을 때만 이름 단서다(#603). "작성 완료"·"서명 요청" 같은
-    # 일반 문장이 많아서 역할어 목록에 넣지 않는다.
-    "작성", "서명", "발신", "수신", "참조", "결재",
-)
+) + _FORM_LABELS_603
+# 표 머리행은 이름 전용 라벨이 있는 줄로 먼저 본다. 수신·서명·작성 같은 #603 짧은 라벨만 있는 줄은
+# 그런 줄이 없을 때만 머리행으로 쓴다. 머리행에서는 라벨 칸을 전부 이름 열로 본다 — 라벨 하나만 고르면
+# "번호,수신,성명,연락처"의 성명 열처럼 다른 이름 열이 통째로 샌다(#674).
+_TABLE_NAME_HEADERS = frozenset(_FORM_LABELS) - frozenset(_FORM_LABELS_603)
+_TABLE_WEAK_NAME_HEADERS = frozenset(_FORM_LABELS_603)
 
 # "이름"은 사람 이름 그 자체를 가리키는 범용 메타 단서라 비인명 문맥("이름 정밀 탐지",
 # "파일 이름")과 자주 겹친다 — 정지어(_COMMON_WORDS) 필터를 면제하는 "강한 라벨"에서
@@ -285,6 +292,9 @@ _TWO_CHAR_TITLE_JOSA_END_RE = re.compile(r"^[가-힣]{2}[의가는를와과]$")
 # 본다 — 두 글자 값("정국"처럼 이름 끝 글자와 겹치는 꼴)은 이름일 가능성이 커서 그대로 둔다.
 _ORG_VALUE_LABELS = frozenset({"발신", "수신", "참조"})
 _ORG_VALUE_END_RE = re.compile(r"(?:팀|실|부|과|국|처|청)$")
+# 결재·발송 양식의 처리 상태 값(#603 — "작성: 완료", "결재: 대기", "참조: 관련 부서"). 이름으로는
+# 보지 않지만 나열은 끊지 않는다 — "수취인 | 본사씨,정민가"에서 나열까지 버리면 뒤 실명이 샌다(#674).
+_FORM_NOT_NAMES_603 = frozenset({"완료", "요청", "대기", "전체", "관련", "본사", "접수", "진행", "반려", "보류"})
 # 양식 칸에 이름 대신 들어가는 값과 표 머리행에 흔한 열 이름 — 끝의 조사·"입니다"를 뗀 값이
 # 이것과 **완전히 같을 때만** 이름으로 보지 않는다. 앞부분 일치로 거르면 "기재민"처럼 이 말로
 # 시작하는 실명이 샌다(#491 독립 검증).
@@ -298,9 +308,7 @@ _FORM_NOT_NAMES = frozenset({
     "설명", "소속", "직위", "직책", "연락처", "부서", "역할", "비고", "상태", "형식", "경로", "기본값",
     "버전", "관계", "은행", "학번", "타입", "번호", "주소", "전화", "날짜", "금액", "수량", "내용",
     "항목", "구분", "법인", "개인", "회사명", "팀명", "부모", "모친", "부친", "배우자", "대리인",
-    # 결재·발송 양식의 처리 상태 값(#603 — "작성: 완료", "결재: 대기", "참조: 관련 부서")
-    "완료", "요청", "대기", "전체", "관련", "본사", "접수", "진행", "반려", "보류",
-})
+}) | _FORM_NOT_NAMES_603
 # 은·이·가·도는 이름 끝 글자로도 흔해서("기재은", "재이") 떼지 않는다 — 떼면 "기재"가 되어 걸러지고 샌다.
 _FORM_VALUE_ENDING_RE = re.compile(r"(?:입니다|이며|이고|님|씨|[는을를의와과])$")
 
@@ -339,13 +347,15 @@ _FORM_NAME_RE = re.compile(
     r"(?=(?:" + _OPEN_ENDING_ALT + r")|(?:입니다|이며|이고|님|씨|[은는이가을를의와과도])?(?![가-힣]))"
 )
 
-_NAME_RE = re.compile(
+_NAME_PREFIX_PART = (
     # 역할어·직함 뒤에 조사가 붙은 형태("담당자는 홍길동", "예금주는 김민")도 잇는다 —
     # 서식 문장에서 흔한데 조사 하나 때문에 단서를 통째로 잃고 있었다.
     # 라벨 뒤 구분자는 양식에서 흔한 " : "·표 칸 " | "까지 받는다(#491). 구분자를
     # named group으로 잡아두는 이유는 #484 참고 — 콜론·세로줄처럼 명시적인 구분자가
     # 있으면(공백뿐인 경우와 달리) prefix가 좁은 양식 라벨이 아니어도 강한 단서로 본다.
     r"(?:(?P<prefix>" + _PREFIX_ALT + r")(?:은|는|이|가)?(?P<label_sep>" + _LABEL_SEP + r"))?"
+)
+_NAME_BODY = (
     # 성씨는 단어(어절) 시작이어야 한다 — 앞에 한글이 붙어 있으면 단어 중간이라 이름이 아니다(#158).
     # 이게 없으면 "감지되어"의 "지"(성씨 사전)부터 "지되어"가 이름으로 잡히고, 뒤 "양빈도"의 "양"을
     # 존칭으로 삼켜 오탐이 된다. 앞이 공백/문장부호/문두면 통과하므로 정상 이름은 그대로 잡힌다.
@@ -377,6 +387,10 @@ _NAME_RE = re.compile(
     r"|이랑|하고|처럼|부터|까지|보다|으로|로서|야|[" + _JOSA_CHARS_STR + r"]{1,2}(?:님|씨)?)?"
     r"(?![가-힣]))))"
 )
+_NAME_RE = re.compile(_NAME_PREFIX_PART + _NAME_BODY)
+# 앞 단서 없이 같은 자리를 이름으로 읽는다. prefix·label_sep 그룹은 늘 비어 있어 detect가 같은 코드로
+# 다룬다. "원고은 차장"처럼 실명 앞부분이 #603 직함+조사로 읽힌 자리를 다시 볼 때 쓴다(#674).
+_NAME_NO_PREFIX_RE = re.compile(r"(?:(?P<prefix>(?!))(?P<label_sep>(?!)))?" + _NAME_BODY)
 
 # 라벨 뒤에 나열한 이름 목록("참석자: 김민수, 이서연, 박지훈", #602). 라벨은 첫 이름에만 붙어서
 # 둘째 이름부터는 단서 없는 후보가 되어 버려졌다. 단서를 달고 잡힌 이름 바로 뒤에 나열 구분자와
@@ -384,7 +398,10 @@ _NAME_RE = re.compile(
 # 앞 이름에 붙은 존칭·직함("이서연님, …", "김민수 과장, …", "김민수 군, …")은 건너뛴다. 구분자는
 # 쉼표·가운뎃점(점 닮은꼴 포함)·슬래시 같은 문장부호, 이름에 붙은 "와·과·랑·이랑·하고", 띄어 쓴
 # "및·그리고·또는"이다.
-_LIST_SUFFIX = r"(?:[ \t]?(?:" + _SUFFIX_ALT + r"))?"
+# "김도현 박사랑 이하늘"의 "박사랑"은 실명이다. 원고·박사 뒤에 이음말 "랑"이 오면 직함으로 읽지 않는다(#674).
+_LIST_SUFFIX = (
+    r"(?:[ \t]?(?!(?:" + "|".join(_NAME_LIKE_TITLES_603) + r")랑[ \t])(?:" + _SUFFIX_ALT + r"))?"
+)
 _LIST_GAP_RE = re.compile(
     _LIST_SUFFIX
     + r"(?:[ \t]*[,，、·ㆍ・･•/][ \t]*|(?:와|과|이랑|랑|하고)[ \t]+|[ \t]+(?:및|그리고|또는)[ \t]+)"
@@ -451,9 +468,38 @@ _ALL_CUES = tuple(dict.fromkeys(_PREFIX_CUES + _SUFFIX_CUES + _TITLE_CUES))
 # 호칭 글자로 시작하는 실명까지 버리면 유출이다.
 _CUE_WORDS = frozenset(_ALL_CUES)
 
+# 나열 칸이 이 단서 낱말이면 나열을 끊는다. #603 단서는 빼서 전처럼 이어받는다 — 나열 중간의
+# "구매자"에서 끊으면 그 뒤 실명까지 샌다("참석자: 김민수, 구매자, 이서연", #674).
+_LIST_STOP_CUE_WORDS = _CUE_WORDS - _CUES_603
+_LIST_STOP_FORM_VALUES = _FORM_NOT_NAMES - _FORM_NOT_NAMES_603
+
 # 역할어·직함 + 조사("원장이", "차장은"). 앞 단서 뒤에서 이걸 이름으로 받아 소비하면, 그 직함이
 # 뒤 이름의 앞 단서가 되지 못해 뒤 이름이 샌다("담당자 : 차장은 김민수", #491 독립 검증).
-_CUE_WITH_JOSA_RE = re.compile(r"(?:" + _PREFIX_ALT + r")(?:은|는|이|가)")
+# 실명과 겹치는 #603 직함은 뺀다. "원고은"처럼 그 직함 글자로 시작하는 실명을 직함+조사로 읽어
+# 버린다(#674).
+_CUE_WITH_JOSA_ALT = "|".join(
+    sorted(
+        dict.fromkeys(_PREFIX_CUES + sorted(_TITLE_ONLY_CUES - frozenset(_NAME_LIKE_TITLES_603))),
+        key=len,
+        reverse=True,
+    )
+)
+_CUE_WITH_JOSA_RE = re.compile(r"(?:" + _CUE_WITH_JOSA_ALT + r")(?:은|는|이|가)")
+# 양식·표·나열 칸 값은 #603 전 단서로만 직함+조사를 본다. 이 칸은 성씨 사전 밖 이름도 받아서("피고은"),
+# #603 단서+조사로 버리면 전부터 가리던 이름과 그 뒤 나열이 샌다(#674).
+_CUE_WITH_JOSA_OLD_RE = re.compile(
+    r"(?:"
+    + "|".join(
+        sorted(
+            dict.fromkeys(
+                [c for c in _PREFIX_CUES if c not in _CUES_603] + sorted(_TITLE_ONLY_CUES - _CUES_603)
+            ),
+            key=len,
+            reverse=True,
+        )
+    )
+    + r")(?:은|는|이|가)"
+)
 
 
 def _is_hangul(ch: str) -> bool:
@@ -559,6 +605,12 @@ class NameDetector(Detector):
         # 버려질 때, 그 "성명"이 실제로는 다음 이름의 앞 단서다. finditer는 "신청자 성명"을
         # 통째로 소비하고 지나가 "김하늘"이 단서 없는 이름이 돼 새어나갔다.
         while (m := _NAME_RE.search(text, pos)) is not None:
+            if m.group("prefix") in _NAME_LIKE_TITLES_603 and m.end("prefix") < m.start("label_sep"):
+                # "원고은 차장"처럼 실명 앞부분과 겹치는 #603 직함+조사는, 그 자리를 이름으로 읽었을 때 뒤
+                # 단서가 붙으면 이름으로 본다. 아니면 "원고는 김민수"처럼 직함+조사로 둔다(#674).
+                alt = _NAME_NO_PREFIX_RE.match(text, m.start("prefix"))
+                if alt is not None and (alt.group("suffix") is not None or alt.group("paren") is not None):
+                    m = alt
             name_start = m.start("name")
             prefix = m.group("prefix")
             suffix = m.group("suffix")
@@ -582,6 +634,11 @@ class NameDetector(Detector):
                 # 뒤 직함을 달고 잡혔다면 그 직함 자리에서 다시 찾는다 — "고객이 대리 김민수에게"는
                 # "고객이"(버림)+"대리"로 먼저 읽히는데, "대리"까지 소비하면 김민수의 앞 단서가
                 # 사라져 이름이 통째로 샌다(#580). 직함은 후보보다 뒤에 있어 늘 앞으로 나아간다.
+                if prefix is not None and prefix not in _CUES_603 and m.group("name") in _CUES_603:
+                    # 기존 앞 단서 뒤 이름 자리의 #603 단서 낱말은 버리되, 그 뒤 나열은 #603 전처럼 이어받는다
+                    # ("의뢰인 : 구매자,정민가", 표의 "성명\n신고인,장민지"). 나열 시작점까지 잃으면 뒤 실명이
+                    # 샌다(#674).
+                    list_seeds.append((m.end("name"), has_explicit_sep or prefix in _STRONG_LABEL_PREFIXES))
                 if prefix is not None and name_start > pos:
                     pos = name_start
                 elif suffix is not None:
@@ -590,6 +647,10 @@ class NameDetector(Detector):
                     pos = m.end()
                 continue
             pos = m.end()
+            if suffix in _NAME_LIKE_TITLES_603:
+                # "원고"·"박사"는 다음 이름의 앞머리일 수 있다("오늘 원고은 님이"). 그 직함 자리부터 다시
+                # 찾아, 직함으로 소비한 글자가 뒤 이름에서 빠지지 않게 한다(#674).
+                pos = m.start("suffix")
             if name_start > m.start() and _CUE_WITH_JOSA_RE.fullmatch(m.group("name")):
                 # 직함+조사는 이름이 아니다. 결과에 남기지 않고, 그 직함부터 다시 찾아 뒤 이름의 단서로
                 # 쓴다. 예전에는 "더 가리기"로 남겨 "차장은"이 이름으로 보고됐다(#533).
@@ -613,6 +674,10 @@ class NameDetector(Detector):
                 prefix in _TITLE_ONLY_CUES and suffix is None and paren_title is None
             )
             if title_only and len(m.group("name")) < 3:
+                if prefix in _TITLE_CUES_603:
+                    # #603 직함을 앞 단서로 읽어 버린 두 글자 이름은 이름 자리부터 다시 찾는다. 괄호 같은
+                    # 다른 단서로 전처럼 잡히게 한다("피고 김민(35세)", #674).
+                    pos = name_start
                 continue
             if (
                 suffix in _TITLE_CUES_603
@@ -621,8 +686,8 @@ class NameDetector(Detector):
                 and _TWO_CHAR_TITLE_JOSA_END_RE.search(m.group("name"))
             ):
                 continue  # "정부의 책임"의 "정부의"처럼 낱말+조사를 두 글자 직함 앞 이름으로 보지 않는다(#603)
-            if suffix == "배상" and len(m.group("name")) < 3:
-                continue  # "손해 배상"의 두 글자 낱말을 이름으로 보지 않는다(#603)
+            if suffix == "배상" and len(m.group("name")) < 3 and (prefix is None or prefix in _CUES_603):
+                continue  # "손해 배상"의 두 글자 낱말을 이름으로 보지 않는다(#603). 기존 앞 단서가 있으면 받는다(#674)
             cues = {c for c in (prefix, suffix) if c is not None}
             if (
                 cues
@@ -640,6 +705,10 @@ class NameDetector(Detector):
                 if m.group("name") in _PAREN_COMMON_WORDS:
                     continue
 
+            if prefix in _CUES_603 and suffix is not None:
+                # #603 앞 단서로 받은 후보 뒤의 단서는 다음 이름의 앞 단서일 수 있다("구매자 문의 담당자
+                # 이서연"). #603 전처럼 그 단서 자리부터 다시 찾는다(#674).
+                pos = m.start("suffix")
             confidence = 0.75 if (has_prefix and has_suffix) else 0.5
             if confidence < self.min_confidence:
                 continue
@@ -655,7 +724,7 @@ class NameDetector(Detector):
             )
             if has_prefix:
                 list_seeds.append((m.end("name"), has_explicit_sep or prefix in _STRONG_LABEL_PREFIXES))
-        form_extra = self._form_names(text, found)
+        form_extra = self._form_names(text, found, list_seeds)
         table_extra = self._table_names(text, found + form_extra)
         slash_extra = self._slash_record_names(text, found + form_extra + table_extra)
         found.extend(form_extra)
@@ -702,10 +771,10 @@ class NameDetector(Detector):
                 name = m.group("name")
                 if (
                     (space_only and len(name) < _LIST_SPACE_NAME_LEN)
-                    or name in _CUE_WORDS
+                    or name in _LIST_STOP_CUE_WORDS
                     or _is_label_word_at(text, start)
-                    or _FORM_VALUE_ENDING_RE.sub("", name) in _FORM_NOT_NAMES
-                    or _CUE_WITH_JOSA_RE.fullmatch(name)
+                    or _FORM_VALUE_ENDING_RE.sub("", name) in _LIST_STOP_FORM_VALUES
+                    or _CUE_WITH_JOSA_OLD_RE.fullmatch(name)
                     or name in _LIST_NOT_NAMES
                     or name[-1] in _LIST_NOT_NAME_LAST
                     or (len(name) == 2 and text.startswith(_TITLE_ONLY_PREFIXES, end))
@@ -743,12 +812,15 @@ class NameDetector(Detector):
         nxt = text[end : end + 1]
         return not nxt or nxt in "\r\n" or nxt in _LIST_TAIL_PUNCT
 
-    def _form_names(self, text: str, found: list[Detection]) -> list[Detection]:
+    def _form_names(
+        self, text: str, found: list[Detection], list_seeds: list[tuple[int, bool]]
+    ) -> list[Detection]:
         """양식 라벨(성명·예금주 등)과 쌍점·세로줄 뒤의 이름을 찾는다(#491).
 
         성씨 사전 밖 이름("성명: 류서윤")도 받는다. 양식 칸의 값은 이름일 가능성이 높아서, 위 규칙이
         일반명사로 보고 버린 "이하은"·"이상은"도 받고, 위 규칙이 "김가"까지만 잡은 "김가을"은 끝까지
-        넓힌다. 위 규칙이 이미 통째로 덮은 구간은 다시 넣지 않는다.
+        넓힌다. 위 규칙이 이미 통째로 덮은 구간은 다시 넣지 않는다. 값이 #603 상태 값이면 이름으로
+        보지 않고, 그 뒤 나열의 출발점만 list_seeds에 남긴다(#674).
         """
         if self.min_confidence > 0.75:
             return []
@@ -763,11 +835,15 @@ class NameDetector(Detector):
             value = _FORM_VALUE_ENDING_RE.sub("", name)
             if name in _FORM_LABELS or value in _FORM_LABELS or _is_label_word_at(text, start, strong=True):
                 # 값 자리에 다른 라벨이 왔다("성명: 예금주: 류서윤") — 그 라벨부터 다시 찾는다
+                if value in _FORM_LABELS_603:
+                    list_seeds.append((end, True))  # "보호자: 결재, 김도현"의 뒤 나열은 #603 전처럼 받는다(#674)
                 pos = start
                 continue
             pos = end
+            if value in _FORM_NOT_NAMES_603:
+                list_seeds.append((end, True))
             # 직함+조사("신청자 : 차장은 …")도 값이 아니다. 뒤 이름은 위 규칙이 직함을 단서로 잡는다(#533)
-            if value in _FORM_NOT_NAMES or _CUE_WITH_JOSA_RE.fullmatch(name) or all(covered[start:end]):
+            if value in _FORM_NOT_NAMES or _CUE_WITH_JOSA_OLD_RE.fullmatch(name) or all(covered[start:end]):
                 continue
             if m.group("label") in _ORG_VALUE_LABELS and len(name) >= 3 and _ORG_VALUE_END_RE.search(name):
                 continue  # 공문 발신·수신·참조 칸은 사람보다 부서·기관이 흔하다("홍보팀")
@@ -801,15 +877,24 @@ class NameDetector(Detector):
         offset = 0
         i = 0
         n_lines = len(lines)
+        # #603 짧은 라벨 머리행에서 이름 라벨 머리행으로 넘어갈 때 앞 머리행의 (칸 수, 이름 열)
+        carry: tuple[int, list[int]] | None = None
         while i < n_lines:
             line = lines[i]
             header = self._table_header(line.rstrip("\r\n"))
+            weak = header is None
+            if weak:
+                header = self._table_header(line.rstrip("\r\n"), _TABLE_WEAK_NAME_HEADERS)
             if header is None:
+                carry = None
                 offset += len(line)
                 i += 1
                 continue
 
-            sep, name_col, n_cols = header
+            sep, name_cols, n_cols = header
+            if carry is not None and carry[0] == n_cols:
+                name_cols = sorted(set(name_cols) | set(carry[1]))  # 두 머리행의 이름 열을 다 본다
+            carry = None
             offset += len(line)
             i += 1
             while i < n_lines:
@@ -824,19 +909,25 @@ class NameDetector(Detector):
                     offset += len(row)
                     i += 1
                     continue  # 마크다운 구분행("|---|")은 건너뛰고 계속한다
-                value, v_start, v_end = cells[name_col]
-                start, end = offset + v_start, offset + v_end
-                if self._looks_like_table_name(value) and not all(covered[start:end]):
-                    extra.append(
-                        Detection(
-                            kind=self.kind,
-                            start=start,
-                            end=end,
-                            text=value,
-                            confidence=0.75,
-                            detector=self.__class__.__name__,
+                if weak and self._table_header(row_text) is not None:
+                    # #603 짧은 라벨 줄(결재란 "작성 | 검토 | 승인") 아래에 이름 전용 라벨 머리행이 오면
+                    # 그 줄부터 머리행으로 다시 본다(#674)
+                    carry = (n_cols, name_cols)
+                    break
+                for name_col in name_cols:
+                    value, v_start, v_end = cells[name_col]
+                    start, end = offset + v_start, offset + v_end
+                    if self._looks_like_table_name(value) and not all(covered[start:end]):
+                        extra.append(
+                            Detection(
+                                kind=self.kind,
+                                start=start,
+                                end=end,
+                                text=value,
+                                confidence=0.75,
+                                detector=self.__class__.__name__,
+                            )
                         )
-                    )
                 offset += len(row)
                 i += 1
         return extra
@@ -904,17 +995,22 @@ class NameDetector(Detector):
         return _SLASH_RECORD_DETAIL_RE.search(cell) is not None
 
     @staticmethod
-    def _table_header(line: str) -> tuple[str, int, int] | None:
-        """이 줄이 표 머리행이면 (구분자, 이름 열 인덱스, 전체 칸 수)를 돌려준다."""
+    def _table_header(
+        line: str, require: frozenset[str] = _TABLE_NAME_HEADERS
+    ) -> tuple[str, list[int], int] | None:
+        """이 줄이 표 머리행이면 (구분자, 이름 열 인덱스들, 전체 칸 수)를 돌려준다.
+
+        require에 든 라벨 칸이 하나라도 있어야 머리행이다. 이름 열은 양식 라벨 칸 전부다.
+        """
         for sep in _TABLE_SEPS:
             if sep not in line:
                 continue
             cells = NameDetector._table_cells(line, sep)
             if cells is None or len(cells) < 2:
                 continue
-            for idx, (value, _start, _end) in enumerate(cells):
-                if value in _FORM_LABELS:
-                    return sep, idx, len(cells)
+            if any(value in require for value, _start, _end in cells):
+                cols = [idx for idx, (value, _start, _end) in enumerate(cells) if value in _FORM_LABELS]
+                return sep, cols, len(cells)
         return None
 
     @staticmethod
@@ -960,6 +1056,6 @@ class NameDetector(Detector):
             return False
         if value in _FORM_LABELS or value in _FORM_NOT_NAMES:
             return False
-        if _CUE_WITH_JOSA_RE.fullmatch(value):
+        if _CUE_WITH_JOSA_OLD_RE.fullmatch(value):
             return False
         return not _is_label_word_at(value, 0, strong=True)
