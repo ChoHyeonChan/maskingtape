@@ -107,3 +107,10 @@ def test_trailing_saeng_cue_does_not_match_unrelated_words_starting_with_saeng()
         "2024년 3월 1일 생명 연장 장치.",
     ):
         assert detect(text) == [], text
+
+
+def test_date_followed_by_dash_digits_that_are_not_an_rrn_is_still_a_birthdate():
+    # 주민번호 형태가 아닌 "-숫자"가 날짜 뒤에 와도 날짜는 생년월일로 가린다(#637)
+    found = detect("생년월일 19800101-12345678")
+    assert len(found) == 1
+    assert found[0].text == "19800101"

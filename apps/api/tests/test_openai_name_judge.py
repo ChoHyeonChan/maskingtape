@@ -75,6 +75,10 @@ def _http_error(status: int, body: dict | None = None) -> urllib.error.HTTPError
     return urllib.error.HTTPError(OPENAI_RESPONSES_URL, status, "error", {}, fp)
 
 
+def _http_error_raw(status: int, body: bytes) -> urllib.error.HTTPError:
+    return urllib.error.HTTPError(OPENAI_RESPONSES_URL, status, "error", {}, io.BytesIO(body))
+
+
 class _BrokenBody(io.BytesIO):
     """에러 본문을 읽는 도중 연결이 끊긴다(#625 후속)."""
 
@@ -178,9 +182,21 @@ def test_text_over_the_backstop_is_rejected_before_sending() -> None:
             "bad_schema",
         ),
         (None, b"not json", "bad_response"),
+        (None, b"[" * 60_000, "bad_response"),
+        (_response(content=[{"type": "output_text", "text": "[" * 5_000}]), None, "bad_schema"),
         (None, b"x" * (64 * 1024 + 1), "response_too_large"),
     ],
-    ids=["refused", "incomplete", "empty", "text", "names-not-list", "not-json", "too-large"],
+    ids=[
+        "refused",
+        "incomplete",
+        "empty",
+        "text",
+        "names-not-list",
+        "not-json",
+        "deep-body",
+        "deep-output-text",
+        "too-large",
+    ],
 )
 def test_bad_responses_raise_a_code_without_text_or_model_output(payload, raw, code) -> None:
     judge, _ = _judge(payload, raw=raw)
@@ -211,6 +227,7 @@ def test_bad_responses_raise_a_code_without_text_or_model_output(payload, raw, c
         (http.client.BadStatusLine("bad status"), "network"),
         # 429 에러 본문을 읽다 끊겨도 같은 그물에 걸려야 한다. 본문은 지출 한도 구분에만 쓴다(#625).
         (_http_error_with_broken_body(429), "rate_limited"),
+        (_http_error_raw(429, b"[" * 8_000), "rate_limited"),
     ],
 )
 def test_transport_errors_become_codes_without_details(error, code) -> None:
