@@ -97,7 +97,7 @@ PyPI 코어 패키지(`maskingtape`)는 런타임 외부 의존성이 없어 표
 
 ### A-3. MCP 서버 (Python, 소스로 배포, 사용자가 설치할 때 받음)
 
-표를 만든 환경(Python 3.13.2, Windows)의 설치본 기준이다. 조건이 붙은 패키지는 운영체제나 파이썬 버전에 따라 설치 여부가 달라진다.
+표를 만든 환경(Python 3.13.5, Windows)의 설치본 기준이다. 조건이 붙은 패키지는 운영체제나 파이썬 버전에 따라 설치 여부가 달라진다.
 
 | 패키지 | 버전 | 라이선스 | 저장소 | 비고 |
 |---|---|---|---|---|
@@ -126,7 +126,7 @@ PyPI 코어 패키지(`maskingtape`)는 런타임 외부 의존성이 없어 표
 | python-multipart | 0.0.32 | Apache-2.0 | https://github.com/Kludex/python-multipart | 경로: maskingtape-mcp → mcp → python-multipart |
 | pywin32 | 312 | PSF-2.0 | https://github.com/mhammond/pywin32 | 경로: maskingtape-mcp → mcp → pywin32. 조건: `sys_platform == "win32" and python_version < "3.14"` |
 | referencing | 0.37.0 | MIT | https://github.com/python-jsonschema/referencing | 경로: maskingtape-mcp → mcp → jsonschema → referencing |
-| rpds-py | 2026.6.3 | MIT | https://github.com/crate-py/rpds | 경로: maskingtape-mcp → mcp → jsonschema → rpds-py |
+| rpds-py | 2026.9.1 | MIT | https://github.com/crate-py/rpds | 경로: maskingtape-mcp → mcp → jsonschema → rpds-py |
 | sse-starlette | 3.5.0 | BSD-3-Clause | https://github.com/sysid/sse-starlette | 경로: maskingtape-mcp → mcp → sse-starlette |
 | starlette | 1.7.0 | BSD-3-Clause | https://github.com/Kludex/starlette | 경로: maskingtape-mcp → mcp → starlette. 조건: `python_version < "3.14"` |
 | typing-extensions | 4.16.0 | PSF-2.0 | https://github.com/python/typing_extensions | 경로: maskingtape-mcp → mcp → typing-extensions |
@@ -189,7 +189,7 @@ PyPI 코어 패키지(`maskingtape`)는 런타임 외부 의존성이 없어 표
 
 npm 개발 의존성 163개: MIT 114 · Apache-2.0 25 · MPL-2.0 12 · ISC 3 · BSD-2-Clause 2 · BSD-3-Clause 2 · MIT-0 2 · 0BSD 1 · BlueOak-1.0.0 1 · CC0-1.0 1
 
-Python 개발 도구(pytest·ruff·httpx2와 그 전이, Python 3.13.2, Windows) 17개: MIT 7 · - 3 · BSD-3-Clause 3 · Apache-2.0 OR BSD-2-Clause 1 · BSD 1 · BSD-2-Clause 1 · PSF-2.0 1
+Python 개발 도구(pytest·ruff·httpx2와 그 전이, Python 3.13.5, Windows) 17개: MIT 7 · - 3 · BSD-3-Clause 3 · Apache-2.0 OR BSD-2-Clause 1 · BSD 1 · BSD-2-Clause 1 · PSF-2.0 1
 
 설치되지 않아 확인하지 못한 패키지: exceptiongroup, httpx2-jsfetch, tomli
 
@@ -223,7 +223,7 @@ Python 개발 도구(pytest·ruff·httpx2와 그 전이, Python 3.13.2, Windows)
 
 ## 부록 B: 허용 목록 밖 라이선스에 대한 판단
 
-부록 A-6에 모인 패키지다. 모두 **우리가 직접 선언하지 않았고, 수정하지 않고 그대로 쓴다.**
+부록 A-6에 모인 패키지와, 허용 목록 안이지만 표기가 달라 근거를 남기는 패키지다. 모두 **우리가 직접 선언하지 않았고, 수정하지 않고 그대로 쓴다.**
 
 ### certifi (MPL-2.0) — MCP 서버
 
@@ -247,6 +247,14 @@ Python 개발 도구(pytest·ruff·httpx2와 그 전이, Python 3.13.2, Windows)
 - 우리는 vector_math를 수정하지 않고 소스를 재배포하지도 않는다. 데스크톱 앱은 소스로 배포되고, 빌드할 때 pub이 받아 온다.
 - 결론: **의무 없음.** 설치 파일로 배포하게 되면 BSD-3-Clause의 바이너리 고지 조건이 생기므로, 앱의 라이선스 화면에 이 고지가 들어가는지 그때 확인한다.
 
+### cffi (MIT-0), cryptography (Apache-2.0 OR BSD-3-Clause) — MCP 서버
+
+- 부록 A-6에는 없지만(생성기가 허용으로 판정), 팀 허용 목록의 표기(MIT·Apache-2.0·BSD·ISC)와 글자가 달라 근거를 남긴다(#500).
+- **직접 의존이 아니다.** mcp가 `pyjwt[crypto]`로 요청한 extra를 따라 cryptography → cffi → pycparser가 설치된다. 생성기가 extra 요구사항을 따라가지 않아 이번 수정 전까지 부록 A에서 빠져 있었다.
+- MIT-0은 MIT에서 "저작권·허가 고지를 사본에 포함해야 한다"는 조건까지 뺀 라이선스다(OSI 승인). MIT보다 조건이 적으므로 MIT를 허용하는 팀 기준을 그대로 만족한다.
+- cryptography는 Apache-2.0과 BSD-3-Clause 중 하나를 고르는 이중 라이선스이고, 둘 다 허용 목록 안이다.
+- 결론: **허용 목록 안, 의무 없음.**
+
 ### lightningcss 계열 (MPL-2.0), lru-cache (BlueOak-1.0.0), mdn-data (CC0-1.0) — 개발 도구
 
 - 셋 다 웹 데모의 **빌드·테스트 도구**(vite, jsdom)가 끌어오는 패키지라 **배포물에 포함되지 않는다.** 빌드 결과물(`apps/web/dist/`)에 이 패키지들의 코드가 없다. CSS에 남는 `--lightningcss-light`·`--lightningcss-dark`는 lightningcss가 CSS를 변환하면서 붙인 변수 이름이다(2026-09-17 빌드로 확인).
@@ -263,15 +271,6 @@ Python 개발 도구(pytest·ruff·httpx2와 그 전이, Python 3.13.2, Windows)
 - 결론: **배포물 미포함, 의무 없음.**
 
 ## 부록 C: AI 모델 상세
-### cffi (MIT-0), cryptography (Apache-2.0 OR BSD-3-Clause) — MCP 서버
-
-- 부록 A-6에는 없지만(생성기가 허용으로 판정), 팀 허용 목록의 표기(MIT·Apache-2.0·BSD·ISC)와 글자가 달라 근거를 남긴다(#500).
-- **직접 의존이 아니다.** mcp가 `pyjwt[crypto]`로 요청한 extra를 따라 cryptography → cffi → pycparser가 설치된다. 생성기가 extra 요구사항을 따라가지 않아 이번 수정 전까지 부록 A에서 빠져 있었다.
-- MIT-0은 MIT에서 "저작권·허가 고지를 사본에 포함해야 한다"는 조건까지 뺀 라이선스다(OSI 승인). MIT보다 조건이 적으므로 MIT를 허용하는 팀 기준을 그대로 만족한다.
-- cryptography는 Apache-2.0과 BSD-3-Clause 중 하나를 고르는 이중 라이선스이고, 둘 다 허용 목록 안이다.
-- 결론: **허용 목록 안, 의무 없음.**
-
-## 부록 C: AI 모델 상세 (Qwen2.5-7B-Instruct)
 
 모델 가중치는 정해진 SBOM 양식이 없어, 확인할 수 있는 정보를 모두 적는다(2026년 9월 OpenUP 컨설팅 권고).
 
