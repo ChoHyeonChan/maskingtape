@@ -116,6 +116,30 @@ def test_hybrid_falls_back_to_rule_when_judge_is_unavailable(monkeypatch) -> Non
     assert [d["kind"] for d in payload["detections"]] == ["phone"]
 
 
+@pytest.mark.parametrize(
+    "bad_key",
+    [
+        "test-key\nX-Injected: 1",
+        "test-key한",
+        "test-key\u200b",
+    ],
+    ids=["newline", "non-ascii", "zero-width-space"],
+)
+def test_hybrid_falls_back_to_rule_when_openai_key_is_invalid(monkeypatch, bad_key: str) -> None:
+    monkeypatch.setenv("OPENAI_API_KEY", bad_key)
+    client = _client(name_judge=None, override_name_judge=False)
+
+    response = client.post("/scan", json={"text": _TEXT, "mode": "hybrid"})
+
+    assert response.status_code == 200
+    assert bad_key not in response.text
+    payload = response.json()
+    assert payload["mode_used"] == "rule"
+    assert payload["hybrid_failed"] is True
+    assert payload["hybrid_failure_code"] == "name_judge_unavailable"
+    assert [d["kind"] for d in payload["detections"]] == ["phone"]
+
+
 def test_hybrid_falls_back_to_rule_on_name_judge_error() -> None:
     judge = FailingNameJudge("refused")
     client = _client(judge)

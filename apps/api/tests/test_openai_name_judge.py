@@ -96,6 +96,20 @@ def _assert_no_attached_details(error: NameJudgeError) -> None:
     assert error.__context__ is None or error.__suppress_context__
 
 
+def _assert_key_not_in_exception_tree(error: BaseException, key: str) -> None:
+    seen: set[int] = set()
+    stack: list[BaseException | None] = [error]
+    while stack:
+        current = stack.pop()
+        if current is None or id(current) in seen:
+            continue
+        seen.add(id(current))
+        assert key not in str(current)
+        assert key not in repr(current)
+        assert all(key not in repr(arg) for arg in current.args)
+        stack.extend([current.__cause__, current.__context__])
+
+
 def test_sends_only_the_masked_text_with_store_off_and_a_strict_schema() -> None:
     judge, opener = _judge(_response(["이도현"]))
 
@@ -255,11 +269,46 @@ def test_empty_key_is_rejected() -> None:
         OpenAINameJudge("  ")
 
 
+@pytest.mark.parametrize(
+    "bad_key",
+    [
+        "test-key\nX-Injected: 1",
+        "test-key한",
+        "test-key\u200b",
+    ],
+    ids=["newline", "non-ascii", "zero-width-space"],
+)
+def test_invalid_api_key_is_rejected_without_leaking_the_key(bad_key: str) -> None:
+    with pytest.raises(ValueError) as caught:
+        OpenAINameJudge(bad_key)
+
+    assert str(caught.value) == "OpenAI API key contains invalid characters"
+    _assert_key_not_in_exception_tree(caught.value, bad_key)
+
+
 def test_from_env_is_none_without_a_key(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     assert openai_name_judge_from_env() is None
 
     monkeypatch.setenv("OPENAI_API_KEY", "   ")
+    assert openai_name_judge_from_env() is None
+
+
+@pytest.mark.parametrize(
+    "bad_key",
+    [
+        "test-key\nX-Injected: 1",
+        "test-key한",
+        "test-key\u200b",
+    ],
+    ids=["newline", "non-ascii", "zero-width-space"],
+)
+def test_from_env_disables_judge_for_invalid_keys(
+    monkeypatch: pytest.MonkeyPatch,
+    bad_key: str,
+) -> None:
+    monkeypatch.setenv("OPENAI_API_KEY", bad_key)
+
     assert openai_name_judge_from_env() is None
 
 
