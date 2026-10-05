@@ -139,3 +139,18 @@ def test_603_cues_do_not_take_over_old_paths(text, name):
 )
 def test_603_prefix_does_not_steal_the_next_cue(text, name):
     assert covered(text, name), NameDetector().detect(text)
+
+
+@pytest.mark.parametrize(
+    "text, name",
+    [
+        # #603 앞 단서 뒤 일반어를 건너뛰고 다시 찾은 직함이 두 글자 이름의 유일한 앞 단서여도, 괄호 같은
+        # 다른 단서로 잡는다(#676)
+        ("구매자 정보\n대표 이준(인)", "이준"),
+        ("피고인 조사\n대표 이준(42세)", "이준"),
+        ("구매자 정보 대표 이준(인) 담당자 김민수", "이준"),
+        ("구매자 정보 대표 이준(인) 담당자 김민수", "김민수"),
+    ],
+)
+def test_resumed_cue_keeps_two_char_name_with_other_cue(text, name):
+    assert covered(text, name), NameDetector().detect(text)
