@@ -3,6 +3,7 @@
 
 import http.client
 import io
+import json
 import urllib.error
 
 import pytest
@@ -115,6 +116,30 @@ def test_hybrid_falls_back_to_rule_when_judge_is_unavailable(monkeypatch) -> Non
     assert [d["kind"] for d in payload["detections"]] == ["phone"]
 
 
+@pytest.mark.parametrize(
+    "bad_key",
+    [
+        "test-key\nX-Injected: 1",
+        "test-key한",
+        "test-key\u200b",
+    ],
+    ids=["newline", "non-ascii", "zero-width-space"],
+)
+def test_hybrid_falls_back_to_rule_when_openai_key_is_invalid(monkeypatch, bad_key: str) -> None:
+    monkeypatch.setenv("OPENAI_API_KEY", bad_key)
+    client = _client(name_judge=None, override_name_judge=False)
+
+    response = client.post("/scan", json={"text": _TEXT, "mode": "hybrid"})
+
+    assert response.status_code == 200
+    assert bad_key not in response.text
+    payload = response.json()
+    assert payload["mode_used"] == "rule"
+    assert payload["hybrid_failed"] is True
+    assert payload["hybrid_failure_code"] == "name_judge_unavailable"
+    assert [d["kind"] for d in payload["detections"]] == ["phone"]
+
+
 def test_hybrid_falls_back_to_rule_on_name_judge_error() -> None:
     judge = FailingNameJudge("refused")
     client = _client(judge)
@@ -186,6 +211,46 @@ class RaisingOpener:
         raise self.error
 
 
+class BodyResponse:
+    def __init__(self, body: bytes) -> None:
+        self._body = io.BytesIO(body)
+
+    def read(self, size: int = -1) -> bytes:
+        return self._body.read(size)
+
+    def __enter__(self) -> "BodyResponse":
+        return self
+
+    def __exit__(self, *exc: object) -> None:
+        return None
+
+
+class BodyOpener:
+    def __init__(self, body: bytes) -> None:
+        self.body = body
+
+    def open(self, request, timeout: float):
+        return BodyResponse(self.body)
+
+
+def _openai_response_body(output_text: str) -> bytes:
+    return json.dumps(
+        {
+            "object": "response",
+            "status": "completed",
+            "output": [
+                {
+                    "type": "message",
+                    "role": "assistant",
+                    "status": "completed",
+                    "content": [{"type": "output_text", "text": output_text, "annotations": []}],
+                }
+            ],
+        },
+        ensure_ascii=False,
+    ).encode("utf-8")
+
+
 @pytest.mark.parametrize(
     "error",
     [http.client.IncompleteRead(b"partial"), http.client.BadStatusLine("bad status")],
@@ -220,6 +285,52 @@ def test_hybrid_falls_back_when_a_rate_limit_error_body_breaks() -> None:
     payload = response.json()
     assert payload["mode_used"] == "rule"
     assert payload["hybrid_failure_code"] == "rate_limited"
+
+
+@pytest.mark.parametrize(
+    ("judge", "code"),
+    [
+        (
+            OpenAINameJudge(
+                "test-key-not-a-real-openai-key",
+                opener=BodyOpener(b"[" * 60_000),
+            ),
+            "bad_response",
+        ),
+        (
+            OpenAINameJudge(
+                "test-key-not-a-real-openai-key",
+                opener=BodyOpener(_openai_response_body("[" * 5_000)),
+            ),
+            "bad_schema",
+        ),
+        (
+            OpenAINameJudge(
+                "test-key-not-a-real-openai-key",
+                opener=RaisingOpener(
+                    urllib.error.HTTPError(
+                        "https://api.openai.com/v1/responses",
+                        429,
+                        "error",
+                        {},
+                        io.BytesIO(b"[" * 8_000),
+                    )
+                ),
+            ),
+            "rate_limited",
+        ),
+    ],
+    ids=["deep-response-body", "deep-output-text", "deep-rate-limit-body"],
+)
+def test_hybrid_falls_back_when_openai_json_is_too_deep(judge, code) -> None:
+    response = _client(judge).post("/scan", json={"text": _TEXT, "mode": "hybrid"})
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["mode_used"] == "rule"
+    assert payload["hybrid_failed"] is True
+    assert payload["hybrid_failure_code"] == code
+    assert [d["kind"] for d in payload["detections"]] == ["phone"]
 
 
 def _client(
