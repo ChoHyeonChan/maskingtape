@@ -912,8 +912,8 @@ core가 미탐을 더 막아도 점수가 거의 움직이지 않는다. 반대 
 ("담당자는 ○○○예요")이 새기 시작한 회귀인데 벤치 점수는 그대로였다.
 
 `bench/datasets/open_misses_v1.jsonl`은 core 이슈 18건의 재현 문장과 **같은 모양**으로 새로
-쓴 합성 문장 580건(29개 태그 × 20건)이다. 처음(#610)에는 13건 360건이었고, #653에서 #636~#640을,
-#659에서 #655~#658을 더했다. 이슈 본문 문장을 복사하지 않고 값만 시드로 새로
+쓴 합성 문장 620건(31개 태그 × 20건)이다. 처음(#610)에는 13건 360건이었고, #653에서 #636~#640을,
+#659에서 #655~#658을, #680에서 #685·#686을 더했다. 이슈 본문 문장을 복사하지 않고 값만 시드로 새로
 뽑았다. 조사는 받침에 맞춰 고른다(이/가, 은/는, 으로/로).
 
 ```bash
@@ -966,10 +966,10 @@ python -m bench.evaluators.compare_open_misses_across_commits bench/datasets/ope
 통째로 남는다(미탐 10건). #594의 부분 6건은 지역 이름 뒤 숫자 일부가 다른 종류(전화 등)로
 우연히 잡힌 경우다.
 
-### 지금 수치 (2026-10-05, main `fafefa8`, 규칙 전용)
+### 지금 수치 (2026-10-05, main `5744f73`, 규칙 전용)
 
 core가 이 세트의 이슈를 하나씩 고치면서 바뀐 수치다. "시작"은 그 태그를 세트에 넣었을 때의
-재현율이다(#636~#640은 #653에서 넣은 `6b54a75`, #655~#658은 #659에서 넣은 `911c27c` 기준).
+재현율이다(#636~#640은 #653에서 넣은 `6b54a75`, #655~#658은 #659에서 넣은 `911c27c`, #685·#686은 `5744f73` 기준).
 
 | core 이슈 | 태그 | 시작 | 지금 | 상태 |
 |---|---|---|---|---|
@@ -983,26 +983,29 @@ core가 이 세트의 이슈를 하나씩 고치면서 바뀐 수치다. "시작
 | [#603](https://github.com/ChoHyeonChan/maskingtape/issues/603) 단서 어휘 (태그 3개) | name_cue_* | 0.000 | **1.000** | 고침 (PR #647) |
 | [#604](https://github.com/ChoHyeonChan/maskingtape/issues/604) 이름 뒤 괄호 | name_paren_after | 0.000 | **1.000** | 고침 (PR #651) |
 | [#605](https://github.com/ChoHyeonChan/maskingtape/issues/605) 주소 꼬리 (태그 3개) | address_tail_* | 0.000 | **1.000** | 고침 (PR #624) |
-| [#606](https://github.com/ChoHyeonChan/maskingtape/issues/606) "시"를 뗀 시 이름 | address_city_without_si | 0.000 | 0.000 | 열림 (부분 10, 미탐 10) |
+| [#606](https://github.com/ChoHyeonChan/maskingtape/issues/606) "시"를 뗀 시 이름 | address_city_without_si | 0.000 | **1.000** | 고침 (PR #671) |
 | [#607](https://github.com/ChoHyeonChan/maskingtape/issues/607) 라벨 + 틀린 검증 숫자 (태그 2개) | *_label_bad_checksum | 0.000 | **1.000** | 고침 (PR #646, 이슈는 열림) |
 | [#608](https://github.com/ChoHyeonChan/maskingtape/issues/608) 다시 나오는 이름 | name_repeat_without_cue | 0.000 | 0.000 | 열림 |
 | [#636](https://github.com/ChoHyeonChan/maskingtape/issues/636) 가운뎃점으로 나눈 번호 | number_middle_dot_separator | 0.000 | **1.000** | 고침 (PR #649) |
-| [#637](https://github.com/ChoHyeonChan/maskingtape/issues/637) 날짜 뒤 일부만 가린 뒷자리 | rrn_partial_back_after_date | 0.000 | 0.000 | 열림 (부분 2, 미탐 18) |
-| [#638](https://github.com/ChoHyeonChan/maskingtape/issues/638) 날짜 표기 + 뒷자리 | rrn_back_after_date_forms | 0.000 | 0.000 | 열림 (가려짐 1, 부분 19) |
+| [#637](https://github.com/ChoHyeonChan/maskingtape/issues/637) 날짜 뒤 일부만 가린 뒷자리 | rrn_partial_back_after_date | 0.000 | **0.950** | PR #669 머지, `030123-45` 꼴 1건 남음 |
+| [#638](https://github.com/ChoHyeonChan/maskingtape/issues/638) 날짜 표기 + 뒷자리 | rrn_back_after_date_forms | 0.000 | **1.000** | 고침 (PR #670) |
 | [#639](https://github.com/ChoHyeonChan/maskingtape/issues/639) 다른 점 닮은꼴 | rrn_other_dot_like_separator | 0.000 | **1.000** | 고침 (PR #649) |
 | [#640](https://github.com/ChoHyeonChan/maskingtape/issues/640) 뒤에 영문이 붙은 주민번호 | rrn_trailing_latin | 0.000 | **1.000** | 고침 (PR #668) |
 | [#655](https://github.com/ChoHyeonChan/maskingtape/issues/655) 줄마다 한 명·사전 밖 성씨·"명단" 라벨 (태그 3개) | name_list_* | 0.000 | 0.000 | 열림 |
 | [#656](https://github.com/ChoHyeonChan/maskingtape/issues/656) 동-호 하이픈·붙여 쓴 동호·건물명+호·영문 층 | address_dong_ho_variants | 0.000 | 0.000 | 열림 (부분 11, 미탐 9) |
 | [#657](https://github.com/ChoHyeonChan/maskingtape/issues/657) 라벨과 번호 사이 줄바꿈·괄호 | number_label_gap_variants | 0.000 | 0.000 | 열림 |
 | [#658](https://github.com/ChoHyeonChan/maskingtape/issues/658) 날짜 뒤 띄어 쓴 "출생" | birth_date_cue_chulsaeng | 0.000 | 0.000 | 열림 |
-| **전체 29개 태그** | | **0.000** | **0.538** | 적중 351 · 가려짐 1 · 부분 42 · 미탐 259 |
+| [#685](https://github.com/ChoHyeonChan/maskingtape/issues/685) "담당:"·"외 N명"·뒤 존칭 나눠 쓰기·대괄호·"원고들" | name_cue_followups | 0.000 | 0.000 | 열림 |
+| [#686](https://github.com/ChoHyeonChan/maskingtape/issues/686) 일반구 없는 시의 축약 | address_city_no_gu_abbr | 0.000 | 0.000 | 열림 |
+| **전체 31개 태그** | | **0.000** | **0.586** | 적중 410 · 가려짐 0 · 부분 11 · 미탐 279 |
 
-- **고친 12건(#592·#593·#594·#600·#602·#603·#604·#605·#607·#636·#639·#640)의 태그 17개가 전부
-  1.000이다.** 이 이슈들은 `FIXED_ISSUES`에 넣어 되돌아가면 CI가 실패하게 했다.
-- 전체 재현율이 23개 태그일 때(0.552)보다 낮은 건 #659에서 아직 안 고친 태그 6개(120건)를 더했기
-  때문이다. 고친 이슈가 줄어든 게 아니다.
-- 남은 미탐은 이름(#589·#601·#608·#655), 주민번호 경계(#637·#638), 주소(#606·#656), 라벨 뒤
-  번호(#657), 생년월일 단서(#658)다.
+- **고친 14건(#592·#593·#594·#600·#602·#603·#604·#605·#606·#607·#636·#638·#639·#640)의 태그 19개가
+  전부 1.000이다.** 이 이슈들은 `FIXED_ISSUES`에 넣어 되돌아가면 CI가 실패하게 했다. #637은 PR #669가
+  머지됐지만 1건(`주민번호 030123-45`)이 남아 아직 넣지 않았다.
+- 전체 재현율은 태그를 더할 때마다 내려갔다가 core가 고치면 오른다(23개 0.552 → 29개 0.538 → 31개 0.586).
+  아직 안 고친 태그를 새로 넣기 때문이고, 고친 이슈가 줄어든 게 아니다.
+- 남은 미탐은 이름(#589·#601·#608·#655·#685), 주소(#656·#686), 라벨 뒤 번호(#657), 생년월일 단서(#658),
+  주민번호 6자리 + 숫자 둘(#637 1건)이다.
 - #640은 core가 번호에 붙은 영문 한 글자까지 번호 구간으로 가리기로 해서(PR #668), 정답 구간도 그에
   맞췄다(#680). 글은 그대로이고 라벨 끝만 한 글자 늘었다.
 - 정답과 안 겹치는 오탐은 그대로 0건이다.
