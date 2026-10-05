@@ -84,9 +84,7 @@ class OpenAINameJudge:
         timeout: float = DEFAULT_TIMEOUT_SECONDS,
         opener: _Opener | None = None,
     ) -> None:
-        if not api_key.strip():
-            raise ValueError("OpenAI API key is empty")
-        self._api_key = api_key.strip()
+        self._api_key = _clean_api_key(api_key)
         self.model = model
         self.timeout = timeout
         self._opener = opener or urllib.request.build_opener(_NoRedirect)
@@ -151,7 +149,19 @@ def openai_name_judge_from_env() -> OpenAINameJudge | None:
         return None
     model = os.getenv("MASKINGTAPE_API_OPENAI_MODEL", "").strip() or DEFAULT_MODEL
     timeout = _env_positive_float("MASKINGTAPE_API_OPENAI_TIMEOUT_SECONDS", DEFAULT_TIMEOUT_SECONDS)
-    return OpenAINameJudge(api_key, model=model, timeout=timeout)
+    try:
+        return OpenAINameJudge(api_key, model=model, timeout=timeout)
+    except ValueError:
+        return None
+
+
+def _clean_api_key(api_key: str) -> str:
+    key = api_key.strip()
+    if not key:
+        raise ValueError("OpenAI API key is empty")
+    if not all(0x21 <= ord(char) <= 0x7E for char in key):
+        raise ValueError("OpenAI API key contains invalid characters")
+    return key
 
 
 def _http_error_code(exc: urllib.error.HTTPError) -> str:
@@ -171,7 +181,7 @@ def _error_body_code(exc: urllib.error.HTTPError) -> str | None:
     """에러 본문에서 `error.code`만 꺼낸다. 메시지(가린 글이 섞일 수 있음)는 읽지 않는다."""
     try:
         data = json.loads(exc.read(_MAX_ERROR_BODY_BYTES))
-    except (OSError, ValueError, http.client.HTTPException):
+    except (OSError, ValueError, RecursionError, http.client.HTTPException):
         # 본문을 읽다 끊기면(IncompleteRead) 구분을 포기하고 rate_limited로 본다. 이 함수는 _post의
         # HTTPError 처리 안에서 불려서, 여기서 놓친 예외는 _post의 다른 except에 걸리지 않고 500이 된다(#625).
         return None
@@ -183,7 +193,7 @@ def _error_body_code(exc: urllib.error.HTTPError) -> str | None:
 def _parse_names(body: bytes) -> list[str]:
     try:
         data = json.loads(body)
-    except ValueError:
+    except (ValueError, RecursionError):
         raise NameJudgeError("bad_response") from None
     if not isinstance(data, dict):
         raise NameJudgeError("bad_response")
@@ -206,7 +216,7 @@ def _parse_names(body: bytes) -> list[str]:
         raise NameJudgeError("empty_output")
     try:
         parsed = json.loads("".join(texts))
-    except ValueError:
+    except (ValueError, RecursionError):
         raise NameJudgeError("bad_schema") from None
     names = parsed.get("names") if isinstance(parsed, dict) else None
     if not isinstance(names, list) or not all(isinstance(name, str) for name in names):
