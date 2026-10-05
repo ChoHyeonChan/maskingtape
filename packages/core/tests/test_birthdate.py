@@ -114,3 +114,30 @@ def test_date_followed_by_dash_digits_that_are_not_an_rrn_is_still_a_birthdate()
     found = detect("생년월일 19800101-12345678")
     assert len(found) == 1
     assert found[0].text == "19800101"
+
+
+# ── 날짜 뒤에 띄어 쓴 "출생"(#658) ─────────────────────────────────────
+# 이력서·인적사항 표에서 "1990년 1월 5일 출생"처럼 날짜 뒤에 출생이 오는 꼴이 흔하다.
+# "출생아·출생률·출생신고"는 통계·행정 낱말이라 단서가 아니다.
+
+
+def test_date_followed_by_a_spaced_chulsaeng_is_a_birthdate():
+    assert detect("1990년 1월 5일 출생")[0].text == "1990년 1월 5일"
+
+
+def test_dashed_date_followed_by_chulsaeng_is_a_birthdate():
+    assert detect("1990-01-05 출생")[0].text == "1990-01-05"
+
+
+def test_date_followed_by_chulsaengja_is_a_birthdate():
+    assert detect("1990년 1월 5일 출생자")[0].text == "1990년 1월 5일"
+
+
+def test_date_inside_parentheses_before_chulsaeng_is_a_birthdate():
+    assert detect("○○○ (1990년 1월 5일 출생)")[0].text == "1990년 1월 5일"
+
+
+def test_chulsaeng_compound_words_after_a_date_are_not_a_birthdate():
+    assert detect("2024년 3월 1일 출생아 수 통계") == []
+    assert detect("2025년 출생률 발표") == []
+    assert detect("2024년 3월 1일 출생신고 접수") == []
