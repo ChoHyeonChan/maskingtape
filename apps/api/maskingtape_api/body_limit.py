@@ -76,8 +76,9 @@ class BodySizeLimitMiddleware:
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         """HTTP 요청만 감싸고, 웹소켓 등 다른 ASGI scope는 그대로 통과시킨다.
 
-        Content-Length가 믿을 만하면 빠르게 끊고, 없거나 이상하면 receive를 감싸 실제로
-        들어오는 바이트 수를 센다. 이렇게 해야 chunked 전송으로 상한을 우회하지 못한다.
+        Content-Length가 상한을 넘으면 빠르게 끊는다. 그 외에는 Content-Length가 있더라도
+        receive를 감싸 실제로 들어오는 바이트 수를 다시 센다. 이렇게 해야 헤더를 낮춰 쓰거나
+        chunked 전송으로 상한을 우회하지 못한다.
         """
         if scope["type"] != "http":
             await self.app(scope, receive, send)
