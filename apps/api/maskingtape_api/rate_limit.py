@@ -164,6 +164,9 @@ def _client_ip_bucket_key(value: str) -> str:
     except ValueError:
         return value
 
+    if address.version == 6 and address.ipv4_mapped is not None:
+        address = address.ipv4_mapped
+
     if address.version == 6:
         return str(ip_network(f"{address}/64", strict=False))
     return str(address)

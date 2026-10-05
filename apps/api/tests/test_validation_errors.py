@@ -155,6 +155,7 @@ def test_method_not_allowed_uses_shared_error_shape() -> None:
     response = TestClient(create_app()).get("/scan")
 
     assert response.status_code == 405
+    assert response.headers["allow"] == "POST"
     assert response.json() == {
         "code": "method_not_allowed",
         "message": "method not allowed.",

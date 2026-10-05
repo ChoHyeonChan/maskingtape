@@ -71,6 +71,7 @@ async def http_exception_handler(
             status.HTTP_405_METHOD_NOT_ALLOWED,
             "method_not_allowed",
             "method not allowed.",
+            headers=exc.headers,
         )
     return error_response(exc.status_code, "http_error", "request failed.")
 
