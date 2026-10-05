@@ -217,3 +217,24 @@ def test_card_failing_luhn_without_a_card_label_is_still_dropped():
     # 라벨이 없으면 검증 숫자가 틀린 숫자열은 여전히 카드가 아니다(#87 오탐 가드 유지)
     assert detect("주문 4111-1111-1111-1112") == []
     assert detect("결제 4111-1111-1111-1112") == []
+
+
+# ── 라벨과 번호 사이에 줄바꿈·괄호가 있거나 띄어 쓴 표기(#657) ─────────────────
+# 양식·표를 텍스트로 옮기면 라벨과 값이 다른 줄에 오는 일이 흔하다. 빈 줄은 넘지 않는다.
+
+
+def test_labeled_card_on_the_next_line_failing_luhn_is_still_masked():
+    found = detect("카드번호\n4111-1111-1111-1112")
+    assert len(found) == 1
+    assert found[0].text == "4111-1111-1111-1112"
+    assert found[0].confidence == 0.6
+
+
+def test_labeled_card_in_parentheses_failing_luhn_is_still_masked():
+    found = detect("카드번호(4111-1111-1111-1112)")
+    assert len(found) == 1
+    assert found[0].confidence == 0.6
+
+
+def test_label_separated_by_a_blank_line_is_not_bridged():
+    assert detect("카드번호\n\n4111-1111-1111-1112") == []
