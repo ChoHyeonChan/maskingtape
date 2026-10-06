@@ -302,6 +302,33 @@ def test_gu_city_names_without_gu_are_not_addresses():
         assert detect(text) == [], f"{text!r}는 주소가 아니다"
 
 
+def test_detects_no_gu_city_road_address_without_si_suffix_when_cued():
+    """일반구가 없는 시도 주소 단서 뒤에서는 '시'를 떼고 도로명주소 시작점으로 쓴다."""
+    for text, expected in [
+        ("주소: 김해 장유로 123", "김해 장유로 123"),
+        ("주소는 화성 동탄대로 12", "화성 동탄대로 12"),
+        ("배송지 평택 평남로 45", "평택 평남로 45"),
+        ("거주지 남양주 다산중앙로 82", "남양주 다산중앙로 82"),
+        # 정식 표기 대조군
+        ("주소: 김해시 장유로 123", "김해시 장유로 123"),
+        # 일반구가 있는 시는 #606 경로가 그대로 처리한다
+        ("수원 영통구 광교로 107", "수원 영통구 광교로 107"),
+    ]:
+        found = detect(text)
+        assert len(found) == 1, f"{text!r} 미탐지"
+        assert found[0].text == expected
+
+
+def test_no_gu_city_without_si_suffix_requires_leading_address_cue():
+    for text in [
+        "김해 장유로 123",
+        "화성 동탄대로 12",
+        "김해 공항 3층",
+        "화성 탐사선 12호",
+    ]:
+        assert detect(text) == [], f"{text!r}는 주소가 아니다"
+
+
 # --- #423: 동/도로명 자리에서 구간이 끊기는 부분 유출 ---
 # 이 자리에서 구간이 끊기면 뒤따르는 도로명·건물번호가 원문 그대로 남는다.
 # 주소에서 가장 구체적인 부분이 새므로, 입력 전체가 한 구간으로 잡혀야 한다.

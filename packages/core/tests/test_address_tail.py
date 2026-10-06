@@ -59,6 +59,23 @@ def test_address_tail_controls(text, expected):
 @pytest.mark.parametrize(
     "text, expected",
     [
+        ("한빛아파트 101-1203호로 보내 주세요", "한빛아파트 101-1203호"),
+        ("서울특별시 강남구 테헤란로 123 101-1203", "서울특별시 강남구 테헤란로 123 101-1203"),
+        ("한빛아파트 101동1203호", "한빛아파트 101동1203호"),
+        ("한빛오피스텔 1203호", "한빛오피스텔 1203호"),
+        ("서울특별시 강남구 테헤란로 123 4F", "서울특별시 강남구 테헤란로 123 4F"),
+        # 지금도 끝까지 가리던 표기(대조)
+        ("한빛아파트 101동 1203호", "한빛아파트 101동 1203호"),
+        ("서울특별시 강남구 테헤란로 123 4층 401호", "서울특별시 강남구 테헤란로 123 4층 401호"),
+    ],
+)
+def test_address_tail_keeps_compact_unit_forms(text, expected):
+    assert spans(text) == [expected]
+
+
+@pytest.mark.parametrize(
+    "text, expected",
+    [
         # 목록에 없는 건물명은 뒤에 층·동·호가 올 때만 받는다 — 평범한 낱말을 삼키지 않는다.
         ("서울특별시 강남구 테헤란로 123 근처에서 만나요", "서울특별시 강남구 테헤란로 123"),
         ("서울특별시 강남구 테헤란로 123 앞 카페", "서울특별시 강남구 테헤란로 123"),
@@ -72,6 +89,18 @@ def test_address_tail_controls(text, expected):
 )
 def test_address_tail_does_not_swallow_plain_words(text, expected):
     assert spans(text) == [expected]
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "한빛아파트 3-4호선 환승",
+        "오피스텔 2호점 오픈",
+        "4F 회의실",
+    ],
+)
+def test_compact_unit_forms_need_address_or_real_unit(text):
+    assert spans(text) == []
 
 
 # ── #593: 시/도·도로명 없이 건물명 + 동·층 + 호만 쓴 주소 ──

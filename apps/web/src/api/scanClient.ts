@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 The maskingtape Authors
 // SPDX-License-Identifier: Apache-2.0
 
+import type { DetectionMode } from "../lib/hybrid";
 import { toUtf16Offsets } from "../lib/offsets";
 import type { AnonymizeResponse, ScanResponse } from "../types/detection";
 
@@ -45,8 +46,8 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
  * 탐지 위치는 서버 기준(코드포인트)이라 여기서 JS 문자열 위치로 바꿔 돌려준다(#495).
  * 이 뒤의 화면·복사·저장은 전부 이 위치를 그대로 slice()한다.
  */
-export async function scanText(text: string): Promise<ScanResponse> {
-  const response = await postJson<ScanResponse>("/api/scan", { text });
+export async function scanText(text: string, mode: DetectionMode = "rule"): Promise<ScanResponse> {
+  const response = await postJson<ScanResponse>("/api/scan", withMode({ text }, mode));
   return { ...response, detections: toUtf16Offsets(text, response.detections) };
 }
 
@@ -54,6 +55,15 @@ export async function scanText(text: string): Promise<ScanResponse> {
  * pseudonym(가명처리)처럼 core의 값 생성 로직이 필요해 클라이언트에서 계산할 수 없는
  * 전략은 /anonymize를 직접 호출해 이미 치환된 text를 받는다(#346).
  */
-export function anonymizeText(text: string, strategy: "mask" | "label" | "pseudonym"): Promise<AnonymizeResponse> {
-  return postJson<AnonymizeResponse>("/api/anonymize", { text, strategy });
+export function anonymizeText(
+  text: string,
+  strategy: "mask" | "label" | "pseudonym",
+  mode: DetectionMode = "rule",
+): Promise<AnonymizeResponse> {
+  return postJson<AnonymizeResponse>("/api/anonymize", withMode({ text, strategy }, mode));
+}
+
+/** 서버 기본값이 규칙 전용이라, 하이브리드를 고를 때만 `mode`를 실어 보낸다(#547). */
+function withMode<T extends object>(body: T, mode: DetectionMode): T | (T & { mode: "hybrid" }) {
+  return mode === "hybrid" ? { ...body, mode } : body;
 }

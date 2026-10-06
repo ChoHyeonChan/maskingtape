@@ -4,8 +4,10 @@
 import { useEffect, useRef, useState } from "react";
 import { scanText } from "../../api/scanClient";
 import { EXTRACT_ERROR_MESSAGES, extractTextFromFile } from "../../lib/extractText";
+import { HYBRID_MAX_TEXT_LENGTH, readModeInfo, type DetectionMode, type ScanModeInfo } from "../../lib/hybrid";
 import type { MaskMode } from "../../lib/masking";
 import type { Detection, HighlightRange } from "../../types/detection";
+import { DetectionModeSelector } from "./DetectionModeSelector";
 import { SamplePickerModal } from "./SamplePickerModal";
 
 const PLACEHOLDER = "예: 고객 홍길동님은 010-1234-5678 또는 hong@example.com으로 연락 가능합니다.";
@@ -17,9 +19,11 @@ interface Props {
   resultVersion: number;
   maskMode?: MaskMode;
   onMaskModeChange?: (mode: MaskMode) => void;
+  detectionMode?: DetectionMode;
+  onDetectionModeChange?: (mode: DetectionMode) => void;
   onTextChange: (text: string) => void;
   onClear: () => void;
-  onResult: (text: string, detections: Detection[]) => void;
+  onResult: (text: string, detections: Detection[], modeInfo: ScanModeInfo) => void;
   onRequestEdit?: () => void;
   highlight?: HighlightRange | null;
 }
@@ -30,6 +34,8 @@ export function InputPanel({
   resultVersion,
   maskMode = "mask",
   onMaskModeChange = () => {},
+  detectionMode = "rule",
+  onDetectionModeChange = () => {},
   onTextChange,
   onClear,
   onResult,
@@ -49,6 +55,8 @@ export function InputPanel({
   const trimmedLength = text.trim().length;
   const isTooLong = text.length > MAX_TEXT_LENGTH;
   const canScan = trimmedLength > 0 && !isTooLong;
+  // 하이브리드 상한을 넘으면 선택기가 이유를 보여 주고, 요청은 규칙 전용으로 보낸다(#547).
+  const requestMode: DetectionMode = text.length > HYBRID_MAX_TEXT_LENGTH ? "rule" : detectionMode;
 
   // 오른쪽 "탐지 결과 조정" 패널에서 토글·일괄 조정을 바꿔도 이 텍스트가 바뀐다 — 두 패널이
   // 화면에서 멀리 떨어져 있어 그냥 두면 왼쪽이 바뀐 걸 못 알아채기 쉽다. 처음 스캔 결과가
@@ -118,8 +126,8 @@ export function InputPanel({
     setLoading(true);
     setError(null);
     try {
-      const { detections } = await scanText(text);
-      onResult(text, detections);
+      const response = await scanText(text, requestMode);
+      onResult(text, response.detections, readModeInfo(requestMode, response));
     } catch (err) {
       setError(err instanceof Error ? err.message : "탐지 요청 중 알 수 없는 오류가 발생했습니다.");
     } finally {
@@ -353,6 +361,10 @@ export function InputPanel({
             </span>
           )}
         </div>
+      )}
+
+      {!hasResult && (
+        <DetectionModeSelector mode={detectionMode} textLength={text.length} onChange={onDetectionModeChange} />
       )}
 
       <div className="input-panel__actions">

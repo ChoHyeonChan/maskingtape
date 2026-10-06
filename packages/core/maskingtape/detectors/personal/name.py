@@ -49,6 +49,9 @@ _SURNAMES = [
 _TITLE_CUES_603 = [
     "책임", "선임", "수석", "박사", "여사", "어르신", "피고", "원고",
     "프로", "기사", "선수",
+    # 판결문의 판사·검사·증인(#663). 판결문마다 거의 반드시 나오는데 규칙도 로컬 LLM도 놓쳤다.
+    # 이름 앞에서만 받는다(_COURT_PREFIX_TITLES).
+    "판사", "검사", "증인",
 ]
 _TITLE_CUES = [
     "팀장", "과장", "부장", "차장", "대리", "사원", "실장", "본부장",
@@ -71,6 +74,8 @@ _PREFIX_CUES_603 = [
     "주문자", "구매자", "예약자", "투숙객", "받는 분", "받는사람", "보내는 사람",
     "피고인", "채무자", "피해자", "신고인", "세대주", "배우자", "소유자", "운전자",
     "검토자", "승인자", "기안자",
+    # 메일 머리의 띄어 쓴 받는 사람(#663). "받는사람"·"받는 분"만 있어 "받는 사람: 송준경"이 샜다.
+    "받는 사람",
 ]
 _PREFIX_CUES = [
     "고객", "환자", "신청자", "작성자", "담당자", "수령인", "수신인", "성명", "이름", "저는",
@@ -132,11 +137,26 @@ _COMMON_WORDS = frozenset({
 # 함께 걸러 "공제 씨"·"고객 우대"처럼 전부터 가리던 이름까지 놓친다(#603 리뷰).
 _CUES_603 = frozenset(_TITLE_CUES_603) | frozenset(_PREFIX_CUES_603)
 _CUE_603_COMMON_WORDS = frozenset({"진술", "진술서", "공제", "안내문", "우대", "오늘자"})
+# 판결문의 판사·검사·증인(#663)은 이름 앞에서만 단서로 받는다. 뒤 단서로 쓰면 "유전자 검사"·"주요 증인"
+# 같은 일반어가 이름이 되고, 두 글자 직함 앞 조사 끝 거르기(#603)가 "피해자 이수가 증인으로"의 실명을
+# 통째로 버린다. 앞에서도 이름 바로 뒤가 낱말 경계(조사·괄호·쉼표·줄 끝)일 때만 받는다(detect 참고).
+_COURT_PREFIX_TITLES = frozenset({"판사", "검사", "증인"})
+# 판사·검사·증인 바로 뒤에 오는 일반 명사("증인 신문이", "판사 전원이", "검사 진단서를"). 이 단서에만
+# 쓴다 — 공용 #603 거르기에 넣으면 "배우자: 유효성"처럼 다른 단서 뒤의 실명까지 버린다(#663 검증).
+_COURT_CUE_COMMON_WORDS = frozenset({
+    "진술", "진술서", "진단서", "성적서", "신청서", "임명장", "정확도", "정밀도", "진행", "진행중",
+    "신문", "전원", "정원", "신분", "방법", "조서", "심문", "결과",
+})
 
 # 직함 전용 단서(존칭 '님' 제외). 이것만으로(다른 단서 없이) 이름을 잡을 땐 성+2자 풀네임을
 # 요구한다 — 부서·업무어("구매 부장"의 구매, "대표 이사"의 이사)가 직함과 붙어 이름으로
 # 오탐되는 걸 막는다. 존칭(님)은 강한 단서라 이 제약을 걸지 않는다. (앞·뒤 직함 공용)
 _TITLE_ONLY_CUES = frozenset(_TITLE_CUES) - frozenset(_SUFFIX_CUES)
+# 성씨 뒤 두 글자가 직함이면 세 글자 "이름"은 사실 성씨+직함이다("김부장"·"이대리", #677).
+_TITLE_TAIL_WORDS = frozenset(c for c in _TITLE_CUES if len(c) == 2)
+# 세 글자 이름의 끝 글자가 지명·학교 어미면 이름이 아니다("김포시"·"김포대"·"강남구", #677).
+# "군"·"양"은 실명 끝 글자로도 흔해서("박도군"·"김하양") 여기 넣지 않는다.
+_PLACE_OR_SCHOOL_ENDINGS = frozenset({"시", "대", "구"})
 
 # 이름 뒤에 붙는 단일 음절 조사 — 일반명사 뒤에 붙어 단어 경계를 흐리는지 판별에 쓴다(#247).
 # "엔"("~에는"의 준말, "이전엔")도 조사로 본다(#484) — 없으면 "이전"(정지어) 뒤에 "엔"이 붙은
@@ -162,7 +182,9 @@ _SUFFIX_ALT_PLAIN = "|".join(
         dict.fromkeys(
             c
             for c in (_SUFFIX_CUES + _TITLE_CUES)
-            if c not in _AMBIGUOUS_SUFFIX_TITLES and c not in _BOUNDED_SUFFIX_TITLES
+            if c not in _AMBIGUOUS_SUFFIX_TITLES
+            and c not in _BOUNDED_SUFFIX_TITLES
+            and c not in _COURT_PREFIX_TITLES
         ),
         key=len,
         reverse=True,
@@ -227,6 +249,9 @@ _OPEN_ENDING_STEMS = (
     "이신", "이세", "이시", "이십", "인데", "인가", "인지", "이야", "이죠", "이지", "이네",
     "이나", "이든", "이면", "에게", "에서", "께서", "한테", "까지", "부터", "처럼", "보다",
     "마저", "조차", "밖에", "뿐",
+    # 말로 소개하는 "제 이름은 황은민이고요"(#663). 받침 없는 이름 뒤 "고요"는 넣지 않는다 — 첫머리로만
+    # 보므로 "담당자 정리하고요"의 "정리하"까지 이름으로 받아 버린다.
+    "이고요",
 )
 _OPEN_ENDING_ALT = "|".join(sorted(_OPEN_ENDING_STEMS, key=len, reverse=True))
 # #600 전까지 이름 뒤로 받던 꼴(닫힌 어미 목록 + 낱말 끝). 흔한 일반명사(_COMMON_WORDS) 뒤에
@@ -336,6 +361,11 @@ _SLASH_RECORD_MIN_CELLS = 3
 _SLASH_RECORD_MIN_NAME_LEN = 3
 _SLASH_RECORD_DETAIL_RE = re.compile(r"@|0\d{1,2}[-.\s]?\d{3,4}[-.\s]?\d{4}|생년월일|생일")
 
+# 이름 바로 뒤에 공백을 두고 다른 낱말이 이어지는지 — 판사·검사·증인을 앞 단서로 받을 때 쓴다(#663).
+_WORD_CONTINUES_RE = re.compile(r"[ \t]+[가-힣]")
+# 판사·검사·증인 뒤 자리에 오는 "원고가"·"박사가" 꼴(#663). 이름이 아니라 다음 이름의 앞 단서다.
+_NAME_LIKE_TITLE_JOSA_RE = re.compile(r"(?:" + "|".join(_NAME_LIKE_TITLES_603) + r")[은는이가]")
+
 # 마크다운 구분행("|---|:--:|--:|")의 칸 — 대시·콜론·공백만으로 이뤄진다. 적어도 한 칸은
 # 비어 있지 않아야 진짜 구분행이다(전부 빈 칸인 데이터 행과 헷갈리지 않기 위해).
 _TABLE_SEPARATOR_CELL_RE = re.compile(r"[-:\s]*")
@@ -394,6 +424,9 @@ _NAME_RE = re.compile(_NAME_PREFIX_PART + _NAME_BODY)
 # 앞 단서 없이 같은 자리를 이름으로 읽는다. prefix·label_sep 그룹은 늘 비어 있어 detect가 같은 코드로
 # 다룬다. "원고은 차장"처럼 실명 앞부분이 #603 직함+조사로 읽힌 자리를 다시 볼 때 쓴다(#674).
 _NAME_NO_PREFIX_RE = re.compile(r"(?:(?P<prefix>(?!))(?P<label_sep>(?!)))?" + _NAME_BODY)
+# 이름과 뒤 단서 사이에서 줄이 바뀌었는지 볼 때 쓰는 줄 구분 문자(#662). 뒤 단서 앞 공백(\s?) 한 글자가
+# 넘을 수 있는 줄바꿈이다 — \n, \r 단독, 세로 탭·폼 피드, NEL, 유니코드 줄·문단 구분자.
+_LINE_BREAK_RE = re.compile("[\n\r\x0b\x0c\x85  ]")
 
 # 라벨 뒤에 나열한 이름 목록("참석자: 김민수, 이서연, 박지훈", #602). 라벨은 첫 이름에만 붙어서
 # 둘째 이름부터는 단서 없는 후보가 되어 버려졌다. 단서를 달고 잡힌 이름 바로 뒤에 나열 구분자와
@@ -599,6 +632,37 @@ class NameDetector(Detector):
         finditer 대신 직접 이어 찾는다. 버린 후보(라벨 단어)가 다음 이름의 앞 단서일 수
         있어서, 그 자리부터 다시 찾아야 뒤 이름을 놓치지 않는다. 단서가 앞뒤 둘 다 있으면
         확신도 0.75, 하나면 0.5를 주고, min_confidence보다 낮으면 버린다.
+
+        여러 줄 문서에서 이름 뒤 단서가 줄바꿈 너머 다음 줄 첫 낱말이었으면(#662), 그 낱말을 다음 줄 이름의
+        앞 단서로도 읽는 두 번째 훑기를 한 번 더 하고 두 결과를 합친다. 첫 훑기는 그 전과 똑같아서, 두 번째
+        훑기가 무엇을 더 찾든 전보다 덜 가리는 일은 없다.
+        """
+        found, list_seeds, crossed = self._scan_cued(text, resume_lines=False)
+        if crossed:
+            again, again_seeds, _ = self._scan_cued(text, resume_lines=True)
+            have = {(d.start, d.end) for d in found}
+            found.extend(d for d in again if (d.start, d.end) not in have)
+            found.sort(key=lambda d: (d.start, d.end))
+            seeds = set(list_seeds)
+            list_seeds.extend(s for s in again_seeds if s not in seeds)
+        form_extra = self._form_names(text, found, list_seeds)
+        table_extra = self._table_names(text, found + form_extra)
+        slash_extra = self._slash_record_names(text, found + form_extra + table_extra)
+        found.extend(form_extra)
+        found.extend(table_extra)
+        found.extend(slash_extra)
+        # 양식 라벨(쌍점·세로줄) 뒤 이름도 목록의 출발점이다. 공백 구분까지 받는다.
+        list_seeds.extend((d.end, True) for d in form_extra)
+        found.extend(self._list_names(text, list_seeds, found))
+        return found
+
+    def _scan_cued(
+        self, text: str, *, resume_lines: bool
+    ) -> tuple[list[Detection], list[tuple[int, bool]], bool]:
+        """앞뒤 단서로 이름을 찾는 기본 훑기. (찾은 이름, 나열 출발점, 줄바꿈 너머 뒤 단서를 만났는지)를 돌려준다.
+
+        resume_lines가 참이면 줄바꿈 너머 뒤 단서 자리부터 다시 찾는다(#662). 거짓이면 그 전과 똑같이
+        훑는다 — detect가 두 결과를 합쳐 전보다 덜 가리지 않게 한다.
         """
         found: list[Detection] = []
         # 라벨을 달고 잡힌 이름의 끝 위치 — 뒤에 나열한 이름을 이어받는 출발점이다(#602)
@@ -606,6 +670,9 @@ class NameDetector(Detector):
         pos = 0
         # #603 앞 단서 뒤 일반어를 버리고 뒤 단서 자리부터 다시 찾을 때 그 자리(#676)
         resume_cue = -1
+        # 줄바꿈 너머 뒤 단서 자리부터 다시 찾을 때 그 자리와, 단서를 소비했다면 이어 찾았을 자리(#662)
+        line_resume_at = line_resume_end = -1
+        crossed = False
         # finditer 대신 직접 이어 찾는다: "신청자 성명 김하늘"에서 "성명"이 이름 후보로 잡혀
         # 버려질 때, 그 "성명"이 실제로는 다음 이름의 앞 단서다. finditer는 "신청자 성명"을
         # 통째로 소비하고 지나가 "김하늘"이 단서 없는 이름이 돼 새어나갔다.
@@ -616,6 +683,14 @@ class NameDetector(Detector):
                 alt = _NAME_NO_PREFIX_RE.match(text, m.start("prefix"))
                 if alt is not None and (alt.group("suffix") is not None or alt.group("paren") is not None):
                     m = alt
+            at_line_resume = m.start() == line_resume_at
+            line_resume_at = -1
+            if at_line_resume and m.group("prefix") is None:
+                # 다시 찾은 단서 낱말이 앞 단서가 아니라 단서 없는 이름 후보로 읽혔다("작성자: 송준경⏎차장이 대리
+                # 김민수에게"의 차장이). 그대로 두면 그 후보가 뒤 직함을 뒤 단서로 먹어 김민수가 앞 단서를 잃는다.
+                # main처럼 앞 줄 이름이 그 단서를 소비한 자리로 돌아간다(#662).
+                pos = line_resume_end
+                continue
             name_start = m.start("name")
             prefix = m.group("prefix")
             suffix = m.group("suffix")
@@ -652,6 +727,20 @@ class NameDetector(Detector):
                     pos = m.end()
                 continue
             pos = m.end()
+            if (
+                suffix is not None
+                and suffix not in _NAME_LIKE_TITLES_603  # 원고·박사는 아래에서 이미 그 자리부터 다시 찾는다(#674)
+                and _LINE_BREAK_RE.search(text, m.end("name"), m.start("suffix"))
+            ):
+                # 줄바꿈을 넘어 다음 줄 첫 낱말을 뒤 단서로 읽었다("참석자: 송준경⏎작성자: 문양석"). 그 낱말은
+                # 다음 줄 이름의 앞 단서이기도 하니 그 자리부터 다시 찾는다. 소비해 버리면 다음 줄 이름이
+                # 앞 단서를 잃고 버려졌다(#662). 뒤 단서로 읽는 것 자체는 두어 "변호사 한율⏎피고 안호지"의
+                # 두 글자 이름도 전처럼 잡는다. 다시 찾은 자리의 직함이 두 글자 이름을 버리게 하면("교사 최한가⏎
+                # 간호사 한별 (인)") 그 이름 자리부터 단서 없이 한 번 더 본다(resume_cue, #676과 같은 장치).
+                crossed = True
+                if resume_lines:
+                    pos = resume_cue = line_resume_at = m.start("suffix")
+                    line_resume_end = m.end()
             if suffix in _NAME_LIKE_TITLES_603:
                 # "원고"·"박사"는 다음 이름의 앞머리일 수 있다("오늘 원고은 님이"). 그 직함 자리부터 다시
                 # 찾아, 직함으로 소비한 글자가 뒤 이름에서 빠지지 않게 한다(#674).
@@ -702,6 +791,26 @@ class NameDetector(Detector):
                 and _is_common_word_at(text, name_start, _CUE_603_COMMON_WORDS)
             ):
                 continue  # "피고인 진술"처럼 #603 단서 뒤의 일반 명사는 이름이 아니다
+            if (prefix in _COURT_PREFIX_TITLES or prefix == "받는 사람") and _NAME_LIKE_TITLE_JOSA_RE.fullmatch(
+                m.group("name")
+            ):
+                # "검사 원고가 김민수를"의 "원고가"는 이름이 아니라 김민수의 앞 단서다. 그 자리부터 다시 찾는다(#663)
+                pos = name_start
+                continue
+            if (
+                prefix in _COURT_PREFIX_TITLES
+                and suffix is None
+                and m.group("paren") is None
+                and (
+                    _WORD_CONTINUES_RE.match(text, m.end("name"))
+                    or _is_common_word_at(text, name_start, _COURT_CUE_COMMON_WORDS)
+                    or m.group("name").endswith("으")
+                )
+            ):
+                # "검사 진단서 발급"·"증인 신문이 열렸다"·"증인 신분으로"는 이름이 아니다. "검사 황수재(기소)"·
+                # "증인 문양석의 증언"은 받는다. 버린 자리부터 다시 찾아 그 낱말이 다음 이름의 단서가 되게 한다(#663)
+                pos = name_start
+                continue
             if m.group("paren") is not None and not has_prefix:
                 # 괄호 안이 숫자만 있는 나이·연락처·성별뿐이면 두 글자 낱말과 흔히 겹친다
                 # ("정원(35)", "문의(02-…)", 서식의 "구분(남/여)"). 세 글자 이름일 때만 받는다.
@@ -720,6 +829,22 @@ class NameDetector(Detector):
             confidence = 0.75 if (has_prefix and has_suffix) else 0.5
             if confidence < self.min_confidence:
                 continue
+            captured = m.group("name")
+            if len(captured) == 3 and captured[1:] in _TITLE_TAIL_WORDS:
+                # "김부장님": 성씨 뒤에 직함이 붙은 꼴이라 세 글자 이름이 아니다. 직함은 남기고 성씨만 가린다(#677)
+                found.append(
+                    Detection(
+                        kind=self.kind,
+                        start=name_start,
+                        end=name_start + 1,
+                        text=captured[0],
+                        confidence=confidence,
+                        detector=self.__class__.__name__,
+                    )
+                )
+                continue
+            if len(captured) == 3 and captured[2] in _PLACE_OR_SCHOOL_ENDINGS:
+                continue  # "김포시"·"김포대"처럼 지명·학교 이름이다(#677)
             found.append(
                 Detection(
                     kind=self.kind,
@@ -732,16 +857,7 @@ class NameDetector(Detector):
             )
             if has_prefix:
                 list_seeds.append((m.end("name"), has_explicit_sep or prefix in _STRONG_LABEL_PREFIXES))
-        form_extra = self._form_names(text, found, list_seeds)
-        table_extra = self._table_names(text, found + form_extra)
-        slash_extra = self._slash_record_names(text, found + form_extra + table_extra)
-        found.extend(form_extra)
-        found.extend(table_extra)
-        found.extend(slash_extra)
-        # 양식 라벨(쌍점·세로줄) 뒤 이름도 목록의 출발점이다. 공백 구분까지 받는다.
-        list_seeds.extend((d.end, True) for d in form_extra)
-        found.extend(self._list_names(text, list_seeds, found))
-        return found
+        return found, list_seeds, crossed
 
     def _list_names(
         self, text: str, seeds: list[tuple[int, bool]], found: list[Detection]
@@ -1071,6 +1187,11 @@ class NameDetector(Detector):
         if not _TABLE_NAME_VALUE_RE.fullmatch(value):
             return False
         if value in _FORM_LABELS or value in _FORM_NOT_NAMES:
+            return False
+        if value in _CUE_WORDS and len(value) >= 3:
+            # "성명 | 김민수⏎담당자 | 이서연"처럼 두 칸짜리 라벨 줄을 머리행으로 읽으면 다음 줄 라벨 칸이
+            # 값 자리에 온다(#662). 세 글자 이상 역할어(담당자·참석자·수령인)만 거른다. 두 글자 단서
+            # 낱말은 외자 이름("선수"·"박사"·"원장")과 같을 수 있어 표 칸에서는 지금처럼 가린다.
             return False
         if _CUE_WITH_JOSA_OLD_RE.fullmatch(value):
             return False

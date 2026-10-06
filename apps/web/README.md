@@ -85,6 +85,16 @@ Node.js 24 기준 (Vite 8 / React 19 / TypeScript 7). 새 패키지 추가 전 �
 
 프론트는 `src/api/scanClient.ts`에서 `POST /api/scan`을 호출합니다. 개발 중에는 `vite.config.ts`의 proxy가 이 요청을 FastAPI 백엔드 `POST /scan`으로 전달합니다. 실제 탐지와 비식별화는 `apps/api`가 `packages/core`의 `Pipeline`을 호출해 처리합니다.
 
+### 탐지 방식: 규칙 전용 / 하이브리드 (#547)
+
+- 기본은 **규칙 전용**입니다. 요청 본문에 `mode`를 싣지 않고, 서버도 규칙 전용으로 처리합니다.
+- 사용자가 **하이브리드 (OpenAI)** 를 고르면 `mode: "hybrid"`를 보냅니다. 서버는 규칙으로 먼저 가린 글을 OpenAI 이름 판단기로 보내고, 판단기가 더 찾은 이름을 합칩니다(`apps/api` README). 화면은 이때 OpenAI로 무엇이 가는지, 규칙이 놓친 개인정보가 함께 전송될 수 있다는 것을 안내합니다.
+- 판단기가 더 찾은 이름은 `detector`가 `OpenAINameJudge`로 와서, 목록에 `LLM` 배지로 구분합니다.
+- 하이브리드가 실패하면 서버는 규칙 결과와 `mode_used: "rule"`·실패 코드를 돌려줍니다. 화면은 조용히 넘어가지 않고 결과 패널 위에 이유를 알립니다.
+- 입력이 하이브리드 상한(5,000자, 서버 `MASKINGTAPE_API_HYBRID_MAX_TEXT_LENGTH` 기본값)을 넘으면 하이브리드 버튼을 막고 규칙 전용으로 탐지합니다.
+- 가명처리는 탐지 때 실제로 쓰인 모드로 `/anonymize`를 다시 부릅니다.
+- 심사용 시연은 로컬 모델 구성(규칙 + Ollama)으로 합니다(CLAUDE.md §2-3). 웹 하이브리드는 선택 옵션입니다.
+
 ## 구조
 
 ```

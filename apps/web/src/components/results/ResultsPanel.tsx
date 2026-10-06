@@ -4,13 +4,15 @@
 import { useEffect, useRef, useState } from "react";
 import { DetectionList } from "./DetectionList";
 import type { DetectionRow } from "./DetectionList";
+import { HybridStatusNotice } from "./HybridStatusNotice";
 import { anonymizeText } from "../../api/scanClient";
+import type { ScanModeInfo } from "../../lib/hybrid";
 import { locateDetections, type MaskMode } from "../../lib/masking";
 import { KIND_COLORS } from "../../types/detection";
 import type { Detection, HighlightRange } from "../../types/detection";
 
 interface Props {
-  scanned: { text: string; detections: Detection[] } | null;
+  scanned: { text: string; detections: Detection[]; modeInfo?: ScanModeInfo } | null;
   scanRun: number;
   maskMode?: MaskMode;
   onMaskedTextChange: (text: string) => void;
@@ -71,7 +73,8 @@ export function ResultsPanel({
     setPseudonymLoading(true);
     setPseudonymError(null);
 
-    anonymizeText(scanned.text, "pseudonym")
+    // 하이브리드로 탐지했다면 가명처리도 같은 모드로 받아야 LLM이 더 찾은 이름까지 바뀐다(#547).
+    anonymizeText(scanned.text, "pseudonym", scanned.modeInfo?.used ?? "rule")
       .then((result) => {
         if (ignore) return;
         setPseudonymText(result.text);
@@ -190,6 +193,8 @@ export function ResultsPanel({
           <span className="panel__badge">총 {scanned.detections.length}건 발견</span>
         )}
       </div>
+
+      {scanned?.modeInfo && <HybridStatusNotice modeInfo={scanned.modeInfo} detections={scanned.detections} />}
 
       {scanned && maskMode === "pseudonym" ? (
         <div className="pseudonym-panel">
