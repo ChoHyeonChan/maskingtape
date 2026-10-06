@@ -652,6 +652,13 @@ class NameDetector(Detector):
                     pos = m.end()
                 continue
             pos = m.end()
+            if suffix is not None and "\n" in text[m.end("name") : m.start("suffix")]:
+                # 줄바꿈을 넘어 다음 줄 첫 낱말을 뒤 단서로 읽었다("참석자: 송준경⏎작성자: 문양석"). 그 낱말은
+                # 다음 줄 이름의 앞 단서이기도 하니 그 자리부터 다시 찾는다. 소비해 버리면 다음 줄 이름이
+                # 앞 단서를 잃고 버려졌다(#662). 뒤 단서로 읽는 것 자체는 두어 "변호사 한율⏎피고 안호지"의
+                # 두 글자 이름도 전처럼 잡는다. 다시 찾은 자리의 직함이 두 글자 이름을 버리게 하면("교사 최한가⏎
+                # 간호사 한별 (인)") 그 이름 자리부터 단서 없이 한 번 더 본다(resume_cue, #676과 같은 장치).
+                pos = resume_cue = m.start("suffix")
             if suffix in _NAME_LIKE_TITLES_603:
                 # "원고"·"박사"는 다음 이름의 앞머리일 수 있다("오늘 원고은 님이"). 그 직함 자리부터 다시
                 # 찾아, 직함으로 소비한 글자가 뒤 이름에서 빠지지 않게 한다(#674).
@@ -1071,6 +1078,10 @@ class NameDetector(Detector):
         if not _TABLE_NAME_VALUE_RE.fullmatch(value):
             return False
         if value in _FORM_LABELS or value in _FORM_NOT_NAMES:
+            return False
+        if value in _CUE_WORDS:
+            # "성명 | 김민수⏎담당자 | 이서연"처럼 두 칸짜리 라벨 줄을 머리행으로 읽으면 다음 줄 라벨 칸이
+            # 값 자리에 온다. 단서 낱말은 기본 경로(detect)에서도 이름으로 보지 않는다(#662).
             return False
         if _CUE_WITH_JOSA_OLD_RE.fullmatch(value):
             return False
