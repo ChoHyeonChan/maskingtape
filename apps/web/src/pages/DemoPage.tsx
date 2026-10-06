@@ -6,6 +6,7 @@ import { CoachMark } from "../components/help/CoachMark";
 import { InputPanel } from "../components/input/InputPanel";
 import { SiteNav } from "../components/layout/SiteNav";
 import { ResultsPanel } from "../components/results/ResultsPanel";
+import type { DetectionMode, ScanModeInfo } from "../lib/hybrid";
 import type { MaskMode } from "../lib/masking";
 import type { Detection, HighlightRange } from "../types/detection";
 
@@ -16,10 +17,14 @@ type CoachMarkVariant = "intro" | "result";
 // 상태·코치마크도 App.tsx가 아니라 여기서 들고 있는다.
 export function DemoPage() {
   const [inputText, setInputText] = useState("");
-  const [scanned, setScanned] = useState<{ text: string; detections: Detection[] } | null>(null);
+  const [scanned, setScanned] = useState<{ text: string; detections: Detection[]; modeInfo: ScanModeInfo } | null>(
+    null,
+  );
   const [scanRun, setScanRun] = useState(0);
   const [coachMarkVariant, setCoachMarkVariant] = useState<CoachMarkVariant | null>("intro");
   const [maskMode, setMaskMode] = useState<MaskMode>("mask");
+  // 탐지 방식(#547) — 기본은 규칙 전용이고, 하이브리드는 사용자가 고를 때만 쓴다.
+  const [detectionMode, setDetectionMode] = useState<DetectionMode>("rule");
   // "탐지 결과 조정" 패널이 항목별 가림/보임 조정을 반영한 최종본을 계산해 여기로 보고한다 —
   // 그래야 왼쪽 결과 박스·복사 버튼이 항상 오른쪽 패널의 조정 상태와 같은 텍스트를 본다.
   const [maskedResultText, setMaskedResultText] = useState("");
@@ -32,8 +37,8 @@ export function DemoPage() {
 
   const displayText = scanned ? maskedResultText : inputText;
 
-  function handleResult(text: string, detections: Detection[]) {
-    setScanned({ text, detections });
+  function handleResult(text: string, detections: Detection[], modeInfo: ScanModeInfo) {
+    setScanned({ text, detections, modeInfo });
     setScanRun((run) => run + 1);
     if (!hasAutoShownResultCoachMark.current) {
       hasAutoShownResultCoachMark.current = true;
@@ -101,6 +106,8 @@ export function DemoPage() {
                 resultVersion={scanRun}
                 maskMode={maskMode}
                 onMaskModeChange={setMaskMode}
+                detectionMode={detectionMode}
+                onDetectionModeChange={setDetectionMode}
                 onTextChange={handleTextChange}
                 onClear={handleClear}
                 onResult={handleResult}
