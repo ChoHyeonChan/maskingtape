@@ -10,7 +10,9 @@ describe("AccuracyPage", () => {
     render(<AccuracyPage />);
 
     expect(screen.getByText("전체 F1 점수")).toBeInTheDocument();
-    expect(screen.getByText(/100건 중 약 97건을 정확히 처리해요/)).toBeInTheDocument();
+    // README 「정확도」 표 전체 행(F1 0.981, 재현율 0.974)과 같은 값이다(#499).
+    expect(screen.getByText("98.1")).toBeInTheDocument();
+    expect(screen.getByText(/개인정보 100개 중 약 97개를 찾아 가려요\(재현율 0\.974\)/)).toBeInTheDocument();
   });
 
   it("lists all 10 perfect-score kinds plus a separate 이름 card, matching AccuracySection's real numbers", () => {
@@ -32,8 +34,18 @@ describe("AccuracyPage", () => {
     }
 
     expect(screen.getAllByText("100%")).toHaveLength(10);
-    expect(screen.getByText("91.0%")).toBeInTheDocument();
-    expect(screen.getByText("92.3%")).toBeInTheDocument();
+  });
+
+  it("shows the 이름 results table with README's current numbers, including the external KDPII set (#499)", () => {
+    render(<AccuracyPage />);
+
+    const table = screen.getByRole("table");
+    expect(table).toHaveTextContent("재현율 0.932 · F1 0.949");
+    expect(table).toHaveTextContent("재현율 0.899 · F1 0.916");
+    expect(table).toHaveTextContent("재현율 0.825 · F1 0.600");
+    expect(table).toHaveTextContent("정밀도 0.471");
+    expect(screen.getByText(/웹 데모의 하이브리드는 OpenAI 판단기를 씁니다/)).toBeInTheDocument();
+    expect(screen.queryByText(/0\.923/)).not.toBeInTheDocument();
   });
 
   it("explains precision, recall and F1 in plain language", () => {

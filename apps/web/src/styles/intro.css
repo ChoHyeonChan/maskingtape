@@ -140,6 +140,8 @@
   font-weight: 900;
   line-height: 1.4;
   color: var(--text-primary);
+  /* 한국어 문장이 어절 중간("잡습니/다")에서 끊기지 않게 한다. */
+  word-break: keep-all;
 }
 
 .coverage-section {
