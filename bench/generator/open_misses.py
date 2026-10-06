@@ -411,10 +411,16 @@ def gen_rrn_other_dot_like_separator(rng: random.Random) -> MissDoc:
 
 
 def gen_rrn_trailing_latin(rng: random.Random) -> MissDoc:
-    """주민등록번호 바로 뒤에 영문 한 글자가 붙는다(#640). 정답은 번호 14자이고 영문은 넣지 않는다."""
+    """주민등록번호 바로 뒤에 영문 한 글자가 붙는다(#640).
+
+    정답 구간은 뒤 영문 글자까지다. core가 #640을 고치며(PR #668) 번호에 붙은 영문 한 글자를 번호
+    구간에 넣어 함께 가리기로 했다 — 더 가리는 쪽이라 안전하다. 난수는 예전과 같은 순서로 쓰므로 글은
+    그대로이고 라벨 끝만 한 글자 늘어난다.
+    """
     _, front, back = _rrn(rng)
     lead = rng.choice(["주민번호 ", ""])
-    return _build([lead, ("rrn", f"{front}-{back}"), rng.choice("ABXYZ"), rng.choice(["", " 확인"])],
+    letter = rng.choice("ABXYZ")
+    return _build([lead, ("rrn", f"{front}-{back}{letter}"), rng.choice(["", " 확인"])],
                   "rrn_trailing_latin", 640)
 
 
@@ -493,10 +499,45 @@ def gen_birth_date_cue_chulsaeng(rng: random.Random) -> MissDoc:
     return _build([lead, ("birth_date", date), tail], "birth_date_cue_chulsaeng", 658)
 
 
+# ── #685·#686 PR #669~#678 머지 뒤 남은 모양 ────────────────────────
+
+
+def gen_name_cue_followups(rng: random.Random) -> MissDoc:
+    """#685의 다섯 모양. 뒤 존칭을 마지막 이름에만 붙인 나열은 그 마지막 이름이 지금도 잡힌다(target 아님)."""
+    name, other = _name3(rng), _name3(rng)
+    form = rng.choice(["damdang", "oe", "shared", "bracket", "plural"])
+    if form == "damdang":
+        return _build([rng.choice(["담당: ", "담당 : "]), ("name", name)], "name_cue_followups", 685)
+    if form == "oe":
+        return _build([("name", name), f" {rng.choice(['외', '등'])} {rng.randint(2, 5)}명"], "name_cue_followups", 685)
+    if form == "shared":
+        return _build([("name", name), rng.choice([", ", "·"]), ("name", other, False), f" 님{rng.choice(['께', ' 앞', ''])}"],
+                      "name_cue_followups", 685)
+    if form == "bracket":
+        return _build(["[", ("name", name), f"] {rng.choice(['휴가 신청서', '주간 보고', '출장 계획'])}"],
+                      "name_cue_followups", 685)
+    role = rng.choice(["원고들", "피고들"])
+    return _build([f"{role} ", ("name", name), ", ", ("name", other)], "name_cue_followups", 685)
+
+
+# 일반구가 없는 시와 그 시의 도로명(공개된 이름). "시"를 떼고 쓰면 시작점이 없다(#686).
+_CITY_NO_GU_ROADS = [
+    ("김해", "장유로"), ("화성", "동탄대로"), ("평택", "평택로"), ("파주", "통일로"),
+    ("김포", "김포대로"), ("시흥", "시흥대로"), ("남양주", "경춘로"),
+]
+
+
+def gen_address_city_no_gu_abbr(rng: random.Random) -> MissDoc:
+    city, road = rng.choice(_CITY_NO_GU_ROADS)
+    value = f"{city} {road} {rng.randint(1, 300)}"
+    return _build([rng.choice(["주소: ", "주소는 ", "배송지 "]), ("address", value), rng.choice(["", "입니다."])],
+                  "address_city_no_gu_abbr", 686)
+
+
 # core가 고친 이슈. 이 이슈들의 태그는 지금 core가 전부 완전 일치로 잡아야 한다 — 되돌아가면
 # test_open_misses.py가 실패한다. 이슈가 고쳐지면 여기에 번호를 더한다(고쳐도 이 목록을 안 고치면
 # 테스트는 그대로 통과하므로 core PR을 막지 않는다).
-FIXED_ISSUES = frozenset({592, 593, 594, 600, 602, 604, 605, 607, 636, 639})
+FIXED_ISSUES = frozenset({592, 593, 594, 600, 602, 603, 604, 605, 606, 607, 636, 638, 639, 640})
 
 
 MISS_TAGS = {
@@ -531,6 +572,8 @@ MISS_TAGS = {
         gen_address_dong_ho_variants,
         gen_number_label_gap_variants,
         gen_birth_date_cue_chulsaeng,
+        gen_name_cue_followups,
+        gen_address_city_no_gu_abbr,
     )
 }
 
