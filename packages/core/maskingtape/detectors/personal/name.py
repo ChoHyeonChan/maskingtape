@@ -137,6 +137,11 @@ _CUE_603_COMMON_WORDS = frozenset({"진술", "진술서", "공제", "안내문",
 # 요구한다 — 부서·업무어("구매 부장"의 구매, "대표 이사"의 이사)가 직함과 붙어 이름으로
 # 오탐되는 걸 막는다. 존칭(님)은 강한 단서라 이 제약을 걸지 않는다. (앞·뒤 직함 공용)
 _TITLE_ONLY_CUES = frozenset(_TITLE_CUES) - frozenset(_SUFFIX_CUES)
+# 성씨 뒤 두 글자가 직함이면 세 글자 "이름"은 사실 성씨+직함이다("김부장"·"이대리", #677).
+_TITLE_TAIL_WORDS = frozenset(c for c in _TITLE_CUES if len(c) == 2)
+# 세 글자 이름의 끝 글자가 지명·학교 어미면 이름이 아니다("김포시"·"김포대"·"강남구", #677).
+# "군"·"양"은 실명 끝 글자로도 흔해서("박도군"·"김하양") 여기 넣지 않는다.
+_PLACE_OR_SCHOOL_ENDINGS = frozenset({"시", "대", "구"})
 
 # 이름 뒤에 붙는 단일 음절 조사 — 일반명사 뒤에 붙어 단어 경계를 흐리는지 판별에 쓴다(#247).
 # "엔"("~에는"의 준말, "이전엔")도 조사로 본다(#484) — 없으면 "이전"(정지어) 뒤에 "엔"이 붙은
@@ -720,6 +725,22 @@ class NameDetector(Detector):
             confidence = 0.75 if (has_prefix and has_suffix) else 0.5
             if confidence < self.min_confidence:
                 continue
+            captured = m.group("name")
+            if len(captured) == 3 and captured[1:] in _TITLE_TAIL_WORDS:
+                # "김부장님": 성씨 뒤에 직함이 붙은 꼴이라 세 글자 이름이 아니다. 직함은 남기고 성씨만 가린다(#677)
+                found.append(
+                    Detection(
+                        kind=self.kind,
+                        start=name_start,
+                        end=name_start + 1,
+                        text=captured[0],
+                        confidence=confidence,
+                        detector=self.__class__.__name__,
+                    )
+                )
+                continue
+            if len(captured) == 3 and captured[2] in _PLACE_OR_SCHOOL_ENDINGS:
+                continue  # "김포시"·"김포대"처럼 지명·학교 이름이다(#677)
             found.append(
                 Detection(
                     kind=self.kind,
@@ -855,8 +876,11 @@ class NameDetector(Detector):
             pos = end
             if value in _FORM_NOT_NAMES_603:
                 list_seeds.append((end, True))
+            # #603 상태 값은 #603 라벨 칸("결재: 대기")에서만 거른다. 보호자·성명 같은 기존 라벨 칸은 #603 전처럼
+            # 이름으로 받는다 — 위 규칙이 앞 단서를 잃으면 "보호자: 진행(인)"이 샌다(#691).
+            not_names = _FORM_NOT_NAMES if m.group("label") in _FORM_LABELS_603 else _LIST_STOP_FORM_VALUES
             # 직함+조사("신청자 : 차장은 …")도 값이 아니다. 뒤 이름은 위 규칙이 직함을 단서로 잡는다(#533)
-            if value in _FORM_NOT_NAMES or _CUE_WITH_JOSA_OLD_RE.fullmatch(name) or all(covered[start:end]):
+            if value in not_names or _CUE_WITH_JOSA_OLD_RE.fullmatch(name) or all(covered[start:end]):
                 continue
             if m.group("label") in _ORG_VALUE_LABELS and len(name) >= 3 and _ORG_VALUE_END_RE.search(name):
                 continue  # 공문 발신·수신·참조 칸은 사람보다 부서·기관이 흔하다("홍보팀")

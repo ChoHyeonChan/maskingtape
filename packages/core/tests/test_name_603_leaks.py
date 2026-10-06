@@ -154,3 +154,20 @@ def test_603_prefix_does_not_steal_the_next_cue(text, name):
 )
 def test_resumed_cue_keeps_two_char_name_with_other_cue(text, name):
     assert covered(text, name), NameDetector().detect(text)
+
+
+@pytest.mark.parametrize(
+    "text, name",
+    [
+        # 위 규칙이 앞 단서를 잃어도, 기존 양식 라벨 칸의 값은 #603 상태 값과 같아도 #603 전처럼 이름으로 받는다
+        ("참석자: 김도윤 박사랑\n보호자: 진행(인)", "진행"),
+        ("참석자: 김도윤 원고은\n보호자: 진행(인)", "진행"),
+    ],
+)
+def test_old_form_label_value_is_a_name_even_if_603_status_word(text, name):
+    assert covered(text, name), NameDetector().detect(text)
+
+
+def test_603_form_label_status_value_is_not_a_name():
+    # #603 라벨 칸의 처리 상태 값("결재: 대기")은 이름이 아니다
+    assert not NameDetector().detect("결재: 대기")
