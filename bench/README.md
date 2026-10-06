@@ -1136,6 +1136,10 @@ python -m bench.evaluators.evaluate_doc_types bench/datasets/doc_types_v1.jsonl
   다음 줄 라벨을 앞 이름의 뒤 단서로 먹는 문제는
   [#662](https://github.com/ChoHyeonChan/maskingtape/issues/662)이다. 저장소 밖 사본에서 이 문제만 고치면
   회의록이 0.807 → 0.950이 된다.
+- **#662로 회의록을 고쳤다(규칙 전용, 2026-10-06, main `dccc23b` 위 브랜치).** 회의록 0.807 → 0.950, 판결문
+  0.680 → 0.683이다. 줄을 넘는 뒤 단서를 막는 대신, 그 단서를 다음 줄 이름의 앞 단서로도 쓰게 고쳐서
+  `변호사 한율⏎피고 안호지`의 두 글자 이름(`한율`)을 잃지 않고 다음 줄 `안호지`까지 잡는다. 나머지 종류는 그대로다.
+  하이브리드 수치(위 표)는 `af587df` 기준 그대로이고 다시 재지 않았다.
 
 ## 프롬프트 공격 골든셋 — 문서 속 지시문이 LLM 이름 마스킹을 약하게 만드는가 ([#549](https://github.com/ChoHyeonChan/maskingtape/issues/549))
 

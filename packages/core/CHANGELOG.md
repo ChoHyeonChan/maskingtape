@@ -29,6 +29,9 @@
 - **표 머리행의 이름 열** ([#526](https://github.com/ChoHyeonChan/maskingtape/issues/526)):
   CSV·TSV·마크다운 표의 머리행이 `이름`·`성명` 등이면 아래 행의 이름을 가린다. 전에는 같은 행의 전화번호·이메일만 가려지고 이름은 남았다.
 - **슬래시로 나눈 명단** ([#581](https://github.com/ChoHyeonChan/maskingtape/issues/581)): `김민수 / 개발팀 / 010-3456-7890`
+- **다음 줄 라벨에 먹히던 여러 줄 양식의 이름** ([#662](https://github.com/ChoHyeonChan/maskingtape/issues/662)):
+  `참석자: 송준경⏎작성자: 문양석`에서 다음 줄 라벨을 앞 이름의 뒤 단서로 읽어 `문양석`이 통째로 남았다.
+  두 칸 `성명 | 김민수⏎담당자 | 이서연`은 라벨 칸(`담당자`)을 이름으로 가리고 `이서연`은 남겼다.
 - **끝 글자가 조사처럼 생긴 이름** ([#579](https://github.com/ChoHyeonChan/maskingtape/issues/579)): `신청인 이하은`
 - **업무 문서 제목형 라벨** ([#537](https://github.com/ChoHyeonChan/maskingtape/issues/537)): `이력서 접수: 전혜호, 생일 1986-10-02`.
   벤치 문장 틀에 있던 라벨이라 벤치 수치를 올린 몫이 크다.
