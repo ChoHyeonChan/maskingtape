@@ -75,7 +75,8 @@ _BIRTHDATE_RE = re.compile(
 _TRAILING_CUE = (
     r"(?:생(?:이에요|이었|이고|이야|이다|이네요|이죠|입니다|으로)?(?![가-힣])"
     r"|에\s{0,2}태어"
-    r"|(?:이|가)?\s{0,2}(?:제\s{0,2})?생일)"
+    r"|(?:이|가)?\s{0,2}(?:제\s{0,2})?생일"
+    r"|\s?출생(?:자|[은는이가을를의에도만])?(?![가-힣]))"
 )
 
 _BIRTHDATE_TRAILING_RE = re.compile(r"(?P<date>" + _DATE + r")" + _TRAILING_CUE)
