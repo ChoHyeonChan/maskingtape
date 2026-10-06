@@ -55,6 +55,28 @@ git status --short --branch
 - Node 패키지는 인터넷이 필요하다. 전날 `apps/web`에서 `npm install`을 한 번 끝내 두거나,
   기능테스트 노트북에서 안정적인 네트워크를 확보한다.
 
+## 0. 터미널 인코딩
+
+목표: Windows PowerShell 5.1에서 한글이 깨지지 않게 한다. **PowerShell 창을 새로 열 때마다 맨 먼저**
+실행한다. 설정은 그 창에서만 유지된다.
+
+```powershell
+[Console]::OutputEncoding = [Text.Encoding]::UTF8; $OutputEncoding = [Console]::OutputEncoding
+$OutputEncoding.WebName
+```
+
+예상 결과:
+
+- `utf-8`이 출력된다.
+
+이 설정을 빼면:
+
+- 파이프(`Get-Content … | maskingtape`)로 넣은 한글이 `???`로 바뀌어 CLI에 들어간다. 번호만 가려지고
+  이름·주소는 그대로 남아서, 동작하는 것처럼 보이지만 탐지가 빠진다.
+- `curl.exe` 응답의 한글이 깨진 글자로 보인다.
+- `Invoke-RestMethod`는 이 설정과 상관없이 요청 본문의 한글을 `???`로 보낸다(서버가 이름을 못 잡고
+  전화번호만 돌려준다). API 확인은 8·10절처럼 `curl.exe`와 UTF-8 JSON 파일로 한다.
+
 ## 1. 깨끗한 clone
 
 목표: 검증기관 앞에서 "내 PC에 우연히 남은 파일" 없이도 설치가 되는지 확인한다.
@@ -180,6 +202,13 @@ maskingtape --strategy pseudonym "고객 김민수님 주민번호 800101-123456
 maskingtape --scan "고객 김민수님 주민번호 800101-1234560, 연락처 010-1234-5678"
 ```
 
+파이프 입력(0단계 인코딩 설정이 된 창에서):
+
+```powershell
+Set-Content -Path C:\maskingtape-rehearsal\sample-pipe.txt -Encoding UTF8 -Value "담당자 김민수, 연락처 010-1234-5678", "주민번호 800101-1234560"
+Get-Content C:\maskingtape-rehearsal\sample-pipe.txt -Encoding UTF8 | maskingtape
+```
+
 예상 시간: 1분 미만.
 
 예상 결과:
@@ -188,6 +217,11 @@ maskingtape --scan "고객 김민수님 주민번호 800101-1234560, 연락처 0
 - `label`은 `[이름]`, `[주민등록번호]`, `[전화번호]`처럼 종류 라벨을 보여 준다.
 - `pseudonym`은 원문과 다른 가짜 값을 만든다.
 - `--scan`은 JSON 탐지 리포트를 출력한다.
+- 파이프 입력은 두 줄이 그대로 나뉘어 `담당자 ***, 연락처 *************`와 `주민번호 **************`로 출력된다.
+  `담당자`가 `???`로 보이거나 이름이 안 가려지면 0단계를 빠뜨린 것이다.
+- 파이프 출력 첫 줄 맨 앞에는 보이지 않는 BOM 문자(U+FEFF)가 하나 붙는다. PowerShell이 UTF-8 입력 앞에
+  붙여 보내는 것이고, 화면과 탐지 결과에는 영향이 없다(문장 맨 앞의 이름도 가려진다). 출력을 파일로
+  저장하면 그 파일의 첫 글자로 남는다.
 
 실패 시:
 
@@ -307,13 +341,18 @@ $env:MASKINGTAPE_API_CORS_ORIGINS="http://localhost:5173,http://127.0.0.1:5173"
 python -m uvicorn maskingtape_api.main:app --app-dir apps/api --host 127.0.0.1 --port 8000
 ```
 
-API 확인:
+API 확인(새 PowerShell 창에서 0단계 인코딩 설정을 먼저 실행한다):
 
 ```powershell
-Invoke-RestMethod http://127.0.0.1:8000/health
-Invoke-RestMethod -Method POST http://127.0.0.1:8000/scan -ContentType "application/json" -Body '{"text":"담당자 김민수, 연락처 010-1234-5678"}'
-Invoke-RestMethod -Method POST http://127.0.0.1:8000/anonymize -ContentType "application/json" -Body '{"text":"담당자 김민수, 연락처 010-1234-5678","strategy":"label"}'
+cd C:\maskingtape-rehearsal
+Set-Content -Path body-scan.json -Encoding UTF8 -Value '{"text":"담당자 김민수, 연락처 010-1234-5678"}'
+Set-Content -Path body-label.json -Encoding UTF8 -Value '{"text":"담당자 김민수, 연락처 010-1234-5678","strategy":"label"}'
+curl.exe -s http://127.0.0.1:8000/health
+curl.exe -s -X POST http://127.0.0.1:8000/scan -H "Content-Type: application/json" --data-binary "@body-scan.json"
+curl.exe -s -X POST http://127.0.0.1:8000/anonymize -H "Content-Type: application/json" --data-binary "@body-label.json"
 ```
+
+`Invoke-RestMethod`는 쓰지 않는다. 요청 본문의 한글이 `???`로 바뀌어 서버로 가서 이름이 탐지되지 않는다.
 
 터미널 2: 웹
 
@@ -337,13 +376,17 @@ http://localhost:5173
 
 예상 결과:
 
-- `/health`는 `{ "status": "ok" }`.
-- `/scan` 응답의 `detections`에는 `text` 원문값이 없고 `kind`, `start`, `end`가 있다.
+- `/health`는 `{"status":"ok"}`.
+- `/scan` 응답의 `detections`에는 `text` 원문값이 없고 `kind`, `start`, `end`가 있다. `name`과 `phone` 2건이 나온다.
+- `/anonymize` 응답의 `text`는 `담당자 [이름], 연락처 [전화번호]`다.
 - 웹에서 합성 문장을 넣으면 하이라이트와 마스킹 결과가 표시된다.
 - 웹 상단에 데모/미저장 안내가 보인다.
 
 실패 시:
 
+- `/scan`에서 `phone` 1건만 나오면 본문 한글이 깨져서 간 것이다. 본문을 `Set-Content -Encoding UTF8`로 만든
+  파일로 보냈는지(`--data-binary "@파일"`) 확인한다.
+- 응답의 한글이 깨져 보이면 그 창에서 0단계를 빠뜨린 것이다.
 - 웹에서 API 오류가 나면 API 터미널이 켜져 있는지, 포트가 8000인지 확인한다.
 - 8000 포트가 이미 사용 중이면 API를 8001로 띄우고 웹 터미널에서
   `$env:VITE_API_TARGET="http://127.0.0.1:8001"`을 설정한다.
@@ -431,11 +474,12 @@ https://maskingtape-lilac.vercel.app
 4. 결과 하이라이트와 마스킹 결과가 표시된다.
 5. 실제 개인정보 입력 금지 문구가 보인다.
 
-API 직접 확인:
+API 직접 확인(0단계 인코딩 설정이 된 창에서, 8절에서 만든 본문 파일을 그대로 쓴다):
 
 ```powershell
-Invoke-RestMethod https://maskingtape-lilac.vercel.app/api/health
-Invoke-RestMethod -Method POST https://maskingtape-lilac.vercel.app/api/scan -ContentType "application/json" -Body '{"text":"담당자 김민수, 연락처 010-1234-5678"}'
+cd C:\maskingtape-rehearsal
+curl.exe -s https://maskingtape-lilac.vercel.app/api/health
+curl.exe -s -X POST https://maskingtape-lilac.vercel.app/api/scan -H "Content-Type: application/json" --data-binary "@body-scan.json"
 ```
 
 예상 시간: 3-5분.
@@ -443,7 +487,7 @@ Invoke-RestMethod -Method POST https://maskingtape-lilac.vercel.app/api/scan -Co
 예상 결과:
 
 - `/api/health`가 정상 응답한다.
-- `/api/scan`은 탐지 metadata를 돌려주며 `detections[].text` 원문값을 담지 않는다.
+- `/api/scan`은 탐지 metadata를 돌려주며 `detections[].text` 원문값을 담지 않는다. `name`과 `phone` 2건이 나온다.
 - 웹 데모는 공개 URL이므로 실제 개인정보를 넣지 않는다.
 
 실패 시:
@@ -460,6 +504,7 @@ Invoke-RestMethod -Method POST https://maskingtape-lilac.vercel.app/api/scan -Co
 | 기능명세서 항목 | 검증 단계 | 표기 가이드 |
 |---|---|---|
 | Python 라이브러리/CLI 규칙 기반 비식별화 | 3, 5 | `pip install maskingtape` 및 소스 설치 모두 가능 |
+| CLI 표준입력(파이프) 입력 | 0, 5 | 테스트 환경에 PowerShell UTF-8 설정을 적고, 그 설정 뒤에 시연 |
 | CLI 로컬 LLM 이름 정밀 탐지 | 6 | 우리 노트북의 Ollama(`hf.co/StayAlive1/maskingtape-name-1.5b-GGUF:Q4_K_M`)에서 시연, 외부 상용 API 아님 |
 | 마스킹 전략 3종 | 5, 8, 9 | `mask`, `label`, `pseudonym` |
 | MCP 서버 | 7 | Claude Code에서 `scan_text`, `anonymize_text`, `anonymize_file` 확인 |
