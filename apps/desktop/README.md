@@ -28,6 +28,7 @@
 ```powershell
 # (권장) core CLI를 PATH에 — 전 기능 사용 가능
 pip install -e packages/core
+pip install pypdf==6.19.0                         # PDF 파일을 넣을 때만 필요 (설치판에는 함께 들어 있다)
 $env:PATH = "<저장소>\.venv\Scripts;$env:PATH"   # venv를 썼다면
 maskingtape --help                                # 이게 나오면 준비 완료
 ```
@@ -84,7 +85,8 @@ lib/
     fallback_anonymizer.dart   # 백엔드를 순서대로 시도 (조합만 담당)
     default_backend.dart       # 기본 조립 — CLI 먼저, 없으면 REST
     llm_status.dart            # 로컬 Ollama 준비 상태 확인 (상태만 조회 — 탐지는 하지 않는다)
-    file_reader.dart           # 파일 검증(확장자·크기·바이너리) + UTF-8/CP949 디코딩
+    file_reader.dart           # 파일 검증(확장자·크기·바이너리) + UTF-8/CP949 디코딩, PDF는 추출기로
+    pdf_text_extractor.dart    # PDF 글자 추출 — Python으로 assets/pdf_text.py(pypdf)를 돌린다
     file_picker.dart           # OS 파일 선택 대화상자 (file_selector)
     shell.dart                 # 탐색기에서 결과 파일 열기
     batch_processor.dart       # 읽기 → 비식별화 → _masked 저장 순차 배치 (취소 지원)
@@ -105,7 +107,8 @@ lib/
 test/
   batch_processor_test.dart    # 배치 로직 유닛 테스트 (가짜 백엔드, 취소 포함)
   text_screen_test.dart        # 텍스트 입력 모드 — 실행·결과/원문 토글·초기화·옵션 재실행·오류
-  file_reader_test.dart        # 인코딩 폴백·검증 규칙 테스트
+  file_reader_test.dart        # 인코딩 폴백·검증 규칙 테스트 (PDF는 가짜 추출기)
+  pdf_text_extractor_test.dart # PDF 추출 실패 안내 — 「오류:」 줄만 화면에 옮긴다
   rest_anonymizer_test.dart    # REST 호출 — 루프백에 실제 HTTP 서버를 띄워 검증
   fallback_anonymizer_test.dart# 백엔드 전환 규칙 테스트
   llm_status_test.dart         # Ollama 상태 확인 — 가짜 Ollama 서버로 4가지 상태 검증
@@ -166,6 +169,20 @@ API 경로에서 지원하지 않는 옵션을 고르면 네트워크를 타기 
 
 입력 파일 규칙: txt·csv·tsv·md·json·log, 10MB 이하, UTF-8 또는 CP949(자동 판별).
 결과 `_masked` 파일은 항상 UTF-8로 저장한다. `_masked` 파일 재드롭·바이너리·빈 파일은 건너뛴다.
+
+**PDF**(50MB 이하)는 글자만 뽑아 같은 방식으로 처리하고, 결과를 `이름_pdf_masked.txt`(UTF-8 텍스트)로 저장한다.
+가린 PDF를 만드는 것이 아니다 — 웹 플레이그라운드의 PDF 업로드와 같은 범위다.
+
+- 추출은 `assets/pdf_text.py`(pypdf)가 한다. 앱이 Python을 `python -B -X utf8 - <경로>`로 띄우고 이 코드를
+  표준입력으로 넘긴다(`-c` 인자로 넘기면 여러 줄·따옴표가 Windows 명령줄 인용에서 깨질 수 있다). Python은 CLI와 같은
+  순서로 찾는다 — 설치판은 동봉 Python(pypdf를 함께 묶었다), 소스 실행은 PATH의 `python`(venv에 `pip install pypdf`).
+- 결과 이름에 `_pdf`를 넣는 이유: `이름_masked.txt`로 두면 같은 폴더의 `이름.txt` 결과를 덮어쓴다.
+- PDF에는 문단이 없고 화면의 줄만 있어서, 폭이 차서 꺾인 줄은 다시 잇는다. 줄 끝이 오른쪽 여백선에 닿고 다음 줄이
+  같은 크기·보통 줄 간격으로 이어질 때만 잇고(표·목록·문단 사이는 그대로), 한글끼리는 조사·어미와 남은 여백으로
+  띄어쓰기 자리인지 어림한다. 단어 중간에서 꺾인 이름·이메일이 조각으로 남아 탐지에서 빠지던 것을 막는다.
+  좁은 상자·다단처럼 페이지 여백이 아닌 곳에서 꺾인 줄은 원래 줄바꿈을 둔다.
+- 글자 층이 없는 스캔본, 열기 암호가 걸린 PDF는 실패로 알린다(OCR은 하지 않는다).
+- 실패 안내는 스크립트가 쓴 `오류: ...` 줄만 옮긴다. pypdf 로그는 꺼 두었다 — 깨진 파일의 경고에 내용 조각이 찍힌다.
 
 ## 로컬 LLM 사용 (선택)
 

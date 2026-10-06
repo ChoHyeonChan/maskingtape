@@ -9,7 +9,7 @@ import 'file_reader.dart';
 /// 취소하면 빈 목록.
 Future<List<String>> pickTextFiles() async {
   final group = XTypeGroup(
-    label: '텍스트 문서',
+    label: '텍스트·PDF 문서',
     extensions: FileReader.supportedExtensions.toList(),
   );
   final files = await openFiles(acceptedTypeGroups: [group]);

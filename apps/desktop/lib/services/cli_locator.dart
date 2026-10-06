@@ -39,3 +39,13 @@ CliCommand locateCli({String? executable, bool Function(String path)? exists}) {
       ? CliCommand(python, bundledCliArgs)
       : const CliCommand('maskingtape');
 }
+
+/// PDF 글자 추출(`pdf_text_extractor.dart`)에 쓸 Python — [locateCli]와 같은 순서다.
+///
+/// 1. 앱 exe 옆에 동봉된 Python(설치판, pypdf를 함께 묶었다).
+/// 2. 없으면 PATH의 `python` — venv를 켠 셸에서 `flutter run`하는 개발 환경. 그 venv에 pypdf가 있어야 한다.
+String locatePython({String? executable, bool Function(String path)? exists}) {
+  final python = inInstallDir(bundledPythonRelativePath, executable: executable);
+  final found = exists ?? (path) => File(path).existsSync();
+  return found(python) ? python : 'python';
+}
