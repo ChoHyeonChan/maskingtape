@@ -81,7 +81,12 @@ _GU_CITY_ABBR = [
     "수원", "성남", "고양", "용인", "안양", "안산",
     "부천", "청주", "천안", "전주", "포항", "창원",
 ]
+# 일반구가 없는 시. 주소 단서가 앞에 있고 바로 도로명+번지가 이어질 때만 '시'를 뗀 시작점으로 쓴다(#606 후속).
+_NO_GU_CITY_ABBR = [
+    "남양주", "김해", "화성", "평택", "파주", "김포", "시흥", "이천",
+]
 _ABBR_ANCHORS = sorted(_PROVINCE_ABBR + _GU_CITY_ABBR, key=len, reverse=True)
+_NO_GU_CITY_ABBR_RE = "|".join(sorted(_NO_GU_CITY_ABBR, key=len, reverse=True))
 
 # 시/도명 뒤에 공백 없이 붙는 조사(에/로/의/은/는/이/가/에서/으로/까지 …)는 정상 한국어 표기라
 # 시/도만으로도 주소로 인정해야 한다("본사는 서울특별시에 있다" → 주소 '서울특별시'). 반면 조사가
@@ -170,17 +175,23 @@ _BUILDING_SUFFIX = (
     r"아파트|빌라|오피스텔|맨션|타워|빌딩|센터|스퀘어|프라자|플라자|타운|파크|캐슬|하이츠|빌리지"
     r"|팰리스|레지던스|상가|연립|주택"
 )
-# 층. "지하 1층"·"B1"(지하층)·"12층". 층 뒤에 조사가 붙어도("4층에") 받는다. 영문자가 이어지면
-# 낱말의 일부라("B2B 영업팀") 층으로 보지 않는다.
-_FLOOR = r"(?:(?:지하|지상)\s?\d{1,2}층|[Bb]\d{1,2}층?|\d{1,3}층)(?![A-Za-z])" + _END
-# 호. 지하 상가는 "B101호"처럼 앞에 영문 한 글자가 붙는다.
-_HO = r"[A-Za-z]?\d{1,5}호"
+# 층. "지하 1층"·"B1"(지하층)·"12층"·"4F". 층 뒤에 조사가 붙어도("4층에") 받는다.
+# 영문자가 이어지면 낱말의 일부라("B2B 영업팀") 층으로 보지 않는다.
+_FLOOR = r"(?:(?:지하|지상)\s?\d{1,2}층|[Bb]\d{1,2}층?|\d{1,3}층|\d{1,2}[Ff])(?![A-Za-z])" + _END
+# 호. 지하 상가는 "B101호"처럼 앞에 영문 한 글자가 붙는다. "2호점" 같은 상호 표현은 제외한다.
+_HO = r"[A-Za-z]?\d{1,5}호" + _END
+# 동-호 줄임 표기. 두 번째 묶음을 세 자리 이상으로 제한하고 뒤 하이픈·숫자를 막아
+# "3-4호선" 같은 노선명과 전화번호 일부를 받지 않는다.
+_HYPHEN_UNIT = r"\d{2,4}-\d{3,5}호?(?![\d-])" + _END
+_UNIT_HO = r"(?:" + _HO + r"|" + _HYPHEN_UNIT + r")"
 # 건물 동. 숫자 동("101동")과 영문 한 글자 동("A동")은 그대로 받는다. 한글 차례 동("가동")은 "자동"·"아동"
 # 같은 낱말과 모양이 같아서 뒤에 층이나 호가 올 때만 받는다.
 _SEP = r"[,\s]\s{0,3}"
 _BUILDING_DONG = (
     r"(?:\d{1,4}동|[A-Za-z]동|[가나다라마바사아자차카타파하]동(?=" + _SEP + r"(?:" + _FLOOR + r"|" + _HO + r")))"
 )
+# 보통은 공백·콤마 뒤에 호가 오지만, "101동1203호"처럼 동과 호를 붙여 쓰기도 한다.
+_UNIT_SEP = r"(?:" + _SEP + r"|(?<=동))"
 
 _TAIL = (
     # 지번은 동/읍/면/리로 끝나지만, 도로명은 "월드컵로237길"처럼 가지번호가 공백 없이 붙는다.
@@ -204,7 +215,7 @@ _TAIL = (
     r"(?=" + _SEP + r"(?:" + _BUILDING_DONG + r"|" + _FLOOR + r"|" + _HO + r")))?"
     r"(?:[,\s]\s*(?P<building_dong>" + _BUILDING_DONG + r"))?"
     r"(?:" + _SEP + r"(?P<floor>" + _FLOOR + r"))?"
-    r"(?:[,\s]\s*(?P<building_ho>" + _HO + r"))?"
+    r"(?:" + _UNIT_SEP + r"(?P<building_ho>" + _UNIT_HO + r"))?"
     # 도로명주소의 참고항목 괄호 — 법정동과 공동주택 이름("(역삼동)", "(역삼동, 더샵아파트)").
     # 괄호 안이 동·가·리로 끝나는 이름일 때만 받아 "(본사)" 같은 괄호는 넘긴다. 쉼표 뒤 둘째 칸은
     # 글자로 시작할 때만 받는다. 숫자로 시작하면 공동주택 이름이 아니라 붙여 쓴 번호("(역삼동,
@@ -215,12 +226,12 @@ _TAIL = (
 
 # 시/도·도로명 없이 건물명과 세대만 쓴 주소 — "한빛아파트 101동 302호로 보내 주세요"(#593).
 # 택배·민원·관리사무소 문서에서 흔하고 동·호까지 나오면 사는 곳이 특정된다. 건물 종류 낱말로 끝나는
-# 건물명 뒤에 동이나 층, 그리고 호가 모두 올 때만 받는다. 호가 없으면("한빛아파트 101동 앞") 받지 않는다.
+# 건물명 뒤에 동/층/호 조합이나 동-호 줄임 표기가 올 때만 받는다. 호가 없으면("한빛아파트 101동 앞") 받지 않는다.
 _BUILDING_UNIT_RE = re.compile(
     r"(?<![0-9A-Za-z가-힣])(?P<building>[0-9A-Za-z가-힣]{1,20}(?:" + _BUILDING_SUFFIX + r"))"
     r"(?:" + _SEP + r"(?P<building_dong>" + _BUILDING_DONG + r"))?"
     r"(?:" + _SEP + r"(?P<floor>" + _FLOOR + r"))?"
-    r"(?<=동|층)" + _SEP + r"(?P<building_ho>" + _HO + r")"
+    r"(?:" + _UNIT_SEP + r"(?P<building_ho>" + _UNIT_HO + r"))"
 )
 _BUILDING_UNIT_CONFIDENCE = 0.6
 
@@ -288,6 +299,13 @@ _ADDR_ABBR_RE = re.compile(
     r"|세종" + _SEJONG_AHEAD + r")" + _GU + _GU2 + _TAIL
 )
 
+_ADDR_NO_GU_CITY_ABBR_RE = re.compile(
+    # "김해 장유로 123"처럼 일반구 없는 시에서 '시'를 뗀 표기. 단서 없이 받으면 "화성 탐사" 같은
+    # 지역·일반명사 문장이 넓어지므로 detect()에서 후보 앞 주소 단서를 다시 확인한다.
+    r"(?<![가-힣])(?P<abbr>" + _NO_GU_CITY_ABBR_RE + r")(?=\s" + _ROAD3 + _BUNJI_AHEAD_STRICT + r")"
+    + _GU + _GU2 + _TAIL
+)
+
 
 # 시/도·시 없이 구로 시작하는 주소 — "주소: 강남구 테헤란로 123", "배송지 마포구 상암동 1601"(#492).
 # 서울·광역시에서 가장 흔한 줄임 표기인데 시작점이 없어 통째로 샜다. 다만 '구'로 끝나는 낱말은 흔하고
@@ -341,6 +359,11 @@ def _starts_line_ignoring_space(text: str, start: int) -> bool:
     return i < 0 or text[i] in "\r\n\u2028\u2029"
 
 
+def _has_leading_address_cue(text: str, start: int) -> bool:
+    """후보 앞 가까운 곳에 주소 단서가 있는지 본다."""
+    return _GU_CUE_RE.search(text, max(0, start - _GU_CUE_WINDOW), start) is not None
+
+
 def _has_gu_cue(text: str, start: int, end: int) -> bool:
     """구로 시작하는 주소 후보가 충분한 주소 단서를 갖는지 확인한다.
 
@@ -348,7 +371,7 @@ def _has_gu_cue(text: str, start: int, end: int) -> bool:
     - 뒤 단서: "강남구 역삼동 12 (배송지)", "…가 제 주소입니다"처럼 같은 줄 뒤에 단서가 있으면 통과.
     - 목록 단서: "배송지 목록" 아래 여러 줄의 구 주소는 같은 문단 안에서만 통과. 빈 줄은 넘지 않는다.
     """
-    if _GU_CUE_RE.search(text, max(0, start - _GU_CUE_WINDOW), start):
+    if _has_leading_address_cue(text, start):
         return True
     after_limit = min(len(text), end + _GU_CUE_WINDOW)
     if _GU_CUE_RE.search(text, end, min(_line_end(text, end, after_limit), after_limit)):
@@ -405,9 +428,11 @@ def _candidates(text: str) -> list[tuple[int, int, float]]:
         candidates.append((m.start(), m.end(), _score(m, 0.5, 1.0)))
     # 시/도 축약형 앵커(#396)·시/군 앵커(#68)·구 앵커(#492) — 정식 시/도명이 없으니 확신도 0.4부터.
     # 동/읍/면/리(도로명 포함) 없이 시/군/구까지만이면 지역 언급일 뿐 — 유출 아님("서울 강남구에 산다").
-    for pattern in (_ADDR_ABBR_RE, _ADDR_NO_PROVINCE_RE, _ADDR_GU_RE):
+    for pattern in (_ADDR_ABBR_RE, _ADDR_NO_PROVINCE_RE, _ADDR_NO_GU_CITY_ABBR_RE, _ADDR_GU_RE):
         for m in _search_every_start(pattern, text):
             if not m.group("dong"):
+                continue
+            if pattern is _ADDR_NO_GU_CITY_ABBR_RE and not _has_leading_address_cue(text, m.start()):
                 continue
             if pattern is _ADDR_GU_RE:
                 if m.group("si") in _GU_NON_ADDRESS_WORDS or not _has_gu_cue(text, m.start(), m.end()):

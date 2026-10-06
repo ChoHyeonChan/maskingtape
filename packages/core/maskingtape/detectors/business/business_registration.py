@@ -29,7 +29,10 @@ from maskingtape.types import Detection
 _BRN_RE = re.compile(r"(?<!\d)(\d{3})-(\d{2})-(\d{5})(?!\d)")
 # 사업자등록번호 라벨이 번호 바로 앞에 있으면 체크섬이 틀려도 받는다(#607). 한 자리 틀린 번호나
 # OCR 오류도 라벨이 "사업자번호다"라고 말해 주므로 가린다. 체크섬이 없는 경우라 확신도는 0.6이다.
-_BRN_LABEL_BEFORE_RE = re.compile(r"(?:사업자 ?등록번호|사업자번호)[ \t]{0,3}[:：]?[ \t]{0,3}\Z")
+# "사업자 번호"처럼 띄어 쓴 꼴도 받는다. 라벨과 번호 사이는 카드와 같다(#657).
+_BRN_LABEL_BEFORE_RE = re.compile(
+    r"(?:사업자 ?(?:등록 ?)?번호)[ \t]{0,3}[:：]?[ \t]{0,3}(?:\r?\n)?[ \t]{0,3}[(（]?[ \t]{0,3}\Z"
+)
 _BRN_LABEL_WINDOW = 20
 _LABELED_CONFIDENCE = 0.6
 
