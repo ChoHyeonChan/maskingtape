@@ -77,3 +77,21 @@ def test_labeled_business_number_passing_checksum_keeps_full_confidence():
 
 def test_business_number_failing_checksum_without_a_label_is_still_dropped():
     assert detect("주문번호 123-45-67890") == []
+
+
+def test_labeled_business_number_on_the_next_line_failing_checksum_is_still_masked():
+    found = detect("사업자등록번호\n123-45-67890")
+    assert len(found) == 1
+    assert found[0].confidence == 0.6
+
+
+def test_labeled_business_number_in_parentheses_failing_checksum_is_still_masked():
+    found = detect("사업자등록번호(123-45-67890)")
+    assert len(found) == 1
+    assert found[0].confidence == 0.6
+
+
+def test_business_number_label_written_with_a_space_is_still_masked():
+    found = detect("사업자 번호: 123-45-67890")
+    assert len(found) == 1
+    assert found[0].confidence == 0.6

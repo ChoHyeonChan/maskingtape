@@ -42,9 +42,10 @@ describe("DemoPage privacy banner (#154)", () => {
 
     // d4f1bb5(2026-08-26)에서 "로컬에서만 처리" 문구가 빠졌는데, 배포판은 실제로
     // /api/scan 서버 호출을 거치므로 그 문구는 틀린 말이었다 — 실제 동작과 같은
-    // "서버로 전송되며 저장하지 않는다"는 안내가 있어야 한다.
+    // "서버로 전송된다"는 안내가 있어야 한다. 저장하지 않는다는 약속은 우리 코드
+    // 범위로만 좁힌다 — 배포 플랫폼(Vercel)의 요청 기록은 우리 코드 밖이다.
     const note = screen.getByRole("note", { name: "개인정보 입력 주의 안내" });
-    expect(note).toHaveTextContent("서버로 전송되며 저장하지 않습니다");
+    expect(note).toHaveTextContent("서버로 전송되며, 우리 코드는 요청 내용을 저장하거나 기록하지 않습니다");
   });
 });
 
