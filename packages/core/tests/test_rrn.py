@@ -331,3 +331,35 @@ def test_short_unmasked_digits_after_a_six_digit_date_are_not_an_rrn():
 def test_short_digits_after_an_order_number_date_are_not_an_rrn_without_a_label():
     # "ORD-20250408-2110"처럼 8자리 날짜형 주문번호의 짧은 일련번호는 주민번호 라벨이 없으면 받지 않는다
     assert RRNDetector().detect("주문번호 ORD-20250408-2110") == []
+
+
+# ── #637 후속: 머지 후 재측정에서 남은 모양(서연님 10/5 댓글) ─────────────────────
+# 셋 다 주민번호·생년월일 라벨이 앞에 있을 때만 받는다 — 라벨 없는 날짜형 주문번호 오탐 방지.
+
+
+def test_six_digit_front_with_short_digits_after_a_label_is_an_rrn():
+    found = RRNDetector().detect("주민번호 030123-45 기재")
+    assert len(found) == 1
+    assert found[0].text == "030123-45"
+
+
+def test_spaced_dotted_date_front_with_trailing_dot_is_an_rrn():
+    found = RRNDetector().detect("생년월일 1980. 1. 1.-1234567")
+    assert len(found) == 1
+    assert found[0].text == "1980. 1. 1.-1234567"
+
+
+def test_back_with_one_inner_space_after_a_label_is_an_rrn():
+    found = RRNDetector().detect("주민번호 800101 - 1234 567")
+    assert len(found) == 1
+    assert found[0].text == "800101 - 1234 567"
+
+
+def test_followup_shapes_without_a_label_are_still_not_an_rrn():
+    assert RRNDetector().detect("주문 030123-45 처리") == []
+    assert RRNDetector().detect("코드 800101 - 1234 567") == []
+
+
+def test_gender_digit_followed_by_spaced_digits_without_a_label_keeps_the_old_partial_match():
+    # 공백 낀 뒷자리 갈래가 라벨이 없어 버려져도 전에 잡던 "800101-1"은 그대로 잡는다(덜 가림 방지)
+    assert [d.text for d in RRNDetector().detect("800101-1 234567")] == ["800101-1"]
