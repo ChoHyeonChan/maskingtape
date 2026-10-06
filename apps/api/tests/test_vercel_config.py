@@ -29,3 +29,19 @@ def test_spa_rewrite_does_not_capture_public_files() -> None:
         assert not re.fullmatch(rewrite_source, f"/{public_file.name}"), public_file.name
     assert re.fullmatch(rewrite_source, "/")
     assert re.fullmatch(rewrite_source, "/accuracy")
+
+
+def test_vercel_security_headers_limit_browser_data_flows() -> None:
+    config_path = Path(__file__).resolve().parents[3] / "vercel.json"
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+
+    header_sets = config["headers"]
+    assert header_sets[0]["source"] == "/(.*)"
+    headers = {entry["key"].lower(): entry["value"] for entry in header_sets[0]["headers"]}
+
+    csp = headers["content-security-policy"]
+    assert "connect-src 'self'" in csp
+    assert "frame-ancestors 'none'" in csp
+    assert "worker-src 'self' blob:" in csp
+    assert headers["x-content-type-options"] == "nosniff"
+    assert headers["referrer-policy"] == "no-referrer"
