@@ -379,6 +379,91 @@
   pointer-events: none;
 }
 
+/* 탐지 방식 선택(#547) — 결과 헤더의 마스킹 방식 버튼(.input-panel__mask-mode)과 같은
+   분절 버튼 모양을 쓴다. 규칙 전용이 기본이고, 하이브리드를 고르면 바로 아래에 OpenAI 전송
+   안내가 붙는다. */
+.detection-mode {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.detection-mode__row {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+
+.detection-mode__label {
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.detection-mode__group {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(24, 58, 139, 0.18);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.detection-mode__btn {
+  min-height: 2.35rem;
+  padding: 0 0.8rem;
+  border: 0;
+  border-left: 1px solid rgba(24, 58, 139, 0.18);
+  background: #ffffff;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.detection-mode__btn:first-child {
+  border-left: 0;
+}
+
+.detection-mode__btn.is-active {
+  background: var(--brand-blue);
+  color: #ffffff;
+}
+
+.detection-mode__btn:disabled {
+  color: var(--kind-fallback);
+  background: var(--surface);
+  cursor: not-allowed;
+}
+
+.detection-mode__notice,
+.detection-mode__blocked {
+  margin: 0;
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  word-break: keep-all;
+}
+
+.detection-mode__notice {
+  border: 1px solid rgba(24, 58, 139, 0.16);
+  background: var(--brand-blue-tint);
+  color: var(--text-secondary);
+}
+
+.detection-mode__notice strong {
+  color: var(--text-primary);
+}
+
+.detection-mode__blocked {
+  border: 1px solid color-mix(in srgb, var(--kind-card) 35%, #ffffff);
+  background: color-mix(in srgb, var(--kind-card) 8%, #ffffff);
+  color: var(--kind-card);
+  font-weight: 700;
+}
+
 .input-panel__actions {
   margin-top: 0.75rem;
   display: flex;

@@ -241,6 +241,20 @@ describe("ResultsPanel pseudonym mode (#346)", () => {
     expect(mockAnonymizeText).not.toHaveBeenCalled();
   });
 
+  it("requests pseudonyms in hybrid mode when the scan itself ran hybrid, so LLM-found names are replaced too (#547)", () => {
+    mockAnonymizeText.mockReturnValue(new Promise(() => {}));
+    render(
+      <ResultsPanel
+        scanned={{ ...scanned, modeInfo: { requested: "hybrid", used: "hybrid", failureCode: null } }}
+        scanRun={1}
+        maskMode="pseudonym"
+        onMaskedTextChange={() => {}}
+      />,
+    );
+
+    expect(mockAnonymizeText).toHaveBeenCalledWith("김철수 010-1234-5678", "pseudonym", "hybrid");
+  });
+
   it("requests the pseudonymized text from the API and reports it once it resolves", async () => {
     mockAnonymizeText.mockResolvedValue({
       text: "고객 김서준 010-8842-1097",
@@ -252,7 +266,7 @@ describe("ResultsPanel pseudonym mode (#346)", () => {
       <ResultsPanel scanned={scanned} scanRun={1} maskMode="pseudonym" onMaskedTextChange={onMaskedTextChange} />,
     );
 
-    expect(mockAnonymizeText).toHaveBeenCalledWith("김철수 010-1234-5678", "pseudonym");
+    expect(mockAnonymizeText).toHaveBeenCalledWith("김철수 010-1234-5678", "pseudonym", "rule");
     expect(screen.getByRole("status")).toHaveTextContent("가명처리 결과를 불러오는 중");
 
     await waitFor(() => expect(onMaskedTextChange).toHaveBeenLastCalledWith("고객 김서준 010-8842-1097"));
@@ -315,6 +329,6 @@ describe("ResultsPanel pseudonym mode (#346)", () => {
     rerender(<ResultsPanel scanned={nextScan} scanRun={2} maskMode="pseudonym" onMaskedTextChange={() => {}} />);
 
     await waitFor(() => expect(mockAnonymizeText).toHaveBeenCalledTimes(2));
-    expect(mockAnonymizeText).toHaveBeenLastCalledWith("다른 문장 010-9999-8888", "pseudonym");
+    expect(mockAnonymizeText).toHaveBeenLastCalledWith("다른 문장 010-9999-8888", "pseudonym", "rule");
   });
 });
