@@ -43,6 +43,7 @@
 | 34 | sentencepiece / protobuf | 0.2.2 / 7.36.2 | Apache-2.0 / BSD-3-Clause | https://github.com/google/sentencepiece · https://github.com/protocolbuffers/protobuf | (학습 도구) transformers 토크나이저 의존 |
 | 35 | gguf (Python) | 0.19.0 | MIT | https://github.com/ggml-org/llama.cpp/tree/master/gguf-py | (학습 도구) GGUF 변환 |
 | 36 | llama.cpp (변환 스크립트·llama-quantize) | b11368 | MIT | https://github.com/ggml-org/llama.cpp | (학습 도구) f16 GGUF 변환·Q4_K_M 양자화. `training/export_ollama.py`가 호출 |
+| 37 | pypdf | 6.19.0 | BSD-3-Clause | https://github.com/py-pdf/pypdf | 데스크톱 설치파일 — 동봉 Python에서 PDF 글자 추출 (wheel SHA-256 고정, 런타임 의존성 없음) |
 
 ※ **AI 모델 주의**: Qwen2.5는 **3B·72B만 비상업 제한(Qwen Research License)**이고 나머지(0.5B/**1.5B**/**7B**/14B/32B)가 Apache-2.0이다. 기본 모델은 1.5B를 학습한 17번, 선택 모델은 7B(26번)다. **3B로 바꾸지 말 것.**
 ※ 위 16·17·26번은 결과보고서 **붙임2(AI 모델 활용 및 라이선스 기술 명세서)**에도 반영한다(유형2 '외부 모델 파인튜닝' + 기반 모델명·라이선스·학습 데이터·가중치 공개 주소).

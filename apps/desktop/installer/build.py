@@ -5,9 +5,10 @@
 
 동작 원리:
 1. `flutter build windows --release` 결과물을 묶음 폴더(bundle)로 복사한다.
-2. Python 임베디드 배포판을 받아(SHA-256 고정) `bundle/python/`에 풀고, core wheel을
-   `python/Lib/site-packages/`에 푼다. pip은 넣지 않는다 — 앱은 `python.exe -X utf8 -m maskingtape.cli`로
-   CLI를 부른다(`lib/services/cli_locator.dart`). 묶은 CLI가 실제로 도는지 합성 문장으로 확인한다.
+2. Python 임베디드 배포판을 받아(SHA-256 고정) `bundle/python/`에 풀고, core wheel과 pypdf wheel
+   (PDF 글자 추출용, SHA-256 고정)을 `python/Lib/site-packages/`에 푼다. pip은 넣지 않는다 — 앱은
+   `python.exe -X utf8 -m maskingtape.cli`로 CLI를 부른다(`lib/services/cli_locator.dart`). 묶은 CLI와
+   PDF 추출이 실제로 도는지 합성 문장으로 확인한다.
 3. 함께 실리는 제3자 구성요소의 고지문을 `bundle/licenses/*.txt`로 모으고(앱의 ⓘ 화면이 읽는다),
    파일별 SHA-256 목록(`BUNDLE_MANIFEST.txt`)을 쓴 뒤 Inno Setup으로 setup.exe를 만든다.
 
@@ -52,9 +53,19 @@ OPENSSL_VERSION = "3.0.15"
 OPENSSL_LICENSE_URL = f"https://raw.githubusercontent.com/openssl/openssl/openssl-{OPENSSL_VERSION}/LICENSE.txt"
 OPENSSL_LICENSE_SHA256 = "7d5450cb2d142651b8afa315b5f238efc805dad827d91ba367d8516bc9d49e7a"
 SQLITE_VERSION = "3.45.3"  # sqlite3.dll의 제품 버전
+# PDF 글자 추출(앱의 assets/pdf_text.py). 순수 Python wheel이고 Python 3.11 이상에서는 런타임 의존성이 없다.
+PYPDF_VERSION = "6.19.0"
+PYPDF_WHEEL_URL = (
+    "https://files.pythonhosted.org/packages/3c/2c/c43c03eaf630435f023f1dc61ec4a4a78951ad5530a62c71cc89bde307b7/"
+    f"pypdf-{PYPDF_VERSION}-py3-none-any.whl"
+)
+PYPDF_WHEEL_SHA256 = "7e5d6e730e7dae87d560a2cee218b852f6498c8be61966f3cd02ead971e48d14"
+PDF_SCRIPT = DESKTOP / "assets" / "pdf_text.py"
 
 # 묶은 CLI 확인용 문장 — 합성 값이다(실제 개인정보 없음).
 SMOKE_TEXT = "문의 전화는 010-1234-5678 입니다."
+# 묶은 PDF 추출 확인용 — 글꼴을 싣지 않는 기본 Helvetica라 ASCII만 쓴다. 합성 값이다.
+SMOKE_PDF_TEXT = "Tel 010-1234-5678"
 
 
 def sha256_of(path: Path) -> str:
@@ -139,6 +150,20 @@ def add_core() -> str:
     return wheel.name.split("-")[1]
 
 
+def add_pypdf() -> None:
+    """pypdf wheel을 site-packages에 푼다 — 앱이 PDF에서 글자를 뽑을 때 쓴다."""
+    site_packages = BUNDLE / "python" / "Lib" / "site-packages"
+    with zipfile.ZipFile(fetch(PYPDF_WHEEL_URL, PYPDF_WHEEL_SHA256)) as z:
+        metadata = z.read(f"pypdf-{PYPDF_VERSION}.dist-info/METADATA").decode("utf-8")
+        requires = [
+            line for line in metadata.splitlines()
+            if line.startswith("Requires-Dist:") and "extra ==" not in line and "python_version < '3.11'" not in line
+        ]
+        if requires:
+            raise SystemExit(f"pypdf에 런타임 의존성이 생겼습니다 — 묶는 방법을 다시 정해야 합니다: {requires}")
+        z.extractall(site_packages)
+
+
 def smoke_test() -> None:
     """묶은 Python으로 CLI를 실제로 돌려 본다 — 앱이 부르는 것과 같은 인자다."""
     # -B: 확인 실행이 __pycache__를 남기면 그게 설치파일에 같이 묶인다.
@@ -154,6 +179,47 @@ def smoke_test() -> None:
     if "phone" not in kinds:
         raise SystemExit(f"묶은 CLI가 합성 전화번호를 못 잡았습니다: {kinds}")
     print("묶은 CLI 확인: 통과")
+
+
+def minimal_pdf(text: str) -> bytes:
+    """글자 한 줄짜리 PDF를 만든다 — 묶은 pypdf가 글자를 뽑는지만 보면 되므로 표준 라이브러리로 직접 쓴다."""
+    stream = f"BT /F1 12 Tf 72 720 Td ({text}) Tj ET".encode("ascii")
+    objects = [
+        b"<< /Type /Catalog /Pages 2 0 R >>",
+        b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+        b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
+        b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+        b"<< /Length %d >>\nstream\n%s\nendstream" % (len(stream), stream),
+    ]
+    out = bytearray(b"%PDF-1.4\n")
+    offsets = []
+    for number, body in enumerate(objects, start=1):
+        offsets.append(len(out))
+        out += b"%d 0 obj\n%s\nendobj\n" % (number, body)
+    xref = len(out)
+    out += b"xref\n0 %d\n0000000000 65535 f \n" % (len(objects) + 1)
+    out += b"".join(b"%010d 00000 n \n" % offset for offset in offsets)
+    out += b"trailer\n<< /Size %d /Root 1 0 R >>\nstartxref\n%d\n%%%%EOF\n" % (len(objects) + 1, xref)
+    return bytes(out)
+
+
+def smoke_test_pdf() -> None:
+    """묶은 Python으로 PDF 추출 스크립트를 앱과 같은 방식(표준입력으로 코드 전달)으로 돌려 본다."""
+    pdf = WORK / "smoke.pdf"  # BUNDLE 밖에 둔다 — 설치파일에 묶이지 않게
+    pdf.write_bytes(minimal_pdf(SMOKE_PDF_TEXT))
+    result = subprocess.run(
+        [str(BUNDLE / "python" / "python.exe"), "-B", "-X", "utf8", "-", str(pdf)],
+        input=PDF_SCRIPT.read_bytes(),
+        capture_output=True,
+        check=False,
+    )
+    pdf.unlink()
+    if result.returncode != 0:
+        raise SystemExit(f"묶은 PDF 추출이 실패했습니다:\n{result.stderr.decode('utf-8', 'replace')}")
+    text = result.stdout.decode("utf-8")
+    if SMOKE_PDF_TEXT not in text:
+        raise SystemExit(f"묶은 PDF 추출이 합성 문장을 못 뽑았습니다: {text!r}")
+    print("묶은 PDF 추출 확인: 통과")
 
 
 def find_iscc() -> Path | None:
@@ -196,6 +262,12 @@ def add_licenses(iscc: Path | None) -> None:
         f"Windows binary build\" of the Python license (see \"Python {PYTHON_VERSION} (CPython)\").\n",
         encoding="utf-8",
     )
+    pypdf_license = python_dir / "Lib" / "site-packages" / f"pypdf-{PYPDF_VERSION}.dist-info" / "licenses" / "LICENSE"
+    (out / f"pypdf {PYPDF_VERSION}.txt").write_text(
+        f"pypdf {PYPDF_VERSION} (python\\Lib\\site-packages\\pypdf) - BSD-3-Clause\n"
+        "https://github.com/py-pdf/pypdf\n\n" + pypdf_license.read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
     if iscc is not None:
         # setup.exe 안에 Inno Setup의 설치 실행부가 들어간다 — 쓰는 컴파일러와 같은 판의 고지문을 넣는다.
         shutil.copy2(iscc.with_name("license.txt"), out / "Inno Setup (installer).txt")
@@ -203,17 +275,24 @@ def add_licenses(iscc: Path | None) -> None:
 
 def write_manifest(app_version: str, core_version: str) -> None:
     """제3자 파일별 SHA-256 — SBOM에 옮겨 적을 근거(우리 코드인 maskingtape 패키지는 뺀다)."""
-    ours = BUNDLE / "python" / "Lib" / "site-packages"
+    site_packages = BUNDLE / "python" / "Lib" / "site-packages"
+    ours = [site_packages / "maskingtape", *site_packages.glob("maskingtape-*.dist-info")]
+
+    def is_ours(p: Path) -> bool:
+        return any(d in p.parents for d in ours)
+
     rows = [
         f"{sha256_of(p)}  {p.stat().st_size:>9}  {p.relative_to(BUNDLE).as_posix()}"
         for p in sorted(BUNDLE.rglob("*"))
-        if p.is_file() and ours not in p.parents and (BUNDLE / "python" in p.parents or p.suffix == ".dll")
+        if p.is_file() and not is_ours(p) and (BUNDLE / "python" in p.parents or p.suffix == ".dll")
     ]
     header = [
         f"maskingtape desktop {app_version} (core {core_version}) - bundled third-party files",
         f"Python embeddable {PYTHON_VERSION} amd64  sha256={PYTHON_EMBED_SHA256}",
         f"  source: {PYTHON_EMBED_URL}",
         f"OpenSSL {OPENSSL_VERSION}, SQLite {SQLITE_VERSION} (inside the Python package)",
+        f"pypdf {PYPDF_VERSION} wheel  sha256={PYPDF_WHEEL_SHA256}",
+        f"  source: {PYPDF_WHEEL_URL}",
         "",
         "sha256  size  path",
     ]
@@ -246,7 +325,9 @@ def main() -> None:
     copy_app()
     add_python()
     core_version = add_core()
+    add_pypdf()
     smoke_test()
+    smoke_test_pdf()
     add_licenses(iscc)
     write_manifest(version, core_version)
     print(f"묶음 폴더: {BUNDLE}")

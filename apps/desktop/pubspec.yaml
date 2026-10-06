@@ -64,6 +64,7 @@ flutter:
   # 브랜드로 보이게 하는 게 목적이라 따로 그리지 않는다(#442).
   assets:
     - assets/maskingtape-logo-blue.png
+    - assets/pdf_text.py
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
