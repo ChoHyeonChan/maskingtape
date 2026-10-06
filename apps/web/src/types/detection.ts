@@ -10,12 +10,22 @@ export interface Detection {
   detector: string;
 }
 
-export interface ScanResponse {
+/**
+ * 실제로 쓰인 모드와 하이브리드 폴백 여부(#545·#547). 하이브리드가 실패하면 서버는 HTTP 200으로
+ * 규칙 결과를 주고 `mode_used: "rule"`, `hybrid_failed: true`, 실패 코드를 붙인다.
+ */
+export interface ModeResult {
+  mode_used?: "rule" | "hybrid";
+  hybrid_failed?: boolean;
+  hybrid_failure_code?: string | null;
+}
+
+export interface ScanResponse extends ModeResult {
   detections: Detection[];
 }
 
 /** POST /anonymize 응답 — strategy에 따라 비식별화까지 끝난 text를 함께 돌려준다(#346). */
-export interface AnonymizeResponse {
+export interface AnonymizeResponse extends ModeResult {
   text: string;
   detections: Detection[];
 }

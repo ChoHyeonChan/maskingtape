@@ -33,6 +33,27 @@ describe("scanText", () => {
     expect(result).toEqual({ detections: [{ kind: "phone" }] });
   });
 
+  it("sends mode: hybrid only when hybrid is chosen, and passes the mode fields through (#547)", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      jsonResponse({ detections: [], mode_used: "rule", hybrid_failed: true, hybrid_failure_code: "timeout" }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await scanText("고객 김민준", "hybrid");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/scan",
+      expect.objectContaining({ body: JSON.stringify({ text: "고객 김민준", mode: "hybrid" }) }),
+    );
+    expect(result).toMatchObject({ mode_used: "rule", hybrid_failed: true, hybrid_failure_code: "timeout" });
+
+    await scanText("고객 김민준", "rule");
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      "/api/scan",
+      expect.objectContaining({ body: JSON.stringify({ text: "고객 김민준" }) }),
+    );
+  });
+
   it("converts server positions to JS string positions when an emoji comes first (#495)", async () => {
     // 서버는 "😀 연락처 010-1234-5678"에서 전화번호를 코드포인트 6~19로 준다
     vi.stubGlobal(
