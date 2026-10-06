@@ -31,6 +31,7 @@ python apps/desktop/installer/build.py --version 0.1.0
   python\                          Python 임베디드 배포판 3.13.2 (amd64)
     python.exe
     Lib\site-packages\maskingtape\ core wheel을 푼 것 (우리 코드)
+    Lib\site-packages\pypdf\       pypdf 6.19.0 wheel을 푼 것 — PDF 글자 추출 (BSD-3-Clause)
   licenses\*.txt                   함께 실린 제3자 구성요소의 고지문
   LICENSE.txt                      Apache-2.0 (우리 코드)
   THIRD_PARTY_NOTICES.md           저장소의 고지 파일 사본
@@ -43,6 +44,9 @@ python apps/desktop/installer/build.py --version 0.1.0
 
 - **pip은 넣지 않는다.** wheel을 site-packages에 풀기만 한다. core에 런타임 의존성이 없어서 가능한
   방법이고, 의존성이 생기면 `build.py`가 멈춘다.
+- **pypdf도 같은 방식으로 푼다.** 앱이 PDF에서 글자를 뽑을 때 쓴다(`assets/pdf_text.py`). PyPI의 wheel 주소와 SHA-256을
+  고정했고, 순수 Python이라 Python 3.11 이상에서는 런타임 의존성이 없다(생기면 `build.py`가 멈춘다). 묶은 Python으로
+  ASCII 한 줄짜리 합성 PDF를 만들어 앱과 같은 방식(코드를 표준입력으로 전달)으로 추출해 본다.
 - **`-B`를 주는 이유**: 실행 중 `__pycache__`가 설치 폴더에 생기지 않게 한다. 그래서 제거할 때 설치한 파일만
   지우면 폴더가 사라지고, `python\` 폴더를 통째로 지우는 단계가 필요 없다(설치 경로가 다른 Python 폴더와 겹쳐도
   남의 파일을 건드리지 않는다). 캐시 없이 도는 비용은 호출당 0.03초쯤이다. `build.py`의 확인 실행도 같은 플래그다.
@@ -72,6 +76,7 @@ python apps/desktop/installer/build.py --version 0.1.0
 | `OpenSSL 3.0.15.txt` | OpenSSL 저장소의 `LICENSE.txt`(Apache-2.0) — 임베디드 zip의 `LICENSE.txt`에는 없다 |
 | `SQLite 3.45.3.txt` | 퍼블릭 도메인 고지 |
 | `Microsoft Visual C++ Runtime.txt` | `vcruntime140*.dll` — 조건은 Python 라이선스의 해당 절을 가리킨다 |
+| `pypdf 6.19.0.txt` | pypdf wheel 안의 `dist-info/licenses/LICENSE` (BSD-3-Clause) |
 | `Inno Setup (installer).txt` | 빌드에 쓴 Inno Setup의 `license.txt` — setup.exe 안에 설치 실행부가 들어간다 |
 
 **동봉물을 바꾸면**(Python 버전 등) `build.py` 위쪽의 버전·주소·해시 상수를 고치고, 팀장에게 알려
