@@ -3,6 +3,7 @@
 
 import { useState, type CSSProperties } from "react";
 import { ConfidenceControl } from "./ConfidenceControl";
+import { isLlmDetection } from "../../lib/hybrid";
 import { KIND_COLORS, KIND_LABELS } from "../../types/detection";
 import type { Detection } from "../../types/detection";
 
@@ -115,6 +116,8 @@ export function DetectionList({
           const label = KIND_LABELS[detection.kind] ?? detection.kind;
           const confidencePct = Math.round(detection.confidence * 100);
           const kindColor = KIND_COLORS[detection.kind] ?? "var(--kind-fallback)";
+          // 하이브리드에서 OpenAI 판단기가 더 찾은 이름은 규칙 탐지와 구분해 보여 준다(#547).
+          const fromLlm = isLlmDetection(detection);
           return (
             <li
               key={key}
@@ -124,14 +127,21 @@ export function DetectionList({
               onMouseLeave={() => onRowHover(null)}
             >
               <span className="detect-row__dot" aria-hidden="true" style={{ background: kindColor }} />
-              <span className="detect-row__kind">{label}</span>
+              <span className="detect-row__kind">
+                {label}
+                {fromLlm && (
+                  <span className="llm-badge" title="하이브리드에서 OpenAI 판단기가 찾은 이름">
+                    LLM
+                  </span>
+                )}
+              </span>
               <span className="detect-row__snippet">{snippet}</span>
               <span className="detect-row__confidence">{confidencePct}%</span>
               <button
                 type="button"
                 role="switch"
                 aria-checked={masked}
-                aria-label={`${label} ${snippet} ${masked ? "가려짐 — 눌러서 보이게 하기" : "보임 — 눌러서 가리기"}`}
+                aria-label={`${label}${fromLlm ? "(LLM)" : ""} ${snippet} ${masked ? "가려짐 — 눌러서 보이게 하기" : "보임 — 눌러서 가리기"}`}
                 className={`detect-row__toggle${masked ? " is-masked" : ""}`}
                 onClick={() => onToggle(detection)}
               >
