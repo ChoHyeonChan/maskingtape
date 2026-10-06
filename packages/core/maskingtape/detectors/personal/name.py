@@ -49,6 +49,9 @@ _SURNAMES = [
 _TITLE_CUES_603 = [
     "책임", "선임", "수석", "박사", "여사", "어르신", "피고", "원고",
     "프로", "기사", "선수",
+    # 판결문의 판사·검사·증인(#663). 판결문마다 거의 반드시 나오는데 규칙도 로컬 LLM도 놓쳤다.
+    # "검사"는 일반어("검사 결과"·"유전자 검사")와 겹쳐 이름 앞에서만 받는다(_PREFIX_ONLY_TITLES_603).
+    "판사", "검사", "증인",
 ]
 _TITLE_CUES = [
     "팀장", "과장", "부장", "차장", "대리", "사원", "실장", "본부장",
@@ -71,6 +74,8 @@ _PREFIX_CUES_603 = [
     "주문자", "구매자", "예약자", "투숙객", "받는 분", "받는사람", "보내는 사람",
     "피고인", "채무자", "피해자", "신고인", "세대주", "배우자", "소유자", "운전자",
     "검토자", "승인자", "기안자",
+    # 메일 머리의 띄어 쓴 받는 사람(#663). "받는사람"·"받는 분"만 있어 "받는 사람: 송준경"이 샜다.
+    "받는 사람",
 ]
 _PREFIX_CUES = [
     "고객", "환자", "신청자", "작성자", "담당자", "수령인", "수신인", "성명", "이름", "저는",
@@ -131,7 +136,15 @@ _COMMON_WORDS = frozenset({
 # "오늘자 기사"). 단서가 #603에서 더한 것뿐일 때만 거른다. _COMMON_WORDS에 넣으면 모든 단서 경로가
 # 함께 걸러 "공제 씨"·"고객 우대"처럼 전부터 가리던 이름까지 놓친다(#603 리뷰).
 _CUES_603 = frozenset(_TITLE_CUES_603) | frozenset(_PREFIX_CUES_603)
-_CUE_603_COMMON_WORDS = frozenset({"진술", "진술서", "공제", "안내문", "우대", "오늘자"})
+_CUE_603_COMMON_WORDS = frozenset({
+    "진술", "진술서", "공제", "안내문", "우대", "오늘자",
+    # 판사·검사·증인 뒤에 오는 일반 명사(#663 — "검사 진단서를", "판사 임명장을", "검사 정확도는")
+    "진단서", "성적서", "신청서", "임명장", "정확도", "정밀도", "유효성", "안전성", "유전자", "이상무",
+})
+# 이름 앞에서만 단서로 받는 #603 직함(#663). "검사"는 이름 뒤에 오는 꼴("유전자 검사"·"안전성 검사")이
+# 일반어와 거의 같아서 뒤 단서로 쓰지 않는다. 앞에서도 이름 바로 뒤가 낱말 경계(조사·괄호·쉼표·줄 끝)일
+# 때만 받는다 — "검사 진단서 발급"처럼 낱말이 이어지면 이름이 아니다(detect 참고).
+_PREFIX_ONLY_TITLES_603 = frozenset({"검사"})
 
 # 직함 전용 단서(존칭 '님' 제외). 이것만으로(다른 단서 없이) 이름을 잡을 땐 성+2자 풀네임을
 # 요구한다 — 부서·업무어("구매 부장"의 구매, "대표 이사"의 이사)가 직함과 붙어 이름으로
@@ -162,7 +175,9 @@ _SUFFIX_ALT_PLAIN = "|".join(
         dict.fromkeys(
             c
             for c in (_SUFFIX_CUES + _TITLE_CUES)
-            if c not in _AMBIGUOUS_SUFFIX_TITLES and c not in _BOUNDED_SUFFIX_TITLES
+            if c not in _AMBIGUOUS_SUFFIX_TITLES
+            and c not in _BOUNDED_SUFFIX_TITLES
+            and c not in _PREFIX_ONLY_TITLES_603
         ),
         key=len,
         reverse=True,
@@ -227,6 +242,9 @@ _OPEN_ENDING_STEMS = (
     "이신", "이세", "이시", "이십", "인데", "인가", "인지", "이야", "이죠", "이지", "이네",
     "이나", "이든", "이면", "에게", "에서", "께서", "한테", "까지", "부터", "처럼", "보다",
     "마저", "조차", "밖에", "뿐",
+    # 말로 소개하는 "제 이름은 황은민이고요"(#663). 받침 없는 이름 뒤 "고요"는 넣지 않는다 — 첫머리로만
+    # 보므로 "담당자 정리하고요"의 "정리하"까지 이름으로 받아 버린다.
+    "이고요",
 )
 _OPEN_ENDING_ALT = "|".join(sorted(_OPEN_ENDING_STEMS, key=len, reverse=True))
 # #600 전까지 이름 뒤로 받던 꼴(닫힌 어미 목록 + 낱말 끝). 흔한 일반명사(_COMMON_WORDS) 뒤에
@@ -335,6 +353,20 @@ _SLASH_RECORD_LEAD_RE = re.compile(r"[ \t]*(?:[-*•·]|\d{1,3}[.)])?[ \t]*")
 _SLASH_RECORD_MIN_CELLS = 3
 _SLASH_RECORD_MIN_NAME_LEN = 3
 _SLASH_RECORD_DETAIL_RE = re.compile(r"@|0\d{1,2}[-.\s]?\d{3,4}[-.\s]?\d{4}|생년월일|생일")
+
+# 이름 바로 뒤에 공백을 두고 다른 낱말이 이어지는지 — "검사"를 앞 단서로 받을 때 쓴다(#663).
+_WORD_CONTINUES_RE = re.compile(r"[ \t]+[가-힣]")
+
+# 부서·조직 이름 뒤에서 자기를 소개하는 꼴("고객센터 송준경입니다", "영업팀 황수재입니다", #663).
+# 앞에 오는 말이 역할어가 아니라 소속이라 기존 단서로는 못 잡았다. 메일·상담 녹취에 흔하다.
+# 오탐을 줄이려고 조건을 좁게 건다: 소속 낱말은 아래 끝말로 끝나야 하고("총무과"·"기획실"처럼 한 글자
+# 끝말은 "결과"·"사실"과 겹쳐 받지 않는다), 이름은 성씨 + 두 글자, 바로 뒤가 자기소개 어미여야 한다.
+_SELF_INTRO_ORG_ENDINGS = ("팀", "센터", "본부", "지점", "지사", "사무소", "부서", "연구소", "사업부", "상담실")
+_SELF_INTRO_RE = re.compile(
+    r"(?<![가-힣])[가-힣]{0,10}?(?:" + "|".join(sorted(_SELF_INTRO_ORG_ENDINGS, key=len, reverse=True)) + r")"
+    r"[ \t]+(?P<name>(?:" + _SURNAME_ALT + r")[가-힣]{2})"
+    r"(?=(?:입니다|이에요|이고요|이었습니다)(?![가-힣]))"
+)
 
 # 마크다운 구분행("|---|:--:|--:|")의 칸 — 대시·콜론·공백만으로 이뤄진다. 적어도 한 칸은
 # 비어 있지 않아야 진짜 구분행이다(전부 빈 칸인 데이터 행과 헷갈리지 않기 위해).
@@ -702,6 +734,13 @@ class NameDetector(Detector):
                 and _is_common_word_at(text, name_start, _CUE_603_COMMON_WORDS)
             ):
                 continue  # "피고인 진술"처럼 #603 단서 뒤의 일반 명사는 이름이 아니다
+            if (
+                prefix in _PREFIX_ONLY_TITLES_603
+                and suffix is None
+                and m.group("paren") is None
+                and _WORD_CONTINUES_RE.match(text, m.end("name"))
+            ):
+                continue  # "검사 진단서 발급"처럼 낱말이 이어지면 이름이 아니다(#663). "검사 황수재(기소)"는 받는다
             if m.group("paren") is not None and not has_prefix:
                 # 괄호 안이 숫자만 있는 나이·연락처·성별뿐이면 두 글자 낱말과 흔히 겹친다
                 # ("정원(35)", "문의(02-…)", 서식의 "구분(남/여)"). 세 글자 이름일 때만 받는다.
@@ -735,9 +774,11 @@ class NameDetector(Detector):
         form_extra = self._form_names(text, found, list_seeds)
         table_extra = self._table_names(text, found + form_extra)
         slash_extra = self._slash_record_names(text, found + form_extra + table_extra)
+        intro_extra = self._self_intro_names(text, found + form_extra + table_extra + slash_extra)
         found.extend(form_extra)
         found.extend(table_extra)
         found.extend(slash_extra)
+        found.extend(intro_extra)
         # 양식 라벨(쌍점·세로줄) 뒤 이름도 목록의 출발점이다. 공백 구분까지 받는다.
         list_seeds.extend((d.end, True) for d in form_extra)
         found.extend(self._list_names(text, list_seeds, found))
@@ -946,6 +987,43 @@ class NameDetector(Detector):
                         )
                 offset += len(row)
                 i += 1
+        return extra
+
+    def _self_intro_names(self, text: str, found: list[Detection]) -> list[Detection]:
+        """부서·조직 이름 뒤 자기소개("영업팀 황수재입니다")의 이름을 찾는다(#663).
+
+        단서가 소속이라 약한 근거로 보고 확신도는 0.5다. 흔한 낱말로 시작하는 값("안내문"·"정산서"·
+        "신청서"), 성씨+직함("김과장"), 단서·자리표시 낱말은 이름으로 보지 않는다. 앞 두 글자가 흔한
+        낱말인 실명("정기훈")도 함께 걸러지는 한계가 있다 — 다른 단서가 있으면 기존 규칙이 잡는다.
+        """
+        if self.min_confidence > 0.5:
+            return []
+        covered = bytearray(len(text))
+        for d in found:
+            covered[d.start : d.end] = b"\x01" * (d.end - d.start)
+        extra: list[Detection] = []
+        for m in _SELF_INTRO_RE.finditer(text):
+            value = m.group("name")
+            start, end = m.span("name")
+            if (
+                value in _CUE_WORDS
+                or value[1:] in _CUE_WORDS
+                or value[:2] in _COMMON_WORDS
+                or value in _FORM_NOT_NAMES
+                or value in _LIST_NOT_NAMES
+                or all(covered[start:end])
+            ):
+                continue
+            extra.append(
+                Detection(
+                    kind=self.kind,
+                    start=start,
+                    end=end,
+                    text=value,
+                    confidence=0.5,
+                    detector=self.__class__.__name__,
+                )
+            )
         return extra
 
     def _slash_record_names(self, text: str, found: list[Detection]) -> list[Detection]:
