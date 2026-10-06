@@ -38,8 +38,10 @@ _MASK_CHAR = r"[*Xx●○■#]"
 _FRONT_PLAIN = r"(?:19|20)?(?P<front>\d{6})"
 # 날짜 앞자리 꼴(#529·#638): 4자리 또는 2자리 연도를 점·하이픈·슬래시로 나누거나 한글 날짜로 쓴
 # 표기("1980.1.1", "80.01.01", "1980/01/01", "1980년 1월 1일"). 월·일은 한 자리도 받는다.
+# 공문서처럼 점 뒤를 한 칸 띄운 "1980. 1. 1."도 받는다(#637 후속). 끝 점은 뒷자리 구분자가 받는다.
 _FRONT_DATED = (
-    r"(?P<front_dated>(?:\d{4}|\d{2})(?:[./\-]\d{1,2}[./\-]\d{1,2}|년\s?\d{1,2}월\s?\d{1,2}일))"
+    r"(?P<front_dated>(?:\d{4}|\d{2})"
+    r"(?:[./\-] ?\d{1,2}[./\-] ?\d{1,2}|년\s?\d{1,2}월\s?\d{1,2}일))"
 )
 
 # 뒷자리가 실제 숫자 7개일 때의 구분자 — 하이픈/점/공백에 더해 en-dash·em-dash(Word·HWP
@@ -82,9 +84,28 @@ RRN_BACK_AHEAD = (
 # 7개 | ② 하이픈류 구분자(좁게) + 가려진/성별 숫자만 남은 뒷자리). 앞뒤에 숫자·영문이
 # 더 붙으면 제외(다른 번호의 일부이거나 뒷자리가 더 남아있는 경우이므로). 생년월일
 # 탐지기는 뒤에 뒷자리가 오는 8자리를 넘기므로, 여기서 안 잡으면 통째로 샌다.
+# 뒷자리 7자리 안에 공백 하나가 낀 표기("800101 - 1234 567", #637 후속). 라벨이 있을 때만 받는다.
+# 공백 앞뒤 숫자를 합쳐 정확히 7자리일 때만 맞게 갈래를 나눈다 — 7자리가 아닌 꼴이 여기 맞으면
+# 아래 부분 뒷자리 갈래("800101-1")를 시도하지 않아 오히려 덜 가리게 된다.
+_BACK_SPACED = (
+    r"(?P<back_spaced>[1-8](?:"
+    + "|".join(rf"\d{{{k}}} \d{{{6 - k}}}" for k in range(6))
+    + r"))"
+)
+_RRN_FRONT = r"(?<!\d)(?:" + _FRONT_PLAIN + r"|" + _FRONT_DATED + r")"
 _RRN_RE = re.compile(
-    r"(?<!\d)(?:" + _FRONT_PLAIN + r"|" + _FRONT_DATED + r")"
-    r"(?:" + _BACK_SEP + _BACK + _TRAILING_LETTER + r"|" + _BACK_PARTIAL_SEP + _BACK_PARTIAL + r")"
+    _RRN_FRONT
+    + r"(?:" + _BACK_SEP + _BACK + _TRAILING_LETTER
+    + r"|" + _BACK_SEP + _BACK_SPACED
+    + r"|" + _BACK_PARTIAL_SEP + _BACK_PARTIAL + r")"
+    r"(?![\dA-Za-z])"
+)
+# 공백 낀 뒷자리 갈래가 라벨이 없어 버려졌을 때, 같은 자리를 그 갈래 없이 다시 맞춰 본다 — 그
+# 갈래를 더하기 전에 잡던 꼴("800101-1 234567"의 "800101-1")을 놓치지 않기 위해서다.
+_RRN_NO_SPACED_RE = re.compile(
+    _RRN_FRONT
+    + r"(?:" + _BACK_SEP + _BACK + _TRAILING_LETTER
+    + r"|" + _BACK_PARTIAL_SEP + _BACK_PARTIAL + r")"
     r"(?![\dA-Za-z])"
 )
 
@@ -133,15 +154,16 @@ def _partial_back_ok(text: str, match: re.Match[str], back: str) -> bool:
     """일부만 적은 뒷자리를 받을지 본다(#637).
 
     가림 문자가 있거나 성별 숫자 하나만 있으면 받는다. 가림 문자 없이 실제 숫자 2~6개만 적은
-    꼴은 8자리 앞자리(19·20으로 시작하는 생년월일)이면서 앞에 주민번호·생년월일 라벨이 있을
-    때만 받는다. "ORD-20250408-2110"·"240101-1234" 같은 날짜형 주문·운송장 번호에 흔해서,
-    라벨 없이 받으면 오탐이 크다.
+    꼴은 앞에 주민번호·생년월일 라벨이 있을 때만 받는다. "ORD-20250408-2110"·"240101-1234"
+    같은 날짜형 주문·운송장 번호에 흔해서, 라벨 없이 받으면 오탐이 크다.
     """
     if re.search(_MASK_CHAR, back) or len(back) == 1:
         return True
-    eight_digit_front = match.group("front") is not None and match.start("front") > match.start()
-    if not eight_digit_front:
-        return False
+    return _has_rrn_label(text, match)
+
+
+def _has_rrn_label(text: str, match: re.Match[str]) -> bool:
+    """번호 앞 20자 안에 주민번호·생년월일 라벨이 있는지 본다."""
     start = match.start()
     return _RRN_LABEL_RE.search(text, max(0, start - _RRN_LABEL_WINDOW), start) is not None
 
@@ -175,9 +197,15 @@ class RRNDetector(Detector):
         """
         found: list[Detection] = []
         for m in _RRN_RE.finditer(text):
+            if m.group("back_spaced") is not None and not _has_rrn_label(text, m):
+                m = _RRN_NO_SPACED_RE.match(text, m.start())
+                if m is None:
+                    continue
             front, front_dated = m.group("front"), m.group("front_dated")
             back = m.group("back")
-            if back is None:
+            if m.re is _RRN_RE and m.group("back_spaced") is not None:
+                back = m.group("back_spaced").replace(" ", "")
+            elif back is None:
                 back = m.group("back_partial")
                 if not _partial_back_ok(text, m, back):
                     continue
