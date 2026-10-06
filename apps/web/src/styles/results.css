@@ -92,6 +92,48 @@
   padding: 0.75rem 0;
 }
 
+/* 하이브리드 결과 알림(#547) — 성공하면 LLM이 더 찾은 이름 수를, 실패해 규칙 결과로
+   돌아왔으면 이유를 보여 준다. 실패는 놓치지 않게 주황 계열로 강조한다. */
+.hybrid-status {
+  margin: 0 0 0.7rem;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid rgba(24, 58, 139, 0.16);
+  border-radius: 8px;
+  background: var(--brand-blue-tint);
+  color: var(--text-secondary);
+  font-size: 0.84rem;
+  line-height: 1.5;
+  word-break: keep-all;
+}
+
+.hybrid-status strong {
+  color: var(--text-primary);
+}
+
+.hybrid-status--fallback {
+  border-color: color-mix(in srgb, var(--kind-card) 35%, #ffffff);
+  background: color-mix(in srgb, var(--kind-card) 8%, #ffffff);
+  color: var(--kind-card);
+}
+
+.hybrid-status--fallback strong {
+  color: var(--kind-card);
+}
+
+/* OpenAI 판단기가 더 찾은 이름 표시 — 목록의 종류 이름 옆과 알림 문장 안에서 같은 모양을 쓴다. */
+.llm-badge {
+  display: inline-block;
+  margin-left: 0.35rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--kind-name) 14%, #ffffff);
+  color: var(--kind-name);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  vertical-align: 0.08em;
+}
+
 /* 가명처리(pseudonym)는 항목별 조정이 없어(#346) DetectionList 대신 안내만 보여준다. */
 .pseudonym-panel {
   display: flex;
