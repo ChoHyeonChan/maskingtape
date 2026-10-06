@@ -32,8 +32,18 @@ describe("AccuracyPage", () => {
     }
 
     expect(screen.getAllByText("100%")).toHaveLength(10);
-    expect(screen.getByText("91.0%")).toBeInTheDocument();
-    expect(screen.getByText("92.3%")).toBeInTheDocument();
+  });
+
+  it("shows the 이름 results table with README's current numbers, including the external KDPII set (#499)", () => {
+    render(<AccuracyPage />);
+
+    const table = screen.getByRole("table");
+    expect(table).toHaveTextContent("재현율 0.932 · F1 0.949");
+    expect(table).toHaveTextContent("재현율 0.899 · F1 0.916");
+    expect(table).toHaveTextContent("재현율 0.825 · F1 0.600");
+    expect(table).toHaveTextContent("정밀도 0.471");
+    expect(screen.getByText(/웹 데모의 하이브리드는 OpenAI 판단기를 씁니다/)).toBeInTheDocument();
+    expect(screen.queryByText(/0\.923/)).not.toBeInTheDocument();
   });
 
   it("explains precision, recall and F1 in plain language", () => {

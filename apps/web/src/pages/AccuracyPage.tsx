@@ -19,6 +19,29 @@ const PERFECT_KINDS: { label: string; color: string }[] = [
   { label: "운전면허번호", color: "var(--kind-fallback)" },
 ];
 
+// 이름 탐지 결과(#499). 합성 벤치·문서 5종은 bench/README.md 「종합 비교표」(#548),
+// KDPII는 루트 README 「정확도」 절(test 500문장, 2026-10-04 측정)과 같은 수치다.
+const NAME_RESULTS: { where: string; rulesOnly: string; withLlm: string; howToRead: string }[] = [
+  {
+    where: "합성 벤치마크 (이름 383개)",
+    rulesOnly: "재현율 0.932 · F1 0.949",
+    withLlm: "재현율 0.969 · F1 0.959",
+    howToRead: "모델을 같은 생성기 데이터로 학습해서 LLM 쪽 값이 실제보다 높게 나옴",
+  },
+  {
+    where: "문서 5종: 판결문·메일·상담·회의록·명단 (이름 1,162개)",
+    rulesOnly: "재현율 0.755 · F1 0.856",
+    withLlm: "재현율 0.899 · F1 0.916",
+    howToRead: "문장 틀은 학습에 없던 것",
+  },
+  {
+    where: "외부 대화 데이터 KDPII (이름 177개)",
+    rulesOnly: "재현율 0.254",
+    withLlm: "재현율 0.825 · F1 0.600",
+    howToRead: "학습에 안 쓴 외부 데이터. 대신 오탐이 늘어 정밀도 0.471",
+  },
+];
+
 export function AccuracyPage() {
   return (
     <>
@@ -155,8 +178,9 @@ export function AccuracyPage() {
               </div>
             ))}
 
-            {/* 이름: 유일하게 100%가 아닌 항목이라 카드를 다르게 강조하고, 규칙만 vs 로컬 LLM
-                두 막대로 비교해 보여준다(README·AccuracySection 캐비엇과 같은 수치). */}
+            {/* 이름: 유일하게 100%가 아닌 항목이라 카드를 다르게 강조하고, 어디서 쟀는지에 따라
+                값이 크게 달라서 세 데이터의 규칙만 vs 로컬 LLM 값을 표로 함께 보여준다(#499).
+                수치는 NAME_RESULTS 주석의 출처와 함께 갱신한다. */}
             <div className="accuracy-name-card">
               <div className="accuracy-name-card__head">
                 <span className="accuracy-row__dot" style={{ background: "var(--kind-name)" }} />
@@ -164,29 +188,37 @@ export function AccuracyPage() {
                 <span className="accuracy-name-card__badge">유일하게 100%가 아닌 항목</span>
               </div>
 
-              <div className="accuracy-row accuracy-row--compact">
-                <span className="accuracy-row__sublabel">규칙만 사용</span>
-                <div className="accuracy-row__track">
-                  <div className="accuracy-row__fill accuracy-row__fill--muted" style={{ width: "91%" }} />
-                </div>
-                <div className="accuracy-row__value accuracy-row__value--muted">91.0%</div>
-              </div>
-              <div className="accuracy-row accuracy-row--compact">
-                <span className="accuracy-row__sublabel">+ 로컬 LLM</span>
-                <div className="accuracy-row__track">
-                  <div
-                    className="accuracy-row__fill"
-                    style={{ width: "92.3%", background: "var(--kind-name)" }}
-                  />
-                </div>
-                <div className="accuracy-row__value" style={{ color: "var(--kind-name)" }}>
-                  92.3%
-                </div>
+              <p className="accuracy-name-card__note accuracy-name-card__note--lead">
+                이름은 정해진 형식이 없어서, 문맥 단서가 부족하면 규칙만으로는 놓쳐요. 어떤 데이터로 쟀는지에
+                따라 값이 크게 달라서 세 곳의 결과를 함께 보여드려요.
+              </p>
+
+              <div className="accuracy-name-table__wrap">
+                <table className="accuracy-name-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">어디서 쟀나</th>
+                      <th scope="col">규칙만</th>
+                      <th scope="col">로컬 LLM 함께 (우리가 학습한 1.5B)</th>
+                      <th scope="col">읽는 법</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {NAME_RESULTS.map((row) => (
+                      <tr key={row.where}>
+                        <th scope="row">{row.where}</th>
+                        <td>{row.rulesOnly}</td>
+                        <td className="accuracy-name-table__llm">{row.withLlm}</td>
+                        <td>{row.howToRead}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
 
               <p className="accuracy-name-card__note">
-                이름은 정해진 형식이 없어서, 문맥 단서가 부족하면 규칙만으로 가끔 놓쳐요(재현율 0.869). 로컬
-                LLM을 함께 켜면 F1 0.910 → <strong>0.923</strong>까지 올라가요.
+                웹 데모의 하이브리드는 OpenAI 판단기를 씁니다. 위 LLM 수치는 CLI·데스크톱의 로컬 모델 값이고, 웹
+                하이브리드 정확도는 따로 재는 중입니다(#683).
               </p>
             </div>
           </div>
