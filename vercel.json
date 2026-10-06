@@ -8,6 +8,19 @@
       "excludeFiles": "{apps/web/node_modules/**,apps/web/src/**,apps/desktop/**,bench/**,packages/mcp-server/**,**/tests/**,**/*.test.py,**/test_*.py,**/__pycache__/**,**/*.pyc}"
     }
   },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+        },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "no-referrer" }
+      ]
+    }
+  ],
   "rewrites": [
     { "source": "/((?!api/|assets/)(?!.*\\.[A-Za-z0-9]+$).*)", "destination": "/index.html" }
   ]

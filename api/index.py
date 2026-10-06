@@ -3,16 +3,20 @@
 
 import hashlib
 import os
+from dataclasses import replace
 from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from starlette.datastructures import Headers
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.responses import FileResponse, Response
 from starlette.staticfiles import NotModifiedResponse
 from starlette.types import Scope
 
+from maskingtape_api.errors import http_exception_handler
 from maskingtape_api.main import create_app
+from maskingtape_api.settings import get_api_settings
 
 
 class WebStaticFiles(StaticFiles):
@@ -50,8 +54,12 @@ app = FastAPI(
     title="maskingtape web demo",
     version="0.1.0",
     description="Vercel entrypoint: API under /api, the built web app for everything else.",
+    docs_url=None,
+    redoc_url=None,
+    openapi_url=None,
 )
-app.mount("/api", create_app())
+app.add_exception_handler(StarletteHTTPException, http_exception_handler)
+app.mount("/api", create_app(replace(get_api_settings(), environment="production")))
 
 # Vercel classifies this repo as a Python app and routes every path to this function,
 # so the function also serves the built Vite frontend (apps/web/dist) for non-/api paths.
