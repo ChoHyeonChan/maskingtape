@@ -192,6 +192,14 @@ _BUILDING_DONG = (
 )
 # 보통은 공백·콤마 뒤에 호가 오지만, "101동1203호"처럼 동과 호를 붙여 쓰기도 한다.
 _UNIT_SEP = r"(?:" + _SEP + r"|(?<=동))"
+# 건물 종류 낱말 바로 뒤에 붙은 '동'("한빛타워동 1203호", "의료센터동 3층")은 그 건물의 동 표기다.
+# 받지 않으면 건물명이 "한빛타워"에서 끊겨 뒤의 "동 1203호 12층 (역삼동)"이 원문으로 남았다.
+# "타워 동쪽"·"센터동 앞" 같은 말과 헷갈리지 않게 바로 뒤에 층·호가 올 때만 받는다.
+_GLUED_BUILDING_DONG = (
+    r"(?:동(?=" + _SEP + r"(?:" + _FLOOR + r"|" + _UNIT_HO + r")|" + _UNIT_HO + r"))?"
+)
+# 호 뒤에 층을 쓰는 표기("1203호 12층")도 있다. 층을 호 앞에서만 받으면 뒤의 층이 원문으로 남는다.
+_FLOOR_AFTER_HO = r"(?:" + _SEP + r"(?P<floor_after_ho>" + _FLOOR + r"))?"
 
 _TAIL = (
     # 지번은 동/읍/면/리로 끝나지만, 도로명은 "월드컵로237길"처럼 가지번호가 공백 없이 붙는다.
@@ -210,12 +218,12 @@ _TAIL = (
     # 낱말("101동"·"4층")은 건물명이 아니라 아래 동·층 자리에서 받는다. 님·씨로 끝나는 낱말은
     # 건물명이 아니라 존칭 붙은 이름이다. 받으면 "테헤란로 123 홍길동님 3층"에서 주소가 이름을 품어
     # scan 결과에서 이름이 사라진다.
-    r"(?:[,\s]\s*(?P<building>[0-9A-Za-z가-힣]{1,20}(?:" + _BUILDING_SUFFIX + r"))"
+    r"(?:[,\s]\s*(?P<building>[0-9A-Za-z가-힣]{1,20}(?:" + _BUILDING_SUFFIX + r")" + _GLUED_BUILDING_DONG + r")"
     r"|" + _SEP + r"(?P<building_named>[A-Za-z가-힣][0-9A-Za-z가-힣]{1,19})(?<![님씨])"
     r"(?=" + _SEP + r"(?:" + _BUILDING_DONG + r"|" + _FLOOR + r"|" + _HO + r")))?"
     r"(?:[,\s]\s*(?P<building_dong>" + _BUILDING_DONG + r"))?"
     r"(?:" + _SEP + r"(?P<floor>" + _FLOOR + r"))?"
-    r"(?:" + _UNIT_SEP + r"(?P<building_ho>" + _UNIT_HO + r"))?"
+    r"(?:" + _UNIT_SEP + r"(?P<building_ho>" + _UNIT_HO + r")" + _FLOOR_AFTER_HO + r")?"
     # 도로명주소의 참고항목 괄호 — 법정동과 공동주택 이름("(역삼동)", "(역삼동, 더샵아파트)").
     # 괄호 안이 동·가·리로 끝나는 이름일 때만 받아 "(본사)" 같은 괄호는 넘긴다. 쉼표 뒤 둘째 칸은
     # 글자로 시작할 때만 받는다. 숫자로 시작하면 공동주택 이름이 아니라 붙여 쓴 번호("(역삼동,
@@ -228,10 +236,10 @@ _TAIL = (
 # 택배·민원·관리사무소 문서에서 흔하고 동·호까지 나오면 사는 곳이 특정된다. 건물 종류 낱말로 끝나는
 # 건물명 뒤에 동/층/호 조합이나 동-호 줄임 표기가 올 때만 받는다. 호가 없으면("한빛아파트 101동 앞") 받지 않는다.
 _BUILDING_UNIT_RE = re.compile(
-    r"(?<![0-9A-Za-z가-힣])(?P<building>[0-9A-Za-z가-힣]{1,20}(?:" + _BUILDING_SUFFIX + r"))"
+    r"(?<![0-9A-Za-z가-힣])(?P<building>[0-9A-Za-z가-힣]{1,20}(?:" + _BUILDING_SUFFIX + r")" + _GLUED_BUILDING_DONG + r")"
     r"(?:" + _SEP + r"(?P<building_dong>" + _BUILDING_DONG + r"))?"
     r"(?:" + _SEP + r"(?P<floor>" + _FLOOR + r"))?"
-    r"(?:" + _UNIT_SEP + r"(?P<building_ho>" + _UNIT_HO + r"))"
+    r"(?:" + _UNIT_SEP + r"(?P<building_ho>" + _UNIT_HO + r"))" + _FLOOR_AFTER_HO
 )
 _BUILDING_UNIT_CONFIDENCE = 0.6
 

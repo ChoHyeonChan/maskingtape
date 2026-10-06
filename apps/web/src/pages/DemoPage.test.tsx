@@ -75,7 +75,7 @@ describe("DemoPage lets you click the masked-result box to edit and re-scan", ()
     fireEvent.change(editableBox, { target: { value: "연락처 010-9999-0000" } });
     fireEvent.click(screen.getByRole("button", { name: "개인정보 탐지 및 마스킹 하기" }));
 
-    await waitFor(() => expect(mockScanText).toHaveBeenLastCalledWith("연락처 010-9999-0000"));
+    await waitFor(() => expect(mockScanText).toHaveBeenLastCalledWith("연락처 010-9999-0000", "rule"));
   });
 });
 
@@ -132,5 +132,75 @@ describe("DemoPage result coachmark (#299)", () => {
     fireEvent.click(screen.getByRole("button", { name: "사용 안내 다시 보기" }));
 
     expect(screen.getByRole("dialog", { name: "사용 방법 안내" })).toHaveTextContent("완료!");
+  });
+});
+
+describe("DemoPage detection mode (#547)", () => {
+  function scan(text: string) {
+    fireEvent.change(screen.getByLabelText("탐지할 텍스트 입력"), { target: { value: text } });
+    fireEvent.click(screen.getByRole("button", { name: "개인정보 탐지 및 마스킹 하기" }));
+  }
+
+  it("scans rule-only by default", async () => {
+    mockScanText.mockResolvedValue({ detections: [] });
+    render(<DemoPage />);
+    fireEvent.keyDown(window, { key: "Escape" });
+
+    scan("고객 김민준");
+
+    await waitFor(() => expect(mockScanText).toHaveBeenLastCalledWith("고객 김민준", "rule"));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("sends hybrid when chosen, and marks the names the OpenAI judge added", async () => {
+    mockScanText.mockResolvedValue({
+      detections: [
+        { kind: "phone", start: 7, end: 20, confidence: 1, detector: "PhoneDetector" },
+        { kind: "name", start: 3, end: 6, confidence: 0.9, detector: "OpenAINameJudge" },
+      ],
+      mode_used: "hybrid",
+      hybrid_failed: false,
+      hybrid_failure_code: null,
+    });
+    render(<DemoPage />);
+    fireEvent.keyDown(window, { key: "Escape" });
+
+    fireEvent.click(screen.getByRole("button", { name: "하이브리드 (OpenAI)" }));
+    scan("고객 김민준 010-1234-5678");
+
+    await waitFor(() => expect(mockScanText).toHaveBeenLastCalledWith("고객 김민준 010-1234-5678", "hybrid"));
+    expect(await screen.findByText(/규칙이 놓친 이름/)).toHaveTextContent("1건");
+    expect(screen.getByRole("switch", { name: /이름\(LLM\) 김민준/ })).toBeInTheDocument();
+    expect(screen.getByRole("switch", { name: /^전화번호 010/ })).toBeInTheDocument();
+  });
+
+  it("tells the user when hybrid fell back to rule results instead of passing silently", async () => {
+    mockScanText.mockResolvedValue({
+      detections: [{ kind: "phone", start: 7, end: 20, confidence: 1, detector: "PhoneDetector" }],
+      mode_used: "rule",
+      hybrid_failed: true,
+      hybrid_failure_code: "rate_limited",
+    });
+    render(<DemoPage />);
+    fireEvent.keyDown(window, { key: "Escape" });
+
+    fireEvent.click(screen.getByRole("button", { name: "하이브리드 (OpenAI)" }));
+    scan("고객 김민준 010-1234-5678");
+
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent("하이브리드 판단에 실패해 규칙 전용 결과만 보여 줍니다");
+    expect(alert).toHaveTextContent("잠시 후 다시 시도해 주세요");
+  });
+
+  it("sends rule-only when the text is over the hybrid limit, even with hybrid chosen", async () => {
+    mockScanText.mockResolvedValue({ detections: [] });
+    render(<DemoPage />);
+    fireEvent.keyDown(window, { key: "Escape" });
+
+    fireEvent.click(screen.getByRole("button", { name: "하이브리드 (OpenAI)" }));
+    const longText = "가".repeat(5_001);
+    scan(longText);
+
+    await waitFor(() => expect(mockScanText).toHaveBeenLastCalledWith(longText, "rule"));
   });
 });
