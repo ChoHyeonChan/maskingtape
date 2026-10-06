@@ -2,6 +2,15 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from maskingtape_api.main import create_app
+from maskingtape_api.settings import ApiSettings
+
+
+def test_production_app_disables_interactive_api_docs() -> None:
+    app = create_app(settings=ApiSettings(environment="production", cors_allowed_origins=()))
+
+    assert app.docs_url is None
+    assert app.redoc_url is None
+    assert app.openapi_url is None
 
 
 def test_openapi_contains_scan_and_anonymize_contracts() -> None:
