@@ -90,6 +90,8 @@
   font-weight: 900;
   color: var(--text-primary);
   line-height: 1.4;
+  /* "(재/현율"처럼 어절 중간에서 끊기지 않게 한다. */
+  word-break: keep-all;
 }
 
 .accuracy-hero__stat-sub {
