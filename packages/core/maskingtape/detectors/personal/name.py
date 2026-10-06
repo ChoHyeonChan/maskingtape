@@ -49,6 +49,9 @@ _SURNAMES = [
 _TITLE_CUES_603 = [
     "책임", "선임", "수석", "박사", "여사", "어르신", "피고", "원고",
     "프로", "기사", "선수",
+    # 판결문의 판사·검사·증인(#663). 판결문마다 거의 반드시 나오는데 규칙도 로컬 LLM도 놓쳤다.
+    # 이름 앞에서만 받는다(_COURT_PREFIX_TITLES).
+    "판사", "검사", "증인",
 ]
 _TITLE_CUES = [
     "팀장", "과장", "부장", "차장", "대리", "사원", "실장", "본부장",
@@ -71,6 +74,8 @@ _PREFIX_CUES_603 = [
     "주문자", "구매자", "예약자", "투숙객", "받는 분", "받는사람", "보내는 사람",
     "피고인", "채무자", "피해자", "신고인", "세대주", "배우자", "소유자", "운전자",
     "검토자", "승인자", "기안자",
+    # 메일 머리의 띄어 쓴 받는 사람(#663). "받는사람"·"받는 분"만 있어 "받는 사람: 송준경"이 샜다.
+    "받는 사람",
 ]
 _PREFIX_CUES = [
     "고객", "환자", "신청자", "작성자", "담당자", "수령인", "수신인", "성명", "이름", "저는",
@@ -132,6 +137,16 @@ _COMMON_WORDS = frozenset({
 # 함께 걸러 "공제 씨"·"고객 우대"처럼 전부터 가리던 이름까지 놓친다(#603 리뷰).
 _CUES_603 = frozenset(_TITLE_CUES_603) | frozenset(_PREFIX_CUES_603)
 _CUE_603_COMMON_WORDS = frozenset({"진술", "진술서", "공제", "안내문", "우대", "오늘자"})
+# 판결문의 판사·검사·증인(#663)은 이름 앞에서만 단서로 받는다. 뒤 단서로 쓰면 "유전자 검사"·"주요 증인"
+# 같은 일반어가 이름이 되고, 두 글자 직함 앞 조사 끝 거르기(#603)가 "피해자 이수가 증인으로"의 실명을
+# 통째로 버린다. 앞에서도 이름 바로 뒤가 낱말 경계(조사·괄호·쉼표·줄 끝)일 때만 받는다(detect 참고).
+_COURT_PREFIX_TITLES = frozenset({"판사", "검사", "증인"})
+# 판사·검사·증인 바로 뒤에 오는 일반 명사("증인 신문이", "판사 전원이", "검사 진단서를"). 이 단서에만
+# 쓴다 — 공용 #603 거르기에 넣으면 "배우자: 유효성"처럼 다른 단서 뒤의 실명까지 버린다(#663 검증).
+_COURT_CUE_COMMON_WORDS = frozenset({
+    "진술", "진술서", "진단서", "성적서", "신청서", "임명장", "정확도", "정밀도", "진행", "진행중",
+    "신문", "전원", "정원", "신분", "방법", "조서", "심문", "결과",
+})
 
 # 직함 전용 단서(존칭 '님' 제외). 이것만으로(다른 단서 없이) 이름을 잡을 땐 성+2자 풀네임을
 # 요구한다 — 부서·업무어("구매 부장"의 구매, "대표 이사"의 이사)가 직함과 붙어 이름으로
@@ -167,7 +182,9 @@ _SUFFIX_ALT_PLAIN = "|".join(
         dict.fromkeys(
             c
             for c in (_SUFFIX_CUES + _TITLE_CUES)
-            if c not in _AMBIGUOUS_SUFFIX_TITLES and c not in _BOUNDED_SUFFIX_TITLES
+            if c not in _AMBIGUOUS_SUFFIX_TITLES
+            and c not in _BOUNDED_SUFFIX_TITLES
+            and c not in _COURT_PREFIX_TITLES
         ),
         key=len,
         reverse=True,
@@ -232,6 +249,9 @@ _OPEN_ENDING_STEMS = (
     "이신", "이세", "이시", "이십", "인데", "인가", "인지", "이야", "이죠", "이지", "이네",
     "이나", "이든", "이면", "에게", "에서", "께서", "한테", "까지", "부터", "처럼", "보다",
     "마저", "조차", "밖에", "뿐",
+    # 말로 소개하는 "제 이름은 황은민이고요"(#663). 받침 없는 이름 뒤 "고요"는 넣지 않는다 — 첫머리로만
+    # 보므로 "담당자 정리하고요"의 "정리하"까지 이름으로 받아 버린다.
+    "이고요",
 )
 _OPEN_ENDING_ALT = "|".join(sorted(_OPEN_ENDING_STEMS, key=len, reverse=True))
 # #600 전까지 이름 뒤로 받던 꼴(닫힌 어미 목록 + 낱말 끝). 흔한 일반명사(_COMMON_WORDS) 뒤에
@@ -340,6 +360,11 @@ _SLASH_RECORD_LEAD_RE = re.compile(r"[ \t]*(?:[-*•·]|\d{1,3}[.)])?[ \t]*")
 _SLASH_RECORD_MIN_CELLS = 3
 _SLASH_RECORD_MIN_NAME_LEN = 3
 _SLASH_RECORD_DETAIL_RE = re.compile(r"@|0\d{1,2}[-.\s]?\d{3,4}[-.\s]?\d{4}|생년월일|생일")
+
+# 이름 바로 뒤에 공백을 두고 다른 낱말이 이어지는지 — 판사·검사·증인을 앞 단서로 받을 때 쓴다(#663).
+_WORD_CONTINUES_RE = re.compile(r"[ \t]+[가-힣]")
+# 판사·검사·증인 뒤 자리에 오는 "원고가"·"박사가" 꼴(#663). 이름이 아니라 다음 이름의 앞 단서다.
+_NAME_LIKE_TITLE_JOSA_RE = re.compile(r"(?:" + "|".join(_NAME_LIKE_TITLES_603) + r")[은는이가]")
 
 # 마크다운 구분행("|---|:--:|--:|")의 칸 — 대시·콜론·공백만으로 이뤄진다. 적어도 한 칸은
 # 비어 있지 않아야 진짜 구분행이다(전부 빈 칸인 데이터 행과 헷갈리지 않기 위해).
@@ -707,6 +732,26 @@ class NameDetector(Detector):
                 and _is_common_word_at(text, name_start, _CUE_603_COMMON_WORDS)
             ):
                 continue  # "피고인 진술"처럼 #603 단서 뒤의 일반 명사는 이름이 아니다
+            if (prefix in _COURT_PREFIX_TITLES or prefix == "받는 사람") and _NAME_LIKE_TITLE_JOSA_RE.fullmatch(
+                m.group("name")
+            ):
+                # "검사 원고가 김민수를"의 "원고가"는 이름이 아니라 김민수의 앞 단서다. 그 자리부터 다시 찾는다(#663)
+                pos = name_start
+                continue
+            if (
+                prefix in _COURT_PREFIX_TITLES
+                and suffix is None
+                and m.group("paren") is None
+                and (
+                    _WORD_CONTINUES_RE.match(text, m.end("name"))
+                    or _is_common_word_at(text, name_start, _COURT_CUE_COMMON_WORDS)
+                    or m.group("name").endswith("으")
+                )
+            ):
+                # "검사 진단서 발급"·"증인 신문이 열렸다"·"증인 신분으로"는 이름이 아니다. "검사 황수재(기소)"·
+                # "증인 문양석의 증언"은 받는다. 버린 자리부터 다시 찾아 그 낱말이 다음 이름의 단서가 되게 한다(#663)
+                pos = name_start
+                continue
             if m.group("paren") is not None and not has_prefix:
                 # 괄호 안이 숫자만 있는 나이·연락처·성별뿐이면 두 글자 낱말과 흔히 겹친다
                 # ("정원(35)", "문의(02-…)", 서식의 "구분(남/여)"). 세 글자 이름일 때만 받는다.
