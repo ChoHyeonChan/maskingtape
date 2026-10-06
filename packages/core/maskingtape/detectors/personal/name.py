@@ -855,8 +855,11 @@ class NameDetector(Detector):
             pos = end
             if value in _FORM_NOT_NAMES_603:
                 list_seeds.append((end, True))
+            # #603 상태 값은 #603 라벨 칸("결재: 대기")에서만 거른다. 보호자·성명 같은 기존 라벨 칸은 #603 전처럼
+            # 이름으로 받는다 — 위 규칙이 앞 단서를 잃으면 "보호자: 진행(인)"이 샌다(#691).
+            not_names = _FORM_NOT_NAMES if m.group("label") in _FORM_LABELS_603 else _LIST_STOP_FORM_VALUES
             # 직함+조사("신청자 : 차장은 …")도 값이 아니다. 뒤 이름은 위 규칙이 직함을 단서로 잡는다(#533)
-            if value in _FORM_NOT_NAMES or _CUE_WITH_JOSA_OLD_RE.fullmatch(name) or all(covered[start:end]):
+            if value in not_names or _CUE_WITH_JOSA_OLD_RE.fullmatch(name) or all(covered[start:end]):
                 continue
             if m.group("label") in _ORG_VALUE_LABELS and len(name) >= 3 and _ORG_VALUE_END_RE.search(name):
                 continue  # 공문 발신·수신·참조 칸은 사람보다 부서·기관이 흔하다("홍보팀")
