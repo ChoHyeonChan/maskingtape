@@ -35,6 +35,15 @@ def test_vercel_entrypoint_mounts_api_under_api_prefix() -> None:
     assert response.json() == {"status": "ok"}
 
 
+def test_vercel_entrypoint_disables_public_api_docs() -> None:
+    client = TestClient(app)
+
+    for path in ("/docs", "/redoc", "/openapi.json", "/api/docs", "/api/redoc", "/api/openapi.json"):
+        response = client.get(path)
+        assert response.status_code == 404
+        assert response.json()["code"] == "not_found"
+
+
 def test_vercel_entrypoint_serves_scan_without_echoing_raw_detection_text() -> None:
     client = TestClient(app)
     passport = "M12345678"
