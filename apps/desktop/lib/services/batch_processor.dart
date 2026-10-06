@@ -16,13 +16,21 @@ class BatchProcessor {
   final FileReader fileReader;
 
   /// `이름.확장자` → `이름_masked.확장자` (확장자 없으면 끝에 `_masked`).
+  ///
+  /// PDF는 뽑은 글자만 저장하므로 `이름_pdf_masked.txt`다. `이름_masked.txt`로 두면 같은 폴더의
+  /// `이름.txt` 결과를 덮어쓴다.
   static String maskedPathFor(String path) {
     final sep = path.lastIndexOf(RegExp(r'[\\/]'));
     final dot = path.lastIndexOf('.');
     if (dot <= sep) {
       return '${path}_masked';
     }
-    return '${path.substring(0, dot)}_masked${path.substring(dot)}';
+    final stem = path.substring(0, dot);
+    final ext = path.substring(dot);
+    if (ext.toLowerCase() == '.pdf') {
+      return '${stem}_pdf_masked.txt';
+    }
+    return '${stem}_masked$ext';
   }
 
   /// isCancelled가 true를 돌려주면 다음 파일부터 처리하지 않는다

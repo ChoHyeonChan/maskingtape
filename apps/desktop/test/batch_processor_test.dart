@@ -23,6 +23,22 @@ void main() {
     expect(BatchProcessor.maskedPathFor(r'C:\v1.2\노트'), r'C:\v1.2\노트_masked');
   });
 
+  test('maskedPathFor: PDF는 뽑은 글자라 _pdf_masked.txt로 저장한다', () {
+    expect(
+      BatchProcessor.maskedPathFor(r'C:\docs\상담기록.pdf'),
+      r'C:\docs\상담기록_pdf_masked.txt',
+    );
+    expect(
+      BatchProcessor.maskedPathFor(r'C:\docs\계약서.PDF'),
+      r'C:\docs\계약서_pdf_masked.txt',
+    );
+    // 같은 폴더의 상담기록.txt 결과(상담기록_masked.txt)와 겹치지 않는다.
+    expect(
+      BatchProcessor.maskedPathFor(r'C:\docs\상담기록.pdf'),
+      isNot(BatchProcessor.maskedPathFor(r'C:\docs\상담기록.txt')),
+    );
+  });
+
   test('summarize: 종류별 개수를 한국어 라벨로 요약한다', () {
     const rrn = Detection(kind: 'rrn', start: 0, end: 1, text: 'x');
     const phone = Detection(kind: 'phone', start: 0, end: 1, text: 'x');

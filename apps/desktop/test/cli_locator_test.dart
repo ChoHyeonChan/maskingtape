@@ -29,4 +29,12 @@ void main() {
     expect(cli.executable, 'maskingtape');
     expect(cli.leadingArgs, isEmpty);
   });
+
+  test('PDF 추출용 Python도 동봉본이 먼저, 없으면 PATH의 python이다', () {
+    expect(
+      locatePython(executable: exe, exists: (_) => true),
+      r'C:\Program Files\maskingtape\python\python.exe',
+    );
+    expect(locatePython(executable: exe, exists: (_) => false), 'python');
+  });
 }
