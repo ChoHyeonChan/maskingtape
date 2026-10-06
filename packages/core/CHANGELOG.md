@@ -94,6 +94,8 @@
   응답의 이름 목록에 문자열이 아닌 값이 있으면 `TypeError`를 낸다. 메시지에는 받은 형태만 적고 이름은 적지 않는다. 같은 이름은 한 번만 찾는다.
 - **`MaskAnonymizer`도 치환 전에 겹친 탐지를 합친다** ([#520](https://github.com/ChoHyeonChan/maskingtape/issues/520)). `Pipeline` 결과에는 출력 변화가 없다.
 - **가명 어휘가 모자라면 라벨로 가린다** ([#494](https://github.com/ChoHyeonChan/maskingtape/issues/494)): 한 호출에 서로 다른 이름이 수백 개면 뒤쪽 이름은 가명 대신 `[이름]`이 된다. 원본은 남지 않는다.
+- **성씨+직함은 성씨만 가린다** ([#677](https://github.com/ChoHyeonChan/maskingtape/issues/677)): `고객 김부장님`이 `고객 *부장님`이 된다. 전에는 `김부장`을 세 글자 이름으로 보고 직함까지 가렸다.
+  뒤에 나열한 이름은 그대로 가린다(`참석자: 김부장, 이서연, 박지훈` → `참석자: *부장, ***, ***`).
 - `Detector`에 `calls_model` 속성이 생겼다(기본 `False`). 모델을 부르는 비싼 탐지기는 `True`로 두면, `Pipeline`이 표기를 정리해 다시 찾을 때 되도록 정리본에서만 부른다([#490](https://github.com/ChoHyeonChan/maskingtape/issues/490)).
 - 선택 의존성 `bench-baselines`(scrubadub)가 패키지 메타데이터에 생겼다. 저장소 벤치에서 다른 도구와 비교할 때만 쓰고, 설치하지 않으면 영향이 없다.
 
