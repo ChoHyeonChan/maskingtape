@@ -143,8 +143,12 @@ curl http://127.0.0.1:8000/health
 예상 응답:
 
 ```json
-{ "status": "ok" }
+{ "status": "ok", "hybrid_available": false }
 ```
+
+`hybrid_available`은 서버가 웹 하이브리드 이름 판단기를 생성할 수 있는지 알려준다.
+`OPENAI_API_KEY`가 없거나 형식이 잘못되어 판단기를 만들 수 없으면 `false`다. 이 값은
+OpenAI API를 실제로 호출하지 않고 환경변수와 키 형식만 확인한다.
 
 테스트:
 
@@ -165,7 +169,7 @@ python -m pytest apps/api -q
 
 | 엔드포인트 | 목적 | 주의할 점 |
 |---|---|---|
-| `GET /health` | 로컬·배포 헬스체크 | rate limit 대상이 아니다 |
+| `GET /health` | 로컬·배포 헬스체크 + 하이브리드 사용 가능 여부 | rate limit 대상이 아니다 |
 | `POST /scan` | 탐지 metadata만 반환 | `detections[].text`를 반환하지 않는다 |
 | `POST /anonymize` | 비식별화된 텍스트와 사용한 탐지 metadata 반환 | `strategy`는 `mask`/`label`/`pseudonym` |
 
@@ -280,6 +284,9 @@ FastAPI 라우터는 core를 직접 호출하지 않고 `maskingtape_api.service
   | `MASKINGTAPE_API_HYBRID_RATE_LIMIT_WINDOW_SECONDS` | `60` | 하이브리드 모드 전용 요청 제한 시간창 |
 
 - **실패 코드**: `name_judge_unavailable` `input_too_long` `timeout` `network` `auth` `rate_limited` `spend_limit` `redirect` `upstream` `http_error` `response_too_large` `bad_response` `incomplete` `refused` `empty_output` `bad_schema`
+- 웹은 페이지 진입 시 `GET /api/health`의 `hybrid_available`을 보고 하이브리드 버튼을
+  처음부터 비활성화할 수 있다. 단, 키가 있어도 실제 요청에서는 timeout, rate limit,
+  spend limit, upstream 오류가 날 수 있으므로 `hybrid_failed` 폴백 처리는 유지한다.
 - 이 앱은 `.env` 파일을 읽지 않는다. 로컬에서 시험할 때는 키를 환경변수로 둔다. 테스트는 가짜 응답으로 돌아 OpenAI를 부르지 않는다.
 
 ## 🔒 배포 시 보안 요구사항 (필수 — 구현할 때부터 지킬 것)

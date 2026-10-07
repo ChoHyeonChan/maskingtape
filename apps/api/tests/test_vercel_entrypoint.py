@@ -26,13 +26,14 @@ def _web_client(directory: Path) -> TestClient:
     return TestClient(web)
 
 
-def test_vercel_entrypoint_mounts_api_under_api_prefix() -> None:
+def test_vercel_entrypoint_mounts_api_under_api_prefix(monkeypatch) -> None:
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     client = TestClient(app)
 
     response = client.get("/api/health")
 
     assert response.status_code == 200
-    assert response.json() == {"status": "ok"}
+    assert response.json() == {"status": "ok", "hybrid_available": False}
 
 
 def test_vercel_entrypoint_disables_public_api_docs() -> None:

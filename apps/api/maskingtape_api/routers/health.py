@@ -4,11 +4,15 @@
 from fastapi import APIRouter
 
 from maskingtape_api.schemas import HealthResponse
+from maskingtape_api.services.openai_name_judge import openai_name_judge_from_env
 
 router = APIRouter(tags=["health"])
 
 
 @router.get("/health", response_model=HealthResponse)
 def health() -> HealthResponse:
-    """Return a small liveness response for local and CI checks."""
-    return HealthResponse(status="ok")
+    """Return liveness and whether the optional hybrid judge can be selected."""
+    return HealthResponse(
+        status="ok",
+        hybrid_available=openai_name_judge_from_env() is not None,
+    )

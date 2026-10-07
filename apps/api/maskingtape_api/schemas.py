@@ -155,6 +155,10 @@ class HealthResponse(BaseModel):
     """Liveness response body."""
 
     status: str = Field(..., description="서비스 상태.")
+    hybrid_available: bool = Field(
+        default=False,
+        description="웹 하이브리드 이름 판단기를 현재 생성할 수 있는지 여부.",
+    )
 
 
 class ErrorResponse(BaseModel):
