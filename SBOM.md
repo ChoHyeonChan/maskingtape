@@ -12,7 +12,7 @@
 | 3 | ruff | >=0.16 | MIT | https://github.com/astral-sh/ruff | (개발 도구) 파이썬 린트·코드 스타일 검사 |
 | 4 | desktop_drop | ^0.7.1 | Apache-2.0 | https://github.com/MixinNetwork/flutter-plugins | 데스크톱 앱 — OS 파일 드래그&드롭 수신 (Flutter 플러그인) |
 | 5 | react / react-dom | 19.2.7 | MIT | https://github.com/facebook/react | 웹 플레이그라운드 UI 렌더링 |
-| 6 | vite | 8.1.5 | MIT | https://github.com/vitejs/vite | (개발 도구) 웹 플레이그라운드 빌드·개발 서버 |
+| 6 | vite | 8.1.5 | MIT | https://github.com/vitejs/vite | (개발 도구) 웹 플레이그라운드 빌드·개발 서버. 빌드 결과물에 작은 런타임 코드(모듈 미리 불러오기 폴리필 등, 번들러 Rolldown 1.1.5 MIT 포함)를 넣어 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)에 고지 |
 | 7 | @vitejs/plugin-react | 6.0.3 | MIT | https://github.com/vitejs/vite-plugin-react | (개발 도구) Vite에서 React JSX 처리 |
 | 8 | typescript | 7.0.2 | Apache-2.0 | https://github.com/microsoft/TypeScript | (개발 도구) 웹 플레이그라운드 타입 검사 |
 | 9 | vitest | 4.1.11 | MIT | https://github.com/vitest-dev/vitest | (개발 도구) 웹 플레이그라운드 테스트 실행 |
@@ -357,7 +357,7 @@ GitHub Releases `desktop-v*`의 설치파일이다(#617). 위 A-4의 Dart 런타
 - **python-stdnum은 LGPL-2.1-or-later다**(설치본 `COPYING` 원문 「GNU LESSER GENERAL PUBLIC LICENSE Version 2.1」, 소스 머리말 「version 2.1 … or (at your option) any later version」). 팀 방침의 금지 목록(GPL·AGPL·SSPL)에는 없지만 같은 계열이라 따로 적는다. 우리는 python-stdnum을 배포하지 않는다. 사용자가 선택 설치를 고르면 pip이 PyPI에서 직접 받는다. 우리 코드는 python-stdnum을 부르지도 않는다.
 - **numpy·scipy의 Windows 휠에는 GCC 런타임 라이브러리가 함께 실린다.** 각 설치본 `LICENSE.txt`에 「Name: GCC runtime library … License: GPL-3.0-or-later WITH GCC-exception-3.1」로 적혀 있다. 이것도 우리가 배포하지 않고, pip이 PyPI에서 받는 휠 그대로다.
 - tqdm의 MPL-2.0은 위 certifi 절과 같은 파일 단위 카피레프트이고, defusedxml·typing-extensions의 PSF-2.0은 위 절과 같다. regex의 CNRI-Python, numpy의 Zlib·CC0-1.0·0BSD도 우리가 배포하지 않는다.
-- 결론: **배포물 미포함.** 이 선택 설치는 팀 방침(GPL 계열 금지)의 예외로 두고, 위 사실을 근거로 남긴다(2026-10-08 팀장 결정, #727). 팀 방침의 금지 대상은 그대로 배포물과 제품 코드의 의존성이다.
+- 결론: **배포물 미포함.** 이 선택 설치는 팀 방침(GPL 계열 금지)의 예외로 두고, 위 사실을 근거로 남긴다(2026-10-08 팀장 결정, #727). 예외는 이 선택 설치(`bench-baselines`)에만 적용하고, 배포물과 제품 코드의 의존성에는 GPL 계열 금지를 그대로 지킨다.
 
 ## 부록 C: AI 모델 상세
 
