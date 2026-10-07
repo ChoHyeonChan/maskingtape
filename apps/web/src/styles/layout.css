@@ -146,7 +146,9 @@
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   gap: 0.9rem;
-  height: min(46rem, 78vh);
+  /* 낮은 창(125% 배율 노트북 등)에서는 78vh가 너무 작아 결과 목록이 비좁다 — 위 고정 메뉴와 여백을 뺀
+     높이까지는 쓴다(#715 후속). 큰 창에서는 46rem 상한이 그대로다. */
+  height: min(46rem, max(78vh, 100vh - 8rem));
   min-height: 26rem;
 }
 
@@ -292,7 +294,11 @@
 .panel--results {
   position: relative;
   height: 100%;
-  overflow: hidden;
+  /* 창이 낮으면(125% 배율 노트북 등) 위쪽 안내·조정 칸만으로 높이가 차서 목록이 0줄이 될 수 있다.
+     목록은 최소 높이를 지키고(results.css), 그래도 모자라면 패널 전체를 스크롤한다(#715 후속). */
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: thin;
   padding: 1rem;
   display: flex;
   flex-direction: column;

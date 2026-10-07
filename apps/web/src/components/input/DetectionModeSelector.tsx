@@ -14,7 +14,7 @@ interface Props {
   hybridUnavailable?: boolean;
   /** 막힌 이유를 선택기 아래에 쓸지. 결과 화면처럼 다른 알림이 이미 같은 이유를 말하면 끈다. */
   showBlockedReason?: boolean;
-  /** 버튼 바로 아래에 붙일 짧은 설명(결과 화면의 "바꾸면 다시 탐지" 안내 등). */
+  /** 버튼 바로 아래에 붙일 짧은 설명. */
   hint?: ReactNode;
 }
 

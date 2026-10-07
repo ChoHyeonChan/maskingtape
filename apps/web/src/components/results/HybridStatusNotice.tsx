@@ -14,6 +14,10 @@ interface Props {
  * 이유와 함께 알리고(CLAUDE.md §2-3), 성공했으면 LLM이 더 찾은 이름 수를 보여 준다.
  * 규칙 전용으로 탐지했으면 아무것도 그리지 않는다.
  */
+// 하이브리드로 무엇이 갔는지 결과 화면에도 남긴다(CLAUDE.md §2-3). 따로 상자를 두면 낮은 창에서 목록이 사라져
+// 이 알림 한 줄에 붙인다(#715 후속).
+const SENT_NOTE = "가린 글을 OpenAI로 보냈고, 규칙이 놓친 개인정보는 함께 갔을 수 있습니다.";
+
 export function HybridStatusNotice({ modeInfo, detections }: Props) {
   if (modeInfo.requested !== "hybrid") return null;
 
@@ -30,11 +34,11 @@ export function HybridStatusNotice({ modeInfo, detections }: Props) {
     <p className="hybrid-status" role="status">
       {llmCount > 0 ? (
         <>
-          하이브리드: OpenAI 판단기가 규칙이 놓친 이름 <strong>{llmCount}건</strong>을 더 찾았습니다. 목록에{" "}
-          <span className="llm-badge">LLM</span> 표시로 구분합니다.
+          하이브리드: 규칙이 놓친 이름 <strong>{llmCount}건</strong>을 더 찾았습니다(목록의{" "}
+          <span className="llm-badge">LLM</span>). {SENT_NOTE}
         </>
       ) : (
-        "하이브리드: OpenAI 판단기가 더 찾은 이름은 없습니다."
+        `하이브리드: OpenAI 판단기가 더 찾은 이름은 없습니다. ${SENT_NOTE}`
       )}
     </p>
   );
