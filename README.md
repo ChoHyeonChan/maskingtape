@@ -60,7 +60,7 @@ pytest packages/core
 
 > **설치는 항상 개별 패키지 경로로 한다** — 저장소 루트에는 배포용 `[build-system]`이 없어(uv 워크스페이스 전용) `pip install .`은 루트에서 실패한다. 위 예시처럼 `packages/core`, `packages/mcp-server`, `apps/api`를 각각 지정하면 된다.
 
-로컬 LLM 기능은 선택 사항이며 설치 방법은 [packages/core](packages/core)에 있다. 웹 데모는 Node.js 20+, 데스크톱 앱은 Flutter가 추가로 필요하며 각 폴더 README를 참고한다.
+로컬 LLM 기능은 선택 사항이며 설치 방법은 [packages/core](packages/core)에 있다. 웹 데모는 Node.js 20.19+(CI는 24), 데스크톱 앱은 Flutter가 추가로 필요하며 각 폴더 README를 참고한다.
 
 현재 탐지(11종): **주민등록번호**(체크섬 검증), **전화번호**(휴대폰·유선·070·050X, +82 표기), **이메일**, **주소**(행정구역·도로명), **신용카드**(Luhn 검증), **계좌번호**, **사업자등록번호**, **여권번호**, **생년월일**, **운전면허번호**, **이름**(규칙 + 로컬 LLM 문맥 판단)
 
@@ -192,7 +192,7 @@ recall도 0.668 → 0.869로 올랐다 — 남은 과제는 문맥 단서가 없
 
 | | 지원 | 지원하지 않음 |
 |---|---|---|
-| **입력 형식** | 텍스트(str) | docx·이미지. PDF는 웹 데모에서 텍스트 추출만 |
+| **입력 형식** | 텍스트(str) | docx·이미지. PDF는 웹 데모·데스크톱 앱에서 글자만 뽑아 처리한다(가린 PDF는 만들지 않음) |
 | **탐지 종류** | 11종(주민등록번호·전화·이메일·주소·카드·계좌·사업자번호·여권·생년월일·운전면허·이름) | 그 밖의 식별자(사번·학번·차량번호·IP 등) |
 | **이름** | 로컬 LLM(`--llm`, 기본 `maskingtape-name-1.5b`)을 켜면 단서 없는 이름을 더 잡는다. 학습에 쓰지 않은 외부 대화 데이터 KDPII에서 재현율 0.254 → 0.825, 문서 성격별 세트에서 0.755 → 0.899(템플릿만 학습 밖) | 규칙 전용은 재현율 0.932 — **열다섯 중 하나쯤을 놓친다**(문맥 단서가 없는 이름, 2음절 이름+조사·직함). 합성 벤치 기준이라 실제 문서에서는 더 놓칠 수 있다(아래 「정확도 수치를 읽는 법」) |
 | **언어** | 한국어 표기를 전제로 설계 | 영문·중문·일문 이름과 주소 |
@@ -211,8 +211,7 @@ recall도 0.668 → 0.869로 올랐다 — 남은 과제는 문맥 단서가 없
 | `강남구 테헤란로 123 근처` | `주소: 강남구 테헤란로 123`, `서울 강남구 테헤란로 123` | 주소 — 시/도·시 없이 구로 시작하는 주소는 앞에 주소 단서(주소·배송지·거주지 등)가 있을 때만 받는다. "인구 이동 1.2%" 같은 통계 문장과 모양이 같아서다 |
 
 구분자 없는 사업자등록번호(10자리 연속 숫자)는 다른 숫자와 구분이 어려워 **의도적으로**
-잡지 않는다. 이 표와 아래 "뺀 항목"은 저장소 main 기준이다. PyPI 최신판 0.3.0(2026-09-17)에는 그 뒤에 머지된
-수정이 들어 있지 않고 다음 배포에 함께 나간다. 지금 동작은 저장소에서 설치해(`pip install -e packages/core`) 확인한다. 이 표 밖에서 새로 찾은 미탐은 [`bug` 라벨이 붙은 열린 이슈](https://github.com/ChoHyeonChan/maskingtape/issues?q=is%3Aissue%20is%3Aopen%20label%3Abug)에 재현 입력과 함께 모아 둔다.
+잡지 않는다. 이 표와 아래 "뺀 항목"은 PyPI 0.4.0(2026-10-07)과 저장소 main 기준이다(둘의 core 코드가 같다). 이 표 밖에서 새로 찾은 미탐은 [`bug` 라벨이 붙은 열린 이슈](https://github.com/ChoHyeonChan/maskingtape/issues?q=is%3Aissue%20is%3Aopen%20label%3Abug)에 재현 입력과 함께 모아 둔다.
 
 > 이 표에서 뺀 항목: 시/도 축약형(#396), 전화 괄호 표기(#397), 여권 소문자(#398),
 > 이메일 한글 로컬파트(#400), 주소가 동/도로명 자리에서 끊겨 건물번호가 새던 표기(#423),
@@ -293,7 +292,7 @@ flowchart LR
 | MCP `anonymize_file` | 이 PC 안 | 에이전트는 파일 경로만 넘기고 경로와 건수만 돌려받는다 |
 | MCP `anonymize_text` · `scan_text` | 이미 에이전트에 있음 | 에이전트가 가진 글자를 넘기는 도구라 그 원문은 에이전트가 이미 봤다. 가린 결과를 다른 곳으로 보내기 전에 쓴다. `scan_text`는 원문 값 없이 종류·위치·확신도·탐지기 이름만 돌려준다 |
 | 웹 데모 (기본, 규칙 모드) | 우리 API 서버 (Vercel) | 파일은 브라우저에서 글자만 뽑고(`apps/web/src/lib/extractText.ts`) 그 글자를 서버로 보낸다. 규칙 모드에서 서버는 규칙 탐지기만 쓰고 LLM을 부르지 않는다. `apps/api`에는 입력을 로그·파일에 남기는 코드가 없고, 검증 오류 응답에서도 입력값을 지운다(`apps/api/maskingtape_api/errors.py`). 호스팅 플랫폼(Vercel)의 요청 기록은 우리 코드 밖이다 |
-| 웹 데모 하이브리드 모드 (선택) | 우리 API 서버 → **OpenAI API** (상용 API) | 요청에 `mode: "hybrid"`를 고를 때만 쓴다. 서버는 규칙 결과로 먼저 가린 글(`LabelAnonymizer`)만 OpenAI 이름 판단기에 보내고(`apps/api/maskingtape_api/services/core_adapter.py`), 요청에 `store: false`를 넣으며 리다이렉트를 따라가지 않는다(`services/openai_name_judge.py`). 입력이 5,000자를 넘거나 같은 IP에서 60초에 10번을 넘게 요청하면 OpenAI를 부르지 않는다(`apps/api/maskingtape_api/routers/pii.py`, 서버 인스턴스마다 따로 세는 제한). 키는 서버 환경변수에만 있고, 키가 없거나 제한에 걸리거나 판단기가 실패하면 규칙 결과를 돌려주며 `hybrid_failed`로 알린다. **규칙이 놓친 개인정보는 가린 글에 그대로 남아 OpenAI로 함께 전송된다.** 웹 화면의 모드 선택은 [#547](https://github.com/ChoHyeonChan/maskingtape/issues/547)에서 붙이는 중이다 |
+| 웹 데모 하이브리드 모드 (선택) | 우리 API 서버 → **OpenAI API** (상용 API) | 요청에 `mode: "hybrid"`를 고를 때만 쓴다. 서버는 규칙 결과로 먼저 가린 글(`LabelAnonymizer`)만 OpenAI 이름 판단기에 보내고(`apps/api/maskingtape_api/services/core_adapter.py`), 요청에 `store: false`를 넣으며 리다이렉트를 따라가지 않는다(`services/openai_name_judge.py`). 입력이 5,000자를 넘거나 같은 IP에서 60초에 10번을 넘게 요청하면 OpenAI를 부르지 않는다(`apps/api/maskingtape_api/routers/pii.py`, 서버 인스턴스마다 따로 세는 제한). 키는 서버 환경변수에만 있고, 키가 없거나 제한에 걸리거나 판단기가 실패하면 규칙 결과를 돌려주며 `hybrid_failed`로 알린다. **규칙이 놓친 개인정보는 가린 글에 그대로 남아 OpenAI로 함께 전송된다.** 웹 화면에서는 입력창 아래 「탐지 방식」에서 「하이브리드 (OpenAI)」를 고를 때만 이 모드가 된다(기본은 규칙 전용, [#705](https://github.com/ChoHyeonChan/maskingtape/pull/705)·[#715](https://github.com/ChoHyeonChan/maskingtape/pull/715)) |
 
 > 에이전트에게 원문 대신 가린 사본만 넘기려면 `anonymize_file`을 쓴다. 다만 에이전트가 자기 도구로
 > 원본 파일을 여는 것까지 막지는 못하고, 탐지하지 못한 값은 사본에도 남는다. 실제 개인정보가 든
