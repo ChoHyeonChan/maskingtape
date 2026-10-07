@@ -55,6 +55,14 @@ export function readModeInfo(
   return { requested, used, failureCode: failed ? (response.hybrid_failure_code ?? null) : null };
 }
 
+/**
+ * 서버에 OpenAI 판단기가 없다는 실패(`OPENAI_API_KEY` 미설정). 한 번 받으면 그 뒤로는 하이브리드를
+ * 눌러도 같은 실패만 나오므로, 화면이 하이브리드 선택을 막는다(#547 후속).
+ */
+export function judgeUnavailable(info: ScanModeInfo): boolean {
+  return info.failureCode === "name_judge_unavailable";
+}
+
 export function hybridFellBack(info: ScanModeInfo): boolean {
   return info.requested === "hybrid" && info.used !== "hybrid";
 }

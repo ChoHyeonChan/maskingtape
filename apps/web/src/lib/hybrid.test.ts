@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { describe, expect, it } from "vitest";
-import { hybridFailureMessage, hybridFellBack, isLlmDetection, readModeInfo } from "./hybrid";
+import { hybridFailureMessage, hybridFellBack, isLlmDetection, judgeUnavailable, readModeInfo } from "./hybrid";
 
 describe("readModeInfo (#547)", () => {
   it("treats a rule request as rule with no failure", () => {
@@ -44,5 +44,13 @@ describe("isLlmDetection", () => {
     const base = { kind: "name", start: 0, end: 3, confidence: 0.9 };
     expect(isLlmDetection({ ...base, detector: "OpenAINameJudge" })).toBe(true);
     expect(isLlmDetection({ ...base, detector: "NameDetector" })).toBe(false);
+  });
+});
+
+describe("judgeUnavailable", () => {
+  it("is true only for the no-judge failure, not for other hybrid failures", () => {
+    expect(judgeUnavailable({ requested: "hybrid", used: "rule", failureCode: "name_judge_unavailable" })).toBe(true);
+    expect(judgeUnavailable({ requested: "hybrid", used: "rule", failureCode: "timeout" })).toBe(false);
+    expect(judgeUnavailable({ requested: "rule", used: "rule", failureCode: null })).toBe(false);
   });
 });

@@ -1,12 +1,21 @@
 // SPDX-FileCopyrightText: 2026 The maskingtape Authors
 // SPDX-License-Identifier: Apache-2.0
 
+import type { ReactNode } from "react";
 import { HYBRID_MAX_TEXT_LENGTH, type DetectionMode } from "../../lib/hybrid";
 
 interface Props {
   mode: DetectionMode;
   textLength: number;
   onChange: (mode: DetectionMode) => void;
+  /** 다시 탐지하는 동안처럼 잠시 고를 수 없을 때. */
+  disabled?: boolean;
+  /** 서버에 하이브리드 판단기가 없다고 확인됐을 때. 하이브리드를 막고 규칙 전용으로만 탐지한다. */
+  hybridUnavailable?: boolean;
+  /** 막힌 이유를 선택기 아래에 쓸지. 결과 화면처럼 다른 알림이 이미 같은 이유를 말하면 끈다. */
+  showBlockedReason?: boolean;
+  /** 버튼 바로 아래에 붙일 짧은 설명(결과 화면의 "바꾸면 다시 탐지" 안내 등). */
+  hint?: ReactNode;
 }
 
 /**
@@ -14,8 +23,17 @@ interface Props {
  * 하이브리드를 고르면 OpenAI로 무엇이 가는지 안내하고(CLAUDE.md §2-3), 입력이 서버의 하이브리드
  * 상한을 넘으면 선택을 막고 이유를 보여 준다.
  */
-export function DetectionModeSelector({ mode, textLength, onChange }: Props) {
-  const hybridBlocked = textLength > HYBRID_MAX_TEXT_LENGTH;
+export function DetectionModeSelector({
+  mode,
+  textLength,
+  onChange,
+  disabled = false,
+  hybridUnavailable = false,
+  showBlockedReason = true,
+  hint,
+}: Props) {
+  const tooLong = textLength > HYBRID_MAX_TEXT_LENGTH;
+  const hybridBlocked = hybridUnavailable || tooLong;
   const effectiveMode: DetectionMode = hybridBlocked ? "rule" : mode;
 
   return (
@@ -29,6 +47,7 @@ export function DetectionModeSelector({ mode, textLength, onChange }: Props) {
             type="button"
             className={`detection-mode__btn${effectiveMode === "rule" ? " is-active" : ""}`}
             aria-pressed={effectiveMode === "rule"}
+            disabled={disabled}
             onClick={() => onChange("rule")}
           >
             규칙 전용
@@ -38,7 +57,7 @@ export function DetectionModeSelector({ mode, textLength, onChange }: Props) {
             className={`detection-mode__btn${effectiveMode === "hybrid" ? " is-active" : ""}`}
             aria-pressed={effectiveMode === "hybrid"}
             aria-describedby={hybridBlocked ? "detection-mode-blocked" : undefined}
-            disabled={hybridBlocked}
+            disabled={disabled || hybridBlocked}
             onClick={() => onChange("hybrid")}
           >
             하이브리드 (OpenAI)
@@ -46,11 +65,19 @@ export function DetectionModeSelector({ mode, textLength, onChange }: Props) {
         </div>
       </div>
 
-      {hybridBlocked && (
+      {hint}
+
+      {!showBlockedReason ? null : hybridUnavailable ? (
         <p className="detection-mode__blocked" id="detection-mode-blocked" role="status">
-          하이브리드는 {HYBRID_MAX_TEXT_LENGTH.toLocaleString()}자까지만 쓸 수 있어 규칙 전용으로 탐지합니다. 지금{" "}
-          {textLength.toLocaleString()}자입니다.
+          지금 서버에는 하이브리드 판단기가 연결돼 있지 않아 규칙 전용으로만 탐지합니다.
         </p>
+      ) : (
+        tooLong && (
+          <p className="detection-mode__blocked" id="detection-mode-blocked" role="status">
+            하이브리드는 {HYBRID_MAX_TEXT_LENGTH.toLocaleString()}자까지만 쓸 수 있어 규칙 전용으로 탐지합니다. 지금{" "}
+            {textLength.toLocaleString()}자입니다.
+          </p>
+        )
       )}
 
       {effectiveMode === "hybrid" && (
