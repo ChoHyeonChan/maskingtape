@@ -272,8 +272,8 @@ GitHub Releases `desktop-v*`의 설치파일이다(#617). 위 A-4의 Dart 런타
 | joblib | 1.6.0 | BSD-3-Clause | nltk, scikit-learn |
 | cloudpickle | 3.1.2 | BSD-3-Clause | joblib |
 | narwhals | 2.26.0 | MIT | scikit-learn |
-| **numpy** | 2.5.3 | **BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0** | scikit-learn, scipy → 부록 B |
-| scipy | 1.18.1 | BSD-3-Clause | scikit-learn |
+| **numpy** | 2.5.3 | **BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0**. Windows 휠에 OpenBLAS(BSD-3-Clause)·LAPACK(BSD-3-Clause-Open-MPI)·**GCC 런타임(GPL-3.0-or-later WITH GCC-exception-3.1)**이 함께 실림(설치본 `LICENSE.txt`) | scikit-learn, scipy → 부록 B |
+| **scipy** | 1.18.1 | BSD-3-Clause. Windows 휠에 numpy와 같은 OpenBLAS·LAPACK·**GCC 런타임(GPL-3.0-or-later WITH GCC-exception-3.1)**이 함께 실림(설치본 `LICENSE.txt`) | scikit-learn → 부록 B |
 | threadpoolctl | 3.7.0 | BSD-3-Clause | scikit-learn |
 | python-dateutil | 2.9.0.post0 | Apache-2.0 OR BSD-3-Clause | dateparser |
 | six | 1.17.0 | MIT | python-dateutil |
@@ -350,13 +350,14 @@ GitHub Releases `desktop-v*`의 설치파일이다(#617). 위 A-4의 Dart 런타
 - OpenUP 회신: 2026-10-06 요지는 Windows와 호환하려고 같이 들어가는 런타임 등의 라이선스는 신경 쓰지 않아도 되고, 실행 화면·고지 파일·SBOM으로 고지하는 방식이 적절하다는 것이다. 2026-10-07 원문은 「Microsoft VC++ 런타임과 같은 오픈소스가 아닌 호환을 위한 설치파일의 경우에는 결과물의 소스코드와 함께 압축하셔서 스캔하시면 됩니다」다. 2차 라이선스 검증 때 Visual C++ 런타임은 이 답에 따라, Inno Setup 실행부는 같은 원칙으로 팀이 정해(10/7) 소스와 같은 zip에 넣는다.
 - 결론: **수정 없이 싣고 고지를 유지해 재배포 조건 충족.**
 
-### python-stdnum (LGPL-2.1-or-later), regex (Apache-2.0 AND CNRI-Python), tqdm (MPL-2.0 AND MIT), numpy (Zlib·CC0-1.0 등 포함), defusedxml·typing-extensions (PSF-2.0) — bench 비교 기준선(개발 도구)
+### python-stdnum (LGPL-2.1-or-later), numpy·scipy 휠의 GCC 런타임 (GPL-3.0-or-later WITH GCC-exception-3.1), regex (Apache-2.0 AND CNRI-Python), tqdm (MPL-2.0 AND MIT), numpy (Zlib·CC0-1.0 등 포함), defusedxml·typing-extensions (PSF-2.0) — bench 비교 기준선(개발 도구)
 
 - **배포물에 들어가지 않는다.** 모두 scrubadub(본표 25번)를 설치할 때만 따라오는 전이 의존성이다(부록 A-8). scrubadub는 core의 선택 설치 `bench-baselines`로만 설치되고, `pip install maskingtape`·웹 데모·MCP 서버·데스크톱 설치파일 어디에도 들어가지 않는다. 쓰는 곳은 오픈소스 도구 비교 스크립트(`bench/evaluators/compare_open_source_tools.py`) 한 곳이다.
 - **직접 의존이 아니다.** 우리 코드는 이 패키지들을 import하지 않는다. scrubadub를 수정하지 않고, 그 결과(탐지 위치)만 벤치 점수 계산에 쓴다.
-- **python-stdnum은 LGPL-2.1-or-later다**(설치본 `COPYING` 원문 「GNU LESSER GENERAL PUBLIC LICENSE Version 2.1」, 소스 머리말 「version 2.1 … or (at your option) any later version」). 팀 방침의 금지 목록(GPL·AGPL·SSPL)에는 없지만 같은 계열이라 근거를 남긴다. LGPL의 조건(라이브러리 소스 제공, 사용자가 라이브러리를 바꿔 끼울 수 있게 하기)은 그 라이브러리나 그것과 묶은 저작물을 **배포할 때** 생긴다. 우리는 python-stdnum을 배포하지 않는다. 사용자가 선택 설치를 고르면 pip이 PyPI에서 직접 받는다. 우리 코드는 python-stdnum을 부르지도 않는다.
-- regex의 CNRI-Python은 옛 파이썬 배포판 계약에서 온 퍼미시브 라이선스이고, tqdm의 MPL-2.0은 파일 단위 카피레프트라 수정 없이 쓰는 한 우리 코드에 영향이 없다(위 certifi 절과 같은 판단). numpy의 Zlib·CC0-1.0·0BSD는 퍼미시브이거나 퍼블릭 도메인이다. defusedxml·typing-extensions의 PSF-2.0은 위 절과 같다.
-- 결론: **배포물 미포함, 의무 없음.** 팀 방침의 GPL 계열 금지는 배포물과 제품 코드 의존성에 적용한다. 벤치 비교용 선택 설치에 들어오는 LGPL 전이 의존성은 이 근거와 함께 허용한다(2026-10-08 팀 결정).
+- **python-stdnum은 LGPL-2.1-or-later다**(설치본 `COPYING` 원문 「GNU LESSER GENERAL PUBLIC LICENSE Version 2.1」, 소스 머리말 「version 2.1 … or (at your option) any later version」). 팀 방침의 금지 목록(GPL·AGPL·SSPL)에는 없지만 같은 계열이라 따로 적는다. 우리는 python-stdnum을 배포하지 않는다. 사용자가 선택 설치를 고르면 pip이 PyPI에서 직접 받는다. 우리 코드는 python-stdnum을 부르지도 않는다.
+- **numpy·scipy의 Windows 휠에는 GCC 런타임 라이브러리가 함께 실린다.** 각 설치본 `LICENSE.txt`에 「Name: GCC runtime library … License: GPL-3.0-or-later WITH GCC-exception-3.1」로 적혀 있다. 이것도 우리가 배포하지 않고, pip이 PyPI에서 받는 휠 그대로다.
+- tqdm의 MPL-2.0은 위 certifi 절과 같은 파일 단위 카피레프트이고, defusedxml·typing-extensions의 PSF-2.0은 위 절과 같다. regex의 CNRI-Python, numpy의 Zlib·CC0-1.0·0BSD도 우리가 배포하지 않는다.
+- 결론: **배포물 미포함.** 이 선택 설치를 팀 방침(GPL 계열 금지)의 예외로 둘지, `bench-baselines`에서 scrubadub를 빼고 벤치 문서에 따로 설치하라고 적을지는 #727에서 정한다.
 
 ## 부록 C: AI 모델 상세
 
