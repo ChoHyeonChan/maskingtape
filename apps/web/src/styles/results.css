@@ -458,3 +458,23 @@
   .detect-row__snippet { grid-area: snippet; white-space: normal; }
   .detect-row__toggle { grid-area: toggle; justify-self: end; }
 }
+
+/* 결과 화면의 탐지 방식 바꾸기(#547 후속) — 입력 화면과 같은 선택기를 쓰고, 바꾸면 같은 글을 다시
+   탐지한다는 짧은 설명을 붙인다. 위쪽 여백은 선택기 자체(.detection-mode)가 이미 갖고 있다. */
+.rescan-mode {
+  margin: -0.75rem 0 0.7rem;
+}
+
+.rescan-mode__hint {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  word-break: keep-all;
+}
+
+.rescan-mode__error {
+  margin: 0.35rem 0 0;
+  color: var(--kind-address);
+  font-size: 0.82rem;
+  font-weight: 600;
+}

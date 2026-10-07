@@ -49,4 +49,21 @@ describe("DetectionModeSelector (#547)", () => {
     expect(screen.getByRole("button", { name: "하이브리드 (OpenAI)" })).toBeEnabled();
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
+
+  it("disables both buttons while disabled (e.g. during a re-scan)", () => {
+    render(<DetectionModeSelector mode="rule" textLength={10} onChange={vi.fn()} disabled />);
+
+    expect(screen.getByRole("button", { name: "규칙 전용" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "하이브리드 (OpenAI)" })).toBeDisabled();
+  });
+
+  it("blocks hybrid and says the server has no judge when hybrid is known to be unavailable", () => {
+    render(<DetectionModeSelector mode="hybrid" textLength={10} onChange={vi.fn()} hybridUnavailable />);
+
+    const hybrid = screen.getByRole("button", { name: "하이브리드 (OpenAI)" });
+    expect(hybrid).toBeDisabled();
+    expect(screen.getByRole("button", { name: "규칙 전용" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("status")).toHaveTextContent("하이브리드 판단기가 연결돼 있지 않아 규칙 전용으로만 탐지합니다");
+    expect(screen.queryByRole("note")).not.toBeInTheDocument();
+  });
 });
