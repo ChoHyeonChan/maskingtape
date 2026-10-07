@@ -14,8 +14,12 @@ interface Props {
   hybridUnavailable?: boolean;
   /** 막힌 이유를 선택기 아래에 쓸지. 결과 화면처럼 다른 알림이 이미 같은 이유를 말하면 끈다. */
   showBlockedReason?: boolean;
-  /** 버튼 바로 아래에 붙일 짧은 설명(결과 화면의 "바꾸면 다시 탐지" 안내 등). */
+  /** 버튼 바로 아래에 붙일 짧은 설명(결과 화면의 "다시 탐지하는 중" 등). */
   hint?: ReactNode;
+  /** 버튼 앞 이름표. 결과 화면은 "다시 탐지할 방식"처럼 바꾸면 무슨 일이 생기는지 이름에 담는다. */
+  label?: string;
+  /** 높이가 빠듯한 결과 화면용. 안내를 상자 없이 작은 글씨로 줄인다(#715 후속). */
+  compact?: boolean;
 }
 
 /**
@@ -31,16 +35,18 @@ export function DetectionModeSelector({
   hybridUnavailable = false,
   showBlockedReason = true,
   hint,
+  label = "탐지 방식",
+  compact = false,
 }: Props) {
   const tooLong = textLength > HYBRID_MAX_TEXT_LENGTH;
   const hybridBlocked = hybridUnavailable || tooLong;
   const effectiveMode: DetectionMode = hybridBlocked ? "rule" : mode;
 
   return (
-    <div className="detection-mode">
+    <div className={`detection-mode${compact ? " detection-mode--compact" : ""}`}>
       <div className="detection-mode__row">
         <span className="detection-mode__label" id="detection-mode-label">
-          탐지 방식
+          {label}
         </span>
         <div className="detection-mode__group" role="group" aria-labelledby="detection-mode-label">
           <button

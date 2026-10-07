@@ -457,6 +457,24 @@
   color: var(--text-primary);
 }
 
+/* 결과 화면용 — 높이가 빠듯해서 안내를 상자 없이 작은 글씨로 줄인다(#715 후속). */
+.detection-mode--compact {
+  margin-top: 0;
+  gap: 0.35rem;
+}
+
+.detection-mode--compact .detection-mode__btn {
+  min-height: 2rem;
+}
+
+.detection-mode--compact .detection-mode__notice,
+.detection-mode--compact .detection-mode__blocked {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 0.76rem;
+}
+
 .detection-mode__blocked {
   border: 1px solid color-mix(in srgb, var(--kind-card) 35%, #ffffff);
   background: color-mix(in srgb, var(--kind-card) 8%, #ffffff);

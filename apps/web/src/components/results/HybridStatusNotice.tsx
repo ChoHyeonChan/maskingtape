@@ -30,8 +30,8 @@ export function HybridStatusNotice({ modeInfo, detections }: Props) {
     <p className="hybrid-status" role="status">
       {llmCount > 0 ? (
         <>
-          하이브리드: OpenAI 판단기가 규칙이 놓친 이름 <strong>{llmCount}건</strong>을 더 찾았습니다. 목록에{" "}
-          <span className="llm-badge">LLM</span> 표시로 구분합니다.
+          하이브리드: 규칙이 놓친 이름 <strong>{llmCount}건</strong>을 더 찾았습니다(목록의{" "}
+          <span className="llm-badge">LLM</span>).
         </>
       ) : (
         "하이브리드: OpenAI 판단기가 더 찾은 이름은 없습니다."

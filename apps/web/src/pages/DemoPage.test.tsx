@@ -236,6 +236,8 @@ describe("DemoPage switch detection mode from the result screen (#547 follow-up)
     mockScanText.mockResolvedValueOnce(ruleResult).mockResolvedValueOnce(hybridResult);
     await scanRuleFirst();
 
+    // 결과 화면은 "바꾸면 다시 탐지한다"는 뜻을 이름표에 담는다(#715 후속 — 패널 높이를 아끼려고 설명 줄을 없앴다).
+    expect(screen.getByRole("group", { name: "다시 탐지할 방식" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "규칙 전용" })).toHaveAttribute("aria-pressed", "true");
     fireEvent.click(screen.getByRole("button", { name: "하이브리드 (OpenAI)" }));
 

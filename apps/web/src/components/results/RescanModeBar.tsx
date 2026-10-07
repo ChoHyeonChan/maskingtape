@@ -34,14 +34,16 @@ export function RescanModeBar({ modeInfo, textLength, rescanning, hybridUnavaila
         hybridUnavailable={hybridUnavailable}
         // 이번 결과가 하이브리드 실패라면 아래 알림(HybridStatusNotice)이 이미 이유를 말한다.
         showBlockedReason={!hybridFellBack(modeInfo)}
+        // 결과 화면은 높이가 빠듯해서(#715 후속) "바꾸면 다시 탐지한다"는 설명을 따로 한 줄 두지 않고
+        // 이름표에 담는다. 다시 탐지하는 동안에만 상태 한 줄을 보여 준다.
+        label="다시 탐지할 방식"
+        compact
         hint={
-          hybridUnavailable ? null : rescanning ? (
+          rescanning ? (
             <p className="rescan-mode__hint" role="status">
               같은 글을 다시 탐지하는 중...
             </p>
-          ) : (
-            <p className="rescan-mode__hint">방식을 바꾸면 같은 글을 그 방식으로 바로 다시 탐지합니다.</p>
-          )
+          ) : null
         }
       />
       {error && (

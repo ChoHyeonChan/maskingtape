@@ -95,14 +95,14 @@
 /* 하이브리드 결과 알림(#547) — 성공하면 LLM이 더 찾은 이름 수를, 실패해 규칙 결과로
    돌아왔으면 이유를 보여 준다. 실패는 놓치지 않게 주황 계열로 강조한다. */
 .hybrid-status {
-  margin: 0 0 0.7rem;
-  padding: 0.6rem 0.8rem;
+  margin: 0 0 0.6rem;
+  padding: 0.45rem 0.7rem;
   border: 1px solid rgba(24, 58, 139, 0.16);
   border-radius: 8px;
   background: var(--brand-blue-tint);
   color: var(--text-secondary);
-  font-size: 0.84rem;
-  line-height: 1.5;
+  font-size: 0.8rem;
+  line-height: 1.45;
   word-break: keep-all;
 }
 
@@ -287,7 +287,9 @@
   --folder-accent: var(--brand-cyan);
   --folder-paper: #f5fafb;
   flex: 1 1 auto;
-  min-height: 0;
+  /* 창이 낮아도(125% 배율 노트북 등) 탭·요약 줄 아래로 항목이 약 3줄은 보이게 한다. 이보다 더
+     좁으면 줄어들지 않고 결과 패널 전체가 스크롤된다(layout.css .panel--results, #715 후속). */
+  min-height: 15.5rem;
 }
 
 .detect-folder__body {
@@ -435,6 +437,18 @@
   transform: translateX(2.9rem);
 }
 
+/* 낮은 창에서는 결과 패널 안 간격을 줄여 목록 자리를 조금이라도 더 남긴다(#715 후속). */
+@media (min-width: 901px) and (max-height: 820px) {
+  .detect {
+    gap: 0.6rem;
+  }
+
+  .detect__bulk {
+    gap: 0.35rem;
+    padding: 0.5rem 0.75rem;
+  }
+}
+
 /* .panel--results가 이 폭부터 height:auto로 바뀌므로(layout.css) flex:1로는 채울 남는
    공간이 없다 — 예전처럼 다시 상한을 둬서 목록 자체가 무한정 길어지지 않게 한다. */
 @media (max-width: 900px) {
@@ -462,7 +476,8 @@
 /* 결과 화면의 탐지 방식 바꾸기(#547 후속) — 입력 화면과 같은 선택기를 쓰고, 바꾸면 같은 글을 다시
    탐지한다는 짧은 설명을 붙인다. 위쪽 여백은 선택기 자체(.detection-mode)가 이미 갖고 있다. */
 .rescan-mode {
-  margin: -0.75rem 0 0.7rem;
+  flex: none;
+  margin: -0.4rem 0 0.6rem;
 }
 
 .rescan-mode__hint {
