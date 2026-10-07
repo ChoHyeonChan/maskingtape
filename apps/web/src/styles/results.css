@@ -449,6 +449,14 @@
   }
 }
 
+/* 아주 낮은 창(1366×768 노트북의 브라우저 안쪽 등)에서는 슬라이더 보조 설명을 숨긴다 — 제목과 숫자만으로
+   쓸 수 있고, 그만큼 항목 목록이 한 줄 더 보인다(#715 후속). */
+@media (min-width: 901px) and (max-height: 680px) {
+  .detect__bulk-sublabel {
+    display: none;
+  }
+}
+
 /* .panel--results가 이 폭부터 height:auto로 바뀌므로(layout.css) flex:1로는 채울 남는
    공간이 없다 — 예전처럼 다시 상한을 둬서 목록 자체가 무한정 길어지지 않게 한다. */
 @media (max-width: 900px) {
@@ -473,11 +481,27 @@
   .detect-row__toggle { grid-area: toggle; justify-self: end; }
 }
 
-/* 결과 화면의 탐지 방식 바꾸기(#547 후속) — 입력 화면과 같은 선택기를 쓰고, 바꾸면 같은 글을 다시
-   탐지한다는 짧은 설명을 붙인다. 위쪽 여백은 선택기 자체(.detection-mode)가 이미 갖고 있다. */
-.rescan-mode {
+/* 결과 화면의 탐지 방식 바꾸기(#547 후속) — 패널 헤더 줄 안에 제목 바로 옆으로 붙는다. 따로 한 줄을
+   차지하면 창이 낮을 때 아래 항목 목록이 사라졌다(#715 후속). 좁은 폭에서는 헤더가 줄바꿈된다. */
+.panel--results > .panel__header {
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
+  column-gap: 0.75rem;
+}
+
+.panel--results .rescan-mode {
+  margin-right: auto;
+}
+
+.panel--results .rescan-mode .detection-mode__btn {
+  min-height: 2rem;
+  padding: 0 0.65rem;
+  font-size: 0.78rem;
+}
+
+.rescan-status {
   flex: none;
-  margin: -0.4rem 0 0.6rem;
+  margin: -0.45rem 0 0.6rem;
 }
 
 .rescan-mode__hint {

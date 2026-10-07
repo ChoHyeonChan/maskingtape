@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { DetectionList } from "./DetectionList";
 import type { DetectionRow } from "./DetectionList";
 import { HybridStatusNotice } from "./HybridStatusNotice";
-import { RescanModeBar } from "./RescanModeBar";
+import { RescanModeButtons, RescanStatus } from "./RescanModeBar";
 import { anonymizeText } from "../../api/scanClient";
 import type { DetectionMode, ScanModeInfo } from "../../lib/hybrid";
 import { locateDetections, type MaskMode } from "../../lib/masking";
@@ -199,19 +199,28 @@ export function ResultsPanel({
             탐지 결과 조정
           </h2>
         </div>
+        {/* 다시 탐지할 방식은 헤더 줄에 둔다 — 따로 한 줄을 차지하면 낮은 창에서 아래 목록이 사라졌다(#715 후속). */}
+        {scanned?.modeInfo && onRescan && (
+          <RescanModeButtons
+            modeInfo={scanned.modeInfo}
+            textLength={scanned.text.length}
+            rescanning={rescanning}
+            hybridUnavailable={hybridUnavailable}
+            onRescan={onRescan}
+          />
+        )}
         {scanned && scanned.detections.length > 0 && (
           <span className="panel__badge">총 {scanned.detections.length}건 발견</span>
         )}
       </div>
 
       {scanned?.modeInfo && onRescan && (
-        <RescanModeBar
+        <RescanStatus
           modeInfo={scanned.modeInfo}
           textLength={scanned.text.length}
           rescanning={rescanning}
           hybridUnavailable={hybridUnavailable}
           error={rescanError}
-          onRescan={onRescan}
         />
       )}
 

@@ -238,6 +238,11 @@ describe("DemoPage switch detection mode from the result screen (#547 follow-up)
 
     // 결과 화면은 "바꾸면 다시 탐지한다"는 뜻을 이름표에 담는다(#715 후속 — 패널 높이를 아끼려고 설명 줄을 없앴다).
     expect(screen.getByRole("group", { name: "다시 탐지할 방식" })).toBeInTheDocument();
+    // 결과 화면은 누르는 즉시 보내므로, 보내기 전에 볼 수 있게 하이브리드 버튼에 전송 안내를 단다(§2-3).
+    expect(screen.getByRole("button", { name: "하이브리드 (OpenAI)" })).toHaveAttribute(
+      "title",
+      expect.stringContaining("규칙이 놓친 개인정보는 가린 글에 그대로 남아 함께 전송될 수 있습니다"),
+    );
     expect(screen.getByRole("button", { name: "규칙 전용" })).toHaveAttribute("aria-pressed", "true");
     fireEvent.click(screen.getByRole("button", { name: "하이브리드 (OpenAI)" }));
 

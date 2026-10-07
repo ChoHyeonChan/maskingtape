@@ -38,6 +38,8 @@ describe("HybridStatusNotice (#547)", () => {
     );
 
     expect(screen.getByRole("status")).toHaveTextContent("규칙이 놓친 이름 1건을 더 찾았습니다");
+    // 하이브리드로 무엇이 갔는지 결과 화면에도 남긴다(CLAUDE.md §2-3).
+    expect(screen.getByRole("status")).toHaveTextContent("가린 글을 OpenAI로 보냈고, 규칙이 놓친 개인정보는 함께 갔을 수 있습니다");
   });
 
   it("says no extra names were found when the judge added none", () => {
