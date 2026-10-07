@@ -22,6 +22,7 @@ interface Props {
   onRescan?: (mode: DetectionMode) => void;
   rescanning?: boolean;
   rescanError?: string | null;
+  hybridUnavailable?: boolean;
 }
 
 const THRESHOLD_STEP = 5;
@@ -48,6 +49,7 @@ export function ResultsPanel({
   onRescan,
   rescanning = false,
   rescanError = null,
+  hybridUnavailable = false,
 }: Props) {
   // 컨트롤에 보이는 숫자가 곧 확신도 임계값이다(더 이상 반전 없음) — 이 값 이상인 항목만
   // 기본으로 가려진다. 고정값(예: 50%) 대신 이번 스캔에서 가장 낮은 확신도로 시작하면,
@@ -207,6 +209,7 @@ export function ResultsPanel({
           modeInfo={scanned.modeInfo}
           textLength={scanned.text.length}
           rescanning={rescanning}
+          hybridUnavailable={hybridUnavailable}
           error={rescanError}
           onRescan={onRescan}
         />

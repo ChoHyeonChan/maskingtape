@@ -299,3 +299,50 @@ describe("DemoPage switch detection mode from the result screen (#547 follow-up)
   });
 });
 
+describe("DemoPage remembers that the server has no hybrid judge (#547 follow-up)", () => {
+  const TEXT = "고객 김민준 010-1234-5678";
+  const fallback = (code: string) => ({
+    detections: [{ kind: "phone", start: 7, end: 20, confidence: 1, detector: "PhoneDetector" }],
+    mode_used: "rule" as const,
+    hybrid_failed: true,
+    hybrid_failure_code: code,
+  });
+
+  async function scanHybrid() {
+    render(<DemoPage />);
+    fireEvent.keyDown(window, { key: "Escape" });
+    fireEvent.click(screen.getByRole("button", { name: "하이브리드 (OpenAI)" }));
+    fireEvent.change(screen.getByLabelText("탐지할 텍스트 입력"), { target: { value: TEXT } });
+    fireEvent.click(screen.getByRole("button", { name: "개인정보 탐지 및 마스킹 하기" }));
+    await screen.findByText(/하이브리드 판단에 실패해/);
+    fireEvent.keyDown(window, { key: "Escape" });
+  }
+
+  it("blocks hybrid on the result screen and after a reset once the server says there is no judge", async () => {
+    mockScanText.mockResolvedValue(fallback("name_judge_unavailable"));
+    await scanHybrid();
+
+    expect(screen.getByRole("button", { name: "하이브리드 (OpenAI)" })).toBeDisabled();
+    // 결과 화면은 실패 알림 하나로만 이유를 말한다(같은 뜻의 안내를 두 번 띄우지 않는다).
+    expect(screen.getByRole("alert")).toHaveTextContent("하이브리드 판단기가 연결돼 있지 않습니다");
+    expect(screen.queryByText(/규칙 전용으로만 탐지합니다/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/방식을 바꾸면 같은 글을/)).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "초기화 하기" }));
+    expect(screen.getByRole("button", { name: "하이브리드 (OpenAI)" })).toBeDisabled();
+    expect(screen.getByText(/규칙 전용으로만 탐지합니다/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "규칙 전용" })).toHaveAttribute("aria-pressed", "true");
+
+    fireEvent.change(screen.getByLabelText("탐지할 텍스트 입력"), { target: { value: "다른 글 010-9999-8888" } });
+    fireEvent.click(screen.getByRole("button", { name: "개인정보 탐지 및 마스킹 하기" }));
+    await waitFor(() => expect(mockScanText).toHaveBeenLastCalledWith("다른 글 010-9999-8888", "rule"));
+  });
+
+  it("keeps hybrid available after other failures, like a timeout", async () => {
+    mockScanText.mockResolvedValue(fallback("timeout"));
+    await scanHybrid();
+
+    expect(screen.getByRole("button", { name: "하이브리드 (OpenAI)" })).toBeEnabled();
+  });
+});
+

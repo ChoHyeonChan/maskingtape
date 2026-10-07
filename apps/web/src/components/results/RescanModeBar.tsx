@@ -8,6 +8,7 @@ interface Props {
   modeInfo: ScanModeInfo;
   textLength: number;
   rescanning: boolean;
+  hybridUnavailable: boolean;
   error: string | null;
   onRescan: (mode: DetectionMode) => void;
 }
@@ -17,7 +18,7 @@ interface Props {
  * "하이브리드는 뭘 더 잡나" 비교하려고 초기화하고 다시 입력할 필요가 없다.
  * 지금 방식을 다시 누르면 아무 일도 없다. 하이브리드가 실패해 규칙 결과로 돌아온 경우만 다시 시도한다.
  */
-export function RescanModeBar({ modeInfo, textLength, rescanning, error, onRescan }: Props) {
+export function RescanModeBar({ modeInfo, textLength, rescanning, hybridUnavailable, error, onRescan }: Props) {
   function handleChange(mode: DetectionMode) {
     if (mode === modeInfo.requested && !hybridFellBack(modeInfo)) return;
     onRescan(mode);
@@ -30,8 +31,11 @@ export function RescanModeBar({ modeInfo, textLength, rescanning, error, onResca
         textLength={textLength}
         onChange={handleChange}
         disabled={rescanning}
+        hybridUnavailable={hybridUnavailable}
+        // 이번 결과가 하이브리드 실패라면 아래 알림(HybridStatusNotice)이 이미 이유를 말한다.
+        showBlockedReason={!hybridFellBack(modeInfo)}
         hint={
-          rescanning ? (
+          hybridUnavailable ? null : rescanning ? (
             <p className="rescan-mode__hint" role="status">
               같은 글을 다시 탐지하는 중...
             </p>
