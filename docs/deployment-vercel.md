@@ -61,7 +61,7 @@ The verifier checks:
 
 - HTTPS URL
 - static web root is reachable
-- `/api/health` returns `{"status": "ok"}`
+- `/api/health` returns `{"status": "ok", "hybrid_available": <bool>}` (`true` only when the OpenAI key is set, #717)
 - `/api/scan` detects a synthetic passport number
 - `/api/scan` detection metadata does not echo the raw PII value
 - `/api/anonymize` masks the synthetic PII value

@@ -2,8 +2,9 @@
 
 운영사무국 2026-09-29 답변 기준으로, 2차 기능테스트는 **우리 노트북**에서 진행하고
 대상은 **프로젝트 전체**다. 기능명세서 제출 전날까지 이 점검표를 따라 처음부터 끝까지 한 번
-돌린 뒤, 그날 `main`을 동결한다. 다른 기능 브랜치 작업은 동결 뒤에도 계속할 수 있지만,
-검증기관에 보여 줄 기능명세서는 동결 커밋 기준으로 맞춘다.
+돌린다. `main` 동결 의무는 없다(운영사무국 2026-10-07 정정). 검증은 제출한 기능명세서와
+라이선스 검증 때 스캔한 소스를 기준으로 하므로, 기능명세서를 낸 커밋을 기록해 두고 그 뒤
+`main`에 코드가 머지되면 명세서의 시험 항목을 다시 돌려 깨지지 않았는지 확인한다.
 
 이 문서는 "깨끗한 설치에서 시연까지 막힘 없이 되는가"를 확인하기 위한 리허설 기록지다. 실제
 개인정보는 쓰지 않고, 모든 입력은 합성 예시만 사용한다.
@@ -40,7 +41,7 @@ git status --short --branch
 |---|---|---|---|
 | Git | `git --version` | 명령이 출력됨 | Git for Windows 설치 |
 | Python | `python --version` | 3.10 이상 | python.org 또는 pyenv 설치 |
-| Node.js | `node --version` | 웹 README 기준 Node 20 이상 권장 | Node LTS 설치 후 새 터미널 |
+| Node.js | `node --version` | 20.19 이상 20.x 또는 22.12 이상(Vite 8 기준, CI는 24) | Node LTS 설치 후 새 터미널 |
 | npm | `npm --version` | 명령이 출력됨 | Node 재설치 |
 | Flutter | `flutter --version` | 데스크톱 README 기준 3.44.6 stable | Flutter SDK 설치, `flutter doctor` 확인 |
 | Ollama | `ollama --version` | 로컬 LLM 시연 노트북에만 필수 | Ollama 설치, 인터넷 없으면 사전 설치본 사용 |
@@ -102,7 +103,7 @@ git status --short --branch
 
 - clone이 느리거나 실패하면 네트워크를 바꾼다.
 - 이미 받은 폴더가 있으면 새 폴더명으로 다시 받는다. 리허설용 폴더에서는 기존 작업물을 재사용하지 않는다.
-- 기능명세서 동결 직후에는 `git rev-parse --short HEAD` 값을 이 문서의 기록표에 적는다.
+- 기능명세서를 낸 직후에는 `git rev-parse --short HEAD` 값을 이 문서의 기록표에 적는다.
 
 ## 2. 가상환경
 
@@ -376,7 +377,7 @@ http://localhost:5173
 
 예상 결과:
 
-- `/health`는 `{"status":"ok"}`.
+- `/health`는 `{"status":"ok","hybrid_available":false}`(로컬에 `OPENAI_API_KEY`가 없을 때. 키가 있으면 `true`).
 - `/scan` 응답의 `detections`에는 `text` 원문값이 없고 `kind`, `start`, `end`가 있다. `name`과 `phone` 2건이 나온다.
 - `/anonymize` 응답의 `text`는 `담당자 [이름], 연락처 [전화번호]`다.
 - 웹에서 합성 문장을 넣으면 하이라이트와 마스킹 결과가 표시된다.
@@ -427,7 +428,7 @@ apps\desktop\build\windows\x64\runner\Release\
 
 1. 텍스트 입력 모드에서 `담당자 김민수, 연락처 010-1234-5678` 입력.
 2. 전략을 `mask`, `label`, `pseudonym`으로 바꿔 결과 비교.
-3. 이름 정밀 탐지 토글을 켜고 LLM 상태 칩이 `LLM 준비됨` 또는 `LLM 로드됨`인지 확인.
+3. 「로컬 LLM 사용」 토글을 켜고 LLM 상태 칩이 `LLM 준비됨` 또는 `LLM 로드됨`인지 확인.
 4. 샘플 `.txt` 파일을 드롭하고 `_masked` 파일이 생기는지 확인.
 5. CLI를 PATH에서 빼거나 새 터미널에서 API만 켠 상태로 REST 폴백 안내가 맞는지 확인.
 
@@ -540,4 +541,4 @@ curl.exe -s -X POST https://maskingtape-lilac.vercel.app/api/scan -H "Content-Ty
 - 최소 1회는 이 문서 순서대로 처음부터 끝까지 막힘 없이 완료했다.
 - 완료 기록에 날짜와 커밋 SHA가 있다.
 - 기능명세서의 기능 목록이 이 문서의 대조표와 맞는다.
-- 막힌 곳은 이슈로 남겼고, 기능명세서 제출 전날 기준으로 `main` 동결 커밋을 확정했다.
+- 막힌 곳은 이슈로 남겼고, 기능명세서를 낸 커밋을 기록했다.

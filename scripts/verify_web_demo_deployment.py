@@ -86,7 +86,14 @@ def _assert_health(base_url: str) -> None:
     response = _request("GET", urljoin(base_url, "api/health"))
     if response.status != 200:
         raise AssertionError(f"/api/health returned {response.status}")
-    if response.json() != {"status": "ok"}:
+    body = response.json()
+    # Since #717 the body also reports whether the hybrid name judge is configured.
+    if (
+        not isinstance(body, dict)
+        or set(body) != {"status", "hybrid_available"}
+        or body["status"] != "ok"
+        or not isinstance(body["hybrid_available"], bool)
+    ):
         raise AssertionError(f"/api/health returned unexpected body: {response.body}")
 
 
