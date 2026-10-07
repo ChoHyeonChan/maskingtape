@@ -228,7 +228,7 @@ Python 개발 도구(pytest·ruff·httpx2와 그 전이, Python 3.13.5, Windows)
 
 > 이 절은 생성기 밖이라 손으로 관리한다. `apps/desktop/installer/build.py` 위쪽의 동봉물 상수(버전·주소·해시)나 빌드에 쓰는 Inno Setup 판을 바꾸면 같은 PR에서 고친다.
 
-GitHub Releases `desktop-v*`의 설치파일이다(#617). 위 A-4의 Dart 런타임 의존성은 앱 코드(`data\app.so`)에 컴파일돼 들어가고, 아래는 그 밖에 설치파일에 함께 실리는 것이다. 버전은 `build.py`의 고정값과 desktop-v0.2.3 설치파일 기준이다.
+GitHub Releases `desktop-v*`의 설치파일이다(#617). 위 A-4의 Dart 런타임 의존성은 앱 코드(`data\app.so`)에 컴파일돼 들어가고, 아래는 그 밖에 설치파일에 함께 실리는 것이다. 버전은 `build.py`의 고정값과 desktop-v0.2.4 설치파일(main `97ed96f`, Flutter 3.44.6·Inno Setup 6.7.0으로 빌드) 기준이다.
 
 | 구성요소 | 버전 | 라이선스 | 원본 | 비고 |
 |---|---|---|---|---|
@@ -239,7 +239,7 @@ GitHub Releases `desktop-v*`의 설치파일이다(#617). 위 A-4의 Dart 런타
 | 그 밖의 CPython 내장 구성요소 | CPython 3.13.2에 든 판 | bzip2·libffi(MIT)·expat(MIT)·libmpdec(BSD-2-Clause)·zlib 등 | https://docs.python.org/3.13/license.html | 고지는 Python 문서 「Licenses and Acknowledgements for Incorporated Software」 원문으로 함께 실음 |
 | pypdf | 6.19.0 | BSD-3-Clause | https://github.com/py-pdf/pypdf | 본표 37번 |
 | maskingtape (core) | 설치파일을 만든 커밋의 판 | Apache-2.0 | https://github.com/ChoHyeonChan/maskingtape | 우리 코드. 런타임 외부 의존성 없음 |
-| Flutter 엔진 (Windows) | 빌드에 쓴 Flutter SDK 판 | BSD-3-Clause | https://github.com/flutter/flutter | `flutter_windows.dll`, `data\icudtl.dat`. 엔진 안의 제3자 구성요소(ICU·Skia 등) 고지는 앱의 `NOTICES.Z` |
+| Flutter 엔진 (Windows) | Flutter 3.44.6 (엔진 `d3a3293`, desktop-v0.2.4) | BSD-3-Clause | https://github.com/flutter/flutter | `flutter_windows.dll`, `data\icudtl.dat`. 엔진 안의 제3자 구성요소(ICU·Skia 등) 고지는 앱의 `NOTICES.Z` |
 | desktop_drop (Windows 플러그인) | 0.7.1 | Apache-2.0 | https://github.com/MixinNetwork/flutter-plugins/tree/main/packages/desktop_drop | `desktop_drop_plugin.dll` |
 | file_selector_windows | 0.9.3+5 | BSD-3-Clause | https://github.com/flutter/packages/tree/main/packages/file_selector/file_selector_windows | `file_selector_windows_plugin.dll` |
 | Inno Setup (설치 실행부) | 6.7.0 | Inno Setup License (오픈소스 아님) | https://github.com/jrsoftware/issrc | 본표 39번. 허용 목록 밖 → 부록 B. 2차 라이선스 검증 때 소스와 같은 zip에 넣어 스캔(팀 결정 10/7) |
@@ -357,7 +357,7 @@ GitHub Releases `desktop-v*`의 설치파일이다(#617). 위 A-4의 Dart 런타
 - **python-stdnum은 LGPL-2.1-or-later다**(설치본 `COPYING` 원문 「GNU LESSER GENERAL PUBLIC LICENSE Version 2.1」, 소스 머리말 「version 2.1 … or (at your option) any later version」). 팀 방침의 금지 목록(GPL·AGPL·SSPL)에는 없지만 같은 계열이라 따로 적는다. 우리는 python-stdnum을 배포하지 않는다. 사용자가 선택 설치를 고르면 pip이 PyPI에서 직접 받는다. 우리 코드는 python-stdnum을 부르지도 않는다.
 - **numpy·scipy의 Windows 휠에는 GCC 런타임 라이브러리가 함께 실린다.** 각 설치본 `LICENSE.txt`에 「Name: GCC runtime library … License: GPL-3.0-or-later WITH GCC-exception-3.1」로 적혀 있다. 이것도 우리가 배포하지 않고, pip이 PyPI에서 받는 휠 그대로다.
 - tqdm의 MPL-2.0은 위 certifi 절과 같은 파일 단위 카피레프트이고, defusedxml·typing-extensions의 PSF-2.0은 위 절과 같다. regex의 CNRI-Python, numpy의 Zlib·CC0-1.0·0BSD도 우리가 배포하지 않는다.
-- 결론: **배포물 미포함.** 이 선택 설치를 팀 방침(GPL 계열 금지)의 예외로 둘지, `bench-baselines`에서 scrubadub를 빼고 벤치 문서에 따로 설치하라고 적을지는 #727에서 정한다.
+- 결론: **배포물 미포함.** 이 선택 설치는 팀 방침(GPL 계열 금지)의 예외로 두고, 위 사실을 근거로 남긴다(2026-10-08 팀장 결정, #727). 팀 방침의 금지 대상은 그대로 배포물과 제품 코드의 의존성이다.
 
 ## 부록 C: AI 모델 상세
 

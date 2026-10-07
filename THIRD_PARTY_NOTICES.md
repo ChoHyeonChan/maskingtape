@@ -39,10 +39,10 @@ Python이 없는 PC에서도 데스크톱 앱을 쓰도록 만든 설치파일�
 | SQLite | 3.45.3 | 퍼블릭 도메인 | https://www.sqlite.org/ | `python\sqlite3.dll` (CPython 임베디드에 들어 있음) |
 | Microsoft Visual C++ 런타임 | 14.42.34226.3 (`vcruntime140.dll` 기준) | Microsoft Distributable Code (오픈소스 아님) | CPython 임베디드 배포판에 포함 | `python\vcruntime140.dll`, `python\vcruntime140_1.dll` |
 | pypdf | 6.19.0 | BSD-3-Clause | https://github.com/py-pdf/pypdf | `python\Lib\site-packages\pypdf\` |
-| Flutter 엔진 (Windows) | 빌드에 쓴 Flutter SDK 판 | BSD-3-Clause | https://github.com/flutter/flutter | `flutter_windows.dll`, `data\icudtl.dat` |
+| Flutter 엔진 (Windows) | Flutter 3.44.6 (desktop-v0.2.4) | BSD-3-Clause | https://github.com/flutter/flutter | `flutter_windows.dll`, `data\icudtl.dat` |
 | desktop_drop (Windows 플러그인) | 0.7.1 | Apache-2.0 | https://github.com/MixinNetwork/flutter-plugins/tree/main/packages/desktop_drop | `desktop_drop_plugin.dll` |
 | file_selector_windows | 0.9.3+5 | BSD-3-Clause | https://github.com/flutter/packages/tree/main/packages/file_selector/file_selector_windows | `file_selector_windows_plugin.dll` |
-| Inno Setup (설치 실행부) | 6.7.0 (desktop-v0.2.3 기준) | Inno Setup License (오픈소스 아님) | https://github.com/jrsoftware/issrc | `setup.exe` 안. 설치 뒤에는 설치 폴더의 제거 프로그램(`unins*` 파일)으로 남음 |
+| Inno Setup (설치 실행부) | 6.7.0 (desktop-v0.2.4 기준) | Inno Setup License (오픈소스 아님) | https://github.com/jrsoftware/issrc | `setup.exe` 안. 설치 뒤에는 설치 폴더의 제거 프로그램(`unins*` 파일)으로 남음 |
 
 - CPython 임베디드 배포판은 `python313._pth`에 `Lib\site-packages` 한 줄을 더해(동봉한 패키지를 찾게 하는 경로 설정) 싣고, 그 밖의 파일은 바꾸지 않는다.
 - CPython 임베디드 배포판에 들어 있는 나머지 구성요소(bzip2·libffi·expat·libmpdec·zlib 등)의 고지는 Python 문서
