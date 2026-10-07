@@ -41,7 +41,7 @@ git status --short --branch
 |---|---|---|---|
 | Git | `git --version` | 명령이 출력됨 | Git for Windows 설치 |
 | Python | `python --version` | 3.10 이상 | python.org 또는 pyenv 설치 |
-| Node.js | `node --version` | 20.19 이상 20.x 또는 22.12 이상(Vite 8 기준, CI는 24) | Node LTS 설치 후 새 터미널 |
+| Node.js | `node --version` | 22.13 이상의 22.x 또는 24 이상(웹 의존성 engines가 겹치는 범위, CI는 24) | Node LTS 설치 후 새 터미널 |
 | npm | `npm --version` | 명령이 출력됨 | Node 재설치 |
 | Flutter | `flutter --version` | 데스크톱 README 기준 3.44.6 stable | Flutter SDK 설치, `flutter doctor` 확인 |
 | Ollama | `ollama --version` | 로컬 LLM 시연 노트북에만 필수 | Ollama 설치, 인터넷 없으면 사전 설치본 사용 |
