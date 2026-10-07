@@ -60,7 +60,7 @@ pytest packages/core
 
 > **설치는 항상 개별 패키지 경로로 한다** — 저장소 루트에는 배포용 `[build-system]`이 없어(uv 워크스페이스 전용) `pip install .`은 루트에서 실패한다. 위 예시처럼 `packages/core`, `packages/mcp-server`, `apps/api`를 각각 지정하면 된다.
 
-로컬 LLM 기능은 선택 사항이며 설치 방법은 [packages/core](packages/core)에 있다. 웹 데모는 Node.js 20.19+(CI는 24), 데스크톱 앱은 Flutter가 추가로 필요하며 각 폴더 README를 참고한다.
+로컬 LLM 기능은 선택 사항이며 설치 방법은 [packages/core](packages/core)에 있다. 웹 데모는 Node.js 20.19 이상 20.x 또는 22.12 이상(CI는 24), 데스크톱 앱은 Flutter가 추가로 필요하며 각 폴더 README를 참고한다.
 
 현재 탐지(11종): **주민등록번호**(체크섬 검증), **전화번호**(휴대폰·유선·070·050X, +82 표기), **이메일**, **주소**(행정구역·도로명), **신용카드**(Luhn 검증), **계좌번호**, **사업자등록번호**, **여권번호**, **생년월일**, **운전면허번호**, **이름**(규칙 + 로컬 LLM 문맥 판단)
 
