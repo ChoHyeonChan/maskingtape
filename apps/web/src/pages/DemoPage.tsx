@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useRef, useState } from "react";
+import { scanText } from "../api/scanClient";
 import { CoachMark } from "../components/help/CoachMark";
 import { InputPanel } from "../components/input/InputPanel";
 import { SiteNav } from "../components/layout/SiteNav";
 import { ResultsPanel } from "../components/results/ResultsPanel";
-import type { DetectionMode, ScanModeInfo } from "../lib/hybrid";
+import { HYBRID_MAX_TEXT_LENGTH, readModeInfo, type DetectionMode, type ScanModeInfo } from "../lib/hybrid";
 import type { MaskMode } from "../lib/masking";
 import type { Detection, HighlightRange } from "../types/detection";
 
@@ -25,6 +26,9 @@ export function DemoPage() {
   const [maskMode, setMaskMode] = useState<MaskMode>("mask");
   // 탐지 방식(#547) — 기본은 규칙 전용이고, 하이브리드는 사용자가 고를 때만 쓴다.
   const [detectionMode, setDetectionMode] = useState<DetectionMode>("rule");
+  // 결과 화면에서 방식을 바꿔 다시 탐지하는 중인지와 그 오류(#547 후속).
+  const [rescanning, setRescanning] = useState(false);
+  const [rescanError, setRescanError] = useState<string | null>(null);
   // "탐지 결과 조정" 패널이 항목별 가림/보임 조정을 반영한 최종본을 계산해 여기로 보고한다 —
   // 그래야 왼쪽 결과 박스·복사 버튼이 항상 오른쪽 패널의 조정 상태와 같은 텍스트를 본다.
   const [maskedResultText, setMaskedResultText] = useState("");
@@ -39,10 +43,30 @@ export function DemoPage() {
 
   function handleResult(text: string, detections: Detection[], modeInfo: ScanModeInfo) {
     setScanned({ text, detections, modeInfo });
+    setRescanError(null);
     setScanRun((run) => run + 1);
     if (!hasAutoShownResultCoachMark.current) {
       hasAutoShownResultCoachMark.current = true;
       setCoachMarkVariant("result");
+    }
+  }
+
+  // 결과 화면에서 탐지 방식을 바꾸면 초기화 없이 같은 원문을 그 방식으로 다시 탐지한다(#547 후속).
+  // 입력 화면과 같은 규칙으로, 하이브리드 상한을 넘는 글은 규칙 전용으로 보낸다.
+  async function handleRescan(mode: DetectionMode) {
+    if (!scanned || rescanning) return;
+    const original = scanned.text;
+    const requestMode: DetectionMode = original.length > HYBRID_MAX_TEXT_LENGTH ? "rule" : mode;
+    setDetectionMode(mode);
+    setRescanning(true);
+    setRescanError(null);
+    try {
+      const response = await scanText(original, requestMode);
+      handleResult(original, response.detections, readModeInfo(requestMode, response));
+    } catch (err) {
+      setRescanError(err instanceof Error ? err.message : "다시 탐지하는 중 알 수 없는 오류가 발생했습니다.");
+    } finally {
+      setRescanning(false);
     }
   }
 
@@ -122,6 +146,9 @@ export function DemoPage() {
               maskMode={maskMode}
               onMaskedTextChange={setMaskedResultText}
               onHighlightChange={setHighlight}
+              onRescan={handleRescan}
+              rescanning={rescanning}
+              rescanError={rescanError}
             />
           </main>
         </div>

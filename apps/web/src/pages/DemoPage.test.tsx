@@ -204,3 +204,98 @@ describe("DemoPage detection mode (#547)", () => {
     await waitFor(() => expect(mockScanText).toHaveBeenLastCalledWith(longText, "rule"));
   });
 });
+
+describe("DemoPage switch detection mode from the result screen (#547 follow-up)", () => {
+  const TEXT = "고객 김민준 010-1234-5678";
+  const ruleResult = {
+    detections: [{ kind: "phone", start: 7, end: 20, confidence: 1, detector: "PhoneDetector" }],
+    mode_used: "rule" as const,
+    hybrid_failed: false,
+    hybrid_failure_code: null,
+  };
+  const hybridResult = {
+    detections: [
+      { kind: "name", start: 3, end: 6, confidence: 0.9, detector: "OpenAINameJudge" },
+      { kind: "phone", start: 7, end: 20, confidence: 1, detector: "PhoneDetector" },
+    ],
+    mode_used: "hybrid" as const,
+    hybrid_failed: false,
+    hybrid_failure_code: null,
+  };
+
+  async function scanRuleFirst() {
+    render(<DemoPage />);
+    fireEvent.keyDown(window, { key: "Escape" });
+    fireEvent.change(screen.getByLabelText("탐지할 텍스트 입력"), { target: { value: TEXT } });
+    fireEvent.click(screen.getByRole("button", { name: "개인정보 탐지 및 마스킹 하기" }));
+    await screen.findByRole("textbox", { name: "마스킹된 탐지 결과" });
+    fireEvent.keyDown(window, { key: "Escape" });
+  }
+
+  it("re-scans the same original text with hybrid when hybrid is picked on the result screen, without resetting", async () => {
+    mockScanText.mockResolvedValueOnce(ruleResult).mockResolvedValueOnce(hybridResult);
+    await scanRuleFirst();
+
+    expect(screen.getByRole("button", { name: "규칙 전용" })).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(screen.getByRole("button", { name: "하이브리드 (OpenAI)" }));
+
+    await waitFor(() => expect(mockScanText).toHaveBeenLastCalledWith(TEXT, "hybrid"));
+    expect(await screen.findByText(/규칙이 놓친 이름/)).toHaveTextContent("1건");
+    expect(screen.getByRole("switch", { name: /이름\(LLM\) 김민준/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "하이브리드 (OpenAI)" })).toHaveAttribute("aria-pressed", "true");
+    // 결과 화면은 그대로다 — 초기화되지 않았다.
+    expect(screen.getByRole("textbox", { name: "마스킹된 탐지 결과" })).toBeInTheDocument();
+  });
+
+  it("can switch back to rule-only from a hybrid result", async () => {
+    mockScanText.mockResolvedValueOnce(ruleResult).mockResolvedValueOnce(hybridResult).mockResolvedValueOnce(ruleResult);
+    await scanRuleFirst();
+    fireEvent.click(screen.getByRole("button", { name: "하이브리드 (OpenAI)" }));
+    await screen.findByText(/규칙이 놓친 이름/);
+
+    fireEvent.click(screen.getByRole("button", { name: "규칙 전용" }));
+
+    await waitFor(() => expect(mockScanText).toHaveBeenLastCalledWith(TEXT, "rule"));
+    await waitFor(() => expect(screen.queryByText(/규칙이 놓친 이름/)).not.toBeInTheDocument());
+    expect(screen.queryByRole("switch", { name: /LLM/ })).not.toBeInTheDocument();
+  });
+
+  it("does nothing when the current mode is clicked again", async () => {
+    mockScanText.mockResolvedValueOnce(ruleResult);
+    await scanRuleFirst();
+
+    fireEvent.click(screen.getByRole("button", { name: "규칙 전용" }));
+
+    expect(mockScanText).toHaveBeenCalledTimes(1);
+  });
+
+  it("retries hybrid when it is clicked again after a fallback", async () => {
+    mockScanText
+      .mockResolvedValueOnce({ ...ruleResult, hybrid_failed: true, hybrid_failure_code: "timeout" })
+      .mockResolvedValueOnce(hybridResult);
+    render(<DemoPage />);
+    fireEvent.keyDown(window, { key: "Escape" });
+    fireEvent.click(screen.getByRole("button", { name: "하이브리드 (OpenAI)" }));
+    fireEvent.change(screen.getByLabelText("탐지할 텍스트 입력"), { target: { value: TEXT } });
+    fireEvent.click(screen.getByRole("button", { name: "개인정보 탐지 및 마스킹 하기" }));
+    await screen.findByText(/하이브리드 판단에 실패해/);
+    fireEvent.keyDown(window, { key: "Escape" });
+
+    fireEvent.click(screen.getByRole("button", { name: "하이브리드 (OpenAI)" }));
+
+    await waitFor(() => expect(mockScanText).toHaveBeenCalledTimes(2));
+    expect(mockScanText).toHaveBeenLastCalledWith(TEXT, "hybrid");
+    expect(await screen.findByText(/규칙이 놓친 이름/)).toBeInTheDocument();
+  });
+
+  it("keeps the current result and shows the error when the re-scan request fails", async () => {
+    mockScanText.mockResolvedValueOnce(ruleResult).mockRejectedValueOnce(new Error("API 서버에 연결하지 못했습니다."));
+    await scanRuleFirst();
+
+    fireEvent.click(screen.getByRole("button", { name: "하이브리드 (OpenAI)" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("API 서버에 연결하지 못했습니다.");
+    expect(screen.getByRole("textbox", { name: "마스킹된 탐지 결과" })).toHaveValue("고객 김민준 *************");
+  });
+});
+

@@ -49,4 +49,11 @@ describe("DetectionModeSelector (#547)", () => {
     expect(screen.getByRole("button", { name: "하이브리드 (OpenAI)" })).toBeEnabled();
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
+
+  it("disables both buttons while disabled (e.g. during a re-scan)", () => {
+    render(<DetectionModeSelector mode="rule" textLength={10} onChange={vi.fn()} disabled />);
+
+    expect(screen.getByRole("button", { name: "규칙 전용" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "하이브리드 (OpenAI)" })).toBeDisabled();
+  });
 });

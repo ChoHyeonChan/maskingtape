@@ -5,8 +5,9 @@ import { useEffect, useRef, useState } from "react";
 import { DetectionList } from "./DetectionList";
 import type { DetectionRow } from "./DetectionList";
 import { HybridStatusNotice } from "./HybridStatusNotice";
+import { RescanModeBar } from "./RescanModeBar";
 import { anonymizeText } from "../../api/scanClient";
-import type { ScanModeInfo } from "../../lib/hybrid";
+import type { DetectionMode, ScanModeInfo } from "../../lib/hybrid";
 import { locateDetections, type MaskMode } from "../../lib/masking";
 import { KIND_COLORS } from "../../types/detection";
 import type { Detection, HighlightRange } from "../../types/detection";
@@ -17,6 +18,10 @@ interface Props {
   maskMode?: MaskMode;
   onMaskedTextChange: (text: string) => void;
   onHighlightChange?: (highlight: HighlightRange | null) => void;
+  /** 결과 화면에서 탐지 방식을 바꿔 같은 글을 다시 탐지한다(#547 후속). 없으면 방식 선택을 그리지 않는다. */
+  onRescan?: (mode: DetectionMode) => void;
+  rescanning?: boolean;
+  rescanError?: string | null;
 }
 
 const THRESHOLD_STEP = 5;
@@ -40,6 +45,9 @@ export function ResultsPanel({
   maskMode = "mask",
   onMaskedTextChange,
   onHighlightChange = () => {},
+  onRescan,
+  rescanning = false,
+  rescanError = null,
 }: Props) {
   // 컨트롤에 보이는 숫자가 곧 확신도 임계값이다(더 이상 반전 없음) — 이 값 이상인 항목만
   // 기본으로 가려진다. 고정값(예: 50%) 대신 이번 스캔에서 가장 낮은 확신도로 시작하면,
@@ -193,6 +201,16 @@ export function ResultsPanel({
           <span className="panel__badge">총 {scanned.detections.length}건 발견</span>
         )}
       </div>
+
+      {scanned?.modeInfo && onRescan && (
+        <RescanModeBar
+          modeInfo={scanned.modeInfo}
+          textLength={scanned.text.length}
+          rescanning={rescanning}
+          error={rescanError}
+          onRescan={onRescan}
+        />
+      )}
 
       {scanned?.modeInfo && <HybridStatusNotice modeInfo={scanned.modeInfo} detections={scanned.detections} />}
 
