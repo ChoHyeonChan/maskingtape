@@ -13,7 +13,7 @@
 
 1. **라이선스는 Apache-2.0 하나로 통일.** 모든 새 파일은 이 라이선스로 작성. 다른 라이선스의 코드를 복사해 붙이지 마라 (스택오버플로/블로그 코드 포함 — AI에게 "처음부터 작성"을 시켜라). 새 소스 파일(`.py` `.ts` `.tsx` `.css` `.html` `.dart`) 맨 위에는 `SPDX-FileCopyrightText: 2026 The maskingtape Authors`와 `SPDX-License-Identifier: Apache-2.0` 두 줄을 언어별 주석으로 넣어라. CI(`scripts/check_license_headers.py`)가 검사하고, 언어별 예시는 CONTRIBUTING.md 「라이선스 규칙」에 있다.
 2. **의존성 추가 전 라이선스 확인 필수.** 허용: MIT, Apache-2.0, BSD, ISC. **금지: GPL·AGPL·SSPL·비상업 전용 라이선스**(GPL 금지는 대회 규정이 아닌 팀 방침 — Apache-2.0 통일 유지 목적). 라이브러리를 하나라도 추가하면 저장소의 `SBOM.md` 표에 즉시 한 줄 추가(이름/버전/라이선스/공식 저장소 URL/사용 목적). 심사에 **라이선스 검증 단계가 별도로 존재**하고, SBOM은 결과보고서 붙임1로 제출된다.
-3. **제품 코드에서 외부 상용 AI API 호출 금지 — 웹 데모 백엔드의 하이브리드 모드만 예외.** `packages/core`·CLI·MCP 서버·데스크톱 앱은 OpenAI·Anthropic·Google 등 클라우드 LLM API를 부르지 않는다. 이 표면들의 LLM은 오직 **로컬 Ollama(오픈웨이트 모델: qwen2.5:7b — Apache-2.0)**다. ※ "개발 도구로 AI를 쓰는 것"은 허용 — 제품이 API를 호출하면 안 된다는 뜻이다.
+3. **제품 코드에서 외부 상용 AI API 호출 금지 — 웹 데모 백엔드의 하이브리드 모드만 예외.** `packages/core`·CLI·MCP 서버·데스크톱 앱은 OpenAI·Anthropic·Google 등 클라우드 LLM API를 부르지 않는다. 이 표면들의 LLM은 오직 **로컬 Ollama(오픈웨이트 모델: 기본 `maskingtape-name-1.5b`(Qwen2.5-1.5B-Instruct 파인튜닝), 선택 `qwen2.5:7b`, 둘 다 Apache-2.0)**다. ※ "개발 도구로 AI를 쓰는 것"은 허용 — 제품이 API를 호출하면 안 된다는 뜻이다.
    - **예외: 웹 데모(`apps/api`)의 하이브리드 모드는 OpenAI API를 쓸 수 있다.** 운영사무국이 2026-09-29 멘토링 DAY에서 구두로, 2026-09-30 메일로 확인해 주었다. 본체(라이브러리·CLI·MCP 서버)가 상용 API 없이 완전히 동작하므로 규정 제9조 ②항 1호 다목(상용 API 전용 모델의 단순 연결 제한)에 해당하지 않고, 제9조 ①항(탑재 모델 요건)은 로컬 모델 구성으로 충족된다는 답이다.
    - 예외의 조건
      - 기본은 규칙 전용이다. 하이브리드는 사용자가 고를 때만 쓴다.
