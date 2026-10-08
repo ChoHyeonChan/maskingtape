@@ -12,10 +12,10 @@
 | 3 | ruff | >=0.16 | MIT | https://github.com/astral-sh/ruff | (개발 도구) 파이썬 린트·코드 스타일 검사 |
 | 4 | desktop_drop | ^0.7.1 | Apache-2.0 | https://github.com/MixinNetwork/flutter-plugins | 데스크톱 앱 — OS 파일 드래그&드롭 수신 (Flutter 플러그인) |
 | 5 | react / react-dom | 19.2.7 | MIT | https://github.com/facebook/react | 웹 플레이그라운드 UI 렌더링 |
-| 6 | vite | 8.1.5 | MIT | https://github.com/vitejs/vite | (개발 도구) 웹 플레이그라운드 빌드·개발 서버 |
+| 6 | vite | 8.1.5 | MIT | https://github.com/vitejs/vite | (개발 도구) 웹 플레이그라운드 빌드·개발 서버. 빌드 결과물에 작은 런타임 코드(모듈 미리 불러오기 폴리필 등, 번들러 Rolldown 1.1.5 MIT 포함)를 넣어 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)에 고지 |
 | 7 | @vitejs/plugin-react | 6.0.3 | MIT | https://github.com/vitejs/vite-plugin-react | (개발 도구) Vite에서 React JSX 처리 |
 | 8 | typescript | 7.0.2 | Apache-2.0 | https://github.com/microsoft/TypeScript | (개발 도구) 웹 플레이그라운드 타입 검사 |
-| 9 | vitest | 4.1.10 | MIT | https://github.com/vitest-dev/vitest | (개발 도구) 웹 플레이그라운드 테스트 실행 |
+| 9 | vitest | 4.1.11 | MIT | https://github.com/vitest-dev/vitest | (개발 도구) 웹 플레이그라운드 테스트 실행 |
 | 10 | @testing-library/react | 16.3.2 | MIT | https://github.com/testing-library/react-testing-library | (개발 도구) 컴포넌트 테스트 |
 | 11 | @testing-library/jest-dom | 6.9.1 | MIT | https://github.com/testing-library/jest-dom | (개발 도구) 테스트용 DOM 매처 |
 | 12 | jsdom | 29.1.1 | MIT | https://github.com/jsdom/jsdom | (개발 도구) 테스트용 가상 브라우저(DOM) 환경 |
@@ -31,7 +31,7 @@
 | 22 | pdfjs-dist | ^6.2.108 | Apache-2.0 | https://github.com/mozilla/pdf.js | 웹 플레이그라운드 — 브라우저(클라이언트) 안에서 PDF 텍스트 추출, 파일을 서버로 보내지 않기 위함 |
 | 23 | cupertino_icons | ^1.0.8 | MIT | https://github.com/flutter/packages/tree/main/third_party/packages/cupertino_icons | 데스크톱 앱 — 기본 아이콘 폰트 (Flutter 프로젝트 생성 시 포함) |
 | 24 | flutter_lints | ^6.0.0 | BSD-3-Clause | https://github.com/flutter/packages/tree/main/packages/flutter_lints | (개발 도구) 데스크톱 앱 Dart 린트 규칙 모음 |
-| 25 | scrubadub | >=2,<3 (실측 2.0.1) | MIT metadata / Apache-2.0 classifier | https://github.com/LeapBeyond/scrubadub | (개발 도구) bench 오픈소스 PII 도구 비교 기준선 — 로컬 실행, 발표용 정확도 대비표 생성 |
+| 25 | scrubadub | >=2,<3 (실측 2.0.1) | Apache-2.0 (저장소 LICENSE. PyPI license 칸은 MIT) | https://github.com/LeapBeyond/scrubadub | (개발 도구) bench 오픈소스 PII 도구 비교 기준선 — 로컬 실행, 발표용 정확도 대비표 생성. core의 선택 설치 `bench-baselines`로만 설치된다. 전이 의존성은 부록 A-8 |
 | 26 | Qwen2.5-7B-Instruct (AI 모델, 선택) | qwen2.5:7b (Q4_K_M, 상세는 부록 C-2) | Apache-2.0 | https://github.com/QwenLM/Qwen2.5 | 이전 기본 모델. `--llm-model qwen2.5:7b`로 고를 때만 쓴다. 로컬 실행 전용 |
 | 27 | Qwen2.5-1.5B-Instruct (기반 모델) | Qwen/Qwen2.5-1.5B-Instruct | Apache-2.0 | https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct | (학습 도구) 17번 모델의 파인튜닝 기반 가중치. 학습할 때만 받는다 |
 | 28 | PyTorch (torch) | 2.6.0+cu124 | BSD-3-Clause | https://github.com/pytorch/pytorch | (학습 도구) `training/`의 LoRA 학습·가중치 병합 |
@@ -228,7 +228,7 @@ Python 개발 도구(pytest·ruff·httpx2와 그 전이, Python 3.13.5, Windows)
 
 > 이 절은 생성기 밖이라 손으로 관리한다. `apps/desktop/installer/build.py` 위쪽의 동봉물 상수(버전·주소·해시)나 빌드에 쓰는 Inno Setup 판을 바꾸면 같은 PR에서 고친다.
 
-GitHub Releases `desktop-v*`의 설치파일이다(#617). 위 A-4의 Dart 런타임 의존성은 앱 코드(`data\app.so`)에 컴파일돼 들어가고, 아래는 그 밖에 설치파일에 함께 실리는 것이다. 버전은 `build.py`의 고정값과 desktop-v0.2.3 설치파일 기준이다.
+GitHub Releases `desktop-v*`의 설치파일이다(#617). 위 A-4의 Dart 런타임 의존성은 앱 코드(`data\app.so`)에 컴파일돼 들어가고, 아래는 그 밖에 설치파일에 함께 실리는 것이다. 버전은 `build.py`의 고정값과 desktop-v0.2.4 설치파일(main `97ed96f`, Flutter 3.44.6·Inno Setup 6.7.0으로 빌드) 기준이다.
 
 | 구성요소 | 버전 | 라이선스 | 원본 | 비고 |
 |---|---|---|---|---|
@@ -239,12 +239,47 @@ GitHub Releases `desktop-v*`의 설치파일이다(#617). 위 A-4의 Dart 런타
 | 그 밖의 CPython 내장 구성요소 | CPython 3.13.2에 든 판 | bzip2·libffi(MIT)·expat(MIT)·libmpdec(BSD-2-Clause)·zlib 등 | https://docs.python.org/3.13/license.html | 고지는 Python 문서 「Licenses and Acknowledgements for Incorporated Software」 원문으로 함께 실음 |
 | pypdf | 6.19.0 | BSD-3-Clause | https://github.com/py-pdf/pypdf | 본표 37번 |
 | maskingtape (core) | 설치파일을 만든 커밋의 판 | Apache-2.0 | https://github.com/ChoHyeonChan/maskingtape | 우리 코드. 런타임 외부 의존성 없음 |
-| Flutter 엔진 (Windows) | 빌드에 쓴 Flutter SDK 판 | BSD-3-Clause | https://github.com/flutter/flutter | `flutter_windows.dll`, `data\icudtl.dat`. 엔진 안의 제3자 구성요소(ICU·Skia 등) 고지는 앱의 `NOTICES.Z` |
+| Flutter 엔진 (Windows) | Flutter 3.44.6 (엔진 `d3a3293`, desktop-v0.2.4) | BSD-3-Clause | https://github.com/flutter/flutter | `flutter_windows.dll`, `data\icudtl.dat`. 엔진 안의 제3자 구성요소(ICU·Skia 등) 고지는 앱의 `NOTICES.Z` |
 | desktop_drop (Windows 플러그인) | 0.7.1 | Apache-2.0 | https://github.com/MixinNetwork/flutter-plugins/tree/main/packages/desktop_drop | `desktop_drop_plugin.dll` |
 | file_selector_windows | 0.9.3+5 | BSD-3-Clause | https://github.com/flutter/packages/tree/main/packages/file_selector/file_selector_windows | `file_selector_windows_plugin.dll` |
 | Inno Setup (설치 실행부) | 6.7.0 | Inno Setup License (오픈소스 아님) | https://github.com/jrsoftware/issrc | 본표 39번. 허용 목록 밖 → 부록 B. 2차 라이선스 검증 때 소스와 같은 zip에 넣어 스캔(팀 결정 10/7) |
 
 고지문은 설치 폴더의 `licenses\`와 앱의 ⓘ(「오픈소스 고지·라이선스」) 화면, [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)에 있다.
+
+### A-8. bench 비교 기준선 `maskingtape[bench-baselines]` (scrubadub, 개발 도구)
+
+> 이 절은 생성기 밖이라 손으로 관리한다. 생성기는 개발 도구로 pytest·ruff·httpx2만 따라가서 이 선택 설치를 보지 않는다. `packages/core/pyproject.toml`의 `bench-baselines`를 바꾸면 같은 PR에서 고친다.
+
+`pip install "maskingtape[bench-baselines]"`(또는 저장소에서 `-e "packages/core[bench-baselines]"`)를 고를 때만 설치된다. `pip install maskingtape`로는 설치되지 않는다. 쓰는 곳은 오픈소스 PII 도구 비교 스크립트 한 곳뿐이다(`bench/evaluators/compare_open_source_tools.py`, 함수 안에서 `import scrubadub`). 아래는 2026-10-08 깨끗한 가상환경(Python 3.13.2, Windows)에 `scrubadub>=2,<3`를 설치해 각 패키지 메타데이터와 라이선스 파일에서 읽은 값이다. 범위로 선언한 의존성이라 설치하는 날 버전이 바뀔 수 있다.
+
+| 패키지 | 버전 | 라이선스 | 끌어오는 패키지 |
+|---|---|---|---|
+| scrubadub | 2.0.1 | Apache-2.0 | (본표 25번) |
+| catalogue | 2.0.10 | MIT | scrubadub |
+| dateparser | 1.4.3 | BSD-3-Clause | scrubadub |
+| faker | 40.41.0 | MIT | scrubadub |
+| phonenumbers | 9.0.40 | Apache-2.0 | scrubadub |
+| **python-stdnum** | 2.2 | **LGPL-2.1-or-later** | scrubadub → 부록 B |
+| scikit-learn | 1.9.1 | BSD-3-Clause | scrubadub |
+| textblob | 0.15.3 | MIT | scrubadub |
+| typing-extensions | 4.16.0 | PSF-2.0 | scrubadub, catalogue → 부록 B |
+| nltk | 3.10.3 | Apache-2.0 | textblob |
+| click | 8.5.0 | BSD-3-Clause | nltk |
+| defusedxml | 0.7.1 | PSF-2.0 | nltk → 부록 B |
+| **regex** | 2026.9.29 | **Apache-2.0 AND CNRI-Python** | dateparser, nltk → 부록 B |
+| **tqdm** | 4.70.1 | **MPL-2.0 AND MIT** | nltk → 부록 B |
+| colorama | 0.4.6 | BSD-3-Clause | tqdm |
+| joblib | 1.6.0 | BSD-3-Clause | nltk, scikit-learn |
+| cloudpickle | 3.1.2 | BSD-3-Clause | joblib |
+| narwhals | 2.26.0 | MIT | scikit-learn |
+| **numpy** | 2.5.3 | **BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0**. Windows 휠에 OpenBLAS(BSD-3-Clause)·LAPACK(BSD-3-Clause-Open-MPI)·**GCC 런타임(GPL-3.0-or-later WITH GCC-exception-3.1)**이 함께 실림(설치본 `LICENSE.txt`) | scikit-learn, scipy → 부록 B |
+| **scipy** | 1.18.1 | BSD-3-Clause. Windows 휠에 numpy와 같은 OpenBLAS·LAPACK·**GCC 런타임(GPL-3.0-or-later WITH GCC-exception-3.1)**이 함께 실림(설치본 `LICENSE.txt`) | scikit-learn → 부록 B |
+| threadpoolctl | 3.7.0 | BSD-3-Clause | scikit-learn |
+| python-dateutil | 2.9.0.post0 | Apache-2.0 OR BSD-3-Clause | dateparser |
+| six | 1.17.0 | MIT | python-dateutil |
+| pytz | 2026.5 | MIT | dateparser |
+| tzlocal | 5.4.4 | MIT | dateparser |
+| tzdata | 2026.5 | Apache-2.0 | faker, tzlocal |
 
 ## 부록 B: 허용 목록 밖 라이선스에 대한 판단
 
@@ -314,6 +349,15 @@ GitHub Releases `desktop-v*`의 설치파일이다(#617). 위 A-4의 Dart 런타
 - 둘 다 대회 규정 제8조 ③항이 막는 비상업 조건 라이선스가 아니다.
 - OpenUP 회신: 2026-10-06 요지는 Windows와 호환하려고 같이 들어가는 런타임 등의 라이선스는 신경 쓰지 않아도 되고, 실행 화면·고지 파일·SBOM으로 고지하는 방식이 적절하다는 것이다. 2026-10-07 원문은 「Microsoft VC++ 런타임과 같은 오픈소스가 아닌 호환을 위한 설치파일의 경우에는 결과물의 소스코드와 함께 압축하셔서 스캔하시면 됩니다」다. 2차 라이선스 검증 때 Visual C++ 런타임은 이 답에 따라, Inno Setup 실행부는 같은 원칙으로 팀이 정해(10/7) 소스와 같은 zip에 넣는다.
 - 결론: **수정 없이 싣고 고지를 유지해 재배포 조건 충족.**
+
+### python-stdnum (LGPL-2.1-or-later), numpy·scipy 휠의 GCC 런타임 (GPL-3.0-or-later WITH GCC-exception-3.1), regex (Apache-2.0 AND CNRI-Python), tqdm (MPL-2.0 AND MIT), numpy (Zlib·CC0-1.0 등 포함), defusedxml·typing-extensions (PSF-2.0) — bench 비교 기준선(개발 도구)
+
+- **배포물에 들어가지 않는다.** 모두 scrubadub(본표 25번)를 설치할 때만 따라오는 전이 의존성이다(부록 A-8). scrubadub는 core의 선택 설치 `bench-baselines`로만 설치되고, `pip install maskingtape`·웹 데모·MCP 서버·데스크톱 설치파일 어디에도 들어가지 않는다. 쓰는 곳은 오픈소스 도구 비교 스크립트(`bench/evaluators/compare_open_source_tools.py`) 한 곳이다.
+- **직접 의존이 아니다.** 우리 코드는 이 패키지들을 import하지 않는다. scrubadub를 수정하지 않고, 그 결과(탐지 위치)만 벤치 점수 계산에 쓴다.
+- **python-stdnum은 LGPL-2.1-or-later다**(설치본 `COPYING` 원문 「GNU LESSER GENERAL PUBLIC LICENSE Version 2.1」, 소스 머리말 「version 2.1 … or (at your option) any later version」). 팀 방침의 금지 목록(GPL·AGPL·SSPL)에는 없지만 같은 계열이라 따로 적는다. 우리는 python-stdnum을 배포하지 않는다. 사용자가 선택 설치를 고르면 pip이 PyPI에서 직접 받는다. 우리 코드는 python-stdnum을 부르지도 않는다.
+- **numpy·scipy의 Windows 휠에는 GCC 런타임 라이브러리가 함께 실린다.** 각 설치본 `LICENSE.txt`에 「Name: GCC runtime library … License: GPL-3.0-or-later WITH GCC-exception-3.1」로 적혀 있다. 이것도 우리가 배포하지 않고, pip이 PyPI에서 받는 휠 그대로다.
+- tqdm의 MPL-2.0은 위 certifi 절과 같은 파일 단위 카피레프트이고, defusedxml·typing-extensions의 PSF-2.0은 위 절과 같다. regex의 CNRI-Python, numpy의 Zlib·CC0-1.0·0BSD도 우리가 배포하지 않는다.
+- 결론: **배포물 미포함.** 이 선택 설치는 팀 방침(GPL 계열 금지)의 예외로 두고, 위 사실을 근거로 남긴다(2026-10-08 팀장 결정, #727). 예외는 이 선택 설치(`bench-baselines`)에만 적용하고, 배포물과 제품 코드의 의존성에는 GPL 계열 금지를 그대로 지킨다.
 
 ## 부록 C: AI 모델 상세
 
