@@ -12,7 +12,7 @@ maskingtape 배포물에 **코드가 함께 실려 나가는** 제3자 소프트
 ### 웹 데모 빌드 결과물
 
 이 파일들은 방문자의 브라우저로 전송되므로 아래 소프트웨어를 고지한다.
-웹 데모 화면에서 이 파일로 가는 링크는 [#439](https://github.com/ChoHyeonChan/maskingtape/issues/439)에서 추가한다.
+웹 데모 상단 메뉴의 「오픈소스 라이선스」 링크가 이 파일을 연다([#439](https://github.com/ChoHyeonChan/maskingtape/issues/439)).
 
 | 소프트웨어 | 버전 | 라이선스 | 저작권 | 원본 | 빌드 결과물 안의 위치 |
 |---|---|---|---|---|---|
@@ -20,8 +20,13 @@ maskingtape 배포물에 **코드가 함께 실려 나가는** 제3자 소프트
 | React (`react`) | 19.2.7 | MIT | Copyright (c) Meta Platforms, Inc. and affiliates. | https://github.com/facebook/react | `assets/index-*.js` |
 | React DOM (`react-dom`) | 19.2.7 | MIT | Copyright (c) Meta Platforms, Inc. and affiliates. | https://github.com/facebook/react | `assets/index-*.js` |
 | Scheduler (`scheduler`) | 0.27.0 | MIT | Copyright (c) Meta Platforms, Inc. and affiliates. | https://github.com/facebook/react | `assets/index-*.js` |
+| Vite 런타임 코드 (`vite`) | 8.1.5 | MIT | Copyright (c) 2019-present, VoidZero Inc. and Vite contributors | https://github.com/vitejs/vite | `assets/index-*.js` |
+| Rolldown 런타임 코드 (`rolldown`, Vite의 번들러) | 1.1.5 | MIT | Copyright (c) 2024-present VoidZero Inc. & Contributors | https://github.com/rolldown/rolldown | `assets/index-*.js` |
 
-네 가지 모두 소스를 고치지 않았다. 빌드 도구(Vite)가 압축해서 결과물에 넣는다.
+모두 소스를 고치지 않았다. 빌드 도구(Vite)가 압축해서 결과물에 넣는다.
+Vite·Rolldown 두 줄은 라이브러리가 아니라, 빌드 도구가 결과물에 직접 넣는 작은 런타임 코드(모듈 미리 불러오기
+폴리필과 지연 로딩 오류 처리 `vite:preloadError`)다. Vite 8은 이 코드를 Rolldown 플러그인으로 넣으므로 둘 다 적는다
+(2026-10-08 운영 번들에서 확인).
 pdfjs-dist 6.2.108 패키지에는 NOTICE 파일이 없다.
 React 계열은 빌드 과정에서 파일 안의 라이선스 주석이 빠지므로 이 파일로 고지를 대신한다.
 
@@ -39,10 +44,10 @@ Python이 없는 PC에서도 데스크톱 앱을 쓰도록 만든 설치파일�
 | SQLite | 3.45.3 | 퍼블릭 도메인 | https://www.sqlite.org/ | `python\sqlite3.dll` (CPython 임베디드에 들어 있음) |
 | Microsoft Visual C++ 런타임 | 14.42.34226.3 (`vcruntime140.dll` 기준) | Microsoft Distributable Code (오픈소스 아님) | CPython 임베디드 배포판에 포함 | `python\vcruntime140.dll`, `python\vcruntime140_1.dll` |
 | pypdf | 6.19.0 | BSD-3-Clause | https://github.com/py-pdf/pypdf | `python\Lib\site-packages\pypdf\` |
-| Flutter 엔진 (Windows) | 빌드에 쓴 Flutter SDK 판 | BSD-3-Clause | https://github.com/flutter/flutter | `flutter_windows.dll`, `data\icudtl.dat` |
+| Flutter 엔진 (Windows) | Flutter 3.44.6 (desktop-v0.2.4) | BSD-3-Clause | https://github.com/flutter/flutter | `flutter_windows.dll`, `data\icudtl.dat` |
 | desktop_drop (Windows 플러그인) | 0.7.1 | Apache-2.0 | https://github.com/MixinNetwork/flutter-plugins/tree/main/packages/desktop_drop | `desktop_drop_plugin.dll` |
 | file_selector_windows | 0.9.3+5 | BSD-3-Clause | https://github.com/flutter/packages/tree/main/packages/file_selector/file_selector_windows | `file_selector_windows_plugin.dll` |
-| Inno Setup (설치 실행부) | 6.7.0 (desktop-v0.2.3 기준) | Inno Setup License (오픈소스 아님) | https://github.com/jrsoftware/issrc | `setup.exe` 안. 설치 뒤에는 설치 폴더의 제거 프로그램(`unins*` 파일)으로 남음 |
+| Inno Setup (설치 실행부) | 6.7.0 (desktop-v0.2.4 기준) | Inno Setup License (오픈소스 아님) | https://github.com/jrsoftware/issrc | `setup.exe` 안. 설치 뒤에는 설치 폴더의 제거 프로그램(`unins*` 파일)으로 남음 |
 
 - CPython 임베디드 배포판은 `python313._pth`에 `Lib\site-packages` 한 줄을 더해(동봉한 패키지를 찾게 하는 경로 설정) 싣고, 그 밖의 파일은 바꾸지 않는다.
 - CPython 임베디드 배포판에 들어 있는 나머지 구성요소(bzip2·libffi·expat·libmpdec·zlib 등)의 고지는 Python 문서
@@ -142,9 +147,10 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### MIT License (create-vite 템플릿)
+### MIT License (create-vite 템플릿, Vite 런타임 코드)
 
 create-vite 패키지(https://github.com/vitejs/vite/tree/main/packages/create-vite)의 LICENSE 원문이다.
+Vite 본체(`vite` 8.1.5의 `LICENSE.md` 첫 절 「Vite core license」)도 같은 저작권 문구와 전문을 쓴다.
 
 ```
 MIT License
@@ -168,6 +174,38 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+```
+
+### MIT License (Rolldown 런타임 코드)
+
+rolldown 1.1.5 패키지의 LICENSE 원문이다.
+
+```
+MIT License
+
+Copyright (c) 2024-present VoidZero Inc. & Contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+end of terms and conditions
+
+The licenses of externally maintained libraries from which parts of the Software is derived are listed [here](https://github.com/rolldown/rolldown/blob/main/THIRD-PARTY-LICENSE).
 ```
 
 ## 고지 대상이 아닌 것
