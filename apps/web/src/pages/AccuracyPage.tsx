@@ -30,8 +30,8 @@ const NAME_RESULTS: { where: string; rulesOnly: string; withLlm: string; howToRe
   },
   {
     where: "문서 5종: 판결문·메일·상담·회의록·명단 (이름 1,162개)",
-    rulesOnly: "재현율 0.755 · F1 0.856",
-    withLlm: "재현율 0.899 · F1 0.916",
+    rulesOnly: "재현율 0.892 · F1 0.938",
+    withLlm: "재현율 0.975 · F1 0.957",
     howToRead: "문장 틀은 학습에 없던 것",
   },
   {
