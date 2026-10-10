@@ -41,7 +41,8 @@ describe("AccuracyPage", () => {
 
     const table = screen.getByRole("table");
     expect(table).toHaveTextContent("재현율 0.932 · F1 0.949");
-    expect(table).toHaveTextContent("재현율 0.899 · F1 0.916");
+    expect(table).toHaveTextContent("재현율 0.892 · F1 0.938");
+    expect(table).toHaveTextContent("재현율 0.975 · F1 0.957");
     expect(table).toHaveTextContent("재현율 0.825 · F1 0.600");
     expect(table).toHaveTextContent("정밀도 0.471");
     expect(screen.getByText(/웹 데모의 하이브리드는 OpenAI 판단기를 씁니다/)).toBeInTheDocument();
