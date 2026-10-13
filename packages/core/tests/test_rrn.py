@@ -333,7 +333,7 @@ def test_short_digits_after_an_order_number_date_are_not_an_rrn_without_a_label(
     assert RRNDetector().detect("주문번호 ORD-20250408-2110") == []
 
 
-# ── #637 후속: 머지 후 재측정에서 남은 모양(서연님 10/5 댓글) ─────────────────────
+# ── #637 후속: 머지 후 재측정에서 남은 모양(seoyeon056 10/5 댓글) ──────────────
 # 셋 다 주민번호·생년월일 라벨이 앞에 있을 때만 받는다 — 라벨 없는 날짜형 주문번호 오탐 방지.
 
 
