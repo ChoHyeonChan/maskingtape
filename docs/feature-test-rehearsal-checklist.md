@@ -13,7 +13,7 @@
 
 | 항목 | 1차 기록 | 2차 기록 |
 |---|---|---|
-| 실행자 | 현찬 노트북 | 다른 팀원 노트북 |
+| 실행자 | ChoHyeonChan 노트북 | 다른 팀원 노트북 |
 | 실행 날짜 |  |  |
 | OS / 사양 |  |  |
 | 검증 커밋 |  |  |
@@ -394,7 +394,7 @@ http://localhost:5173
 - CORS 오류가 나면 `MASKINGTAPE_API_CORS_ORIGINS`에 웹 주소가 들어 있는지 확인한다.
 - `npm install`이 실패하면 Node 버전과 네트워크를 확인한다.
 
-## 9. 데스크톱(exe, 준형)
+## 9. 데스크톱(exe, stayalive000)
 
 목표: Windows 배포용 exe 또는 Flutter 실행본에서 파일 일괄 처리와 텍스트 입력 모드가 동작하는지 확인한다.
 
@@ -537,7 +537,7 @@ curl.exe -s -X POST https://maskingtape-lilac.vercel.app/api/scan -H "Content-Ty
 
 ## 13. 최종 통과 기준
 
-- 현찬 노트북에서 1회, 다른 팀원 노트북에서 1회 돌렸다.
+- ChoHyeonChan 노트북에서 1회, 다른 팀원 노트북에서 1회 돌렸다.
 - 최소 1회는 이 문서 순서대로 처음부터 끝까지 막힘 없이 완료했다.
 - 완료 기록에 날짜와 커밋 SHA가 있다.
 - 기능명세서의 기능 목록이 이 문서의 대조표와 맞는다.

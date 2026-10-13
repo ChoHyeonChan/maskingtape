@@ -672,7 +672,7 @@ python -m bench.evaluators.compare_modes bench/datasets/synth_v1.jsonl bench/dat
 > 측정). 외부 평가라고 부를 수 있는 건 ②뿐이다.
 
 이름 기준, 완전 일치 채점. 규칙 전용은 main `5744f73`, 하이브리드는 main `fafefa8`(둘 사이 core 변경은
-bench 세트에서 차이가 없음을 확인), 로컬 Ollama, 온도 0, 서연 PC. 모델은
+bench 세트에서 차이가 없음을 확인), 로컬 Ollama, 온도 0, seoyeon056 PC. 모델은
 `hf.co/StayAlive1/maskingtape-name-1.5b-GGUF:Q4_K_M`이다. **문서 성격별 두 행은 #662·#663 머지 뒤 main `97ed96f`에서
 다시 쟀다(2026-10-07).** 하이브리드는 같은 명령을 3번 돌렸고 세 번 모두 같은 값이 나왔다. 나머지 하이브리드 행은 1회 측정이다.
 
