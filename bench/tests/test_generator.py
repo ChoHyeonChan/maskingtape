@@ -828,11 +828,13 @@ def test_full_name_with_title_only_is_detected():
     assert found[0].confidence == 0.5
 
 
-def test_two_syllable_name_with_title_only_is_not_detected():
-    """#213 설계된 한계 — 직함 단서 하나뿐이고 2음절 이름(성씨+1음절)이면 core가 일부러 놓친다
-    (부서·업무어 오탐을 막는 성+2자 풀네임 가드). 버그가 아니라 문서화된 트레이드오프다."""
+def test_two_syllable_name_with_title_only_is_detected():
+    """#213 때는 직함 단서 하나뿐인 2음절 이름(성씨+1음절)을 core가 일부러 놓쳤다. #601부터 띄어 쓴 이름 뒤
+    직함이면 잡는다. 부서·업무어 오탐 방지는 아래 테스트가 그대로 지킨다."""
     detector = NameDetector()
-    assert detector.detect("김민 부장이 결재했습니다.") == []
+    found = detector.detect("김민 부장이 결재했습니다.")
+    assert [d.text for d in found] == ["김민"]
+    assert found[0].confidence == 0.5
 
 
 def test_department_word_with_title_is_not_detected_as_name():

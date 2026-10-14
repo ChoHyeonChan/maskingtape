@@ -151,7 +151,42 @@ _COURT_CUE_COMMON_WORDS = frozenset({
 # 직함 전용 단서(존칭 '님' 제외). 이것만으로(다른 단서 없이) 이름을 잡을 땐 성+2자 풀네임을
 # 요구한다 — 부서·업무어("구매 부장"의 구매, "대표 이사"의 이사)가 직함과 붙어 이름으로
 # 오탐되는 걸 막는다. 존칭(님)은 강한 단서라 이 제약을 걸지 않는다. (앞·뒤 직함 공용)
+# 두 글자 이름은 _two_char_title_name_ok가 정한 세 자리에서만 받는다(#601).
 _TITLE_ONLY_CUES = frozenset(_TITLE_CUES) - frozenset(_SUFFIX_CUES)
+# 직함 단서 하나만 있을 때 두 글자 이름을 받는 자리(#601)에서 이름으로 보지 않는 두 글자 낱말 —
+# 직함을 꾸미는 말("신입 사원"·"우리 팀장님"·"공동 대표"·"지도 교수")과 직함 칸의 빈자리 표시
+# ("대표: 공석"). 성씨 글자로 시작해 두 글자 이름과 모양이 같다. 완전 일치로만 거른다. 완전한 목록은
+# 아니다 — 여기 없는 말은 더 가려지는 쪽(안전한 쪽)으로 틀린다.
+_TITLE_CONTEXT_WORDS = frozenset({
+    "우리", "신입", "신임", "신인", "전임", "전담", "전문", "전략", "전산", "전직", "전교", "전국", "전속",
+    "전공", "차기", "차석", "공동", "공인", "공익", "공석", "지도", "지역", "지점", "정규", "정식", "정치",
+    "정부", "우수", "주무", "주민", "주요", "주전", "고문", "하계", "현역", "현직", "심사", "심의", "민간",
+    "노조", "구조", "방송", "신문", "유망", "문화", "조직", "임원", "원로", "남자", "남녀",
+    # 직함 앞에 흔한 시간·정도 부사와 높임 동사("지금 강사 하고"·"오늘 교수님이"·"새로 오신 이사님")
+    "지금", "오늘", "현재", "당시", "전날", "주말", "방학", "정말", "진짜", "원래", "이미", "이제", "우선",
+    "한번", "하튼", "전부", "지난", "오신", "오실",
+    # 인용 뒤 서술격 조사('"…법"이라 팀원에게')
+    "이라", "이고", "이다",
+    # 직함 앞에 오는 기관·부서·분야·지위("진료 과장"·"진로 교사"·"주주 대표 소송"·"지휘 감독"·"구청 팀장")
+    "허위", "지휘", "주주", "노사", "유족", "정당", "현지", "원청", "조합", "진료", "원무", "한방", "심리", "진로",
+    "임상", "주방", "고교", "공립", "유명", "구청", "공장", "장기", "현업", "공대", "고대", "이대", "홍대", "성대",
+    # 판결문 판사·검사·증인 뒤의 일반어("증인 채택."·"판사 임용.")
+    "채택", "임용", "구인", "주기", "성적",
+    # 직함 앞 말투 부사·대명사("방금 팀장이"·"이런 팀장은"·"남은 팀원들")
+    "방금", "주로", "이건", "이런", "나도", "한편", "정작", "오직", "남은",
+    # 직함 칸의 빈자리·참조 표시("팀장: 공란"·"대표: 하단 참조")
+    "공란", "하단",
+})
+# 두 글자 후보의 둘째 글자가 조사·어미면 성씨 글자 하나에 조사가 붙은 낱말이다("전에 팀장에게"·"제23조는
+# 의사표시"·"승인 나면 팀원들"·"전엔 팀장이"). #601에서 받는 두 글자 이름에만 쓴다.
+_TWO_CHAR_PARTICLE_TAILS = frozenset("에는를을과와의면며엔")
+# #601에서 두 글자 이름 뒤 단서로 받지 않는 직함. 기관장 직함은 앞에 지명·기관이 흔히 오고("강남 지점장"·
+# "안양 센터장"·"공장 소장"), 직함이 아닌 뜻이 더 흔한 낱말도 뺀다 — 의사(의향, "이직 의사를"), 이사(거처
+# 옮기기, "원룸 이사 비용"), 전무(없음, "공급 전무 상태"), 감독(감독하는 일, "원격 감독하에").
+_TWO_CHAR_SKIP_TITLES = frozenset({
+    "의사", "이사", "전무", "감독",
+    "지점장", "지사장", "본부장", "센터장", "소장", "원장", "부원장", "이사장", "위원장", "국장", "처장", "사무장",
+})
 # 성씨 뒤 두 글자가 직함이면 세 글자 "이름"은 사실 성씨+직함이다("김부장"·"이대리", #677).
 # 끝 글자(시·대·구)만 보고 지명·학교로 버리지 않는다. "김민구"·"이성구"·"박정대" 같은 실명이 통째로 샌다.
 _TITLE_TAIL_WORDS = frozenset(c for c in _TITLE_CUES if len(c) == 2)
@@ -162,6 +197,16 @@ _TITLE_TAIL_WORDS = frozenset(c for c in _TITLE_CUES if len(c) == 2)
 # "랑"·"께"도 흔한 단일 음절 조사다(#484 리뷰 — "김민수랑", "박서준께"가 낱말 경계 확인
 # 때문에 놓치고 있었다).
 _JOSA_CHARS = frozenset("이가은는을를도만의에로과와엔랑께")
+# 이름 뒤 직함 바로 다음에 와도 되는 첫 글자(#601) — 조사·존칭·흔한 어미의 첫머리("팀장이"·"부장님께"·
+# "주임입니다"·"과장으로"·"팀장한테"·"팀장처럼"·"대리예요"·"대리였다"·"대리라서"·"팀장조차"·"팀장마저"·
+# "팀장밖에"). 다른 한글이 이어지면 직함이 더 긴 낱말의 앞부분이다("노동 위원회"·"서울 대리점"·"한국 대표팀"·
+# "남은 팀원들"). 한글이 아니면(공백·문장부호·끝) 언제나 된다.
+_TITLE_FOLLOW_CHARS = _JOSA_CHARS | frozenset("님입으한하처부까보예였라조마밖")
+# 직함 뒤 "이"는 조사·서술격 어미일 때만 직함 끝이다("팀장이 "·"팀장이다"·"팀장이었다"). 뒤에 다른 글자가
+# 붙으면 합성어다("교수이론"·"대표이미지"·"대표이사").
+_TITLE_I_ENDING_NEXT = frozenset("다었며고라야에지나면랑여자시셨세신므니든래요란냐죠")
+# 판결문 앞 직함 뒤 두 글자 이름이 닫혔다고 볼 문장부호(#601). 숫자·영문은 닫힘이 아니다("검사 유효1").
+_CLOSING_PUNCT = frozenset("(),.;:!?/·[]「」『』\"'")
 
 _SURNAME_ALT = "|".join(sorted(_SURNAMES, key=len, reverse=True))
 # 이름 앞 단서 = 역할어 + 직함. 직함이 이름 앞에 오는 형태("대표 홍길동")도 잡는다(#239).
@@ -596,6 +641,70 @@ def _is_label_word_at(text: str, pos: int, *, strong: bool = False) -> bool:
     return not strong and _is_common_word_at(text, pos)
 
 
+def _title_ends_at(text: str, pos: int) -> bool:
+    """이름 뒤 직함이 text[pos]에서 끝나는지 — 글 끝, 한글이 아닌 글자, 또는 조사·존칭·어미의 첫머리(#601)."""
+    ch = text[pos : pos + 1]
+    if not ch or not _is_hangul(ch):
+        return True
+    if ch == "이":
+        nxt = text[pos + 1 : pos + 2]
+        return not nxt or not _is_hangul(nxt) or nxt in _TITLE_I_ENDING_NEXT
+    return ch in _TITLE_FOLLOW_CHARS
+
+
+def _closed_after(text: str, pos: int) -> bool:
+    """text[pos]에서 낱말이 닫히는지 — 가로 공백을 건너뛴 뒤 글 끝, 줄바꿈, 또는 닫는 문장부호(#601).
+
+    "판사 한하 (재판장)"·"판사 한하 ⏎"은 닫힌 것으로, "검사 유효 판정"·"검사 유효1"은 닫히지 않은 것으로 본다.
+    """
+    while pos < len(text) and text[pos].isspace() and text[pos] not in "\r\n":
+        pos += 1
+    ch = text[pos : pos + 1]
+    return not ch or ch in "\r\n" or ch in _CLOSING_PUNCT
+
+
+def _two_char_title_name_ok(
+    name: str,
+    prefix: str | None,
+    suffix: str | None,
+    *,
+    explicit_sep: bool,
+    glued: bool,
+    closed: bool,
+    common: bool,
+    title_ends: bool,
+) -> bool:
+    """직함 단서 하나만 있는 두 글자 후보를 이름으로 받을지(#601).
+
+    세 자리만 받는다. 띄어 쓴 이름 뒤 직함("남원 팀장이"·"임빈 부장님께"), 쌍점·세로줄이 붙은 앞 직함("상담원:
+    이영", 양식 라벨이다), 판결문의 판사·검사·증인 바로 뒤에서 이름이 괄호·쉼표·줄 끝으로 닫힐 때(closed, "판사
+    한하"·"검사 홍성(기소, 공판)"). "검사"는 점검이라는 뜻으로 더 흔해서 "검사 유형"·"검사 하나는"처럼 뒤에 낱말이나
+    조사가 이어지면 받지 않는다.
+
+    이름 뒤 직함은 띄어 썼고(glued가 아니고, "홍보팀장"·"총무과장"은 부서+직함 한 낱말이다) 직함 바로 뒤가 조사·
+    존칭이나 낱말 끝이어야 한다(title_ends, "노동 위원회"·"서울 대리점"을 막는다). #603 직함(기사·선수·프로·박사
+    등)과 _TWO_CHAR_SKIP_TITLES(기관장 직함·"의사")는 받지 않는다. 괄호 안 직함("남원(대리)")과 공백만 있는 앞
+    직함("팀장 주재 회의")도 그대로 버린다. 일반어(common, _COMMON_WORDS 낱말 경계)는 쌍점 자리에서도 거른다.
+    이 함수는 두 글자 이름을 더 받을지만 정해서, 거짓을 돌려주면 그 전과 똑같이 동작한다.
+    """
+    if (
+        common
+        or name in _TITLE_CONTEXT_WORDS
+        or name in _LIST_NOT_NAMES
+        or name[1] in _TWO_CHAR_PARTICLE_TAILS
+    ):
+        return False
+    if prefix is None:
+        return (
+            suffix is not None
+            and suffix not in _CUES_603
+            and suffix not in _TWO_CHAR_SKIP_TITLES
+            and not glued
+            and title_ends
+        )
+    return explicit_sep or (prefix in _COURT_PREFIX_TITLES and closed)
+
+
 def has_name_candidate(text: str) -> bool:
     """이 텍스트에 사람 이름이 있을 가능성이 있는지 — LLM에 보낼지 정하는 느슨한 필터.
 
@@ -758,6 +867,7 @@ class NameDetector(Detector):
 
             # 직함 하나만 단서일 땐(앞이든 뒤든) 성+2자 풀네임(3글자)만 인정 — 부서·업무어가
             # 직함에 붙어 이름으로 오탐되는 걸 막는다(#213 뒤 직함, #239 앞 직함).
+            # 두 글자 실명("남원 팀장이"·"판사 한하")까지 버려 새던 자리는 _two_char_title_name_ok가 받는다(#601).
             # 부서어+조사("정기가")가 3글자로 둔갑하는 우회(#247)는 위 _COMMON_WORDS 경계
             # 판정이 먼저 거른다.
             # 앞 직함은 괄호 안 직함일 때만 짝이 된다. "부장 전결(인)"처럼 결재란의 업무어가
@@ -765,7 +875,22 @@ class NameDetector(Detector):
             title_only = ((suffix or paren_title) in _TITLE_ONLY_CUES and not has_prefix) or (
                 prefix in _TITLE_ONLY_CUES and suffix is None and paren_title is None
             )
-            if title_only and len(m.group("name")) < 3:
+            if (
+                title_only
+                and len(m.group("name")) < 3
+                and not _two_char_title_name_ok(
+                    m.group("name"),
+                    prefix,
+                    suffix,
+                    explicit_sep=has_explicit_sep,
+                    glued=suffix is not None and m.start("suffix") == m.end("name"),
+                    # 판결문 직함은 조사 없이 이름이 바로 올 때만 본다("검사가 유효⏎"의 "유효"는 이름이 아니다)
+                    closed=_closed_after(text, m.end("name"))
+                    and (prefix is None or m.end("prefix") == m.start("label_sep")),
+                    common=_is_common_word_at(text, name_start),
+                    title_ends=suffix is not None and _title_ends_at(text, m.end("suffix")),
+                )
+            ):
                 if prefix in _TITLE_CUES_603 or (prefix is not None and m.start() == resume_cue):
                     # #603 직함을 앞 단서로 읽어 버린 두 글자 이름은 이름 자리부터 다시 찾는다. 괄호 같은
                     # 다른 단서로 전처럼 잡히게 한다("피고 김민(35세)", #674). 아래에서 다시 찾은 뒤 단서가

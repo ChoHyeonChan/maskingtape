@@ -102,7 +102,7 @@ scrubadub 행은 다시 돌리지 않았다. #650은 글을 바꾸지 않고 사
 >    운전면허번호나 카드번호로 오탐될 위험이 이 표에는 전혀 드러나지 않는다**는 뜻이기도 하다
 >    — 그 위험은 아래 `driver_license`(운전면허번호) 단락에서 별도로 실측·서술한다.
 
-500건 기준 최신 실측(#537 재측정, seed=42 — 데이터셋은 #339/#340 반영본 그대로):
+500건 기준 최신 실측(#537 재측정, 이름 행은 2026-10-15 #601 반영 재측정, seed=42 — 데이터셋은 #339/#340 반영본 그대로):
 
 | kind | precision | recall | f1 | f2 | 비고 |
 |---|---|---|---|---|---|
@@ -114,7 +114,7 @@ scrubadub 행은 다시 돌리지 않았다. #650은 글을 바꾸지 않고 사
 | **address** | **1.000** | **1.000** | **1.000** | **1.000** | core [#252](https://github.com/ChoHyeonChan/maskingtape/pull/252)가 [#248](https://github.com/ChoHyeonChan/maskingtape/issues/248)(계사 어미 미탐)을 고쳐 recall 1.000 완전 복구 + [#340](https://github.com/ChoHyeonChan/maskingtape/issues/340) "번지" 리터럴 체인 끊김 신규 커버 — 아래 참고 |
 | birth_date | 1.000 | 1.000 | 1.000 | 1.000 | [#266](https://github.com/ChoHyeonChan/maskingtape/issues/266)/[#271](https://github.com/ChoHyeonChan/maskingtape/pull/271)에서 core가 추가한 10번째 kind. confidence가 항상 정확히 0.9로 고정 — 아래 confidence 절 참고 |
 | driver_license | 1.000 | 1.000 | 1.000 | 1.000 | [#267](https://github.com/ChoHyeonChan/maskingtape/issues/267)/[#305](https://github.com/ChoHyeonChan/maskingtape/pull/305)에서 core가 추가한 11번째 kind. 문맥 앵커조차 없이 confidence가 항상 정확히 0.85로 고정 — 아래 참고 |
-| **name** | **0.967** | **0.932** | **0.949** | **0.939** | [#537](https://github.com/ChoHyeonChan/maskingtape/issues/537)+[#484](https://github.com/ChoHyeonChan/maskingtape/issues/484) 반영(0.910 → 0.949, recall 0.869 → 0.932): #537이 "이력서 접수:"·"면허 갱신 신청:" 같은 업무 문서 제목형 라벨 누락(20건)을, #484가 약한 단서 오탐 4종을 각각 고침. 남은 미탐 26건 중 12건은 경계 한 글자 차이(실질적 유출 아님 — 아래 하이브리드 절 참고)이고 나머지 14건이 2음절 이름+조사·직함(설계된 한계)과 "A에서 B로 변경" 두 번째 이름([#589](https://github.com/ChoHyeonChan/maskingtape/issues/589), 단서 자체가 없음) 등. **recall 0.932는 실세계 추정치가 아니라 상한** — 위 한계 고지 2번 참고 |
+| **name** | **0.968** | **0.956** | **0.962** | **0.958** | [#601](https://github.com/ChoHyeonChan/maskingtape/issues/601) 반영(recall 0.932 → 0.956, tp 357 → 366, 오탐 12건 그대로): 두 글자 이름 + 띄어 쓴 직함(`남원 팀장이`)을 받는다. 그 전 값 0.967 / 0.932 / 0.949 / 0.939는 [#537](https://github.com/ChoHyeonChan/maskingtape/issues/537)+[#484](https://github.com/ChoHyeonChan/maskingtape/issues/484) 반영(0.910 → 0.949, recall 0.869 → 0.932): #537이 "이력서 접수:"·"면허 갱신 신청:" 같은 업무 문서 제목형 라벨 누락(20건)을, #484가 약한 단서 오탐 4종을 각각 고침. 남은 미탐 26건 중 12건은 경계 한 글자 차이(실질적 유출 아님 — 아래 하이브리드 절 참고)이고 나머지 14건이 2음절 이름+조사·직함(설계된 한계)과 "A에서 B로 변경" 두 번째 이름([#589](https://github.com/ChoHyeonChan/maskingtape/issues/589), 단서 자체가 없음) 등. **recall 0.932는 실세계 추정치가 아니라 상한** — 위 한계 고지 2번 참고 |
 
 card는 `gen_account_number_like`가 구분자 없이 13자리 이상을 만들 때 core `CreditCardDetector`의
 "구분자 없는 13~19자리" 분기와 우연히 겹칠 수 있다는 걸 이번 재측정 중 실제로 재현했다
@@ -285,12 +285,13 @@ address recall이 1.000으로 완전히 복구됐다 — 회귀 테스트도 새
 `name`(이름)에는 **역할어·존칭 없이 직함만 있는 문맥**("홍길동 대표가 서명했다")이 새로
 추가됐다(#213/#223) — core `NameDetector`가 `_TITLE_CUES`(팀장/대표/이사 등)를 오늘부터 suffix
 단서로도 쓰게 됐다. 다만 core는 이 단서 하나만으론 **성+2음절 이상 풀네임(3글자 이상)만**
-인정한다 — "구매 부장"처럼 부서·업무어가 성씨와 우연히 겹쳐 오탐되는 걸 막는 설계다. 직접
-재현해 이 가드가 실제로 지켜지는지 확인했다:
+인정했다 — "구매 부장"처럼 부서·업무어가 성씨와 우연히 겹쳐 오탐되는 걸 막는 설계였다. #601(2026-10-15)부터는
+띄어 쓴 이름 뒤 직함·쌍점이 붙은 앞 직함·판결문 앞 직함에서 두 글자 이름도 받는다(core `_two_char_title_name_ok`).
+지금 동작:
 
 ```python
 NameDetector().detect("홍길동 대표가 서명했다.")        # -> [('홍길동', 0.5)]  3글자, 정상 탐지
-NameDetector().detect("김민 부장이 결재했습니다.")        # -> []  2글자, 설계상 미탐
+NameDetector().detect("김민 부장이 결재했습니다.")        # -> [('김민', 0.5)]  2글자, #601부터 탐지
 NameDetector().detect("구매 부장이 결재했습니다.")        # -> []  부서어 오탐 가드 정상 동작
 ```
 
@@ -1157,6 +1158,7 @@ python -m bench.evaluators.evaluate_doc_types bench/datasets/doc_types_v1.jsonl
   잡는다. 첫 훑기가 main과 같아 이 처리 때문에 이름을 덜 가리는 일은 없다(표 칸의 세 글자 이상 역할어를 이름으로
   가리던 오탐은 뺐다). 나머지 종류는 그대로다. 하이브리드 수치(위 표)는
   `97ed96f`에서 다시 쟀다.
+- **#601로 두 글자 이름 + 직함을 고쳤다(규칙 전용, 2026-10-15, main `5fd40af` 위 브랜치).** 판결문 0.903 → 0.937, 사내 메일 0.792 → 0.825, 상담 기록 0.794 → 0.825, 회의록 0.950 → 1.000, 전체 0.892 → 0.923이고 오탐은 11건 그대로다. #601 댓글에 적은 이 세트의 꼴을 고친 것이라 이 숫자는 상한으로 읽는다. 위 표의 하이브리드 수치는 #601 전 값이다.
 - **#662·#663 머지 뒤(main `97ed96f`) 규칙 전용에서 남은 이름 미탐은 126건이다.** 자기소개
   (`고객센터 임인예입니다.`·`제 이름은 김지재고요`) 68건은 [#663](https://github.com/ChoHyeonChan/maskingtape/issues/663)의 남은 부분이고, 하이브리드에서는 모델이 거의 잡는다(메일 미탐 5·상담 3).
   두 글자 이름(`판사 한하`·`송찬 팀장님,`·`상담원: 이영`) 45건과 두 글자 이름 + 조사를 세 글자로 잡은 경계 13건은

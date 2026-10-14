@@ -34,7 +34,8 @@ def test_counselor_role_word_is_a_name_cue(text, name):
     "text", ["상담원 연결 대기 중입니다", "상담원 연결해 드릴게요", "상담원 배정은 내일"]
 )
 def test_counselor_followed_by_a_common_word_is_not_a_name(text):
-    # "상담사"와 같은 직함 규칙을 따른다 — 직함만 단서일 땐 성+2자 풀네임만 받고, 흔한 낱말은 거른다.
+    # "상담사"와 같은 직함 규칙을 따른다 — 직함만 단서일 땐 성+2자 풀네임을 받고(두 글자 이름은 #601의 세 자리에서만),
+    # 흔한 낱말은 거른다.
     assert detect(text) == []
 
 
