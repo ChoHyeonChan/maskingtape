@@ -115,11 +115,13 @@ def test_department_word_before_title_is_not_a_name():
     assert detect("홍보 팀장 회의록") == []
 
 
-def test_two_char_name_with_title_only_is_dropped_by_design():
-    # #213 트레이드오프: 직함만 단서인 2글자 이름("김민 대표")은 부서어와 구분이 안 돼 규칙에선 버린다.
-    # 문맥을 이해하는 하이브리드(LLM)판이 이런 경우를 담당한다.
-    assert detect("김민 대표 서명") == []
-    # 단, 존칭(님)이 붙으면 2글자 이름도 그대로 잡는다 — 님은 강한 단서라 3글자 제약을 안 건다.
+def test_two_char_name_before_spaced_title_is_caught():
+    # #213 때는 직함만 단서인 2글자 이름("김민 대표")을 부서어와 구분 못 해 버렸다. #601부터 띄어 쓴 이름 뒤
+    # 직함이면 받는다. 부서어는 _COMMON_WORDS가, 직함을 꾸미는 말은 _TITLE_CONTEXT_WORDS가 거른다.
+    assert detect("김민 대표 서명")[0].text == "김민"
+    # 붙여 쓴 부서+직함("홍보팀장")은 여전히 이름이 아니다.
+    assert detect("홍보팀장 서명") == []
+    # 존칭(님)이 붙으면 2글자 이름도 그대로 잡는다 — 님은 강한 단서라 3글자 제약을 안 건다.
     assert detect("김민님 안내")[0].text == "김민"
 
 
