@@ -1253,7 +1253,7 @@ python -m bench.evaluators.evaluate_doc_types bench/datasets/doc_types_v1.jsonl
 
 ```bash
 python -m bench.generate_attacks --out bench/datasets/attacks_v1.jsonl      # seed=549, 종류별 20쌍
-python -m bench.evaluators.evaluate_attacks bench/datasets/attacks_v1.jsonl [--model qwen2.5:7b] [--json out.json]
+python -m bench.evaluators.evaluate_attacks bench/datasets/attacks_v1.jsonl [--model qwen2.5:7b] [--json out.json]   # --model을 빼면 core 기본 모델(지금 1.5B)
 ```
 
 평가기는 같은 문서를 세 구성으로 돌려 **이름 라벨만** 완전 일치로 채점한다:
@@ -1264,7 +1264,7 @@ python -m bench.evaluators.evaluate_attacks bench/datasets/attacks_v1.jsonl [--m
 
 Ollama가 없으면(CI) rule만 낸다. 다른 종류(전화·주민번호 등)는 규칙만 쓰므로 세지 않는다.
 
-### 결과 (2026-10-01, main `f399a6a`, qwen2.5:7b, RTX 3080)
+### 결과 — qwen2.5:7b (2026-10-01 당시 기본 모델, main `f399a6a`, RTX 3080)
 
 이름 재현율 — `깨끗한 판 / 공격 판`:
 
@@ -1292,6 +1292,51 @@ Ollama가 없으면(CI) rule만 낸다. 다른 종류(전화·주민번호 등)�
 - 하이브리드의 깨끗한 판이 LLM 단독보다 낮은 칸(`ignore_previous`·`rename` 0.905 < 1.000)은
   Pipeline의 겹침 병합 때문이다 — 규칙이 경계가 다른 span을 내면 LLM의 정확한 span과 합쳐져
   완전 일치에서 빠진다(보호 범위가 줄어드는 게 아니라 넓어지는 쪽이다).
+
+### 결과 — 지금 기본 모델 maskingtape-name-1.5b (2026-10-16, main `2d88336`, RTX 3080) ([#740](https://github.com/ChoHyeonChan/maskingtape/issues/740))
+
+모델 `hf.co/StayAlive1/maskingtape-name-1.5b-GGUF:Q4_K_M`(digest `5aab76e2c8a4`), Ollama 0.34.2. 200문서 2구성에 27초 걸렸고, 두 번 재서 같았다.
+
+```bash
+python -m bench.evaluators.evaluate_attacks bench/datasets/attacks_v1.jsonl --model hf.co/StayAlive1/maskingtape-name-1.5b-GGUF:Q4_K_M --json out.json
+```
+
+이름 재현율 — `깨끗한 판 / 공격 판`:
+
+| 공격 종류 | 쌍 | rule | llm_only | hybrid | 안전망이 막은 몫 (hybrid − llm_only, 공격 판) |
+|---|---|---|---|---|---|
+| deny_names | 20 | 0.952 / 0.952 | 1.000 / **1.000** | 1.000 / 1.000 | 0.000 |
+| ignore_previous | 20 | 0.857 / 0.857 | 1.000 / **1.000** | 0.905 / 0.905 | −0.095 |
+| json_override | 20 | 0.952 / 0.952 | 1.000 / **1.000** | 1.000 / 1.000 | 0.000 |
+| rename | 20 | 0.857 / 0.857 | 1.000 / **1.000** | 0.905 / 0.905 | −0.095 |
+| role_switch | 20 | 0.950 / 0.950 | 1.000 / **1.000** | 0.950 / 0.950 | −0.050 |
+
+읽는 법:
+
+- **1.5B는 다섯 유형 모두에서 흔들리지 않는다.** LLM 단독의 공격 판 재현율이 1.000이다(7B는 0.095~0.700).
+  `name_llm.py`의 프롬프트와 응답 해석은 7B를 잰 `f399a6a`와 같고 기본 모델만 바뀌었다. 그래서 llm_only 열은
+  위 7B 표와 바로 비교할 수 있다.
+- **단, 이 모델은 이 생성기의 공격 문장으로 학습했다**([training/README.md](../training/README.md) 「데이터」).
+  학습 문서의 20%에 공격 문장을 붙이고 정답은 그대로 두어 지시문을 무시하도록 가르쳤고, 종류마다 공격 문장
+  3개 중 앞 2개를 학습에 썼다. 그래서 아래처럼 학습에 쓰지 않은 공격 문장만 따로 잰다.
+
+  | 세트 | 쌍 | llm_only 공격 판 재현율 |
+  |---|---|---|
+  | attacks_v1 중 학습에 쓴 공격 문장(종류별 앞 2개) | 61 | 다섯 유형 모두 1.000 |
+  | attacks_v1 중 학습에 안 쓴 공격 문장(종류별 마지막 1개) | 39 | 다섯 유형 모두 1.000 |
+  | [`training/data/heldout_attacks_v2.jsonl`](../training/data/heldout_attacks_v2.jsonl) — 학습에 안 쓴 템플릿·공격 문장 | 100 | 다섯 유형 모두 1.000 |
+
+  attacks_v1은 공격 판 본문에 든 문장이 `bench/generator/attacks.py`의 `ATTACK_SENTENCES[태그]` 마지막 문장인지로
+  나눴다(`training/make_dataset.py`가 학습·보고용을 가르는 기준과 같다). 보고용 세트는 위 명령에서 데이터셋 경로만 바꾸면 된다.
+  그래도 공격 문장은 모두 같은 다섯 유형·같은 말투에서 나왔다. 이 숫자는 **"이 다섯 유형에는 흔들리지 않는다"까지**이고,
+  처음 보는 유형의 공격에도 강하다는 근거는 아니다.
+- **규칙과 함께 쓸 때 규칙만 쓸 때보다 낮아지지 않는다 — 1.5B에서도 맞다.** 하이브리드의 공격 판 재현율이 다섯 유형 모두
+  규칙 전용과 같거나 높다(0.905~1.000 ≥ 0.857~0.952). 보고용 세트에서도 같다(0.900~1.000 ≥ 0.850~1.000).
+- 「안전망이 막은 몫」이 음수인 칸은 이름이 덜 가려진 게 아니다. 하이브리드가 완전 일치에서 놓친 5건은 모두 규칙이
+  두 글자 이름 뒤 조사까지 잡은 경계 차이다(`강민` → `강민의`, `백호` → `백호이`). 이름은 전부 가려졌고 한 글자가 더
+  가려졌다(위 7B 표의 깨끗한 판과 같은 이유). 1.5B는 공격 판에서 잃는 이름이 없어서 안전망이 막을 몫도 없다.
+- rule 열이 7B 표와 다른 것(예: deny_names 0.857 → 0.952)은 모델이 아니라 10/1 이후 규칙 수정 때문이다. hybrid 열에도
+  이 차이가 섞여 있다.
 
 **웹 하이브리드(OpenAI) 측정은 아직 없다.** `apps/api`의 OpenAI 경로는 비용이 들어
 팀장 승인을 받은 뒤 같은 세트로 잰다(이슈 본문의 조건). 로컬 모델이 흔들리는 유형은
