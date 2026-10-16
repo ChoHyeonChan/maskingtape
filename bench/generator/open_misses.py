@@ -539,7 +539,7 @@ def gen_address_city_no_gu_abbr(rng: random.Random) -> MissDoc:
 # 테스트는 그대로 통과하므로 core PR을 막지 않는다).
 FIXED_ISSUES = frozenset({
     592, 593, 594, 600, 601, 602, 603, 604, 605, 606, 607,
-    636, 638, 639, 640, 656, 657, 686,
+    636, 638, 639, 640, 656, 657, 658, 686,
 })
 
 
