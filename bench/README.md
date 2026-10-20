@@ -53,6 +53,10 @@ tests/               # 생성기·평가 로직 단위 테스트
 | **`doc_types_holdout_v1`** | **보고용** | 문서 틀과 이름 음절을 조정용과 다르게 새로 썼다(아래). 미탐 예를 보지 않는다 |
 | KDPII test (외부, 저장소 밖) | 보고용 | 규칙 조정과 학습에 쓰지 않은 외부 데이터다 |
 
+KDPII는 `python -m bench.fetch_kdpii --split test`로 받는다. Zenodo 파일의 MD5를 레코드에 적힌 값과 대조하고,
+한 줄에 한 문장씩 원본 순서대로 `bench/datasets/external/kdpii_test.jsonl`(git이 무시하는 폴더)에 쓴다. 누가 받아도
+같은 4,891문장이 나온다. CC-BY-4.0이고 원자료와 변환본은 저장소에 싣지 않는다(SBOM 부록 D).
+
 **규칙**
 
 1. core 규칙을 고칠 때 미탐·오탐 예는 **조정용에서만** 본다.
