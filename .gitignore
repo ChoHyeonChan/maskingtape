@@ -35,3 +35,6 @@ desktop.ini
 
 # #458 학습 데이터 — make_dataset.py로 같은 시드에서 재현된다(6.9MB). 보고용 heldout_*.jsonl은 커밋한다.
 training/data/train.jsonl
+
+# KDPII 변환본 — bench/fetch_kdpii.py로 받는다(CC-BY-4.0, 저장소에 싣지 않음, SBOM 부록 D)
+bench/datasets/external/

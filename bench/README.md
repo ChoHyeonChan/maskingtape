@@ -1,6 +1,6 @@
 # bench — 합성 벤치마크
 
-**담당: seoyeon ([@seoyeon056](https://github.com/seoyeon056))** · 상태: ✅ 시작 가능 (스켈레톤 머지 완료)
+**담당: seoyeon ([@seoyeon056](https://github.com/seoyeon056))** · 상태: 운영 중 — 조정용·보고용 세트로 정확도를 재고, 발표 전 재측정은 [#739](https://github.com/ChoHyeonChan/maskingtape/issues/739)
 
 저작권·개인정보 걱정 없는 **자체 합성 평가 데이터셋**과 정확도(F1·F2) 측정 스크립트. 공개 벤치마크는 이 프로젝트의 핵심 차별화 포인트다.
 
@@ -51,7 +51,16 @@ tests/               # 생성기·평가 로직 단위 테스트
 | `variants_v1` · `open_misses_v1` | 조정용 | 고친 꼴이 되돌아가지 않는지, 이슈별 미탐이 줄었는지 보는 회귀 세트다 |
 | `doc_types_v1` | 조정용 | 미탐 예를 #601·#662·#663에 올려 규칙을 고치는 데 썼다(2026-10-06~) |
 | **`doc_types_holdout_v1`** | **보고용** | 문서 틀과 이름 음절을 조정용과 다르게 새로 썼다(아래). 미탐 예를 보지 않는다 |
-| KDPII test (외부, 저장소 밖) | 보고용 | 규칙 조정과 학습에 쓰지 않은 외부 데이터다 |
+| KDPII test (외부, 저장소 밖) | 보고용 | 학습에 쓰지 않은 외부 데이터다. #601(PR #743)에서 오탐 낱말을 거르기 목록에 넣을 때 한 번 봤다(아래 「KDPII 타 도구 비교」) |
+
+KDPII는 `python -m bench.fetch_kdpii --split test`로 받는다. Zenodo 파일의 MD5를 레코드에 적힌 값과 대조하고,
+한 줄에 한 문장씩 원본 순서대로 `bench/datasets/external/kdpii_test.jsonl`(git이 무시하는 폴더)에 쓴다. 누가 받아도
+같은 4,891문장이 나온다. CC-BY-4.0이고 원자료와 변환본은 저장소에 싣지 않는다(SBOM 부록 D).
+우리 11종에 맞는 라벨 770개는 `labels`로, 나머지 라벨 1,441개(직장·직위·닉네임 등)는 `other`로 나눈다.
+`--name-sample 500`을 주면 이름 하이브리드 외부 비교(아래 「이름 탐지 방식 비교」)에 쓴 500문장도
+`kdpii_test_names500.jsonl`로 쓴다. 이름 문장 169개 전부에 나머지 331개를 시드 458로 더한 것이다. 이 표본으로
+main `8fc7889`의 규칙 전용을 재면 아래 「이름 탐지 방식 비교」 표의 재현율 0.254(tp 45·fp 6·fn 132)가 그대로 나온다. 타 도구 비교는 아래
+「KDPII 타 도구 비교」에 있다.
 
 **규칙**
 
@@ -119,8 +128,9 @@ python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl --report bench
 README와 ROADMAP의 "영어권 도구는 한국어 개인정보를 제대로 못 잡는다"는 주장을 숫자로 뒷받침하기
 위해, 로컬에서 실행되는 오픈소스 도구만 같은 합성 데이터셋과 같은 exact-match 채점기로 비교한다.
 상용 API 모델(GPT/Claude 등)과 비상업 전용 라이선스 모델은 비교 코드에 넣지 않는다. 현재 기준선은
-`scrubadub` 2.0.1이다 — PyPI 메타데이터는 MIT, classifier는 Apache-2.0으로 표시되며 둘 다 팀 허용
-라이선스다. 한국 주민번호·사업자등록번호·여권번호 같은 전용 kind가 없어 매핑 가능한
+`scrubadub` 2.0.1이다. 저장소 LICENSE는 Apache-2.0이다(PyPI license 칸은 MIT로 적혀 있다). 전이 의존성 중
+`python-stdnum`은 LGPL-2.1-or-later다. 팀 금지 목록(GPL·AGPL·SSPL)에는 없지만 같은 계열이라 SBOM 부록 A-8·B에
+따로 적었다. scrubadub은 선택 설치 `maskingtape[bench-baselines]`로만 들어오는 개발 도구이고, 우리가 배포하지 않는다. 한국 주민번호·사업자등록번호·여권번호 같은 전용 kind가 없어 매핑 가능한
 `email`·`phone`·`credit_card → card`만 채점에 들어가고, 나머지는 그대로 FN으로 남는다.
 
 ```bash
@@ -138,9 +148,8 @@ python -m bench.evaluators.compare_open_source_tools bench/datasets/synth_v1.jso
 
 scrubadub 행은 다시 돌리지 않았다. #650은 글을 바꾸지 않고 사업자등록번호 정답만 2건 더했고 scrubadub은
 사업자등록번호를 예측하지 않으므로, 예측은 그대로이고 fn만 2 늘어난다(반올림한 비율은 같다). 종류별 표와
-매핑표는 `bench/reports/open_source_baselines_v1.md`에 저장돼 있다(2026-10-01 측정본). Presidio 같은
-무거운 NLP 기반 도구는 후보로 볼 수 있지만, 이 저장소에 비교 기준선으로 넣으려면 설치·모델 다운로드·
-라이선스·로컬 재현 절차가 먼저 안정적으로 정리돼야 한다.
+매핑표는 `bench/reports/open_source_baselines_v1.md`에 저장돼 있다(2026-10-01 측정본). ko-pii와 Presidio는
+외부 데이터로 따로 비교한다(아래 「KDPII 타 도구 비교」).
 
 > **⚠️ 한계 고지 (#345) — 구조화 kind의 1.000을 읽을 때 반드시 함께 볼 것**
 >
@@ -402,6 +411,97 @@ NameDetector().detect("대표 허가가 필요합니다.")     # -> [('허가가
 방향의 실패). precision을 깎아 사용자 신뢰를 떨어뜨리는 문제이지, CONTRIBUTING이 최우선으로
 보는 "탐지 실패=유출" 문제는 아니다 — 아래 마스킹 품질 절에서도 이 구분이 그대로 확인된다.
 
+## KDPII 타 도구 비교 — 외부 데이터, 보고용 ([#457](https://github.com/ChoHyeonChan/maskingtape/issues/457), [#751](https://github.com/ChoHyeonChan/maskingtape/issues/751))
+
+위 합성 데이터 비교는 생성기와 탐지기가 같은 형식을 공유해서(위 한계 고지 1번) 다른 도구와 견주기에는 우리
+쪽에 유리하다. 그래서 발표 자료의 타 도구 비교는 학습에 쓰지 않은 외부 데이터 KDPII test(4,891문장)로 낸다.
+한국어 오픈소스 도구 ko-pii와 영어권에서 널리 쓰는 Presidio를 같은 채점기로 잰다. 모든 도구는 로컬에서 돌고,
+상용 API는 쓰지 않는다. 다만 Presidio의 이메일 인식기가 쓰는 tldextract는 캐시가 비어 있으면 공개 도메인 접미사
+목록(publicsuffix.org, 실패하면 GitHub 사본)을 한 번 받아 홈의 `.cache/python-tldextract`에 둔다. 고정된 목록 주소를
+받는 요청이고, 비교하는 문장은 보내지 않는다.
+
+| 이름 | 도구 | 설정 |
+|---|---|---|
+| `maskingtape-rules` | maskingtape(이 저장소) | 규칙 전용 `Pipeline()`. LLM은 끈다 |
+| `ko-pii-strict` | ko-pii 1.16.0 | `Anonymizer(mode=ProcessingMode.STRICT)`가 막는(BLOCK) 탐지만 |
+| `ko-pii-all` | ko-pii 1.16.0 | `detect_all`이 낸 탐지 전부 |
+| `presidio` | presidio-analyzer 2.2.364, spaCy 3.8.16, en_core_web_lg 3.8.0 | 기본 설정(영어 NLP, 점수 문턱 0) |
+| `presidio-kr` | 같음 | 기본으로 꺼진 한국 인식기 5개(주민·외국인·사업자등록·운전면허·여권)를 켜고 전화 지역에 KR을 더함 |
+
+도구마다 라벨을 우리 11종으로 옮긴다(`bench/evaluators/pii_tool_adapters.py`). 상대에게 유리하게 잡았다. Presidio의
+`LOCATION`은 주소로, `DATE_TIME`은 생년월일로 보고, 미국 여권·운전면허 같은 다른 나라 라벨도 같은 종류로 친다.
+매핑에 없는 라벨도 「다 가림」과 「엉뚱한 곳 가림」에는 들어간다.
+
+정답은 KDPII 라벨 중 우리 11종에 맞는 770개다(이름 177·전화 124·주소 101·이메일 81·카드 78·계좌 77·생년월일 70·
+주민·외국인등록번호 27·여권 18·운전면허 17). 직장·직위·닉네임 같은 나머지 1,441개는 정답에 넣지 않지만, 그 자리를
+가린 것은 「엉뚱한 곳」으로 세지 않는다.
+
+- **다 가림**: 정답 글자가 어떤 탐지로든(종류 무관) 전부 덮였는가. 유출 관점의 재현율이다. 숫자가 4개 이상인 정답은
+  숫자만 다 덮이면 가린 것으로 본다. KDPII는 「우리은행 …」처럼 은행명·지역명까지 정답 구간에 넣는데, 그 이름이
+  보이는 것은 유출이 아니다.
+- **엉뚱한 곳 가림**: 정답과도, 범위 밖 라벨과도 겹치지 않는 탐지 수 / 전체 탐지 수.
+- **정답 없는 문장 중 가림**: 라벨이 하나도 없는 3,183문장 중 무엇이라도 가린 문장 수.
+- **overlap F1**: 종류가 같고 구간이 겹치면 맞음. 도구마다 구간을 자르는 관행(조사·은행명 포함 여부)이 달라 exact보다
+  이쪽을 본다. 리포트에는 exact F1도 같이 나온다.
+
+**재현.** ko-pii와 Presidio는 저장소 의존성이 아니다(`pyproject.toml`에 없다). 저장소 밖에 비교용 가상환경을 따로
+만들고, 명령은 저장소 루트에서 돌린다. 버전은 아래 숫자를 잰 그대로 고정했다. 함께 설치되는 패키지와 라이선스는
+SBOM 본표 40~43번과 부록 A-9에 있다.
+
+```bash
+python -m venv ../venv-compare        # Python 3.13.2에서 확인
+source ../venv-compare/bin/activate   # Windows: ..\venv-compare\Scripts\activate
+python -m pip install -e packages/core "ko-pii==1.16.0" "presidio-analyzer==2.2.364" "spacy==3.8.16" \
+  "phonenumbers==9.0.41" "en_core_web_lg @ https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.8.0/en_core_web_lg-3.8.0-py3-none-any.whl"
+python -m bench.fetch_kdpii --split test --name-sample 500
+python -m bench.evaluators.compare_kdpii_tools bench/datasets/external/kdpii_test.jsonl \
+  --report bench/datasets/external/kdpii_tools_report.md
+```
+
+### 결과 (2026-10-21, core는 main `e74c3df`와 같음)
+
+maskingtape 행은 발표 자료 숫자를 잰 main `0935b7f`와 같다. 나머지 네 행도 발표 자료 숫자(2026-10-01 측정)와 같고,
+새 가상환경에 위 명령으로 다시 깔아 돌렸을 때 문장별 예측까지 같았다.
+
+| 도구 | 다 가림 (770개 중) | 일부만 | 그대로 노출 | 엉뚱한 곳 가림 | 정답 없는 문장 중 가림 (3,183문장 중) | overlap F1 |
+|---|---:|---:|---:|---:|---:|---:|
+| maskingtape-rules | 442 (0.574) | 1 | 327 | 17 / 458 | 14 | 0.706 |
+| ko-pii-strict | 406 (0.527) | 4 | 360 | 71 / 553 | 38 | 0.636 |
+| ko-pii-all | 443 (0.575) | 5 | 322 | 274 / 1,243 | 146 | 0.584 |
+| presidio-kr | 276 (0.358) | 135 | 359 | 354 / 1,136 | 264 | 0.274 |
+| presidio | 209 (0.271) | 148 | 413 | 354 / 1,030 | 264 | 0.169 |
+
+종류별 다 가림 수:
+
+| 종류 | 정답 | maskingtape-rules | ko-pii-strict | ko-pii-all | presidio-kr | presidio |
+|---|---:|---:|---:|---:|---:|---:|
+| name | 177 | 51 | 30 | 47 | 12 | 12 |
+| phone | 124 | 122 | 124 | 124 | 124 | 75 |
+| email | 81 | 81 | 81 | 81 | 26 | 26 |
+| rrn | 27 | 27 | 27 | 27 | 27 | 21 |
+| address | 101 | 32 | 14 | 34 | 6 | 6 |
+| card | 78 | 12 | 15 | 15 | 18 | 18 |
+| passport | 18 | 15 | 15 | 15 | 16 | 7 |
+| account | 77 | 67 | 61 | 61 | 23 | 23 |
+| birth_date | 70 | 19 | 34 | 34 | 8 | 8 |
+| driver_license | 17 | 16 | 5 | 5 | 16 | 13 |
+
+**읽는 법**
+
+- maskingtape와 ko-pii 전체는 다 가린 수가 비슷하다(442 대 443). 엉뚱한 곳을 가린 수는 17 대 274이고, 정답 없는
+  문장을 가린 수는 14 대 146이다.
+- 우리가 지는 종류도 있다. 생년월일은 ko-pii가 34개, maskingtape가 19개를 다 가렸다. 주소(32 대 34)와 카드(12 대 15)도
+  ko-pii 전체가 조금 많다. 카드는 모든 도구가 78개 중 18개 이하다.
+- 이름은 규칙만으로 177개 중 51개다. 로컬 LLM을 켜면 500문장 표본에서 재현율이 0.254에서 0.825로 오른다(아래
+  「이름 탐지 방식 비교」).
+- Presidio는 영어 모델(en_core_web_lg)로 돌린 값이다. 한국어 이름은 12개, 주소는 6개를 가렸다. 한국 인식기를 켜면 다
+  가린 수가 209에서 276으로 는다.
+- #601(PR [#743](https://github.com/ChoHyeonChan/maskingtape/pull/743))에서 KDPII에 새로 나온 오탐 5건(`지금 강사`·
+  `오늘 교수님` 등)을 보고 거르기 목록에 부사를 넣은 적이 있다(PR 본문에 밝힘). 그 PR 전인 `0935b7f`와 지금 core의
+  maskingtape 예측은 4,891문장 모두 같다.
+- KDPII는 보고용이다(#456). 이 표를 보고 규칙을 고치지 않는다. 10/25 코드 머지 마감 뒤 같은 명령으로 다시 잰다
+  ([#739](https://github.com/ChoHyeonChan/maskingtape/issues/739)).
+
 ## 오탐(False Positive) 측정
 
 기존에는 데이터셋 전체가 "개인정보가 있는 문서"뿐이라 재현율(recall)만 측정 가능했고,
@@ -644,8 +744,9 @@ DEFAULT_LABELS 누락을 겪은 이력이 있어 전용 테스트로 분리).
 kind)에 적용되는 단일 값이라, **RRN(14자)을 겨냥해 keep_head=2를 설정하면 같은 파이프라인이
 탐지하는 2글자 이름은 완전히 노출된다**(`min(keep_head, span_len)`이 짧은 값 전체를 삼킴) —
 "일부만 보여주려던" 설정이 조용히 "이름은 전혀 안 가림"이 되는 셈이다. bench 소관이 아니라
-core에 [#169](https://github.com/ChoHyeonChan/maskingtape/issues/169)로 남겼고, 이 현재
-동작 자체는 회귀 테스트로 고정해뒀다(core가 고치면 테스트가 깨져서 알 수 있다).
+core에 [#169](https://github.com/ChoHyeonChan/maskingtape/issues/169)로 남겼다. core가 8/10에 고쳐서 이제 보존하는 글자 수는
+구간 길이의 절반을 넘지 않는다(`min(keep_head, span_len // 2)`). 2글자 이름은 최대 1글자만 남는다. 처음에 옛 동작을
+잡아 두던 회귀 테스트도 새 동작으로 바꿨다(`test_keep_head_no_longer_fully_exposes_values_shorter_than_it`).
 
 ## 신뢰도(confidence) 임계값 분석
 
@@ -659,17 +760,15 @@ python -m bench.evaluators.confidence_analysis bench/datasets/synth_v1.jsonl
 후보 임계값마다 그보다 confidence가 낮은 예측을 버린 뒤 다시 채점해서, 임계값을 올릴수록
 precision이 오르고 recall이 내려가는 트레이드오프를 표로 보여준다.
 
-500건 기준 실측 결과(2026-09-28, main `1086044`, #498 재측정): 임계값 0.5 이하에서는 precision이 0.983(오탐 16건)이다 —
-전부 `name` kind, confidence 정확히 0.5. 대다수가 [#255](https://github.com/ChoHyeonChan/maskingtape/issues/255)에서
-정량화한 잔여 위험이다 — core #252가 #247을 하드코딩 5개 부서어만 막게 고쳐서, 그 밖의
-흔한 업무어("차량"/"허가"/"성과"/"안내")는 negative 문서(개인정보 없음)에서도 여전히
-오탐된다. 나머지는 기존에 이미 알려진 한계들이다 — 실명이 조사를 머금어 span이 한 글자
-늘어나는 안전한 방향의 경계 오차(#247 수정 이후에도 남는 정상 동작, 위 참고)와 #158 잔여
-패턴("민원인"/"지원자"류). 임계값 0.7부터 이 FP가 전부 걸러져 precision이 1.000이 되지만,
-**recall은 0.950(임계값 0.5 이하) → 0.596(0.7) → 0.557(0.8) → 0.540(0.85) → 0.487(0.9) →
-0.293(1.0)로 계속 떨어진다** — name의 규칙판 confidence 구간이 잘려나가는 게 대부분이다.
+500건 기준 실측 결과(2026-10-20, main `e74c3df`): 임계값 0.5 이하에서는 precision이 0.988(오탐 12건)이다.
+12건 모두 `name`이고 confidence가 정확히 0.5다. **12건 모두 경계 차이다** — 두 글자 이름 뒤 조사를 이름의
+셋째 글자로 함께 가린 것이라(`신성의`·`권지이`) 이름은 다 가려진다. 9/28(`1086044`)에는 흔한 업무어("차량"/"허가"/
+"성과"/"안내")를 이름으로 잡은 오탐이 섞여 16건이었는데([#255](https://github.com/ChoHyeonChan/maskingtape/issues/255)), 지금은 그런 오탐이 없다.
+임계값 0.7부터 이 12건이 걸러져 precision이 1.000이 되지만,
+**recall은 0.983(임계값 0.5 이하) → 0.615(0.7) → 0.556(0.8) → 0.552(0.85) → 0.499(0.9) →
+0.303(1.0)로 계속 떨어진다** — name의 규칙판 confidence 구간이 잘려나가는 게 대부분이다.
 
-**🚨 임계값을 0.6 초과로 올리면 안 되는 진짜 이유**: 0.5→0.7 구간에서 recall이 0.950→0.596로
+**🚨 임계값을 0.6 초과로 올리면 안 되는 진짜 이유**: 0.5→0.7 구간에서 recall이 0.983→0.615로
 유독 크게 떨어지는데, name 하나만으로는 이 폭을 설명 못 한다. `account`(계좌번호)는 core가
 체크섬이 없어 문맥어가 있어도 **confidence를 항상 정확히 0.6으로 고정**한다(직접 확인: 정답
 account 전건 confidence 0.6). 즉 **임계값을 0.7 이상으로만 올려도 계좌번호가 100% 통째로
@@ -895,8 +994,9 @@ kind를 차지한다.** 재현해보니 confidence 1.0짜리 rrn이 confidence 0
 완전히 포함되면 `kind="address", confidence=0.9`로만 보고되고 rrn 존재 자체가 사라진다.
 마스킹 범위 자체(넓은 쪽 전체를 가림)는 안전해서 직접 유출은 아니지만, kind에 의존하는
 하류 로직(통계·로깅·정책)은 오판할 수 있다. bench 소관이 아니라
-[#172](https://github.com/ChoHyeonChan/maskingtape/issues/172)로 남기고 현재 동작은
-회귀 테스트로 고정해뒀다.
+[#172](https://github.com/ChoHyeonChan/maskingtape/issues/172)로 남겼다. core가 8/10에 고쳐서 이제 완전 포함 겹침도 확신도가 높은
+쪽이 kind를 맡는다(넓은 구간은 그대로 가린다). 회귀 테스트도 새 동작으로 바꿨다
+(`test_fully_contained_overlap_applies_confidence_based_kind_rule`).
 
 ## 데이터셋 버전 — v1(제출 수치 근거)과 v2(주소 확장)
 
