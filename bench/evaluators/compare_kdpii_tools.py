@@ -144,8 +144,10 @@ def format_report(
         f"- 생성 시각: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}",
         f"- 버전: {' · '.join(versions)}",
         "",
-        "| 도구 | 다 가림 | 일부만 | 그대로 노출 | 엉뚱한 곳 가림 | 정답 없는 문장 중 가림 "
-        "| overlap P | overlap R | overlap F1 | exact F1 | ms/문장 |",
+        (
+            "| 도구 | 다 가림 | 일부만 | 그대로 노출 | 엉뚱한 곳 가림 | 정답 없는 문장 중 가림 "
+            "| overlap P | overlap R | overlap F1 | exact F1 | ms/문장 |"
+        ),
         "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for t in tools:
