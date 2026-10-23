@@ -589,6 +589,60 @@ _BRACKET_NAME_RE = re.compile(
 # 나열(_LIST_SEP)의 쉼표·가운뎃점과 같은 글자를 쓴다.
 _REVERSE_LIST_SEPS = ",，、·ㆍ・･•"
 
+# 단서가 소속·자기소개·변경 기록에만 있는 이름(#663 남은 부분·#589). 둘 다 #685 훑기처럼 더하기만 한다.
+# 이름 모양을 짧은 쪽부터 본다. "조정이고요"를 "조정이"+"고요"가 아니라 "조정"+"이고요"로 읽는다.
+_NAME_SHAPE_LAZY = (
+    r"(?:" + _SURNAME_ALT + r")[가-힣]"
+    r"(?:(?![" + _NAME_TAIL_STOP + r"])[가-힣]|" + _EUL_AS_LAST_SYLLABLE + r")??"
+)
+# 인사말이나 "저는" 바로 뒤의 소속 + 이름 + 서술격 어미(#663). 메일·상담 녹취의 자기소개다("안녕하세요.⏎구매팀
+# 백군원입니다"·"안녕하세요, 고객센터 임인예입니다"·"감사합니다. (주)한빛 인사팀 담당 김민수인데요"·"저는 개발팀 조호윤입니다").
+# 인사말을 요구하는 건 같은 모양의 일반 문장("검사 결과 정상입니다"·"팀 송년회입니다")을 피하려는 것이다. 인사말과 소속 사이에는
+# 낱말 네 개까지("이번에 새로 합류한 인사팀"), 소속과 이름 사이에는 직함 목록 밖의 역할어 하나("담당"·"파트장"·"리더")까지 둔다.
+# 소속은 끝 글자로 본다. "부·과·실"은 두 글자 이상 뒤에만 붙인다("총무과"·"기획실"은 받고 "결과"·"전부"는 받지 않는다). 이름
+# 바로 뒤가 어미이고 그 뒤가 낱말 끝이어야 한다. "고요"는 받지 않는다("인사팀 정리하고요").
+_GREETING = (
+    r"(?:안녕하세요|안녕하십니까|수고하십니다|수고[ \t]?많으십니다|반갑습니다|인사드립니다|여보세요|감사합니다|고맙습니다)"
+)
+_SELF_INTRO_RE = re.compile(
+    r"(?:" + _GREETING + r"[.!,~]*[ \t]*(?:\r?\n[ \t]*){0,2}|(?<![가-힣])저는[ \t]+)"
+    r"(?:[가-힣A-Za-z0-9()]{1,12}[ \t]+){0,4}"
+    r"(?P<org>[가-힣A-Za-z0-9]{1,10}(?:팀|센터|본부|부서|파트|그룹|지점|지사|사무소|연구소)|[가-힣]{2,10}(?:부|과|실))"
+    r"(?:의)?[ \t]+(?:(?:담당|파트장|리더|총괄|간사)[ \t]+)?(?P<name>" + _NAME_SHAPE_LAZY + r")"
+    r"[ \t]?(?:입니다만|입니다|이에요|예요|이고요|인데요|이라고|라고)(?![가-힣])"
+)
+# 자기소개 자리의 세 글자 후보가 이 글자로 끝나면 문서·행사 명사로 본다("총무팀 공지문입니다"·"재무팀 정산표입니다"·"인사팀
+# 송년회입니다"). 낱말을 하나씩 더하지 않고 끝 글자로 거른다. 이 글자로 끝나는 실명은 드물고, 거르면 그 전처럼 안 가릴 뿐이다.
+_SELF_INTRO_NOT_NAME_LAST = frozenset("문표회록집함")
+# 두 글자 복성("남궁"·"선우" 등). 복성 + 한 글자를 짧게 읽은 이름의 끝 글자 처리에 쓴다.
+_COMPOUND_SURNAMES = frozenset(s for s in _SURNAMES if len(s) == 2)
+# 소속 자리에 오지만 소속이 아닌 말의 끝("검사결과"·"화장실"·"회의실").
+_SELF_INTRO_NOT_ORG_ENDS = (
+    "결과", "효과", "성과", "사실", "현실", "진실", "확실", "전부", "일부", "내부", "외부", "세부",
+    "화장실", "회의실", "휴게실", "강의실", "탈의실", "응급실", "수술실", "대기실", "자료실", "전시실",
+)
+# 소속 뒤 자기소개 자리에 오는 성씨 글자로 시작하는 업무어("개발팀 서버입니다"·"인사팀 안내문입니다"). 공용 일반어
+# 목록(_COMMON_WORDS·_TITLE_CONTEXT_WORDS 등)과 함께 완전 일치로 거른다. 완전한 목록은 아니다.
+_SELF_INTRO_NOT_NAMES = frozenset({
+    "서버", "서비스", "서식", "안내문", "안내서", "안건", "공문", "공유", "공용", "공개", "공간", "정리", "정식", "전담",
+    "전산", "주관", "주최", "지침", "지시", "신고", "신설", "원칙", "유의", "진단", "하청", "방안", "담당",
+    "공문서", "신청서", "정산서", "조직도", "구성도", "구조도",
+})
+# 말로 이름을 대는 "제 이름은 황재고요"(#663). "이름" 단서 경로는 "고요"를 받지 않고 일반어("조정")를 걸러서 샜다.
+# "제 이름은" 바로 뒤에서만 받으므로 "고요"(받침 없는 이름 뒤)와 일반어 모양 이름도 받는다.
+_MY_NAME_IS_RE = re.compile(
+    r"(?<![가-힣])(?:제|저의|내)[ \t]*이름은[ \t]+(?P<name>"
+    + _NAME_SHAPE_LAZY
+    + r")(?:입니다|이에요|예요|이고요|고요|이라고요|라고요|이라고|라고|이야)(?![가-힣])"
+)
+# 이미 잡힌 이름 뒤 "에서 ○○○(으)로 변경"(#589). 두 번째 이름은 앞뒤에 단서가 없어 통째로 샜다. 앞 이름이 잡혔을 때만
+# 그 끝에서 맞춰 본다. "에서" 뒤 줄바꿈과 "최종 변경"·"다시 변경"도 받는다.
+_CHANGE_LOG_NEXT_RE = re.compile(
+    r"에서(?:[ \t]+|[ \t]*\r?\n[ \t]*)(?P<name>"
+    + _NAME_SHAPE_LAZY
+    + r")(?:으로|로)[ \t]*(?:(?:최종|다시|새로|모두)[ \t]*)?(?:변경|교체|바뀌|바뀐|바꾸|바꿨|바꿔|대체|교대|인계)"
+)
+
 # LLM에 보낼지 정하는 후보 판정용: 한글 두 글자가 붙은 자리. 한국어 이름은 두 글자 이상이다.
 _HANGUL_PAIR_RE = re.compile(r"[가-힣]{2}")
 
@@ -819,6 +873,9 @@ class NameDetector(Detector):
         found.extend(self._count_tail_names(text, found))
         found.extend(self._bracket_names(text, found))
         found.extend(self._reverse_list_names(text, found))
+        # #663·#589: 인사말 뒤 소속 + 이름의 자기소개, 변경 기록의 두 번째 이름. 더하기만 한다.
+        found.extend(self._self_intro_names(text, found))
+        found.extend(self._change_log_names(text, found))
         return found
 
     def _scan_cued(
@@ -1119,9 +1176,13 @@ class NameDetector(Detector):
         nxt = text[end : end + 1]
         return not nxt or nxt in "\r\n" or nxt in _LIST_TAIL_PUNCT
 
-    def _name_detection(self, start: int, end: int, text: str) -> Detection:
-        """단서 하나짜리 확신도(0.5)로 이름 탐지 하나를 만든다(#685의 세 훑기 공용)."""
-        if end - start == 3 and text[start + 1 : end] in _TITLE_TAIL_WORDS:
+    def _name_detection(self, start: int, end: int, text: str, *, keep_title_tail: bool = True) -> Detection:
+        """단서 하나짜리 확신도(0.5)로 이름 탐지 하나를 만든다(#685·#663·#589 훑기 공용).
+
+        keep_title_tail이 거짓이면 "성씨 + 직함" 모양이어도 세 글자를 다 가린다. 자기소개("총무과 오수석입니다")처럼
+        이름 자리가 분명한 곳에서 성씨만 가리면, 하이브리드 모델이 가려진 글에서 실명 "오수석"을 알아보지 못한다.
+        """
+        if keep_title_tail and end - start == 3 and text[start + 1 : end] in _TITLE_TAIL_WORDS:
             end = start + 1  # "김부장, 이서연 님께": 성씨 뒤에 직함이 붙은 꼴이다. 직함은 남기고 성씨만 가린다(#677)
         return Detection(
             kind=self.kind, start=start, end=end, text=text[start:end], confidence=0.5, detector=self.__class__.__name__
@@ -1231,6 +1292,82 @@ class NameDetector(Detector):
                     covered[st:k] = b"\x01" * (k - st)
                     extra.append(self._name_detection(st, k, text))
                 pos = st
+        return extra
+
+    def _self_intro_names(self, text: str, found: list[Detection]) -> list[Detection]:
+        """소속 뒤 자기소개("인사팀 김민수입니다")와 "제 이름은 황재고요"의 이름을 받는다(#663). 이미 잡힌 이름은 다시 넣지 않는다."""
+        if self.min_confidence > 0.5:
+            return []
+        covered = self._covered(found, text)
+        extra: list[Detection] = []
+        for m in _SELF_INTRO_RE.finditer(text):
+            start, end = m.span("name")
+            name = m.group("name")
+            end = self._keep_i_ra_after_short_name(text, start, end)
+            if (
+                all(covered[start:end])
+                or m.group("org").endswith(_SELF_INTRO_NOT_ORG_ENDS)
+                or (len(name) == 3 and name[-1] in _SELF_INTRO_NOT_NAME_LAST)
+                or name in _SELF_INTRO_NOT_NAMES
+                or name in _COMMON_WORDS
+                or name in _TITLE_CONTEXT_WORDS
+                or name in _COUNT_TAIL_NOT_NAMES
+                or name in _COURT_CUE_COMMON_WORDS
+                or not self._plain_name_cell(text, start, name)
+            ):
+                continue
+            covered[start:end] = b"\x01" * (end - start)
+            extra.append(self._name_detection(start, end, text, keep_title_tail=False))
+        for m in _MY_NAME_IS_RE.finditer(text):
+            start, end = m.span("name")
+            name = m.group("name")
+            end = self._keep_i_ra_after_short_name(text, start, end)
+            # "제 이름은"이 단서라 일반어 모양 이름("조정")도 받는다. 라벨·단서 낱말만 거른다.
+            if (
+                all(covered[start:end])
+                or name in _CUE_WORDS
+                or _is_label_word_at(text, start, strong=True)
+            ):
+                continue
+            covered[start:end] = b"\x01" * (end - start)
+            extra.append(self._name_detection(start, end, text, keep_title_tail=False))
+        return extra
+
+    @staticmethod
+    def _keep_i_ra_after_short_name(text: str, start: int, end: int) -> int:
+        """짧게 읽은 이름 바로 뒤가 "이"·"라"면 그 글자까지 가린다(#663 보안 점검).
+
+        "주한이고요"는 "주한"+"이고요"로도, 실명 "주한이"+"고요"로도 읽힌다. 짧은 쪽만 가리면 실명의 끝 글자가 남고,
+        하이브리드에서는 규칙이 먼저 가린 자리 때문에 모델이 "주한이"를 알아보지 못한다. 한 글자 더 가리는 쪽이 안전하다.
+        두 글자 이름과, 복성 + 한 글자인 세 글자 이름("남궁이이라고"의 "남궁이")에 건다.
+        """
+        short = end - start == 2 or (end - start == 3 and text[start : start + 2] in _COMPOUND_SURNAMES)
+        if short and text[end : end + 1] in ("이", "라"):
+            return end + 1
+        return end
+
+    def _change_log_names(self, text: str, found: list[Detection]) -> list[Detection]:
+        """이미 잡힌 이름 뒤 "에서 ○○○(으)로 변경"의 두 번째 이름을 받는다(#589)."""
+        if self.min_confidence > 0.5:
+            return []
+        covered = self._covered(found, text)
+        extra: list[Detection] = []
+        for anchor in sorted({d.end for d in found if text.startswith("에서", d.end)}):
+            m = _CHANGE_LOG_NEXT_RE.match(text, anchor)
+            if m is None:
+                continue
+            start, end = m.span("name")
+            name = m.group("name")
+            if (
+                all(covered[start:end])
+                or name in _TITLE_CONTEXT_WORDS
+                or name in _COUNT_TAIL_NOT_NAMES
+                or name in _SELF_INTRO_NOT_NAMES  # "김민수에서 공용으로 변경"처럼 사람이 아닌 상태
+                or not self._plain_name_cell(text, start, name)
+            ):
+                continue
+            covered[start:end] = b"\x01" * (end - start)
+            extra.append(self._name_detection(start, end, text, keep_title_tail=False))
         return extra
 
     def _form_names(

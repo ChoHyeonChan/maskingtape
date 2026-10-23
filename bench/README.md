@@ -189,7 +189,7 @@ scrubadub 행은 다시 돌리지 않았다. #650은 글을 바꾸지 않고 사
 | **address** | **1.000** | **1.000** | **1.000** | **1.000** | core [#252](https://github.com/ChoHyeonChan/maskingtape/pull/252)가 [#248](https://github.com/ChoHyeonChan/maskingtape/issues/248)(계사 어미 미탐)을 고쳐 recall 1.000 완전 복구 + [#340](https://github.com/ChoHyeonChan/maskingtape/issues/340) "번지" 리터럴 체인 끊김 신규 커버 — 아래 참고 |
 | birth_date | 1.000 | 1.000 | 1.000 | 1.000 | [#266](https://github.com/ChoHyeonChan/maskingtape/issues/266)/[#271](https://github.com/ChoHyeonChan/maskingtape/pull/271)에서 core가 추가한 10번째 kind. confidence가 항상 정확히 0.9로 고정 — 아래 confidence 절 참고 |
 | driver_license | 1.000 | 1.000 | 1.000 | 1.000 | [#267](https://github.com/ChoHyeonChan/maskingtape/issues/267)/[#305](https://github.com/ChoHyeonChan/maskingtape/pull/305)에서 core가 추가한 11번째 kind. 문맥 앵커조차 없이 confidence가 항상 정확히 0.85로 고정 — 아래 참고 |
-| **name** | **0.968** | **0.956** | **0.962** | **0.958** | [#601](https://github.com/ChoHyeonChan/maskingtape/issues/601) 반영(recall 0.932 → 0.956, tp 357 → 366, 오탐 12건 그대로): 두 글자 이름 + 띄어 쓴 직함(`남원 팀장이`)을 받는다. 그 전 값 0.967 / 0.932 / 0.949 / 0.939는 [#537](https://github.com/ChoHyeonChan/maskingtape/issues/537)+[#484](https://github.com/ChoHyeonChan/maskingtape/issues/484) 반영(0.910 → 0.949, recall 0.869 → 0.932): #537이 "이력서 접수:"·"면허 갱신 신청:" 같은 업무 문서 제목형 라벨 누락(20건)을, #484가 약한 단서 오탐 4종을 각각 고침. 남은 미탐 26건 중 12건은 경계 한 글자 차이(실질적 유출 아님 — 아래 하이브리드 절 참고)이고 나머지 14건이 2음절 이름+조사·직함(설계된 한계)과 "A에서 B로 변경" 두 번째 이름([#589](https://github.com/ChoHyeonChan/maskingtape/issues/589), 단서 자체가 없음) 등. **recall 0.932는 실세계 추정치가 아니라 상한** — 위 한계 고지 2번 참고 |
+| **name** | **0.969** | **0.966** | **0.967** | **0.967** | [#663](https://github.com/ChoHyeonChan/maskingtape/issues/663)·[#589](https://github.com/ChoHyeonChan/maskingtape/issues/589) 반영(recall 0.956 → 0.966, tp 366 → 370, 오탐 12건 그대로): 인사말 뒤 자기소개(`안녕하세요.⏎인사팀 김민수입니다`)와 변경 기록의 두 번째 이름(`담당자가 김민수에서 이서연으로 변경`)을 받는다. 그 전 값 0.968 / 0.956 / 0.962 / 0.958은 [#601](https://github.com/ChoHyeonChan/maskingtape/issues/601) 반영(recall 0.932 → 0.956, tp 357 → 366, 오탐 12건 그대로): 두 글자 이름 + 띄어 쓴 직함(`남원 팀장이`)을 받는다. 그 전 값 0.967 / 0.932 / 0.949 / 0.939는 [#537](https://github.com/ChoHyeonChan/maskingtape/issues/537)+[#484](https://github.com/ChoHyeonChan/maskingtape/issues/484) 반영(0.910 → 0.949, recall 0.869 → 0.932): #537이 "이력서 접수:"·"면허 갱신 신청:" 같은 업무 문서 제목형 라벨 누락(20건)을, #484가 약한 단서 오탐 4종을 각각 고침. 남은 미탐 26건 중 12건은 경계 한 글자 차이(실질적 유출 아님 — 아래 하이브리드 절 참고)이고 나머지 14건이 2음절 이름+조사·직함(설계된 한계)과 "A에서 B로 변경" 두 번째 이름([#589](https://github.com/ChoHyeonChan/maskingtape/issues/589), 단서 자체가 없음) 등. **recall 0.932는 실세계 추정치가 아니라 상한** — 위 한계 고지 2번 참고 |
 
 card는 `gen_account_number_like`가 구분자 없이 13자리 이상을 만들 때 core `CreditCardDetector`의
 "구분자 없는 13~19자리" 분기와 우연히 겹칠 수 있다는 걸 이번 재측정 중 실제로 재현했다
@@ -1199,7 +1199,7 @@ core가 이 세트의 이슈를 하나씩 고치면서 바뀐 수치다. "시작
 
 | core 이슈 | 태그 | 시작 | 지금 | 상태 |
 |---|---|---|---|---|
-| [#589](https://github.com/ChoHyeonChan/maskingtape/issues/589) "A에서 B로 변경" | name_change_log_second | 0.000 | 0.000 | 열림 |
+| [#589](https://github.com/ChoHyeonChan/maskingtape/issues/589) "A에서 B로 변경" | name_change_log_second | 0.000 | **1.000** | 고침 (PR #753) |
 | [#592](https://github.com/ChoHyeonChan/maskingtape/issues/592) 날짜 뒤 생년월일 단서 | birth_date_cue_after | 0.000 | **1.000** | 고침 |
 | [#593](https://github.com/ChoHyeonChan/maskingtape/issues/593) 건물명 + 동·호만 | address_building_dong_ho_only | 0.000 | **1.000** | 고침 (PR #624) |
 | [#594](https://github.com/ChoHyeonChan/maskingtape/issues/594) 지역 이름 운전면허 | driver_license_region_name | 0.000 | **1.000** | 고침 |
@@ -1220,24 +1220,24 @@ core가 이 세트의 이슈를 하나씩 고치면서 바뀐 수치다. "시작
 | [#655](https://github.com/ChoHyeonChan/maskingtape/issues/655) 줄마다 한 명·사전 밖 성씨·"명단" 라벨 (태그 3개) | name_list_* | 0.000 | 0.000 | 열림 |
 | [#656](https://github.com/ChoHyeonChan/maskingtape/issues/656) 동-호 하이픈·붙여 쓴 동호·건물명+호·영문 층 | address_dong_ho_variants | 0.000 | **1.000** | 고침 (PR #699) |
 | [#657](https://github.com/ChoHyeonChan/maskingtape/issues/657) 라벨과 번호 사이 줄바꿈·괄호 | number_label_gap_variants | 0.000 | **1.000** | 고침 (PR #696) |
-| [#658](https://github.com/ChoHyeonChan/maskingtape/issues/658) 날짜 뒤 띄어 쓴 "출생" | birth_date_cue_chulsaeng | 0.000 | **0.600** | PR #695 머지·이슈 닫힘, `출생으로` 꼴 8건 남음 |
+| [#658](https://github.com/ChoHyeonChan/maskingtape/issues/658) 날짜 뒤 띄어 쓴 "출생" | birth_date_cue_chulsaeng | 0.000 | **1.000** | 고침 (PR #695, 남은 `출생으로` 꼴은 PR #748) |
 | [#685](https://github.com/ChoHyeonChan/maskingtape/issues/685) "담당:"·"외 N명"·뒤 존칭 나눠 쓰기·대괄호·"원고들" | name_cue_followups | 0.000 | **0.963** | 고침 (PR #749), 메일 제목 대괄호 1건 남음 |
 | [#686](https://github.com/ChoHyeonChan/maskingtape/issues/686) 일반구 없는 시의 축약 | address_city_no_gu_abbr | 0.000 | **1.000** | 고침 (PR #698) |
-| **전체 31개 태그** | | **0.000** | **0.756** | 적중 529 · 가려짐 0 · 부분 0 · 미탐 171 (#685 반영, PR #749) |
+| **전체 31개 태그** | | **0.000** | **0.796** | 적중 557 · 가려짐 0 · 부분 0 · 미탐 143 (#589 반영, PR #753) |
 
-- **고친 18건(#592·#593·#594·#600·#601·#602·#603·#604·#605·#606·#607·#636·#638·#639·#640·#656·#657·#686)의
-  태그 23개가 전부 1.000이다.** 이 이슈들은 `FIXED_ISSUES`에 넣어 되돌아가면 CI가 실패하게 했다.
+- **고친 20건(#589·#592·#593·#594·#600·#601·#602·#603·#604·#605·#606·#607·#636·#638·#639·#640·#656·#657·#658·#686)의
+  태그 25개가 전부 1.000이다.** 이 이슈들은 `FIXED_ISSUES`에 넣어 되돌아가면 CI가 실패하게 했다.
   #637은 세트 20건은 다 맞지만 넣지 않았다. 생성기로 1,000건을 만들면 31건(약 3%)이
   `주민번호 020225-3000***`·`031010-3639***`처럼 앞자리가 지역번호·휴대전화 앞자리(`02`·`031`·`011` 등)로
   시작해 전화번호로 잡힌다. 다 가리긴 하지만(유출 아님)
   종류가 달라 완전 일치 회귀 테스트가 흔들린다. #658은
-  PR #695가 머지돼 이슈가 닫혔지만 `김씨는 1964년 12월 4일 출생으로 확인됐다.`처럼 `출생` 뒤에 두 글자 이상
-  조사·어미(`으로`·`인`·`이며`·`입니다`)가 붙은 8건이 남아 넣지 않았다. #685도 27건 중 26건만 맞아 넣지
+  PR #695 뒤에도 `김씨는 1964년 12월 4일 출생으로 확인됐다.`처럼 `출생` 뒤에 두 글자 이상
+  조사·어미(`으로`·`인`·`이며`·`입니다`)가 붙은 8건이 남았는데, PR #748(#726)이 마저 고쳐 넣었다. #685는 27건 중 26건만 맞아 넣지
   않았다. 남은 1건은 메일 제목 대괄호(`[김민수] 휴가 신청서`)다. `[서울시] 보도자료` 같은 말머리와 구별할 단서가
   약해 받지 않기로 했다.
-- 전체 재현율은 태그를 더할 때마다 내려갔다가 core가 고치면 오른다(23개 0.552 `c526000` → 29개 0.538 `fafefa8` → 31개 0.586 `5744f73` → 31개 0.690 `97ed96f` → 31개 0.719 #601 PR #743 → 31개 0.756 #685 PR #749).
+- 전체 재현율은 태그를 더할 때마다 내려갔다가 core가 고치면 오른다(23개 0.552 `c526000` → 29개 0.538 `fafefa8` → 31개 0.586 `5744f73` → 31개 0.690 `97ed96f` → 31개 0.719 #601 PR #743 → 31개 0.730 #658 PR #748 → 31개 0.767 #685 PR #749 → 31개 0.796 #589 PR #753).
   아직 안 고친 태그를 새로 넣기 때문이고, 고친 이슈가 줄어든 게 아니다.
-- 남은 미탐은 이름(#589·#608·#655, #685 메일 제목 대괄호 1건)과 생년월일 단서(#658 8건)다. 주소·번호·주민번호 태그는 모두
+- 남은 미탐은 이름(#608·#655, #685 메일 제목 대괄호 1건)이다. 주소·번호·주민번호·생년월일 태그는 모두
   1.000이 됐다.
 - #640은 core가 번호에 붙은 영문 한 글자까지 번호 구간으로 가리기로 해서(PR #668), 정답 구간도 그에
   맞췄다(#680). 글은 그대로이고 라벨 끝만 한 글자 늘었다.
@@ -1332,6 +1332,16 @@ python -m bench.evaluators.evaluate_doc_types bench/datasets/doc_types_v1.jsonl
   (`고객센터 임인예입니다.`·`제 이름은 김지재고요`) 68건은 [#663](https://github.com/ChoHyeonChan/maskingtape/issues/663)의 남은 부분이고, 하이브리드에서는 모델이 거의 잡는다(메일 미탐 5·상담 3).
   두 글자 이름(`판사 한하`·`송찬 팀장님,`·`상담원: 이영`) 45건과 두 글자 이름 + 조사를 세 글자로 잡은 경계 13건은
   [#601](https://github.com/ChoHyeonChan/maskingtape/issues/601)과 겹친다. 각 이슈에 건수와 예를 댓글로 남겼다.
+- **#663의 남은 자기소개와 #589를 고쳤다(규칙 전용, 2026-10-24, main `33d9c40` 위 브랜치).** 사내 메일
+  0.825 → 0.992, 상담 기록 0.825 → 0.981, 전체 0.923 → 0.979이고 판결문(0.937)과 엉뚱한 곳 오탐 0건은 그대로다. 상담 기록의
+  경계 3건은 두 글자 이름 뒤 `이`까지 가린 것이다(`제 이름은 조정이고요`의 `조정이`). 실명이 `주한이`처럼 세 글자일 수 있어
+  일부러 한 글자 더 가리게 했고, 유출 기준 재현율은 1.000이다.
+  자기소개는 인사말(`안녕하세요`·`감사합니다`·`여보세요` 등)이나 `저는` 바로 뒤의 소속 다음에서만 받는다. 그래서 위에서 미룬
+  이유였던 `우리 팀 송년회입니다`나 `검사 결과 정상입니다` 같은 문장은 이름으로 보지 않는다. 판사·증인 뒤 두 글자 이름 + 조사
+  ([#741](https://github.com/ChoHyeonChan/maskingtape/issues/741))도 시험했지만, 외부 모델 교차검토에서 `증인 유무를`·
+  `판사 권한은` 같은 흔한 법률 문장을 이름으로 가리는 것이 재현돼 이번에 넣지 않았다. 이 세트에서 찾은 꼴을 고친 것이라 이
+  숫자는 상한으로 읽는다. 위 표의 하이브리드 수치는 그 전 값이다. 저장소 문서와 로컬 노트 13,105문단에서는 새로 가린 곳이
+  이름 예문 1곳뿐이었고, 조정용 세트 2,380문장에서는 새로 가린 108곳이 모두 정답과 겹쳤다. 덜 가린 문장은 둘 다 0이다.
 
 ## 프롬프트 공격 골든셋 — 문서 속 지시문이 LLM 이름 마스킹을 약하게 만드는가 ([#549](https://github.com/ChoHyeonChan/maskingtape/issues/549))
 
