@@ -1,6 +1,6 @@
 # bench — 합성 벤치마크
 
-**담당: seoyeon ([@seoyeon056](https://github.com/seoyeon056))** · 상태: ✅ 시작 가능 (스켈레톤 머지 완료)
+**담당: seoyeon ([@seoyeon056](https://github.com/seoyeon056))** · 상태: 운영 중 — 조정용·보고용 세트로 정확도를 재고, 발표 전 재측정은 [#739](https://github.com/ChoHyeonChan/maskingtape/issues/739)
 
 저작권·개인정보 걱정 없는 **자체 합성 평가 데이터셋**과 정확도(F1·F2) 측정 스크립트. 공개 벤치마크는 이 프로젝트의 핵심 차별화 포인트다.
 
@@ -128,8 +128,9 @@ python -m bench.evaluators.evaluate bench/datasets/synth_v1.jsonl --report bench
 README와 ROADMAP의 "영어권 도구는 한국어 개인정보를 제대로 못 잡는다"는 주장을 숫자로 뒷받침하기
 위해, 로컬에서 실행되는 오픈소스 도구만 같은 합성 데이터셋과 같은 exact-match 채점기로 비교한다.
 상용 API 모델(GPT/Claude 등)과 비상업 전용 라이선스 모델은 비교 코드에 넣지 않는다. 현재 기준선은
-`scrubadub` 2.0.1이다 — PyPI 메타데이터는 MIT, classifier는 Apache-2.0으로 표시되며 둘 다 팀 허용
-라이선스다. 한국 주민번호·사업자등록번호·여권번호 같은 전용 kind가 없어 매핑 가능한
+`scrubadub` 2.0.1이다. 저장소 LICENSE는 Apache-2.0이다(PyPI license 칸은 MIT로 적혀 있다). 전이 의존성 중
+`python-stdnum`은 LGPL-2.1-or-later다. 팀 금지 목록(GPL·AGPL·SSPL)에는 없지만 같은 계열이라 SBOM 부록 A-8·B에
+따로 적었다. scrubadub은 선택 설치 `maskingtape[bench-baselines]`로만 들어오는 개발 도구이고, 우리가 배포하지 않는다. 한국 주민번호·사업자등록번호·여권번호 같은 전용 kind가 없어 매핑 가능한
 `email`·`phone`·`credit_card → card`만 채점에 들어가고, 나머지는 그대로 FN으로 남는다.
 
 ```bash
@@ -743,8 +744,9 @@ DEFAULT_LABELS 누락을 겪은 이력이 있어 전용 테스트로 분리).
 kind)에 적용되는 단일 값이라, **RRN(14자)을 겨냥해 keep_head=2를 설정하면 같은 파이프라인이
 탐지하는 2글자 이름은 완전히 노출된다**(`min(keep_head, span_len)`이 짧은 값 전체를 삼킴) —
 "일부만 보여주려던" 설정이 조용히 "이름은 전혀 안 가림"이 되는 셈이다. bench 소관이 아니라
-core에 [#169](https://github.com/ChoHyeonChan/maskingtape/issues/169)로 남겼고, 이 현재
-동작 자체는 회귀 테스트로 고정해뒀다(core가 고치면 테스트가 깨져서 알 수 있다).
+core에 [#169](https://github.com/ChoHyeonChan/maskingtape/issues/169)로 남겼다. core가 8/10에 고쳐서 이제 보존하는 글자 수는
+구간 길이의 절반을 넘지 않는다(`min(keep_head, span_len // 2)`). 2글자 이름은 최대 1글자만 남는다. 처음에 옛 동작을
+잡아 두던 회귀 테스트도 새 동작으로 바꿨다(`test_keep_head_no_longer_fully_exposes_values_shorter_than_it`).
 
 ## 신뢰도(confidence) 임계값 분석
 
@@ -758,17 +760,15 @@ python -m bench.evaluators.confidence_analysis bench/datasets/synth_v1.jsonl
 후보 임계값마다 그보다 confidence가 낮은 예측을 버린 뒤 다시 채점해서, 임계값을 올릴수록
 precision이 오르고 recall이 내려가는 트레이드오프를 표로 보여준다.
 
-500건 기준 실측 결과(2026-09-28, main `1086044`, #498 재측정): 임계값 0.5 이하에서는 precision이 0.983(오탐 16건)이다 —
-전부 `name` kind, confidence 정확히 0.5. 대다수가 [#255](https://github.com/ChoHyeonChan/maskingtape/issues/255)에서
-정량화한 잔여 위험이다 — core #252가 #247을 하드코딩 5개 부서어만 막게 고쳐서, 그 밖의
-흔한 업무어("차량"/"허가"/"성과"/"안내")는 negative 문서(개인정보 없음)에서도 여전히
-오탐된다. 나머지는 기존에 이미 알려진 한계들이다 — 실명이 조사를 머금어 span이 한 글자
-늘어나는 안전한 방향의 경계 오차(#247 수정 이후에도 남는 정상 동작, 위 참고)와 #158 잔여
-패턴("민원인"/"지원자"류). 임계값 0.7부터 이 FP가 전부 걸러져 precision이 1.000이 되지만,
-**recall은 0.950(임계값 0.5 이하) → 0.596(0.7) → 0.557(0.8) → 0.540(0.85) → 0.487(0.9) →
-0.293(1.0)로 계속 떨어진다** — name의 규칙판 confidence 구간이 잘려나가는 게 대부분이다.
+500건 기준 실측 결과(2026-10-20, main `e74c3df`): 임계값 0.5 이하에서는 precision이 0.988(오탐 12건)이다.
+12건 모두 `name`이고 confidence가 정확히 0.5다. **12건 모두 경계 차이다** — 두 글자 이름 뒤 조사를 이름의
+셋째 글자로 함께 가린 것이라(`신성의`·`권지이`) 이름은 다 가려진다. 9/28(`1086044`)에는 흔한 업무어("차량"/"허가"/
+"성과"/"안내")를 이름으로 잡은 오탐이 섞여 16건이었는데([#255](https://github.com/ChoHyeonChan/maskingtape/issues/255)), 지금은 그런 오탐이 없다.
+임계값 0.7부터 이 12건이 걸러져 precision이 1.000이 되지만,
+**recall은 0.983(임계값 0.5 이하) → 0.615(0.7) → 0.556(0.8) → 0.552(0.85) → 0.499(0.9) →
+0.303(1.0)로 계속 떨어진다** — name의 규칙판 confidence 구간이 잘려나가는 게 대부분이다.
 
-**🚨 임계값을 0.6 초과로 올리면 안 되는 진짜 이유**: 0.5→0.7 구간에서 recall이 0.950→0.596로
+**🚨 임계값을 0.6 초과로 올리면 안 되는 진짜 이유**: 0.5→0.7 구간에서 recall이 0.983→0.615로
 유독 크게 떨어지는데, name 하나만으로는 이 폭을 설명 못 한다. `account`(계좌번호)는 core가
 체크섬이 없어 문맥어가 있어도 **confidence를 항상 정확히 0.6으로 고정**한다(직접 확인: 정답
 account 전건 confidence 0.6). 즉 **임계값을 0.7 이상으로만 올려도 계좌번호가 100% 통째로
@@ -994,8 +994,9 @@ kind를 차지한다.** 재현해보니 confidence 1.0짜리 rrn이 confidence 0
 완전히 포함되면 `kind="address", confidence=0.9`로만 보고되고 rrn 존재 자체가 사라진다.
 마스킹 범위 자체(넓은 쪽 전체를 가림)는 안전해서 직접 유출은 아니지만, kind에 의존하는
 하류 로직(통계·로깅·정책)은 오판할 수 있다. bench 소관이 아니라
-[#172](https://github.com/ChoHyeonChan/maskingtape/issues/172)로 남기고 현재 동작은
-회귀 테스트로 고정해뒀다.
+[#172](https://github.com/ChoHyeonChan/maskingtape/issues/172)로 남겼다. core가 8/10에 고쳐서 이제 완전 포함 겹침도 확신도가 높은
+쪽이 kind를 맡는다(넓은 구간은 그대로 가린다). 회귀 테스트도 새 동작으로 바꿨다
+(`test_fully_contained_overlap_applies_confidence_based_kind_rule`).
 
 ## 데이터셋 버전 — v1(제출 수치 근거)과 v2(주소 확장)
 
