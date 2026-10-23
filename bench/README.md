@@ -51,11 +51,16 @@ tests/               # 생성기·평가 로직 단위 테스트
 | `variants_v1` · `open_misses_v1` | 조정용 | 고친 꼴이 되돌아가지 않는지, 이슈별 미탐이 줄었는지 보는 회귀 세트다 |
 | `doc_types_v1` | 조정용 | 미탐 예를 #601·#662·#663에 올려 규칙을 고치는 데 썼다(2026-10-06~) |
 | **`doc_types_holdout_v1`** | **보고용** | 문서 틀과 이름 음절을 조정용과 다르게 새로 썼다(아래). 미탐 예를 보지 않는다 |
-| KDPII test (외부, 저장소 밖) | 보고용 | 규칙 조정과 학습에 쓰지 않은 외부 데이터다 |
+| KDPII test (외부, 저장소 밖) | 보고용 | 학습에 쓰지 않은 외부 데이터다. #601(PR #743)에서 오탐 낱말을 거르기 목록에 넣을 때 한 번 봤다(아래 「KDPII 타 도구 비교」) |
 
 KDPII는 `python -m bench.fetch_kdpii --split test`로 받는다. Zenodo 파일의 MD5를 레코드에 적힌 값과 대조하고,
 한 줄에 한 문장씩 원본 순서대로 `bench/datasets/external/kdpii_test.jsonl`(git이 무시하는 폴더)에 쓴다. 누가 받아도
 같은 4,891문장이 나온다. CC-BY-4.0이고 원자료와 변환본은 저장소에 싣지 않는다(SBOM 부록 D).
+우리 11종에 맞는 라벨 770개는 `labels`로, 나머지 라벨 1,441개(직장·직위·닉네임 등)는 `other`로 나눈다.
+`--name-sample 500`을 주면 이름 하이브리드 외부 비교(아래 「이름 탐지 방식 비교」)에 쓴 500문장도
+`kdpii_test_names500.jsonl`로 쓴다. 이름 문장 169개 전부에 나머지 331개를 시드 458로 더한 것이다. 이 표본으로
+main `8fc7889`의 규칙 전용을 재면 아래 「이름 탐지 방식 비교」 표의 재현율 0.254(tp 45·fp 6·fn 132)가 그대로 나온다. 타 도구 비교는 아래
+「KDPII 타 도구 비교」에 있다.
 
 **규칙**
 
@@ -142,9 +147,8 @@ python -m bench.evaluators.compare_open_source_tools bench/datasets/synth_v1.jso
 
 scrubadub 행은 다시 돌리지 않았다. #650은 글을 바꾸지 않고 사업자등록번호 정답만 2건 더했고 scrubadub은
 사업자등록번호를 예측하지 않으므로, 예측은 그대로이고 fn만 2 늘어난다(반올림한 비율은 같다). 종류별 표와
-매핑표는 `bench/reports/open_source_baselines_v1.md`에 저장돼 있다(2026-10-01 측정본). Presidio 같은
-무거운 NLP 기반 도구는 후보로 볼 수 있지만, 이 저장소에 비교 기준선으로 넣으려면 설치·모델 다운로드·
-라이선스·로컬 재현 절차가 먼저 안정적으로 정리돼야 한다.
+매핑표는 `bench/reports/open_source_baselines_v1.md`에 저장돼 있다(2026-10-01 측정본). ko-pii와 Presidio는
+외부 데이터로 따로 비교한다(아래 「KDPII 타 도구 비교」).
 
 > **⚠️ 한계 고지 (#345) — 구조화 kind의 1.000을 읽을 때 반드시 함께 볼 것**
 >
@@ -405,6 +409,97 @@ NameDetector().detect("대표 허가가 필요합니다.")     # -> [('허가가
 "차량이"를 잘못 이름으로 표시해 마스킹해도 실제로 새는 정보는 없다(과다 마스킹, 안전한
 방향의 실패). precision을 깎아 사용자 신뢰를 떨어뜨리는 문제이지, CONTRIBUTING이 최우선으로
 보는 "탐지 실패=유출" 문제는 아니다 — 아래 마스킹 품질 절에서도 이 구분이 그대로 확인된다.
+
+## KDPII 타 도구 비교 — 외부 데이터, 보고용 ([#457](https://github.com/ChoHyeonChan/maskingtape/issues/457), [#751](https://github.com/ChoHyeonChan/maskingtape/issues/751))
+
+위 합성 데이터 비교는 생성기와 탐지기가 같은 형식을 공유해서(위 한계 고지 1번) 다른 도구와 견주기에는 우리
+쪽에 유리하다. 그래서 발표 자료의 타 도구 비교는 학습에 쓰지 않은 외부 데이터 KDPII test(4,891문장)로 낸다.
+한국어 오픈소스 도구 ko-pii와 영어권에서 널리 쓰는 Presidio를 같은 채점기로 잰다. 모든 도구는 로컬에서 돌고,
+상용 API는 쓰지 않는다. 다만 Presidio의 이메일 인식기가 쓰는 tldextract는 캐시가 비어 있으면 공개 도메인 접미사
+목록(publicsuffix.org, 실패하면 GitHub 사본)을 한 번 받아 홈의 `.cache/python-tldextract`에 둔다. 고정된 목록 주소를
+받는 요청이고, 비교하는 문장은 보내지 않는다.
+
+| 이름 | 도구 | 설정 |
+|---|---|---|
+| `maskingtape-rules` | maskingtape(이 저장소) | 규칙 전용 `Pipeline()`. LLM은 끈다 |
+| `ko-pii-strict` | ko-pii 1.16.0 | `Anonymizer(mode=ProcessingMode.STRICT)`가 막는(BLOCK) 탐지만 |
+| `ko-pii-all` | ko-pii 1.16.0 | `detect_all`이 낸 탐지 전부 |
+| `presidio` | presidio-analyzer 2.2.364, spaCy 3.8.16, en_core_web_lg 3.8.0 | 기본 설정(영어 NLP, 점수 문턱 0) |
+| `presidio-kr` | 같음 | 기본으로 꺼진 한국 인식기 5개(주민·외국인·사업자등록·운전면허·여권)를 켜고 전화 지역에 KR을 더함 |
+
+도구마다 라벨을 우리 11종으로 옮긴다(`bench/evaluators/pii_tool_adapters.py`). 상대에게 유리하게 잡았다. Presidio의
+`LOCATION`은 주소로, `DATE_TIME`은 생년월일로 보고, 미국 여권·운전면허 같은 다른 나라 라벨도 같은 종류로 친다.
+매핑에 없는 라벨도 「다 가림」과 「엉뚱한 곳 가림」에는 들어간다.
+
+정답은 KDPII 라벨 중 우리 11종에 맞는 770개다(이름 177·전화 124·주소 101·이메일 81·카드 78·계좌 77·생년월일 70·
+주민·외국인등록번호 27·여권 18·운전면허 17). 직장·직위·닉네임 같은 나머지 1,441개는 정답에 넣지 않지만, 그 자리를
+가린 것은 「엉뚱한 곳」으로 세지 않는다.
+
+- **다 가림**: 정답 글자가 어떤 탐지로든(종류 무관) 전부 덮였는가. 유출 관점의 재현율이다. 숫자가 4개 이상인 정답은
+  숫자만 다 덮이면 가린 것으로 본다. KDPII는 「우리은행 …」처럼 은행명·지역명까지 정답 구간에 넣는데, 그 이름이
+  보이는 것은 유출이 아니다.
+- **엉뚱한 곳 가림**: 정답과도, 범위 밖 라벨과도 겹치지 않는 탐지 수 / 전체 탐지 수.
+- **정답 없는 문장 중 가림**: 라벨이 하나도 없는 3,183문장 중 무엇이라도 가린 문장 수.
+- **overlap F1**: 종류가 같고 구간이 겹치면 맞음. 도구마다 구간을 자르는 관행(조사·은행명 포함 여부)이 달라 exact보다
+  이쪽을 본다. 리포트에는 exact F1도 같이 나온다.
+
+**재현.** ko-pii와 Presidio는 저장소 의존성이 아니다(`pyproject.toml`에 없다). 저장소 밖에 비교용 가상환경을 따로
+만들고, 명령은 저장소 루트에서 돌린다. 버전은 아래 숫자를 잰 그대로 고정했다. 함께 설치되는 패키지와 라이선스는
+SBOM 본표 40~43번과 부록 A-9에 있다.
+
+```bash
+python -m venv ../venv-compare        # Python 3.13.2에서 확인
+source ../venv-compare/bin/activate   # Windows: ..\venv-compare\Scripts\activate
+python -m pip install -e packages/core "ko-pii==1.16.0" "presidio-analyzer==2.2.364" "spacy==3.8.16" \
+  "phonenumbers==9.0.41" "en_core_web_lg @ https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.8.0/en_core_web_lg-3.8.0-py3-none-any.whl"
+python -m bench.fetch_kdpii --split test --name-sample 500
+python -m bench.evaluators.compare_kdpii_tools bench/datasets/external/kdpii_test.jsonl \
+  --report bench/datasets/external/kdpii_tools_report.md
+```
+
+### 결과 (2026-10-21, core는 main `e74c3df`와 같음)
+
+maskingtape 행은 발표 자료 숫자를 잰 main `0935b7f`와 같다. 나머지 네 행도 발표 자료 숫자(2026-10-01 측정)와 같고,
+새 가상환경에 위 명령으로 다시 깔아 돌렸을 때 문장별 예측까지 같았다.
+
+| 도구 | 다 가림 (770개 중) | 일부만 | 그대로 노출 | 엉뚱한 곳 가림 | 정답 없는 문장 중 가림 (3,183문장 중) | overlap F1 |
+|---|---:|---:|---:|---:|---:|---:|
+| maskingtape-rules | 442 (0.574) | 1 | 327 | 17 / 458 | 14 | 0.706 |
+| ko-pii-strict | 406 (0.527) | 4 | 360 | 71 / 553 | 38 | 0.636 |
+| ko-pii-all | 443 (0.575) | 5 | 322 | 274 / 1,243 | 146 | 0.584 |
+| presidio-kr | 276 (0.358) | 135 | 359 | 354 / 1,136 | 264 | 0.274 |
+| presidio | 209 (0.271) | 148 | 413 | 354 / 1,030 | 264 | 0.169 |
+
+종류별 다 가림 수:
+
+| 종류 | 정답 | maskingtape-rules | ko-pii-strict | ko-pii-all | presidio-kr | presidio |
+|---|---:|---:|---:|---:|---:|---:|
+| name | 177 | 51 | 30 | 47 | 12 | 12 |
+| phone | 124 | 122 | 124 | 124 | 124 | 75 |
+| email | 81 | 81 | 81 | 81 | 26 | 26 |
+| rrn | 27 | 27 | 27 | 27 | 27 | 21 |
+| address | 101 | 32 | 14 | 34 | 6 | 6 |
+| card | 78 | 12 | 15 | 15 | 18 | 18 |
+| passport | 18 | 15 | 15 | 15 | 16 | 7 |
+| account | 77 | 67 | 61 | 61 | 23 | 23 |
+| birth_date | 70 | 19 | 34 | 34 | 8 | 8 |
+| driver_license | 17 | 16 | 5 | 5 | 16 | 13 |
+
+**읽는 법**
+
+- maskingtape와 ko-pii 전체는 다 가린 수가 비슷하다(442 대 443). 엉뚱한 곳을 가린 수는 17 대 274이고, 정답 없는
+  문장을 가린 수는 14 대 146이다.
+- 우리가 지는 종류도 있다. 생년월일은 ko-pii가 34개, maskingtape가 19개를 다 가렸다. 주소(32 대 34)와 카드(12 대 15)도
+  ko-pii 전체가 조금 많다. 카드는 모든 도구가 78개 중 18개 이하다.
+- 이름은 규칙만으로 177개 중 51개다. 로컬 LLM을 켜면 500문장 표본에서 재현율이 0.254에서 0.825로 오른다(아래
+  「이름 탐지 방식 비교」).
+- Presidio는 영어 모델(en_core_web_lg)로 돌린 값이다. 한국어 이름은 12개, 주소는 6개를 가렸다. 한국 인식기를 켜면 다
+  가린 수가 209에서 276으로 는다.
+- #601(PR [#743](https://github.com/ChoHyeonChan/maskingtape/pull/743))에서 KDPII에 새로 나온 오탐 5건(`지금 강사`·
+  `오늘 교수님` 등)을 보고 거르기 목록에 부사를 넣은 적이 있다(PR 본문에 밝힘). 그 PR 전인 `0935b7f`와 지금 core의
+  maskingtape 예측은 4,891문장 모두 같다.
+- KDPII는 보고용이다(#456). 이 표를 보고 규칙을 고치지 않는다. 10/25 코드 머지 마감 뒤 같은 명령으로 다시 잰다
+  ([#739](https://github.com/ChoHyeonChan/maskingtape/issues/739)).
 
 ## 오탐(False Positive) 측정
 

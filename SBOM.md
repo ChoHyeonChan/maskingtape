@@ -46,10 +46,15 @@
 | 37 | pypdf | 6.19.0 | BSD-3-Clause | https://github.com/py-pdf/pypdf | 데스크톱 설치파일 — 동봉 Python에서 PDF 글자 추출 (wheel SHA-256 고정, 런타임 의존성 없음) |
 | 38 | CPython 임베디드 배포판 | 3.13.2 | Python-2.0.1 | https://github.com/python/cpython | 데스크톱 설치파일 — 앱이 core CLI와 PDF 추출을 부르는 동봉 Python (zip SHA-256 고정). 안에 든 OpenSSL·SQLite·Visual C++ 런타임은 부록 A-7 |
 | 39 | Inno Setup | 6.7.0 | Inno Setup License | https://github.com/jrsoftware/issrc | (빌드 도구) 데스크톱 Windows 설치파일 제작 — 설치 실행부가 setup.exe에 들어간다. 부록 A-7·B |
+| 40 | ko-pii | 1.16.0 | MIT | https://github.com/Marker-Inc-Korea/ko-pii | (개발 도구) KDPII 타 도구 비교의 비교 대상(한국어 개인정보 탐지 라이브러리). 저장소 밖 비교용 가상환경에만 설치한다. 전이 의존성 없음 |
+| 41 | presidio-analyzer | 2.2.364 | MIT (패키지 메타데이터) | https://github.com/data-privacy-stack/presidio | (개발 도구) KDPII 타 도구 비교의 비교 대상(개인정보 탐지 도구). 40번과 같은 가상환경에만 설치한다. 전이 의존성은 부록 A-9 |
+| 42 | spaCy | 3.8.16 | MIT | https://github.com/explosion/spaCy | (개발 도구) 41번이 쓰는 자연어 처리 엔진. 41번과 함께 설치되고, 결과가 같도록 버전만 고정한다 |
+| 43 | en_core_web_lg (spaCy 영어 모델, AI 모델) | 3.8.0 | MIT | https://github.com/explosion/spacy-models | (개발 도구) 41번의 기본 개체명 인식 모델. 비교 상대를 기본 설정으로 돌리려고 받는다. 로컬 실행. 학습 데이터 출처(OntoNotes 5 등)는 모델 패키지의 `LICENSES_SOURCES`에 있다 |
 
 ※ **AI 모델 주의**: Qwen2.5는 **3B·72B만 비상업 제한(Qwen Research License)**이고 나머지(0.5B/**1.5B**/**7B**/14B/32B)가 Apache-2.0이다. 기본 모델은 1.5B를 학습한 17번, 선택 모델은 7B(26번)다. **3B로 바꾸지 말 것.**
 ※ 위 16·17·26번은 결과보고서 **붙임2(AI 모델 활용 및 라이선스 기술 명세서)**에도 반영한다(유형2 '외부 모델 파인튜닝' + 기반 모델명·라이선스·학습 데이터·가중치 공개 주소).
 ※ 27~36번 학습 도구는 `training/`의 학습·변환에만 쓰며 배포물(PyPI·웹·MCP·데스크톱)과 공개한 가중치 파일에 들어가지 않는다. 버전은 학습한 PC의 환경 기준(2026-10-03, #643)이다. 학습 PC의 NVIDIA CUDA 런타임은 부록 B에 적었다.
+※ 40~43번은 bench의 KDPII 타 도구 비교(`bench/evaluators/compare_kdpii_tools.py`, 2026-10-21, #751)에만 쓴다. `pyproject.toml`과 lock 파일에 없고, 배포물(PyPI·웹·MCP·데스크톱)에 들어가지 않는다. 우리 코드는 `bench/evaluators/pii_tool_adapters.py`의 함수 안에서만 import한다. 설치 명령은 `bench/README.md` 「KDPII 타 도구 비교」에 있다. 43번은 우리 제품에 탑재·적용하는 모델이 아니라 비교 상대 도구의 부품이다.
 
 ## 부록 A: 배포물별 전이 의존성
 
@@ -281,6 +286,69 @@ GitHub Releases `desktop-v*`의 설치파일이다(#617). 위 A-4의 Dart 런타
 | tzlocal | 5.4.4 | MIT | dateparser |
 | tzdata | 2026.5 | Apache-2.0 | faker, tzlocal |
 
+### A-9. KDPII 타 도구 비교용 가상환경 (ko-pii·Presidio, 개발 도구)
+
+> 이 절도 생성기 밖이라 손으로 관리한다. `bench/README.md` 「KDPII 타 도구 비교」의 설치 명령을 바꾸면 같은 PR에서 고친다.
+
+저장소 밖에 따로 만드는 비교용 가상환경이다. `pyproject.toml`에 없어서 `pip install maskingtape`나 저장소의 어떤 선택 설치로도 설치되지 않는다. 쓰는 곳은 `bench/evaluators/pii_tool_adapters.py` 한 곳이다(함수 안에서 `ko_pii`·`presidio_analyzer` import). 아래는 2026-10-21 깨끗한 가상환경(Python 3.13.2, Windows)에 README의 설치 명령을 그대로 돌린 뒤, 각 패키지 메타데이터와 라이선스 파일에서 읽은 값이다. 직접 설치한 5개는 버전을 고정했고, 나머지는 설치하는 날 버전이 바뀔 수 있다. pip(가상환경 기본)과 maskingtape(본 저장소)는 뺐다.
+
+| 패키지 | 버전 | 라이선스 | 끌어오는 패키지 |
+|---|---|---|---|
+| ko-pii | 1.16.0 | MIT | (본표 40번) |
+| presidio-analyzer | 2.2.364 | MIT | (본표 41번) |
+| spacy | 3.8.16 | MIT | (본표 42번) presidio-analyzer |
+| en_core_web_lg | 3.8.0 | MIT | (본표 43번) |
+| phonenumbers | 9.0.41 | Apache-2.0 | presidio-analyzer (버전 고정) |
+| annotated-doc | 0.0.5 | MIT | typer |
+| annotated-types | 0.8.0 | MIT | pydantic |
+| anyio | 4.15.1 | MIT | httpx |
+| blis | 1.3.3 | BSD-3-Clause | thinc |
+| catalogue | 2.0.10 | MIT | spacy, srsly, thinc |
+| **certifi** | 2026.10.19 | **MPL-2.0** | httpcore, httpx, requests → 부록 B |
+| charset-normalizer | 3.5.2 | MIT | requests |
+| click | 8.5.0 | BSD-3-Clause | presidio-analyzer, spacy |
+| cloudpathlib | 0.26.0 | MIT | weasel |
+| colorama | 0.4.6 | BSD-3-Clause | tqdm, typer, wasabi |
+| confection | 1.3.3 | MIT | spacy, thinc, weasel |
+| cymem | 2.0.13 | MIT | preshed, spacy, thinc |
+| filelock | 4.2.4 | MIT | tldextract |
+| h11 | 0.16.0 | MIT | httpcore |
+| httpcore | 1.0.9 | BSD-3-Clause | httpx |
+| httpx | 0.28.1 | BSD-3-Clause | weasel |
+| idna | 3.20 | BSD-3-Clause | anyio, httpx, requests, tldextract |
+| jinja2 | 3.1.6 | BSD-3-Clause | spacy |
+| markdown-it-py | 4.2.0 | MIT | rich |
+| markupsafe | 3.0.4 | BSD-3-Clause | jinja2 |
+| mdurl | 0.1.2 | MIT | markdown-it-py |
+| murmurhash | 1.0.15 | MIT | preshed, spacy, thinc |
+| **numpy** | 2.4.6 | **BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0**. Windows 휠에 OpenBLAS(BSD-3-Clause)·LAPACK(BSD-3-Clause-Open-MPI)·**GCC 런타임(GPL-3.0-or-later WITH GCC-exception-3.1)**이 함께 실림(설치본 `LICENSE.txt`) | blis, presidio-analyzer, spacy, thinc → 부록 B |
+| packaging | 26.3 | Apache-2.0 OR BSD-2-Clause | spacy, thinc, weasel |
+| preshed | 3.0.13 | MIT | spacy, thinc |
+| pydantic | 2.14.1 | MIT | presidio-analyzer, spacy, thinc, weasel |
+| pydantic-core | 2.50.1 | MIT | pydantic |
+| pygments | 2.21.0 | BSD-2-Clause | rich |
+| pyyaml | 6.0.3 | MIT | presidio-analyzer |
+| **regex** | 2026.9.29 | **Apache-2.0 AND CNRI-Python** | presidio-analyzer → 부록 B |
+| requests | 2.34.2 | Apache-2.0 | requests-file, spacy, tldextract |
+| requests-file | 3.0.1 | Apache-2.0 | tldextract |
+| rich | 15.0.0 | MIT | typer |
+| setuptools | 84.2.0 | MIT. 안에 **autocommand 2.2.2(LGPL-3.0-or-later)**가 함께 실림(`setuptools/_vendor`, 소스 머리말 「version 3 … or (at your option) any later version」) | spacy, thinc → 부록 B |
+| shellingham | 1.5.4 | ISC | typer |
+| smart-open | 8.0.4 | MIT | weasel |
+| spacy-legacy | 3.0.12 | MIT | spacy |
+| spacy-loggers | 1.0.5 | MIT | spacy |
+| srsly | 2.5.4 | MIT | spacy, thinc, weasel |
+| thinc | 8.3.13 | MIT | spacy |
+| tldextract | 5.4.0 | BSD-3-Clause | presidio-analyzer |
+| **tqdm** | 4.70.1 | **MPL-2.0 AND MIT** | spacy → 부록 B |
+| typer | 0.27.3 | MIT | spacy, weasel |
+| **typing-extensions** | 4.16.0 | **PSF-2.0** | anyio, pydantic, pydantic-core, typing-inspection → 부록 B |
+| typing-inspection | 0.4.4 | MIT | pydantic |
+| urllib3 | 2.8.0 | MIT | requests |
+| wasabi | 1.1.3 | MIT | spacy, thinc, weasel |
+| weasel | 1.0.0 | MIT | spacy |
+| wrapt | 2.5.1 | BSD-2-Clause | smart-open |
+
 ## 부록 B: 허용 목록 밖 라이선스에 대한 판단
 
 부록 A-6에 모인 패키지와, 허용 목록 안이지만 표기가 달라 근거를 남기는 패키지다. 모두 **우리가 직접 선언하지 않았고, 수정하지 않고 그대로 쓴다.**
@@ -357,7 +425,15 @@ GitHub Releases `desktop-v*`의 설치파일이다(#617). 위 A-4의 Dart 런타
 - **python-stdnum은 LGPL-2.1-or-later다**(설치본 `COPYING` 원문 「GNU LESSER GENERAL PUBLIC LICENSE Version 2.1」, 소스 머리말 「version 2.1 … or (at your option) any later version」). 팀 방침의 금지 목록(GPL·AGPL·SSPL)에는 없지만 같은 계열이라 따로 적는다. 우리는 python-stdnum을 배포하지 않는다. 사용자가 선택 설치를 고르면 pip이 PyPI에서 직접 받는다. 우리 코드는 python-stdnum을 부르지도 않는다.
 - **numpy·scipy의 Windows 휠에는 GCC 런타임 라이브러리가 함께 실린다.** 각 설치본 `LICENSE.txt`에 「Name: GCC runtime library … License: GPL-3.0-or-later WITH GCC-exception-3.1」로 적혀 있다. 이것도 우리가 배포하지 않고, pip이 PyPI에서 받는 휠 그대로다.
 - tqdm의 MPL-2.0은 위 certifi 절과 같은 파일 단위 카피레프트이고, defusedxml·typing-extensions의 PSF-2.0은 위 절과 같다. regex의 CNRI-Python, numpy의 Zlib·CC0-1.0·0BSD도 우리가 배포하지 않는다.
-- 결론: **배포물 미포함.** 이 선택 설치는 팀 방침(GPL 계열 금지)의 예외로 두고, 위 사실을 근거로 남긴다(2026-10-08 팀장 결정, #727). 예외는 이 선택 설치(`bench-baselines`)에만 적용하고, 배포물과 제품 코드의 의존성에는 GPL 계열 금지를 그대로 지킨다.
+- 결론: **배포물 미포함.** 이 선택 설치는 팀 방침(GPL 계열 금지)의 예외로 두고, 위 사실을 근거로 남긴다(2026-10-08 팀장 결정, #727). 예외는 이 선택 설치(`bench-baselines`)와 아래 KDPII 비교용 가상환경에만 적용하고, 배포물과 제품 코드의 의존성에는 GPL 계열 금지를 그대로 지킨다.
+
+### setuptools 안의 autocommand (LGPL-3.0-or-later), numpy 휠의 GCC 런타임 (GPL-3.0-or-later WITH GCC-exception-3.1), certifi·tqdm (MPL-2.0), regex (Apache-2.0 AND CNRI-Python), numpy (Zlib·CC0-1.0 등 포함), typing-extensions (PSF-2.0) — KDPII 타 도구 비교(개발 도구)
+
+- **배포물에 들어가지 않는다.** 모두 본표 40~43번을 저장소 밖 비교용 가상환경에 설치할 때만 따라온다(부록 A-9). 이 가상환경은 `pyproject.toml`·lock 파일·선택 설치 어디에도 없고, `pip install maskingtape`·웹 데모·MCP 서버·데스크톱 설치파일과 무관하다.
+- **직접 의존이 아니다.** 우리 코드는 ko-pii·presidio-analyzer만 함수 안에서 import하고, 아래 패키지는 import하지 않는다. 어느 것도 수정하지 않고, 결과(탐지 위치)만 벤치 점수 계산에 쓴다.
+- **autocommand는 setuptools 84.2.0 휠 안에 함께 실린 패키지다**(`setuptools/_vendor`, 설치본 `LICENSE` 원문 「GNU LESSER GENERAL PUBLIC LICENSE Version 3」, 소스 머리말 「version 3 … or (at your option) any later version」). setuptools는 spaCy·thinc가 요구해서 설치된다. setuptools 안에서는 jaraco.text의 예제 스크립트 두 개만 autocommand를 부른다. 비교를 실행했을 때 setuptools와 autocommand는 불리지 않았다(2026-10-21, 어댑터 5개 실행 뒤 `sys.modules` 확인).
+- numpy 휠의 GCC 런타임은 위 절과 같다(설치본 `LICENSE.txt`). certifi·tqdm의 MPL-2.0, regex의 CNRI-Python, numpy의 Zlib·CC0-1.0·0BSD, typing-extensions의 PSF-2.0도 위 절들의 판단과 같다.
+- 결론: **배포물 미포함.** 팀 방침(GPL 계열 금지)의 예외를 이 비교용 가상환경에도 적용하고, 위 사실을 근거로 남긴다(2026-10-23 팀장 결정, #751). 배포물과 제품 코드의 의존성에는 GPL 계열 금지를 그대로 지킨다.
 
 ## 부록 C: AI 모델 상세
 
@@ -407,4 +483,4 @@ GitHub Releases `desktop-v*`의 설치파일이다(#617). 위 A-4의 Dart 런타
 
 | 데이터셋 | 출처 | 라이선스 | 쓴 곳 |
 |---|---|---|---|
-| KDPII (한국어 대화 개인정보 데이터셋) | https://doi.org/10.5281/zenodo.10968609 | CC-BY-4.0 | README의 이름 하이브리드 외부 비교(test에서 500문장, 2026-10-04). 원자료와 변환본은 저장소에 싣지 않는다. 받아서 바꾸는 스크립트는 `bench/fetch_kdpii.py`(Zenodo MD5 대조) |
+| KDPII (한국어 대화 개인정보 데이터셋) | https://doi.org/10.5281/zenodo.10968609 | CC-BY-4.0 | README의 이름 하이브리드 외부 비교(test에서 500문장, 2026-10-04)와 타 도구 비교(test 4,891문장, `bench/README.md` 「KDPII 타 도구 비교」). 원자료와 변환본은 저장소에 싣지 않는다. 받아서 바꾸는 스크립트는 `bench/fetch_kdpii.py`(Zenodo MD5 대조) |
