@@ -3,6 +3,8 @@
 
 """생년월일 탐지기 테스트 — 모든 날짜는 합성(가짜)이다."""
 
+import pytest
+
 from maskingtape.detectors import BirthDateDetector
 
 
@@ -141,3 +143,37 @@ def test_chulsaeng_compound_words_after_a_date_are_not_a_birthdate():
     assert detect("2024년 3월 1일 출생아 수 통계") == []
     assert detect("2025년 출생률 발표") == []
     assert detect("2024년 3월 1일 출생신고 접수") == []
+
+
+# ── 「출생」 뒤에 두 글자 이상 어미가 붙는 꼴(#726, #658 후속) ─────────────────────
+# 판결문·기사·신청서에 흔한 "출생으로·출생이다·출생이며·출생인·출생입니다"가 샜다.
+
+
+
+@pytest.mark.parametrize(
+    "text, date_text",
+    [
+        ("김씨는 1964년 12월 4일 출생으로 확인됐다", "1964년 12월 4일"),
+        ("박씨는 1990년 1월 5일 출생이다", "1990년 1월 5일"),
+        ("이씨는 1990년 1월 5일 출생이며 서울에 산다", "1990년 1월 5일"),
+        ("1990년 1월 5일 출생인 신청인", "1990년 1월 5일"),
+        ("1990년 1월 5일 출생입니다", "1990년 1월 5일"),
+        ("1990년 1월 5일 출생, 서울 거주", "1990년 1월 5일"),
+        ("1990년 1월 5일 출생은 확인됨", "1990년 1월 5일"),
+    ],
+)
+def test_chulsaeng_followed_by_longer_endings_is_a_birthdate(text, date_text):
+    assert [d.text for d in detect(text)] == [date_text]
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "2024년 출생률이 떨어졌다",
+        "2024년 3월 1일 출생신고를 했다",
+        "2024년 출생아 수",
+        "2024년 3월 1일 출생아 수 통계",
+    ],
+)
+def test_chulsaeng_compound_words_are_still_not_a_birthdate(text):
+    assert detect(text) == []
