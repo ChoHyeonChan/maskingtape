@@ -655,6 +655,21 @@ _ALL_CUES = tuple(dict.fromkeys(_PREFIX_CUES + _SUFFIX_CUES + _TITLE_CUES))
 # 호칭 글자로 시작하는 실명까지 버리면 유출이다.
 _CUE_WORDS = frozenset(_ALL_CUES)
 
+# 같은 입력에서 다시 나온 이름을 찾을 때(#608) 한글 낱말의 첫머리만 본다.
+_HANGUL_RUN_RE = re.compile(r"[가-힣]+")
+# 이름으로 잡혔어도 퍼뜨리지 않는 말. 한 번의 오탐이 문서 전체로 번지지 않게 일반어·라벨·단서 낱말을 막는다.
+_REPEAT_NOT_SEEDS = (
+    _COMMON_WORDS | _TITLE_CONTEXT_WORDS | _COUNT_TAIL_NOT_NAMES | _COURT_CUE_COMMON_WORDS
+    | _SELF_INTRO_NOT_NAMES | _FORM_NOT_NAMES | _CUE_WORDS
+)
+# 단서 하나(0.5)로 잡은 이름도 바로 뒤가 이 어미이고 앞이 역할어면 퍼뜨린다("담당자 김민수입니다"). 사람을 소개하는 말이다.
+# 직함("대표 이미지입니다")은 일반어 오탐이 흔해 넣지 않는다. "저는"·"이름"은 "저는 이민자입니다"처럼 사람 아닌 말이 잦아 뺀다.
+_REPEAT_SEED_ENDINGS = ("입니다", "이에요", "예요")
+_REPEAT_ROLE_CUES = tuple(sorted(set(_PREFIX_CUES) - {"저는", "이름"}, key=len, reverse=True))
+# 뒤 값을 퍼뜨려도 되는 이름 전용 양식 라벨. #603 짧은 라벨(수신·작성·결재·담당 등)은 부서·업무 값이 흔하고,
+# "이름"은 "파일 이름: 보고서"처럼 사람 아닌 것에도 쓰여 뺀다.
+_REPEAT_SEED_FORM_LABELS = frozenset(_FORM_LABELS) - frozenset(_FORM_LABELS_603) - {"이름"}
+
 # 나열 칸이 이 단서 낱말이면 나열을 끊는다. #603 단서는 빼서 전처럼 이어받는다 — 나열 중간의
 # "구매자"에서 끊으면 그 뒤 실명까지 샌다("참석자: 김민수, 구매자, 이서연", #674).
 _LIST_STOP_CUE_WORDS = _CUE_WORDS - _CUES_603
@@ -692,6 +707,17 @@ _CUE_WITH_JOSA_OLD_RE = re.compile(
 def _is_hangul(ch: str) -> bool:
     """완성형 한글 음절(가~힣)인지 본다. 일반명사(_COMMON_WORDS)의 낱말 경계를 판정할 때 쓴다."""
     return "가" <= ch <= "힣"
+
+
+def _role_cue_before(text: str, pos: int) -> bool:
+    """text[pos] 바로 앞(공백·쌍점 건너)이 역할어 낱말(_REPEAT_ROLE_CUES)인지 본다(#608 원본 판정)."""
+    k = pos
+    while k > 0 and text[k - 1] in " \t:":
+        k -= 1
+    for cue in _REPEAT_ROLE_CUES:
+        if text.endswith(cue, 0, k) and (k == len(cue) or not _is_hangul(text[k - len(cue) - 1])):
+            return True
+    return False
 
 
 def _name_could_end_at(text: str, pos: int) -> bool:
@@ -860,6 +886,7 @@ class NameDetector(Detector):
             found.sort(key=lambda d: (d.start, d.end))
             seeds = set(list_seeds)
             list_seeds.extend(s for s in again_seeds if s not in seeds)
+        cued = list(found)
         form_extra = self._form_names(text, found, list_seeds)
         table_extra = self._table_names(text, found + form_extra)
         slash_extra = self._slash_record_names(text, found + form_extra + table_extra)
@@ -876,6 +903,8 @@ class NameDetector(Detector):
         # #663·#589: 인사말 뒤 소속 + 이름의 자기소개, 변경 기록의 두 번째 이름. 더하기만 한다.
         found.extend(self._self_intro_names(text, found))
         found.extend(self._change_log_names(text, found))
+        # #608: 위에서 잡은 이름이 같은 입력에 단서 없이 다시 나온 자리. 더하기만 한다.
+        found.extend(self._repeat_names(text, found, cued, form_extra))
         return found
 
     def _scan_cued(
@@ -1369,6 +1398,87 @@ class NameDetector(Detector):
             covered[start:end] = b"\x01" * (end - start)
             extra.append(self._name_detection(start, end, text, keep_title_tail=False))
         return extra
+
+    def _repeat_names(
+        self, text: str, found: list[Detection], cued: list[Detection], form: list[Detection]
+    ) -> list[Detection]:
+        """이미 이름으로 잡은 세 글자 이상 문자열이 같은 입력에 단서 없이 다시 나온 자리를 받는다(#608).
+
+        문서는 첫 언급에만 역할어·존칭을 붙이고 그 뒤로는 이름만 쓴다. 앞은 한글이 아니고 뒤는 조사·어미·낱말 끝인
+        자리만 받아 "이서연구소"·"김민수진" 같은 더 긴 낱말은 건드리지 않는다. 뒤 한 글자가 조사로 읽혀도 이름의
+        끝 글자일 수 있으면 그 글자까지 가린다(_repeat_name_end). 한글 낱말의 첫머리를 한 번만 훑어 이름 수와 상관없이
+        선형이다. 두 글자 이름은 일반 낱말과 겹쳐("이상"·"정원") 퍼뜨리지 않는다.
+
+        퍼뜨리는 원본은 사람이라는 근거가 강한 이름뿐이다. 단서 훑기(cued)에서 앞뒤 단서가 둘 다 있었던 0.75, 이름 전용
+        양식 라벨 바로 뒤("성명: 박서준"), 역할어 뒤나 자기소개 자리에서 바로 뒤가 "입니다"인 이름("담당자 김민수입니다",
+        "안녕하세요. 인사팀 김민수입니다")이다. 단서 하나짜리 0.5를 다 퍼뜨리면 "대표 이미지"·"팀원 노트북" 같은 오탐 한
+        번이 문서 전체로 번졌다(저장소·노트 495개 파일에서 새로 가린 386곳 가운데 절반쯤이 일반어). 표 칸·약한 양식
+        라벨("수신: 정보통신"·"작성: 품질관리"·"파일 이름: 보고서")에서 0.75로 잡힌 값과 직함 뒤 "입니다"("대표
+        이미지입니다")는 원본으로 쓰지 않는다(#608 보안 점검·교차검토).
+        """
+        if self.min_confidence > 0.5:
+            return []
+        name_form_starts = {
+            m.start("name") for m in _FORM_NAME_RE.finditer(text) if m.group("label") in _REPEAT_SEED_FORM_LABELS
+        }
+        intro_starts = {m.start("name") for m in _SELF_INTRO_RE.finditer(text)}
+        intro_starts.update(m.start("name") for m in _MY_NAME_IS_RE.finditer(text))
+        sources = [d for d in cued if d.confidence >= 0.75]
+        sources += [d for d in cued + form if d.start in name_form_starts]
+        sources += [
+            d
+            for d in found
+            if text.startswith(_REPEAT_SEED_ENDINGS, d.end)
+            and (d.start in intro_starts or _role_cue_before(text, d.start))
+        ]
+        seeds = {
+            name
+            for d in sources
+            if _FOLLOWUP_MIN_NAME_LEN <= len(name := text[d.start : d.end]) <= 4
+            and all(_is_hangul(ch) for ch in name)
+            and name not in _REPEAT_NOT_SEEDS
+        }
+        if not seeds:
+            return []
+        covered = self._covered(found, text)
+        extra: list[Detection] = []
+        for m in _HANGUL_RUN_RE.finditer(text):
+            start = m.start()
+            for n in (4, 3):
+                name = text[start : start + n]
+                end = start + n
+                if len(name) == n and name in seeds and end <= m.end() and _name_could_end_at(text, end):
+                    break
+            else:
+                continue
+            end = self._repeat_name_end(text, start, end, name)
+            if all(covered[start:end]) or not self._plain_name_cell(text, start, name):
+                continue
+            covered[start:end] = b"\x01" * (end - start)
+            extra.append(self._name_detection(start, end, text, keep_title_tail=False))
+        return extra
+
+    def _repeat_name_end(self, text: str, start: int, end: int, name: str) -> int:
+        """다시 나온 세 글자 이름 바로 뒤 한 글자가 이름의 끝 글자일 수 있으면 그 글자까지 가린다(#608 보안 점검·교차검토).
+
+        시드가 다른 사람 이름의 앞부분이면("선우하"와 "선우하은", "김하나"와 "김하나은") 앞 세 글자만 가리게 되고,
+        웹 하이브리드에서는 모델이 그 실명을 못 알아봐 끝 글자가 남는다. 뒤 글자가 앞 글자 받침과 맞지 않는 조사이거나
+        (받침 없는 "김하나" 뒤 "은"·"을"·"과"·"이", 받침 있는 이름 뒤 "는"·"가"·"를"·"와") "라"·"란"이면 그 글자까지
+        가린다. 복성 + 한 글자("선우하")는 뒤 한글 한 글자를 늘 넣는다. 받침에 맞는 조사("김민수가"·"이서연은")는
+        그대로 둔다. 한 글자 더 가리는 쪽이라 안전하다.
+        """
+        if end - start != 3 or not _is_hangul(text[end : end + 1] or " ") or not _name_could_end_at(text, end + 1):
+            return self._keep_i_ra_after_short_name(text, start, end)
+        nxt = text[end]
+        has_final = (ord(name[-1]) - 0xAC00) % 28 != 0
+        if (
+            name[:2] in _COMPOUND_SURNAMES
+            or nxt in "라란"
+            or (not has_final and nxt in "은을과이")
+            or (has_final and nxt in "는가를와")
+        ):
+            return end + 1
+        return end
 
     def _form_names(
         self, text: str, found: list[Detection], list_seeds: list[tuple[int, bool]]
