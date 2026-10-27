@@ -32,6 +32,9 @@ export function ServiceIntro() {
       <p className="service-intro__hint">
         바로 실행하면 웹에서 설치 없이 바로 체험 가능하고 다운로드는 <code>pip install maskingtape</code> 또는
         데스크톱 앱으로 내 PC에서 실행됩니다.
+        {/* Releases 맨 위 Latest(파이썬 패키지)에는 첨부가 없고, 설치파일은 desktop-v… 항목에 있다(#731). */}
+        <br />
+        데스크톱 설치파일은 Releases의 <code>desktop-v…</code> 항목에 있어요.
       </p>
     </section>
   );
