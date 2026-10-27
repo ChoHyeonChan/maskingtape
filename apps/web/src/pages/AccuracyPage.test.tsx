@@ -10,9 +10,9 @@ describe("AccuracyPage", () => {
     render(<AccuracyPage />);
 
     expect(screen.getByText("전체 F1 점수")).toBeInTheDocument();
-    // README 「정확도」 표 전체 행(F1 0.981, 재현율 0.974)과 같은 값이다(#499).
-    expect(screen.getByText("98.1")).toBeInTheDocument();
-    expect(screen.getByText(/개인정보 100개 중 약 97개를 찾아 가려요\(재현율 0\.974\)/)).toBeInTheDocument();
+    // README 「정확도」 표 전체 행(F1 0.987, 재현율 0.987, 2026-10-26 main `2802949` 재측정 #739)과 같은 값이다(#499, #731).
+    expect(screen.getByText("98.7")).toBeInTheDocument();
+    expect(screen.getByText(/개인정보 100개 중 약 99개를 찾아 가려요\(재현율 0\.987\)/)).toBeInTheDocument();
   });
 
   it("lists all 10 perfect-score kinds plus a separate 이름 card, matching AccuracySection's real numbers", () => {

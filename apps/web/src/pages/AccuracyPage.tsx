@@ -58,7 +58,7 @@ export function AccuracyPage() {
           <div className="accuracy-hero__card">
             <div className="accuracy-hero__stat">
               <div className="accuracy-hero__stat-value">
-                98.1<span>%</span>
+                98.7<span>%</span>
               </div>
               <div className="accuracy-hero__stat-label">전체 F1 점수</div>
             </div>
@@ -67,7 +67,7 @@ export function AccuracyPage() {
               <div className="accuracy-hero__stat-plain">
                 쉽게 말하면,
                 <br />
-                개인정보 100개 중 약 97개를 찾아 가려요(재현율 0.974)
+                개인정보 100개 중 약 99개를 찾아 가려요(재현율 0.987)
               </div>
             </div>
             <div className="accuracy-hero__divider" aria-hidden="true" />
