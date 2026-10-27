@@ -36,7 +36,7 @@ const NAME_RESULTS: { where: string; rulesOnly: string; withLlm: string; howToRe
     howToRead: "규칙을 고칠 때 본 세트라 규칙 쪽 값이 실력보다 높게 나옴. 문장 틀은 학습에 없던 것",
   },
   {
-    where: "문서 5종 보고용: 같은 다섯 종류를 틀·이름부터 새로 쓴 세트 (이름 1,078개)",
+    where: "문서 5종 보고용: 틀·이름을 새로 쓴 같은 다섯 종류 (이름 1,078개)",
     rulesOnly: "재현율 0.567 · F1 0.687",
     withLlm: "재현율 0.971~0.973 · F1 0.918~0.919",
     howToRead: "규칙을 고칠 때 안 본 세트. 규칙은 처음 보는 꼴에 약하고, 로컬 LLM이 그 몫을 메움",
