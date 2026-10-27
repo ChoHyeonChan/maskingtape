@@ -296,12 +296,12 @@ describe("DemoPage switch detection mode from the result screen (#547 follow-up)
   });
 
   it("keeps the current result and shows the error when the re-scan request fails", async () => {
-    mockScanText.mockResolvedValueOnce(ruleResult).mockRejectedValueOnce(new Error("API 서버에 연결하지 못했습니다."));
+    mockScanText.mockResolvedValueOnce(ruleResult).mockRejectedValueOnce(new Error("서버에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요."));
     await scanRuleFirst();
 
     fireEvent.click(screen.getByRole("button", { name: "하이브리드 (OpenAI)" }));
 
-    expect(await screen.findByRole("alert")).toHaveTextContent("API 서버에 연결하지 못했습니다.");
+    expect(await screen.findByRole("alert")).toHaveTextContent("서버에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요.");
     expect(screen.getByRole("textbox", { name: "마스킹된 탐지 결과" })).toHaveValue("고객 김민준 *************");
   });
 });
