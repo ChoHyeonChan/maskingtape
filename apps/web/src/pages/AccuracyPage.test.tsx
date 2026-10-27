@@ -51,6 +51,13 @@ describe("AccuracyPage", () => {
     expect(screen.queryByText(/0\.923/)).not.toBeInTheDocument();
   });
 
+  it("describes the LLM step as re-reading the whole text, not only ambiguous names (#731)", () => {
+    render(<AccuracyPage />);
+
+    expect(screen.getByText("로컬 LLM이 글 전체를 다시 읽기")).toBeInTheDocument();
+    expect(screen.queryByText(/애매한 이름만/)).not.toBeInTheDocument();
+  });
+
   it("explains precision, recall and F1 in plain language", () => {
     render(<AccuracyPage />);
 

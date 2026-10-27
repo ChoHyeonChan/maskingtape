@@ -89,7 +89,7 @@ export function AccuracyPage() {
             <p className="accuracy-callout__body">
               <strong>
                 많은 서비스는 AI(인공지능)에게 통째로 맡겨서, AI가 가끔 헷갈리거나 놓쳐요. 마스킹테이프는 정해진
-                규칙으로 먼저 꼼꼼하게 찾고, 애매한 이름만 로컬 LLM으로 한 번 더 확인해요.
+                규칙으로 먼저 꼼꼼하게 찾고, 로컬 LLM이 글 전체를 다시 읽어 놓친 이름을 더 찾아요.
               </strong>{" "}
               그래서 이름을 뺀 나머지 10종(주민번호·전화번호 등)은 규칙만으로 정확도 100%예요.
             </p>
@@ -115,10 +115,13 @@ export function AccuracyPage() {
               <div className="accuracy-step__badge" aria-hidden="true">
                 2
               </div>
-              <div className="accuracy-step__title">애매한 이름만 로컬 LLM이 한 번 더 확인</div>
+              {/* LLM은 한글 두 글자가 붙은 자리나 인명 단서가 있으면 글 전체를 받는다
+                  (core name.py has_name_candidate → name_llm.py detect). "애매한 이름만"이 아니다(#731). */}
+              <div className="accuracy-step__title">로컬 LLM이 글 전체를 다시 읽기</div>
               <p className="accuracy-step__body">
-                이름은 정해진 형식이 없어 규칙만으로는 가끔 놓쳐요. 애매한 경우만{" "}
-                <strong>내 컴퓨터 안의 로컬 LLM</strong>이 문맥을 보고 다시 확인해요.
+                이름은 정해진 형식이 없어 규칙만으로는 가끔 놓쳐요. 그래서{" "}
+                <strong>내 컴퓨터 안의 로컬 LLM</strong>이 글 전체를 문맥과 함께 다시 읽고, 규칙이 놓친 이름을 더
+                찾아요.
               </p>
             </div>
           </div>
