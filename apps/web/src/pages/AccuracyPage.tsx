@@ -29,10 +29,10 @@ const NAME_RESULTS: { where: string; rulesOnly: string; withLlm: string; howToRe
     howToRead: "모델을 같은 생성기 데이터로 학습해서 LLM 쪽 값이 실제보다 높게 나옴",
   },
   {
-    where: "문서 5종: 판결문·메일·상담·회의록·명단 (이름 1,162개)",
-    rulesOnly: "재현율 0.892 · F1 0.938",
-    withLlm: "재현율 0.975 · F1 0.957",
-    howToRead: "문장 틀은 학습에 없던 것",
+    where: "문서 5종 조정용: 판결문·메일·상담·회의록·명단 (이름 1,162개)",
+    rulesOnly: "재현율 0.979 · F1 0.984",
+    withLlm: "재현율 0.981 · F1 0.958",
+    howToRead: "규칙을 고칠 때 본 세트라 규칙 쪽 값이 실력보다 높게 나옴. 문장 틀은 학습에 없던 것",
   },
   {
     where: "외부 대화 데이터 KDPII (이름 177개)",

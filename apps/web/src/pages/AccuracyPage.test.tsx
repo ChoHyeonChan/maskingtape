@@ -41,8 +41,9 @@ describe("AccuracyPage", () => {
 
     const table = screen.getByRole("table");
     expect(table).toHaveTextContent("재현율 0.966 · F1 0.967");
-    expect(table).toHaveTextContent("재현율 0.892 · F1 0.938");
-    expect(table).toHaveTextContent("재현율 0.975 · F1 0.957");
+    expect(table).toHaveTextContent("문서 5종 조정용");
+    expect(table).toHaveTextContent("재현율 0.979 · F1 0.984");
+    expect(table).toHaveTextContent("재현율 0.981 · F1 0.958");
     expect(table).toHaveTextContent("재현율 0.825 · F1 0.600");
     expect(table).toHaveTextContent("정밀도 0.471");
     // #683은 비용 계산·팀장 승인 전이라 측정을 시작하지 않았다 — 「재는 중」이라고 쓰지 않는다(#731).
