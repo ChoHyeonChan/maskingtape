@@ -132,8 +132,8 @@ src/
   styles/                  # tokens/base/layout/intro/input/results/accuracy/coachmark로 역할별 분리된 CSS
 ```
 
-- 하이라이트 색상은 CVD 접근성 검증을 거친 고정 팔레트(`src/styles/tokens.css`의 `--kind-*` 변수, 매핑에 없는 kind는 `--kind-fallback` 회색으로 폴백) — 색만으로 구분하지 않도록 종류 라벨을 항상 텍스트로 같이 표시하고, 요약 카드가 색상 범례를 겸한다.
-- 확신도(confidence) 1.0 미만 탐지(이름·주소 등 규칙만으론 애매한 것)는 점선 밑줄로 "불확실"을 표시한다.
+- 하이라이트 색상은 CVD 접근성 검증을 거친 고정 팔레트(`src/styles/tokens.css`의 `--kind-*` 변수, 매핑에 없는 kind는 `--kind-fallback` 회색으로 폴백) — 색만으로 구분하지 않도록 탐지 목록의 항목마다 종류 라벨을 글자로 같이 적는다.
+- 탐지 목록의 항목마다 확신도를 %로 적는다. 「신뢰도 기준」(기본 50%)보다 낮은 항목은 처음부터 가리지 않고, 「수동 조정」에서 항목별로 가림/보임을 바꾸면 그 선택이 기준보다 먼저다(`ResultsPanel.tsx` `isMasked`).
 - 다크모드는 아직 지원하지 않는다 — 색상이 전부 `src/styles/tokens.css`의 CSS 변수 기반이라, 나중에 `prefers-color-scheme` 미디어 쿼리로 다크 팔레트만 추가하면 확장 가능하다.
 
 ## 다음 (imsoo 담당 — 결과·배치 화면)
