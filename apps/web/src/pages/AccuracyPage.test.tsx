@@ -48,8 +48,8 @@ describe("AccuracyPage", () => {
     expect(table).toHaveTextContent("문서 5종 보고용");
     expect(table).toHaveTextContent("재현율 0.567 · F1 0.687");
     expect(table).toHaveTextContent("재현율 0.971~0.973 · F1 0.918~0.919");
-    expect(table).toHaveTextContent("재현율 0.825 · F1 0.600");
-    expect(table).toHaveTextContent("정밀도 0.471");
+    expect(table).toHaveTextContent("재현율 0.819 · F1 0.593");
+    expect(table).toHaveTextContent("정밀도 0.465");
     // #683은 비용 계산·팀장 승인 전이라 측정을 시작하지 않았다 — 「재는 중」이라고 쓰지 않는다(#731).
     expect(screen.getByText(/웹 데모의 하이브리드는 OpenAI 판단기를 씁니다/)).toHaveTextContent("아직 재지 않았습니다(#683)");
     expect(screen.queryByText(/재는 중/)).not.toBeInTheDocument();

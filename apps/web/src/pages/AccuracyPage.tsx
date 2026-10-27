@@ -42,9 +42,9 @@ const NAME_RESULTS: { where: string; rulesOnly: string; withLlm: string; howToRe
   },
   {
     where: "외부 대화 데이터 KDPII (이름 177개)",
-    rulesOnly: "재현율 0.254",
-    withLlm: "재현율 0.825 · F1 0.600",
-    howToRead: "학습에 안 쓴 외부 데이터. 대신 오탐이 늘어 정밀도 0.471",
+    rulesOnly: "재현율 0.299",
+    withLlm: "재현율 0.819 · F1 0.593",
+    howToRead: "학습에 안 쓴 외부 데이터. 대신 오탐이 늘어 정밀도 0.465",
   },
 ];
 
