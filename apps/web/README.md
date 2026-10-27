@@ -136,11 +136,11 @@ src/
 - 탐지 목록의 항목마다 확신도를 %로 적는다. 「신뢰도 기준」(기본 50%)보다 낮은 항목은 처음부터 가리지 않고, 「수동 조정」에서 항목별로 가림/보임을 바꾸면 그 선택이 기준보다 먼저다(`ResultsPanel.tsx` `isMasked`).
 - 다크모드는 아직 지원하지 않는다 — 색상이 전부 `src/styles/tokens.css`의 CSS 변수 기반이라, 나중에 `prefers-color-scheme` 미디어 쿼리로 다크 팔레트만 추가하면 확장 가능하다.
 
-## 다음 (imsoo 담당 — 결과·배치 화면)
+## 남은 일
 
-- 여러 문서를 한 번에 올려서 일괄 처리하는 화면 — `apps/desktop`의 `batch_processor.dart` 흐름을 참고하면 됨(같은 core를 쓰므로 로직은 동일, 화면만 웹으로)
-- `App.tsx`에 탭 또는 라우팅을 추가해 이 화면과 입력·하이라이트 뷰를 나란히 배치
-- 컴포넌트는 `src/components/` 아래 새 폴더로 분리해서 충돌 방지
+- 여러 문서를 한 번에 처리하는 화면은 웹에 두지 않는다. 데스크톱 앱(`apps/desktop`)이 맡는다([ROADMAP](../../ROADMAP.md) Phase 1).
+- 새 페이지는 `src/pages/`에 두고 `main.tsx`의 `PAGES`에 경로를 더한다. 컴포넌트는 `src/components/` 아래 역할별 폴더로 나눈다.
+- 지금 웹 파트에서 하는 일은 [`part: web` 열린 이슈](https://github.com/ChoHyeonChan/maskingtape/issues?q=is%3Aissue+is%3Aopen+label%3A%22part%3A+web%22)에서 본다.
 
 ## 규칙
 
