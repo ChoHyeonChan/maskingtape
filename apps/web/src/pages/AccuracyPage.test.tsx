@@ -44,6 +44,10 @@ describe("AccuracyPage", () => {
     expect(table).toHaveTextContent("문서 5종 조정용");
     expect(table).toHaveTextContent("재현율 0.979 · F1 0.984");
     expect(table).toHaveTextContent("재현율 0.981 · F1 0.958");
+    // 규칙을 고칠 때 보지 않은 보고용 세트(#456)를 함께 보여야 조정용 숫자를 실력으로 오해하지 않는다.
+    expect(table).toHaveTextContent("문서 5종 보고용");
+    expect(table).toHaveTextContent("재현율 0.567 · F1 0.687");
+    expect(table).toHaveTextContent("재현율 0.971~0.973 · F1 0.918~0.919");
     expect(table).toHaveTextContent("재현율 0.825 · F1 0.600");
     expect(table).toHaveTextContent("정밀도 0.471");
     // #683은 비용 계산·팀장 승인 전이라 측정을 시작하지 않았다 — 「재는 중」이라고 쓰지 않는다(#731).
