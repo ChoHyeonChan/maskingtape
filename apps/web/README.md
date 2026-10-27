@@ -101,20 +101,35 @@ Node.js 24 기준 (Vite 8 / React 19 / TypeScript 7). 새 패키지 추가 전 �
 
 ```
 src/
+  main.tsx                 # 경로를 보고 페이지를 고른다 (/, /demo, /accuracy — 라우터 라이브러리 없음)
+  App.tsx                  # 랜딩 페이지 조립 — 소개 + 탐지 범위 + 클로징 CTA
+  pages/
+    DemoPage.tsx             # 실제 체험 화면 — 입력 패널과 결과 패널을 나란히 두고 상태를 묶는다
+    AccuracyPage.tsx         # 정확도 페이지 — 전체 점수, 종류별 막대, 이름 표(데이터별 규칙 vs 로컬 LLM)
   types/detection.ts       # core Detection과 1:1 (API 계약 v1 스키마) + 한국어 라벨/색상
-  api/scanClient.ts        # POST /scan 호출
-  lib/segments.ts          # 원문+탐지결과 → 하이라이트용 조각으로 분해 (순수 함수, 테스트 용이)
-  lib/summary.ts           # 탐지결과 → 종류별 개수·최소 확신도 집계 (순수 함수, 테스트 용이)
+  api/scanClient.ts        # POST /api/scan · /api/anonymize 호출, 서버 위치를 JS 문자열 위치로 변환
+  lib/
+    hybrid.ts                # 탐지 방식(규칙 전용 / 하이브리드)과 하이브리드 입력 상한
+    masking.ts               # 가림·라벨 치환을 클라이언트에서 계산 (가명처리는 서버 /anonymize)
+    offsets.ts               # 코드포인트 위치 → UTF-16 위치 (#495)
+    extractText.ts           # 올린 파일(txt·csv·md·json·log, 글자가 있는 PDF 등)에서 글자 꺼내기
+    presets.ts               # 예제 문서 — 전부 합성값
   components/
-    layout/AppHeader.tsx      # 상단 헤더
-    help/CoachMark.tsx        # 첫 사용 안내 코치마크 (Esc로 닫기 가능)
-    input/InputPanel.tsx      # 입력 — 텍스트 입력 + 예제 프리셋 버튼 + 탐지 버튼 (plana 담당)
+    layout/SiteNav.tsx         # 상단 내비게이션 (도움말 버튼은 /demo에만)
+    layout/ClosingCta.tsx      # 랜딩 맨 아래 체험 유도
+    intro/                     # 랜딩 섹션 — ServiceIntro, CoverageSection, ExampleGallery
+    help/CoachMark.tsx         # 첫 사용 안내 코치마크 (Esc로 닫기 가능)
+    input/
+      InputPanel.tsx             # 입력 — 텍스트·파일 입력, 탐지 버튼. 결과가 나오면 같은 자리에서 가림 방식(가림·라벨·가명처리) 선택, 복사·파일 저장, 항목 위치 강조
+      DetectionModeSelector.tsx  # 규칙 전용 / 하이브리드 (OpenAI) 선택과 안내
+      SamplePickerModal.tsx      # 「샘플 넣기」 모달 — 안에 ExampleGallery
     results/
-      ResultsPanel.tsx          # 결과 패널 조립 — 확신도 임계값 슬라이더 포함
-      DetectionSummary.tsx      # 탐지 요약 카드 (종류별 건수 + 확신도 막대, 0건이면 안심 메시지)
-      HighlightedText.tsx       # 탐지 구간 하이라이트 + 마스킹 결과 복사·다운로드 (확신도 낮으면 점선)
-  styles/                   # tokens/base/layout/input/results/coachmark로 역할별 분리된 CSS
-  App.tsx                   # 화면 조립 + 프라이버시 안내 배너 — imsoo가 결과·배치 화면 붙일 때 이 파일에 라우팅/탭 추가
+      ResultsPanel.tsx           # 결과 패널 조립 — 탐지 목록·하이브리드 알림·다시 탐지 버튼, 가명처리는 /anonymize 호출
+      DetectionList.tsx          # 「신뢰도 기준」 일괄 조정과 「수동 조정」(항목별 가림/보임·확신도 %)
+      ConfidenceControl.tsx      # 확신도 임계값 막대 (드래그·클릭·키보드)
+      RescanModeBar.tsx          # 결과 화면에서 탐지 방식을 바꿔 다시 탐지
+      HybridStatusNotice.tsx     # 하이브리드 결과·실패(규칙 결과로 돌아옴) 알림
+  styles/                  # tokens/base/layout/intro/input/results/accuracy/coachmark로 역할별 분리된 CSS
 ```
 
 - 하이라이트 색상은 CVD 접근성 검증을 거친 고정 팔레트(`src/styles/tokens.css`의 `--kind-*` 변수, 매핑에 없는 kind는 `--kind-fallback` 회색으로 폴백) — 색만으로 구분하지 않도록 종류 라벨을 항상 텍스트로 같이 표시하고, 요약 카드가 색상 범례를 겸한다.
