@@ -44,6 +44,8 @@ cd apps/web
 npm run dev
 ```
 
+화면에 「서버에 연결하지 못했습니다」가 뜨면 로컬 개발에서는 위 API 서버(`uvicorn`)가 떠 있는지, `VITE_API_TARGET`이 그 주소를 가리키는지 먼저 확인합니다. 이 문구는 운영 방문자도 보므로 개발용 안내를 화면에 넣지 않습니다(#731).
+
 Node.js 24 기준 (Vite 8 / React 19 / TypeScript 7). 새 패키지 추가 전 라이선스 확인 후 [SBOM.md](../../SBOM.md)에 기록.
 
 ## 초기 버전 대비 변경 사항

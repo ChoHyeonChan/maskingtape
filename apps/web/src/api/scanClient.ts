@@ -10,11 +10,14 @@ interface ApiErrorBody {
   message?: string;
 }
 
+// 운영 방문자가 보는 문구다. "백엔드 실행" 같은 로컬 개발 안내는 apps/web/README.md에 둔다(#731).
+const SERVER_UNREACHABLE = "서버에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요.";
+
 const ERROR_MESSAGES: Record<number, string> = {
   400: "요청 형식이 올바르지 않습니다. 입력 내용을 확인해 주세요.",
   413: "입력한 텍스트가 너무 깁니다. 내용을 줄인 뒤 다시 시도해 주세요.",
   500: "분석 엔진에서 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.",
-  502: "API 서버에 연결하지 못했습니다. 백엔드가 실행 중인지 확인해 주세요.",
+  502: SERVER_UNREACHABLE,
 };
 
 async function postJson<T>(path: string, body: unknown): Promise<T> {
@@ -27,7 +30,7 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
       body: JSON.stringify(body),
     });
   } catch {
-    throw new Error("API 서버에 연결하지 못했습니다. 백엔드가 실행 중인지 확인해 주세요.");
+    throw new Error(SERVER_UNREACHABLE);
   }
 
   if (!res.ok) {
