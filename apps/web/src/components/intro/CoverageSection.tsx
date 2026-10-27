@@ -36,14 +36,14 @@ export function CoverageSection() {
 
       {/* 루트 README와 같은 수치(#499) — 전체 F1은 「정확도」 표의 전체 행(합성 벤치 v1,
           규칙 전용), 이름 재현율은 KDPII test 500문장(학습에 안 쓴 외부 데이터, 2026-10-04)
-          하이브리드 값이다. README가 바뀌면 AccuracyPage의 이름 표와 함께 갱신한다. */}
+          하이브리드 값이다(둘 다 #739, 2026-10-26 main `2802949` 재측정). README가 바뀌면 AccuracyPage의 이름 표와 함께 갱신한다. */}
       <div className="coverage-section__stats">
         <div className="coverage-section__stat">
-          <div className="coverage-section__stat-value">0.981</div>
+          <div className="coverage-section__stat-value">0.987</div>
           <div className="coverage-section__stat-label">전체 F1 (11종, 규칙 전용)</div>
         </div>
         <div className="coverage-section__stat">
-          <div className="coverage-section__stat-value">0.825</div>
+          <div className="coverage-section__stat-value">0.819</div>
           <div className="coverage-section__stat-label">이름 재현율 (외부 대화 데이터, 로컬 LLM)</div>
         </div>
         <div className="coverage-section__stat">
