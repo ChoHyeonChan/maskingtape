@@ -24,7 +24,7 @@ const PERFECT_KINDS: { label: string; color: string }[] = [
 const NAME_RESULTS: { where: string; rulesOnly: string; withLlm: string; howToRead: string }[] = [
   {
     where: "합성 벤치마크 (이름 383개)",
-    rulesOnly: "재현율 0.932 · F1 0.949",
+    rulesOnly: "재현율 0.966 · F1 0.967",
     withLlm: "재현율 0.969 · F1 0.959",
     howToRead: "모델을 같은 생성기 데이터로 학습해서 LLM 쪽 값이 실제보다 높게 나옴",
   },
