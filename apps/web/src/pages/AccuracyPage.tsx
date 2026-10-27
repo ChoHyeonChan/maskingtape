@@ -19,8 +19,9 @@ const PERFECT_KINDS: { label: string; color: string }[] = [
   { label: "운전면허번호", color: "var(--kind-fallback)" },
 ];
 
-// 이름 탐지 결과(#499). 합성 벤치·문서 5종은 bench/README.md 「종합 비교표」(#548),
-// KDPII는 루트 README 「정확도」 절(test 500문장, 2026-10-04 측정)과 같은 수치다.
+// 이름 탐지 결과(#499). 전부 bench/README.md 「머지 마감 뒤 재측정」 표(#739, 2026-10-26 main
+// `2802949`)와 같은 수치다 — 합성 벤치 LLM 칸만 그때 다시 재지 않아 「종합 비교표」(#548) 값이다.
+// 문서 5종은 조정용(doc_types_v1)과 보고용(doc_types_holdout_v1)을 나눠 싣는다(#456, #731).
 const NAME_RESULTS: { where: string; rulesOnly: string; withLlm: string; howToRead: string }[] = [
   {
     where: "합성 벤치마크 (이름 383개)",
@@ -188,7 +189,7 @@ export function AccuracyPage() {
             ))}
 
             {/* 이름: 유일하게 100%가 아닌 항목이라 카드를 다르게 강조하고, 어디서 쟀는지에 따라
-                값이 크게 달라서 세 데이터의 규칙만 vs 로컬 LLM 값을 표로 함께 보여준다(#499).
+                값이 크게 달라서 네 데이터의 규칙만 vs 로컬 LLM 값을 표로 함께 보여준다(#499, #731).
                 수치는 NAME_RESULTS 주석의 출처와 함께 갱신한다. */}
             <div className="accuracy-name-card">
               <div className="accuracy-name-card__head">
@@ -199,7 +200,7 @@ export function AccuracyPage() {
 
               <p className="accuracy-name-card__note accuracy-name-card__note--lead">
                 이름은 정해진 형식이 없어서, 문맥 단서가 부족하면 규칙만으로는 놓쳐요. 어떤 데이터로 쟀는지에
-                따라 값이 크게 달라서 세 곳의 결과를 함께 보여드려요.
+                따라 값이 크게 달라서 네 곳의 결과를 함께 보여드려요.
               </p>
 
               <div className="accuracy-name-table__wrap">
@@ -235,7 +236,10 @@ export function AccuracyPage() {
 
         <section className="accuracy-footnote">
           <p>
-            저작권·개인정보 걱정 없는 자체 합성 데이터셋(500건, 규칙 전용 모드)으로 측정했습니다 — 같은 수치를{" "}
+            맨 위 전체 점수와 종류별 막대는 저작권·개인정보 걱정 없는 자체 합성 데이터셋(500건, 규칙 전용 모드)으로
+            측정했습니다. 이름 표는 표마다 데이터가 다릅니다 — 합성 벤치, 문서 5종 조정용·보고용(자체 합성), 학습에 안
+            쓴 외부 대화 데이터 KDPII이고, 로컬 LLM 칸은 우리가 학습한 1.5B 모델 값입니다(2026-10-26 측정, 합성 벤치
+            LLM 칸만 2026-10-05 측정). 같은 수치를{" "}
             <a
               href="https://github.com/ChoHyeonChan/maskingtape/blob/main/README.md"
               target="_blank"

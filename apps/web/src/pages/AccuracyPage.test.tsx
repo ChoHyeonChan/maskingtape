@@ -63,6 +63,15 @@ describe("AccuracyPage", () => {
     expect(screen.queryByText(/애매한 이름만/)).not.toBeInTheDocument();
   });
 
+  it("says where each number was measured instead of crediting every table to the 500-doc synthetic set (#731)", () => {
+    render(<AccuracyPage />);
+
+    const footnote = screen.getByText(/맨 위 전체 점수와 종류별 막대는/);
+    expect(footnote).toHaveTextContent("자체 합성 데이터셋(500건, 규칙 전용 모드)");
+    expect(footnote).toHaveTextContent("이름 표는 표마다 데이터가 다릅니다");
+    expect(footnote).toHaveTextContent("KDPII");
+  });
+
   it("explains precision, recall and F1 in plain language", () => {
     render(<AccuracyPage />);
 
