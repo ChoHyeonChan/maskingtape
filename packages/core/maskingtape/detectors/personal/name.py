@@ -1577,10 +1577,13 @@ class NameDetector(Detector):
         carry: tuple[int, list[int]] | None = None
         while i < n_lines:
             line = lines[i]
-            header = self._table_header(line.rstrip("\r\n"))
+            cells_by_sep: dict[str, list[tuple[str, int, int]] | None] = {}
+            header = self._table_header(line.rstrip("\r\n"), cells_by_sep=cells_by_sep)
             weak = header is None
             if weak:
-                header = self._table_header(line.rstrip("\r\n"), _TABLE_WEAK_NAME_HEADERS)
+                header = self._table_header(
+                    line.rstrip("\r\n"), _TABLE_WEAK_NAME_HEADERS, cells_by_sep=cells_by_sep
+                )
             if header is None:
                 carry = None
                 offset += len(line)
@@ -1605,7 +1608,7 @@ class NameDetector(Detector):
                     offset += len(row)
                     i += 1
                     continue  # 마크다운 구분행("|---|")은 건너뛰고 계속한다
-                if weak and self._table_header(row_text) is not None:
+                if weak and self._table_header(row_text, cells_by_sep={sep: cells}) is not None:
                     # #603 짧은 라벨 줄(결재란 "작성 | 검토 | 승인") 아래에 이름 전용 라벨 머리행이 오면
                     # 그 줄부터 머리행으로 다시 본다(#674)
                     carry = (n_cols, name_cols)
@@ -1692,16 +1695,24 @@ class NameDetector(Detector):
 
     @staticmethod
     def _table_header(
-        line: str, require: frozenset[str] = _TABLE_NAME_HEADERS
+        line: str,
+        require: frozenset[str] = _TABLE_NAME_HEADERS,
+        *,
+        cells_by_sep: dict[str, list[tuple[str, int, int]] | None] | None = None,
     ) -> tuple[str, list[int], int] | None:
         """이 줄이 표 머리행이면 (구분자, 이름 열 인덱스들, 전체 칸 수)를 돌려준다.
 
         require에 든 라벨 칸이 하나라도 있어야 머리행이다. 이름 열은 양식 라벨 칸 전부다.
+        같은 줄의 강한·약한 라벨 판정은 cells_by_sep를 공유해 칸을 한 번만 나눈다.
         """
+        if cells_by_sep is None:
+            cells_by_sep = {}
         for sep in _TABLE_SEPS:
             if sep not in line:
                 continue
-            cells = NameDetector._table_cells(line, sep)
+            if sep not in cells_by_sep:
+                cells_by_sep[sep] = NameDetector._table_cells(line, sep)
+            cells = cells_by_sep[sep]
             if cells is None or len(cells) < 2:
                 continue
             if any(value in require for value, _start, _end in cells):
@@ -1715,8 +1726,8 @@ class NameDetector(Detector):
 
         `csv` 표준 모듈로 나눈다 — 쉼표 구분 칸이 따옴표로 통째로 감싸여 있으면("김민수",
         "인사팀, 신규") 안쪽에 구분자가 있어도 한 칸으로 보고 따옴표를 벗긴 값을 쓴다(#526).
-        파싱할 수 없는 줄(따옴표가 안 닫힘 등)은 None을 돌려준다. 값의 원래 위치는 줄에서
-        순서대로 찾아나간다 — 실제 이름 값에는 따옴표 이스케이프(`""`)가 거의 없어 안전하다.
+        파싱할 수 없는 줄은 None을 돌려준다. 칸 경계를 한 번 훑고 값은 그 칸 안에서만
+        찾는다. 이스케이프(`""`)가 풀린 값이 원문에 없어도 줄 끝까지 거듭 검색하지 않는다.
         """
         try:
             raw_values = next(csv.reader([line], delimiter=sep), [])
@@ -1725,12 +1736,26 @@ class NameDetector(Detector):
         cells: list[tuple[str, int, int]] = []
         pos = 0
         for raw in raw_values:
+            field_start = pos
+            # csv.reader의 기본 방언처럼 칸 첫 글자가 따옴표일 때만 구분자를 감싼다.
+            if pos < len(line) and line[pos] == '"':
+                pos += 1
+                while pos < len(line):
+                    if line[pos] == '"':
+                        pos += 1
+                        if pos < len(line) and line[pos] == '"':
+                            pos += 1
+                            continue
+                        break
+                    pos += 1
+            while pos < len(line) and line[pos] != sep:
+                pos += 1
             value = raw.strip()
-            idx = line.find(value, pos)
+            idx = line.find(value, field_start, pos)
             if idx == -1:
-                idx = pos
+                idx = field_start
             cells.append((value, idx, idx + len(value)))
-            pos = idx + len(value)
+            pos += 1
         return cells
 
     @staticmethod
