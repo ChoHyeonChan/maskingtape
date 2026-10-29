@@ -16,6 +16,7 @@ const SERVER_UNREACHABLE = "서버에 연결하지 못했습니다. 잠시 후 �
 const ERROR_MESSAGES: Record<number, string> = {
   400: "요청 형식이 올바르지 않습니다. 입력 내용을 확인해 주세요.",
   413: "입력한 텍스트가 너무 깁니다. 내용을 줄인 뒤 다시 시도해 주세요.",
+  429: "요청이 너무 잦습니다. 잠시 후 다시 시도해 주세요.",
   500: "분석 엔진에서 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.",
   502: SERVER_UNREACHABLE,
 };
@@ -34,9 +35,11 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
   }
 
   if (!res.ok) {
+    // API는 오류마다 영어 message를 담아 보낸다. 웹이 아는 상태는 한국어 문구가 먼저고,
+    // 모르는 상태일 때만 서버 문구로 내려간다(#759).
     const errorBody = (await res.json().catch(() => null)) as ApiErrorBody | null;
     throw new Error(
-      errorBody?.message ?? errorBody?.code ?? ERROR_MESSAGES[res.status] ?? `요청 실패 (HTTP ${res.status})`,
+      ERROR_MESSAGES[res.status] ?? errorBody?.message ?? errorBody?.code ?? `요청 실패 (HTTP ${res.status})`,
     );
   }
 
