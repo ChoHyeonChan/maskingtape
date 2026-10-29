@@ -101,6 +101,6 @@ describe("anonymizeText (#346)", () => {
       vi.fn().mockRejectedValue(new TypeError("Failed to fetch")),
     );
 
-    await expect(anonymizeText("텍스트", "pseudonym")).rejects.toThrow("API 서버에 연결하지 못했습니다");
+    await expect(anonymizeText("텍스트", "pseudonym")).rejects.toThrow("서버에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요.");
   });
 });

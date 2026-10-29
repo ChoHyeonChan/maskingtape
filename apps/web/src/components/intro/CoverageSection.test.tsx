@@ -30,12 +30,12 @@ describe("CoverageSection (#455)", () => {
     }
   });
 
-  it("shows README's current numbers: overall F1 0.981 and name recall 0.825 on external data (#499)", () => {
+  it("shows README's current numbers: overall F1 0.987 and name recall 0.819 on external data (#499, #731)", () => {
     render(<CoverageSection />);
 
-    expect(screen.getByText("0.981")).toBeInTheDocument();
+    expect(screen.getByText("0.987")).toBeInTheDocument();
     expect(screen.getByText("전체 F1 (11종, 규칙 전용)")).toBeInTheDocument();
-    expect(screen.getByText("0.825")).toBeInTheDocument();
+    expect(screen.getByText("0.819")).toBeInTheDocument();
     expect(screen.getByText("이름 재현율 (외부 대화 데이터, 로컬 LLM)")).toBeInTheDocument();
     expect(screen.queryByText(/하이브리드로 11종/)).not.toBeInTheDocument();
   });
