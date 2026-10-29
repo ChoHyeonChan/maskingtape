@@ -126,7 +126,7 @@
 
 ## ⑥ 설치파일 (#617)
 
-**한 줄**: Inno Setup 설치파일에 임베디드 Python 3.13.2·엔진·pypdf를 함께 묶어, 받는 사람은 Python도 PATH 설정도 없이 쓴다. GitHub Releases `desktop-v0.2.3`.
+**한 줄**: Inno Setup 설치파일에 임베디드 Python 3.13.2·엔진·pypdf를 함께 묶어, 받는 사람은 Python도 PATH 설정도 없이 쓴다. 최신은 GitHub Releases `desktop-v0.2.4`(10/7, 동작은 0.2.3과 같고 설치 폴더의 고지문이 새 판).
 
 **동작** ([`installer/build.py`](../installer/build.py))
 - Flutter 릴리스 빌드 → Python 임베디드 zip(SHA-256 고정)을 풀고 core·pypdf wheel을 `site-packages`에 푼다 → 묶은 CLI와 PDF 추출을 합성 문장으로 실제로 돌려 확인 → 고지문을 `licenses\*.txt`로 모으고 파일별 해시(`BUNDLE_MANIFEST.txt`)를 쓴 뒤 Inno Setup으로 만든다.
@@ -152,7 +152,9 @@
 - LoRA(r=16), 2 에폭, RTX 3080에서 약 35분 → 기반 모델과 합쳐 GGUF로 바꾸고 Q4_K_M으로 양자화해 Ollama에 등록.
 
 **수치 — 정직한 요약**
-- 학습에 안 쓴 **외부 데이터**(KDPII test 500문장): 하이브리드 재현율 0.825로 **7B와 같고**, 정밀도는 7B가 높다(0.527 대 0.471).
+- 학습에 안 쓴 **외부 데이터**(KDPII test 500문장): 하이브리드 재현율 0.825로 **7B와 같고**, 정밀도는 7B가 높다(0.527 대 0.471)
+  (10/4 측정 — 1.5B와 7B를 같은 조건으로 비교한 값). 발표 숫자는 10/26 재측정의 **0.819**다([#739](https://github.com/ChoHyeonChan/maskingtape/issues/739), bench/README 「머지 마감 뒤 재측정」).
+  Q&A에서는 「발표 숫자는 0.819, 0.825는 7B와 비교할 때 잰 값」으로 구분해 답한다.
 - 같은 생성기의 보고용 세트에서는 7B보다 높지만(하이브리드 F1 0.944 > 0.907) **학습 분포 안쪽이라 낙관적**이다.
 - 그래서 요약은 "7B보다 정확하다"가 아니라 **"재현율은 같고, 더 작고 빠르며, 문서 속 지시문에 덜 흔들린다"**다.
 
