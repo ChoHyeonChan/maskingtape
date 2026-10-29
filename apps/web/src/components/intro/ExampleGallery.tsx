@@ -13,13 +13,15 @@ interface Props {
  * "샘플 더 불러오기" 안에 숨어 있어, 처음 온 사람이 어떤 문서 유형을 시험해볼 수 있는지
  * 첫 화면에서 알기 어려웠다. 카드마다 실제로 탐지되는 개인정보 종류를 태그로 붙여, 클릭
  * 전에도 이 예제가 무엇을 보여주는지 짐작할 수 있게 한다.
+ *
+ * 갤러리는 「샘플 넣기」 모달 안에 뜨므로 입력창이 "아래"에 있지 않다 — 안내 문구에 위치를 적지 않는다(#731).
  */
 export function ExampleGallery({ onPick }: Props) {
   return (
     <section className="example-gallery" aria-label="예제 문서로 체험하기">
       <h2>예제로 바로 체험해보기</h2>
       <p className="example-gallery__lead">
-        문서 유형을 하나 골라 클릭하면 아래 입력창에 바로 채워집니다 — 실제 개인정보가 아닌 합성 데이터입니다.
+        문서 유형을 하나 골라 클릭하면 입력창에 바로 채워집니다 — 실제 개인정보가 아닌 합성 데이터입니다.
       </p>
       <div className="example-gallery__grid">
         {PRESETS.map((preset) => (

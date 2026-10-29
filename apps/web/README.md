@@ -1,6 +1,6 @@
 # apps/web — 웹 플레이그라운드
 
-**담당: [@plana1470](https://github.com/plana1470) (입력·하이라이트 뷰) + [@imsoo0816](https://github.com/imsoo0816) (결과·배치 화면)** · 상태: ✅ 입력·하이라이트 뷰 완료(접근성·프라이버시 배너·확신도 슬라이더 포함), 🚧 결과·배치 화면 진행 중
+**담당: [@plana1470](https://github.com/plana1470) (입력·하이라이트 뷰) + [@imsoo0816](https://github.com/imsoo0816) (결과·배치 화면)** · 상태: ✅ 입력·하이라이트 뷰, 결과 화면(항목별 가림·확신도 일괄 조정·가명처리), 탐지 방식 선택(규칙 전용 / 하이브리드), 정확도 페이지 — 운영 중(<https://maskingtape-lilac.vercel.app>). 여러 파일 일괄 처리는 데스크톱 앱(`apps/desktop`)이 맡는다
 
 브라우저에서 텍스트를 붙여넣으면 탐지된 개인정보를 하이라이트하고 마스킹 결과를 보여주는 데모.
 
@@ -44,11 +44,21 @@ cd apps/web
 npm run dev
 ```
 
+화면에 「서버에 연결하지 못했습니다」가 뜨면 로컬 개발에서는 위 API 서버(`uvicorn`)가 떠 있는지, `VITE_API_TARGET`이 그 주소를 가리키는지 먼저 확인합니다. 이 문구는 운영 방문자도 보므로 개발용 안내를 화면에 넣지 않습니다(#731).
+
+API 오류 응답의 `message`는 영어입니다. 화면은 웹이 아는 상태(400·413·429·500·502)면 `src/api/scanClient.ts`의 한국어 문구를 먼저 보이고, 모르는 상태일 때만 서버 문구를 그대로 보입니다(#759).
+
 Node.js 24 기준 (Vite 8 / React 19 / TypeScript 7). 새 패키지 추가 전 라이선스 확인 후 [SBOM.md](../../SBOM.md)에 기록.
 
 ## 초기 버전 대비 변경 사항
 
 초기 웹 데모에 비해 다음 항목들을 추가·개선했습니다.
+
+> 아래는 **2026년 8월까지의 이력**이라 지금 화면과 다른 곳이 있습니다. 그 뒤로 바뀐 점:
+> - 결과 요약 카드와 종류 필터는 탐지 목록(`DetectionList`)으로 바뀌었습니다. 항목별 가림/보임 토글이 실제 마스킹 결과에 반영되고, **복사·저장도 토글을 반영한 글**을 내보냅니다(예전에는 토글과 무관하게 완전 마스킹본).
+> - 확신도 기준은 0%로 리셋되지 않고, 새로 탐지할 때마다 탐지 결과의 가장 낮은 확신도로 맞춰져 처음에는 전부 가립니다.
+> - 상단 헤더는 `SiteNav`로, 한 화면 구성은 랜딩(`/`)·체험(`/demo`)·정확도(`/accuracy`) 세 페이지로 나뉘었습니다.
+> - 예제는 「샘플 넣기」 모달 안의 갤러리로 옮겨졌고, 탐지 방식(규칙 전용 / 하이브리드)을 고를 수 있습니다.
 
 ### UI/UX 개선
 - 입력 영역이 텍스트 길이에 따라 자동으로 확장되며, 길어질 경우 내부 스크롤바가 생기도록 조정했습니다.
@@ -101,31 +111,46 @@ Node.js 24 기준 (Vite 8 / React 19 / TypeScript 7). 새 패키지 추가 전 �
 
 ```
 src/
+  main.tsx                 # 경로를 보고 페이지를 고른다 (/, /demo, /accuracy — 라우터 라이브러리 없음)
+  App.tsx                  # 랜딩 페이지 조립 — 소개 + 탐지 범위 + 클로징 CTA
+  pages/
+    DemoPage.tsx             # 실제 체험 화면 — 입력 패널과 결과 패널을 나란히 두고 상태를 묶는다
+    AccuracyPage.tsx         # 정확도 페이지 — 전체 점수, 종류별 막대, 이름 표(데이터별 규칙 vs 로컬 LLM)
   types/detection.ts       # core Detection과 1:1 (API 계약 v1 스키마) + 한국어 라벨/색상
-  api/scanClient.ts        # POST /scan 호출
-  lib/segments.ts          # 원문+탐지결과 → 하이라이트용 조각으로 분해 (순수 함수, 테스트 용이)
-  lib/summary.ts           # 탐지결과 → 종류별 개수·최소 확신도 집계 (순수 함수, 테스트 용이)
+  api/scanClient.ts        # POST /api/scan · /api/anonymize 호출, 서버 위치를 JS 문자열 위치로 변환
+  lib/
+    hybrid.ts                # 탐지 방식(규칙 전용 / 하이브리드)과 하이브리드 입력 상한
+    masking.ts               # 가림·라벨 치환을 클라이언트에서 계산 (가명처리는 서버 /anonymize)
+    offsets.ts               # 코드포인트 위치 → UTF-16 위치 (#495)
+    extractText.ts           # 올린 파일(txt·csv·md·json·log, 글자가 있는 PDF 등)에서 글자 꺼내기
+    presets.ts               # 예제 문서 — 전부 합성값
   components/
-    layout/AppHeader.tsx      # 상단 헤더
-    help/CoachMark.tsx        # 첫 사용 안내 코치마크 (Esc로 닫기 가능)
-    input/InputPanel.tsx      # 입력 — 텍스트 입력 + 예제 프리셋 버튼 + 탐지 버튼 (plana 담당)
+    layout/SiteNav.tsx         # 상단 내비게이션 (도움말 버튼은 /demo에만)
+    layout/ClosingCta.tsx      # 랜딩 맨 아래 체험 유도
+    intro/                     # 랜딩 섹션 — ServiceIntro, CoverageSection, ExampleGallery
+    help/CoachMark.tsx         # 첫 사용 안내 코치마크 (Esc로 닫기 가능)
+    input/
+      InputPanel.tsx             # 입력 — 텍스트·파일 입력, 탐지 버튼. 결과가 나오면 같은 자리에서 가림 방식(가림·라벨·가명처리) 선택, 복사·파일 저장, 항목 위치 강조
+      DetectionModeSelector.tsx  # 규칙 전용 / 하이브리드 (OpenAI) 선택과 안내
+      SamplePickerModal.tsx      # 「샘플 넣기」 모달 — 안에 ExampleGallery
     results/
-      ResultsPanel.tsx          # 결과 패널 조립 — 확신도 임계값 슬라이더 포함
-      DetectionSummary.tsx      # 탐지 요약 카드 (종류별 건수 + 확신도 막대, 0건이면 안심 메시지)
-      HighlightedText.tsx       # 탐지 구간 하이라이트 + 마스킹 결과 복사·다운로드 (확신도 낮으면 점선)
-  styles/                   # tokens/base/layout/input/results/coachmark로 역할별 분리된 CSS
-  App.tsx                   # 화면 조립 + 프라이버시 안내 배너 — imsoo가 결과·배치 화면 붙일 때 이 파일에 라우팅/탭 추가
+      ResultsPanel.tsx           # 결과 패널 조립 — 탐지 목록·하이브리드 알림·다시 탐지 버튼, 가명처리는 /anonymize 호출
+      DetectionList.tsx          # 「신뢰도 기준」 일괄 조정과 「수동 조정」(항목별 가림/보임·확신도 %)
+      ConfidenceControl.tsx      # 확신도 임계값 막대 (드래그·클릭·키보드)
+      RescanModeBar.tsx          # 결과 화면에서 탐지 방식을 바꿔 다시 탐지
+      HybridStatusNotice.tsx     # 하이브리드 결과·실패(규칙 결과로 돌아옴) 알림
+  styles/                  # tokens/base/layout/intro/input/results/accuracy/coachmark로 역할별 분리된 CSS
 ```
 
-- 하이라이트 색상은 CVD 접근성 검증을 거친 고정 팔레트(`src/styles/tokens.css`의 `--kind-*` 변수, 매핑에 없는 kind는 `--kind-fallback` 회색으로 폴백) — 색만으로 구분하지 않도록 종류 라벨을 항상 텍스트로 같이 표시하고, 요약 카드가 색상 범례를 겸한다.
-- 확신도(confidence) 1.0 미만 탐지(이름·주소 등 규칙만으론 애매한 것)는 점선 밑줄로 "불확실"을 표시한다.
+- 하이라이트 색상은 CVD 접근성 검증을 거친 고정 팔레트(`src/styles/tokens.css`의 `--kind-*` 변수, 매핑에 없는 kind는 `--kind-fallback` 회색으로 폴백) — 색만으로 구분하지 않도록 탐지 목록의 항목마다 종류 라벨을 글자로 같이 적는다.
+- 탐지 목록의 항목마다 확신도를 %로 적는다. 새로 탐지할 때마다 「신뢰도 기준」을 탐지 결과의 가장 낮은 확신도로 맞춰 처음에는 전부 가린다. 기준을 올리면 그보다 낮은 항목은 가리지 않고, 「수동 조정」에서 항목별로 바꾼 가림/보임이 기준보다 먼저다(`ResultsPanel.tsx` `isMasked`).
 - 다크모드는 아직 지원하지 않는다 — 색상이 전부 `src/styles/tokens.css`의 CSS 변수 기반이라, 나중에 `prefers-color-scheme` 미디어 쿼리로 다크 팔레트만 추가하면 확장 가능하다.
 
-## 다음 (imsoo 담당 — 결과·배치 화면)
+## 남은 일
 
-- 여러 문서를 한 번에 올려서 일괄 처리하는 화면 — `apps/desktop`의 `batch_processor.dart` 흐름을 참고하면 됨(같은 core를 쓰므로 로직은 동일, 화면만 웹으로)
-- `App.tsx`에 탭 또는 라우팅을 추가해 이 화면과 입력·하이라이트 뷰를 나란히 배치
-- 컴포넌트는 `src/components/` 아래 새 폴더로 분리해서 충돌 방지
+- 여러 문서를 한 번에 처리하는 화면은 웹에 두지 않는다. 데스크톱 앱(`apps/desktop`)이 맡는다([ROADMAP](../../ROADMAP.md) Phase 1).
+- 새 페이지는 `src/pages/`에 두고 `main.tsx`의 `PAGES`에 경로를 더한다. 컴포넌트는 `src/components/` 아래 역할별 폴더로 나눈다.
+- 지금 웹 파트에서 하는 일은 [`part: web` 열린 이슈](https://github.com/ChoHyeonChan/maskingtape/issues?q=is%3Aissue+is%3Aopen+label%3A%22part%3A+web%22)에서 본다.
 
 ## 규칙
 

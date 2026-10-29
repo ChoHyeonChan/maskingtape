@@ -89,10 +89,23 @@ describe("anonymizeText (#346)", () => {
     expect(result.text).toBe("고객 김서준 010-8842-1097");
   });
 
-  it("surfaces the server's error message when the request fails", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({ message: "요청이 너무 큽니다." }, 413)));
+  it("falls back to the server's message only for statuses the web has no wording for", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({ message: "service unavailable." }, 503)));
 
-    await expect(anonymizeText("x".repeat(200_000), "pseudonym")).rejects.toThrow("요청이 너무 큽니다.");
+    await expect(anonymizeText("텍스트", "pseudonym")).rejects.toThrow("service unavailable.");
+  });
+
+  // API는 오류마다 영어 message를 담아 보낸다(apps/api errors.py·rate_limit.py). 웹이 아는 상태는
+  // 한국어 문구가 먼저여야 방문자에게 "too many requests." 같은 영어가 뜨지 않는다(#759).
+  it.each([
+    [400, "request body validation failed.", "요청 형식이 올바르지 않습니다. 입력 내용을 확인해 주세요."],
+    [413, "text must be at most 100000 characters.", "입력한 텍스트가 너무 깁니다. 내용을 줄인 뒤 다시 시도해 주세요."],
+    [429, "too many requests.", "요청이 너무 잦습니다. 잠시 후 다시 시도해 주세요."],
+    [500, "internal server error.", "분석 엔진에서 오류가 발생했습니다. 잠시 후 다시 시도해 주세요."],
+  ])("shows Korean wording instead of the server's English message for HTTP %i (#759)", async (status, serverMessage, shown) => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({ code: "x", message: serverMessage }, status)));
+
+    await expect(scanText("텍스트")).rejects.toThrow(shown);
   });
 
   it("reports a connection error when the fetch itself throws", async () => {
@@ -101,6 +114,6 @@ describe("anonymizeText (#346)", () => {
       vi.fn().mockRejectedValue(new TypeError("Failed to fetch")),
     );
 
-    await expect(anonymizeText("텍스트", "pseudonym")).rejects.toThrow("API 서버에 연결하지 못했습니다");
+    await expect(anonymizeText("텍스트", "pseudonym")).rejects.toThrow("서버에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요.");
   });
 });
