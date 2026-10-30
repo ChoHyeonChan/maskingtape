@@ -13,5 +13,5 @@
 from maskingtape.pipeline import AnonymizeResult, Pipeline
 from maskingtape.types import Detection
 
-__version__ = "0.4.0"
+__version__ = "0.4.1"
 __all__ = ["AnonymizeResult", "Detection", "Pipeline", "__version__"]
