@@ -425,7 +425,7 @@
   word-break: keep-all;
 }
 
-/* 수치 칸은 "재현율 0.932 · F1 0.949"가 숫자 중간에서 끊기지 않게 한 줄로 둔다. */
+/* 수치 칸은 "재현율 0.966 · F1 0.967"가 숫자 중간에서 끊기지 않게 한 줄로 둔다. */
 .accuracy-name-table td:nth-child(2),
 .accuracy-name-table__llm {
   white-space: nowrap;

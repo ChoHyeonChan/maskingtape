@@ -19,26 +19,33 @@ const PERFECT_KINDS: { label: string; color: string }[] = [
   { label: "운전면허번호", color: "var(--kind-fallback)" },
 ];
 
-// 이름 탐지 결과(#499). 합성 벤치·문서 5종은 bench/README.md 「종합 비교표」(#548),
-// KDPII는 루트 README 「정확도」 절(test 500문장, 2026-10-04 측정)과 같은 수치다.
+// 이름 탐지 결과(#499). 전부 bench/README.md 「머지 마감 뒤 재측정」 표(#739, 2026-10-26 main
+// `2802949`)와 같은 수치다 — 합성 벤치 LLM 칸만 그때 다시 재지 않아 「종합 비교표」(#548) 값이다.
+// 문서 5종은 조정용(doc_types_v1)과 보고용(doc_types_holdout_v1)을 나눠 싣는다(#456, #731).
 const NAME_RESULTS: { where: string; rulesOnly: string; withLlm: string; howToRead: string }[] = [
   {
     where: "합성 벤치마크 (이름 383개)",
-    rulesOnly: "재현율 0.932 · F1 0.949",
+    rulesOnly: "재현율 0.966 · F1 0.967",
     withLlm: "재현율 0.969 · F1 0.959",
     howToRead: "모델을 같은 생성기 데이터로 학습해서 LLM 쪽 값이 실제보다 높게 나옴",
   },
   {
-    where: "문서 5종: 판결문·메일·상담·회의록·명단 (이름 1,162개)",
-    rulesOnly: "재현율 0.892 · F1 0.938",
-    withLlm: "재현율 0.975 · F1 0.957",
-    howToRead: "문장 틀은 학습에 없던 것",
+    where: "문서 5종 조정용: 판결문·메일·상담·회의록·명단 (이름 1,162개)",
+    rulesOnly: "재현율 0.979 · F1 0.984",
+    withLlm: "재현율 0.981 · F1 0.958",
+    howToRead: "규칙을 고칠 때 본 세트라 규칙 쪽 값이 실력보다 높게 나옴. 문장 틀은 학습에 없던 것",
+  },
+  {
+    where: "문서 5종 보고용: 틀·이름을 새로 쓴 같은 다섯 종류 (이름 1,078개)",
+    rulesOnly: "재현율 0.567 · F1 0.687",
+    withLlm: "재현율 0.971~0.973 · F1 0.918~0.919",
+    howToRead: "규칙을 고칠 때 안 본 세트. 규칙은 처음 보는 꼴에 약하고, 로컬 LLM이 그 몫을 메움",
   },
   {
     where: "외부 대화 데이터 KDPII (이름 177개)",
-    rulesOnly: "재현율 0.254",
-    withLlm: "재현율 0.825 · F1 0.600",
-    howToRead: "학습에 안 쓴 외부 데이터. 대신 오탐이 늘어 정밀도 0.471",
+    rulesOnly: "재현율 0.299",
+    withLlm: "재현율 0.819 · F1 0.593",
+    howToRead: "학습에 안 쓴 외부 데이터. 대신 오탐이 늘어 정밀도 0.465",
   },
 ];
 
@@ -58,7 +65,7 @@ export function AccuracyPage() {
           <div className="accuracy-hero__card">
             <div className="accuracy-hero__stat">
               <div className="accuracy-hero__stat-value">
-                98.1<span>%</span>
+                98.7<span>%</span>
               </div>
               <div className="accuracy-hero__stat-label">전체 F1 점수</div>
             </div>
@@ -67,7 +74,7 @@ export function AccuracyPage() {
               <div className="accuracy-hero__stat-plain">
                 쉽게 말하면,
                 <br />
-                개인정보 100개 중 약 97개를 찾아 가려요(재현율 0.974)
+                개인정보 100개 중 약 99개를 찾아 가려요(재현율 0.987)
               </div>
             </div>
             <div className="accuracy-hero__divider" aria-hidden="true" />
@@ -89,7 +96,7 @@ export function AccuracyPage() {
             <p className="accuracy-callout__body">
               <strong>
                 많은 서비스는 AI(인공지능)에게 통째로 맡겨서, AI가 가끔 헷갈리거나 놓쳐요. 마스킹테이프는 정해진
-                규칙으로 먼저 꼼꼼하게 찾고, 애매한 이름만 로컬 LLM으로 한 번 더 확인해요.
+                규칙으로 먼저 꼼꼼하게 찾고, 로컬 LLM이 글 전체를 다시 읽어 놓친 이름을 더 찾아요.
               </strong>{" "}
               그래서 이름을 뺀 나머지 10종(주민번호·전화번호 등)은 규칙만으로 정확도 100%예요.
             </p>
@@ -115,10 +122,13 @@ export function AccuracyPage() {
               <div className="accuracy-step__badge" aria-hidden="true">
                 2
               </div>
-              <div className="accuracy-step__title">애매한 이름만 로컬 LLM이 한 번 더 확인</div>
+              {/* LLM은 한글 두 글자가 붙은 자리나 인명 단서가 있으면 글 전체를 받는다
+                  (core name.py has_name_candidate → name_llm.py detect). "애매한 이름만"이 아니다(#731). */}
+              <div className="accuracy-step__title">로컬 LLM이 글 전체를 다시 읽기</div>
               <p className="accuracy-step__body">
-                이름은 정해진 형식이 없어 규칙만으로는 가끔 놓쳐요. 애매한 경우만{" "}
-                <strong>내 컴퓨터 안의 로컬 LLM</strong>이 문맥을 보고 다시 확인해요.
+                이름은 정해진 형식이 없어 규칙만으로는 가끔 놓쳐요. 그래서{" "}
+                <strong>내 컴퓨터 안의 로컬 LLM</strong>이 글 전체를 문맥과 함께 다시 읽고, 규칙이 놓친 이름을 더
+                찾아요.
               </p>
             </div>
           </div>
@@ -179,7 +189,7 @@ export function AccuracyPage() {
             ))}
 
             {/* 이름: 유일하게 100%가 아닌 항목이라 카드를 다르게 강조하고, 어디서 쟀는지에 따라
-                값이 크게 달라서 세 데이터의 규칙만 vs 로컬 LLM 값을 표로 함께 보여준다(#499).
+                값이 크게 달라서 네 데이터의 규칙만 vs 로컬 LLM 값을 표로 함께 보여준다(#499, #731).
                 수치는 NAME_RESULTS 주석의 출처와 함께 갱신한다. */}
             <div className="accuracy-name-card">
               <div className="accuracy-name-card__head">
@@ -190,7 +200,7 @@ export function AccuracyPage() {
 
               <p className="accuracy-name-card__note accuracy-name-card__note--lead">
                 이름은 정해진 형식이 없어서, 문맥 단서가 부족하면 규칙만으로는 놓쳐요. 어떤 데이터로 쟀는지에
-                따라 값이 크게 달라서 세 곳의 결과를 함께 보여드려요.
+                따라 값이 크게 달라서 네 곳의 결과를 함께 보여드려요.
               </p>
 
               <div className="accuracy-name-table__wrap">
@@ -218,7 +228,7 @@ export function AccuracyPage() {
 
               <p className="accuracy-name-card__note">
                 웹 데모의 하이브리드는 OpenAI 판단기를 씁니다. 위 LLM 수치는 CLI·데스크톱의 로컬 모델 값이고, 웹
-                하이브리드 정확도는 따로 재는 중입니다(#683).
+                하이브리드 정확도는 아직 재지 않았습니다(#683).
               </p>
             </div>
           </div>
@@ -226,7 +236,10 @@ export function AccuracyPage() {
 
         <section className="accuracy-footnote">
           <p>
-            저작권·개인정보 걱정 없는 자체 합성 데이터셋(500건, 규칙 전용 모드)으로 측정했습니다 — 같은 수치를{" "}
+            맨 위 전체 점수와 종류별 막대는 저작권·개인정보 걱정 없는 자체 합성 데이터셋(500건, 규칙 전용 모드)으로
+            측정했습니다. 이름 표는 표마다 데이터가 다릅니다 — 합성 벤치, 문서 5종 조정용·보고용(자체 합성), 학습에 안
+            쓴 외부 대화 데이터 KDPII이고, 로컬 LLM 칸은 우리가 학습한 1.5B 모델 값입니다(2026-10-26 측정, 합성 벤치
+            LLM 칸만 2026-10-05 측정). 같은 수치를{" "}
             <a
               href="https://github.com/ChoHyeonChan/maskingtape/blob/main/README.md"
               target="_blank"

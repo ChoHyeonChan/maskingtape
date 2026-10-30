@@ -19,4 +19,10 @@ describe("ServiceIntro (#455)", () => {
       "https://github.com/ChoHyeonChan/maskingtape/releases",
     );
   });
+
+  it("tells visitors the desktop installer lives under the desktop-v… release, not Latest (#731)", () => {
+    render(<ServiceIntro />);
+
+    expect(screen.getByText(/데스크톱 설치파일은 Releases의/)).toHaveTextContent("desktop-v…");
+  });
 });
