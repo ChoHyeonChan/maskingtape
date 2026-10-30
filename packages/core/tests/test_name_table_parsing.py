@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 The maskingtape Authors
 # SPDX-License-Identifier: Apache-2.0
 
-"""Table parsing must preserve source spans without rescanning escaped CSV fields."""
+"""CSV 이스케이프 칸을 반복 검색하지 않고 이름의 원문 위치와 선형 처리 시간을 지키는지 확인한다."""
 
 import csv
 from statistics import median
