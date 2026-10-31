@@ -84,6 +84,9 @@ lib/
   services/
     anonymizer.dart            # 비식별화 백엔드 인터페이스 + 예외 타입
     cli_anonymizer.dart        # core CLI 서브프로세스 호출 (stdin UTF-8)
+    cli_locator.dart           # CLI 찾기 — exe 옆 동봉 Python 먼저, 없으면 PATH의 maskingtape
+    install_layout.dart        # 설치판 폴더 배치 (installer/build.py와 같은 배치, 함께 고친다)
+    bundled_licenses.dart      # 설치판에 함께 실린 구성요소 고지문을 ⓘ 라이선스 화면에 등록
     rest_anonymizer.dart       # apps/api REST 호출 (dart:io HttpClient, 의존성 추가 없음)
     fallback_anonymizer.dart   # 백엔드를 순서대로 시도 (조합만 담당)
     default_backend.dart       # 기본 조립 — CLI 먼저, 없으면 REST
@@ -93,6 +96,8 @@ lib/
     file_picker.dart           # OS 파일 선택 대화상자 (file_selector)
     shell.dart                 # 탐색기에서 결과 파일 열기
     batch_processor.dart       # 읽기 → 비식별화 → _masked 저장 순차 배치 (취소 지원)
+    code_point_offsets.dart    # core 탐지 위치(코드포인트) → Dart 위치(UTF-16) 변환 (#496)
+    mask_applier.dart          # 항목별 가림/보임 선택대로 마스킹 결과를 다시 만든다
   screens/
     home_screen.dart           # 홈 — 파일 일괄 ↔ 텍스트 입력 모드 전환, 작업 목록 상태 + 배치 시작
     text_screen.dart           # 텍스트 입력 모드 — 입력·실행·결과/원문 토글·탐지 목록
@@ -107,6 +112,9 @@ lib/
     tape_strip.dart            # 시그니처 — 뜯어 붙인 마스킹테이프 한 조각 (직접 그림)
     redacted_text.dart         # 테이프로 가려진 글자 (빈 화면 예시용)
     result_preview_dialog.dart # 원문 하이라이트 vs 마스킹 결과 비교 다이얼로그
+    detection_panel.dart       # 「탐지 결과 조정」 패널 — 건수·요약·정렬·항목별 가림 토글
+    mask_toggle.dart           # 항목별 「가림 / 보임」 알약 토글 (웹 .detect-row__toggle과 같은 모양)
+    sample_tabs.dart           # 스캔 전 샘플 문서 서랍 — 웹 SampleTabs와 같은 구성 (#587)
 test/
   batch_processor_test.dart    # 배치 로직 유닛 테스트 (가짜 백엔드, 취소 포함)
   text_screen_test.dart        # 텍스트 입력 모드 — 실행·결과/원문 토글·초기화·옵션 재실행·오류
@@ -116,6 +124,13 @@ test/
   fallback_anonymizer_test.dart# 백엔드 전환 규칙 테스트
   llm_status_test.dart         # Ollama 상태 확인 — 가짜 Ollama 서버로 4가지 상태 검증
   widget_test.dart             # 드롭존·목록·처리 흐름 위젯 테스트
+  cli_anonymizer_test.dart     # CLI 인자 조립 (--scan·--strategy 등)
+  cli_locator_test.dart        # 동봉 Python ↔ PATH CLI 찾기
+  bundled_licenses_test.dart   # licenses\*.txt가 라이선스 화면 항목이 되는지
+  code_point_offsets_test.dart # 이모지처럼 BMP 밖 글자 뒤의 위치 변환
+  mask_applier_test.dart       # 항목별 가림 결과 — 전부 가리면 코어 CLI 출력과 같은지
+  detection_test.dart          # 종류 한국어 라벨·요약
+  sample_tabs_test.dart        # 샘플 서랍 — 탭은 미리보기만, 「입력창에 넣기」가 콜백을 부른다
   fakes.dart                   # 테스트용 가짜 Anonymizer
   manual_rest_smoke.dart       # 수동 확인용 — 실제로 뜬 apps/api에 붙여본다 (자동 실행 아님)
 ```
@@ -137,7 +152,7 @@ test/
 
 순서를 이렇게 둔 이유:
 
-- 로컬 CLI는 기능이 온전하다 — 가명처리(`pseudonym`)는 #309 이후 API도 지원하지만, **로컬 LLM 사용(이름 탐지)은 여전히 CLI 전용**이다(배포 API는 규칙 기반 탐지만 제공한다). 텍스트가 이 PC를 벗어나지도 않는다.
+- 로컬 CLI는 기능이 온전하다 — 가명처리(`pseudonym`)는 #309 이후 API도 지원하지만, **로컬 LLM 사용(이름 탐지)은 여전히 CLI 전용**이다(API에는 로컬 LLM 경로가 없다. API의 `mode: "hybrid"`는 웹 데모용 OpenAI 선택 옵션이고, 앱은 `mode`를 보내지 않아 규칙 탐지로 받는다). 텍스트가 이 PC를 벗어나지도 않는다.
 - CLI는 **앱 exe 옆에 동봉된 Python**(`python\python.exe -B -X utf8 -m maskingtape.cli` — 설치판, #617)을 먼저 찾고,
   없으면 PATH의 `maskingtape`를 쓴다(`services/cli_locator.dart`). 소스에서 `flutter run`할 때는 venv를 활성화한
   셸에서 띄워야 PATH에 CLI가 있다 — 아니면 "CLI를 찾을 수 없습니다"가 뜬다.
@@ -222,7 +237,7 @@ API 경로에서 지원하지 않는 옵션을 고르면 네트워크를 타기 
 **Windows만 지원한다.** `apps/desktop/`에 플랫폼 러너가 `windows/` 하나뿐이라 macOS·Linux에서는 빌드되지 않는다.
 
 - macOS·Linux 사용자는 **CLI(`pip install maskingtape`)** 또는 **[웹 데모](https://maskingtape-lilac.vercel.app)**로 같은 비식별화를 할 수 있다 —
-  탐지·마스킹은 전부 core에 있고 이 앱은 그걸 감싸는 껍데기다. CLI는 앱과 기능이 같고(로컬 LLM 사용 포함), 웹 데모는 규칙 기반 탐지만 제공한다.
+  탐지·마스킹은 전부 core에 있고 이 앱은 그걸 감싸는 껍데기다. CLI는 앱과 기능이 같고(로컬 LLM 사용 포함), 웹 데모는 규칙 탐지가 기본이며 이름을 OpenAI로 한 번 더 보는 하이브리드(선택, 규칙으로 가린 글만 보냄)가 있다. 웹 데모에는 로컬 LLM 사용이 없다.
 - `flutter create --platforms=macos,linux .`로 러너를 추가할 수는 있지만, 팀에 그 환경이 없어 동작을 확인할 수 없다.
   검증 없이 추가하면 "폴더는 있는데 빌드가 깨지는" 상태가 되어 더 나쁘므로 **대회 이후 과제로 남긴다** (#404).
 
