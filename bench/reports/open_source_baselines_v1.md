@@ -1,14 +1,14 @@
 # 오픈소스 PII 도구 비교 리포트
 
 - 데이터셋: `bench/datasets/synth_v1.jsonl` (500건, 합성 데이터)
-- 생성 시각: 2026-10-31 05:02 UTC
+- 생성 시각: 2026-10-31 05:09 UTC
 - 평가 방식: span 완전 일치(exact match) 기준 precision/recall/F1/F2
 - 비교 대상: 로컬 실행 오픈소스 도구만 사용. 상용 API 모델·비상업 전용 모델은 제외.
 
 ## 비교 도구와 라이선스
 
 - maskingtape-rules 0.4.1: Apache-2.0, https://github.com/ChoHyeonChan/maskingtape
-- scrubadub 2.0.1: MIT metadata / Apache-2.0 classifier, https://github.com/LeapBeyond/scrubadub
+- scrubadub 2.0.1: Apache-2.0 (저장소 LICENSE. PyPI license 칸은 MIT), https://github.com/LeapBeyond/scrubadub
 
 ## 엔티티 매핑
 

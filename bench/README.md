@@ -1048,7 +1048,7 @@ kind를 차지한다.** 재현해보니 confidence 1.0짜리 rrn이 confidence 0
 | | `synth_v1.jsonl` | `synth_v2.jsonl` |
 |---|---|---|
 | 만드는 법 | `python -m bench.generate_dataset --count 500 --seed 42 --out bench/datasets/synth_v1.jsonl` | 위에 `--address-extended`를 더하고 `--out bench/datasets/synth_v2.jsonl` |
-| 용도 | README·제출 보고서의 정확도 수치(전체 F1 0.981 등)의 근거 | v1이 못 재는 주소 형태의 경계를 잰다 |
+| 용도 | README·제출 보고서의 정확도 수치(전체 F1 0.987 등)의 근거 | v1이 못 재는 주소 형태의 경계를 잰다 |
 | 기존 수치 | 그대로(#650에서 라벨 2건 추가, 아래) | 해당 없음(별도 측정, #650에서 라벨 1건 추가) |
 
 **왜 v2가 필요한가**([#431](https://github.com/ChoHyeonChan/maskingtape/issues/431)): core가 #423(PR #427)에서
