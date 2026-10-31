@@ -1,6 +1,6 @@
 # apps/api — FastAPI 백엔드
 
-**담당: [@kitae13](https://github.com/kitae13) (부리뷰어)** · 상태: ✅ `/scan`·`/anonymize` core 연동 완료
+**담당: [@kitae13](https://github.com/kitae13)** · 상태: ✅ `/scan`·`/anonymize` core 연동 완료
 
 웹 플레이그라운드·데스크톱 앱이 함께 쓰는 REST API. `packages/core`를 **래핑만** 한다 — 탐지 로직을 여기 재구현하지 않는다.
 
@@ -249,7 +249,7 @@ FastAPI 라우터는 core를 직접 호출하지 않고 `maskingtape_api.service
 - `detections`는 원문 PII 값을 담는 `text` 필드를 반환하지 않는다. 클라이언트 하이라이트는 자신이 이미 가진 입력 원문과 `start`/`end`로 처리한다.
 - 계약 변경은 팀장 승인 후 이 문서부터 갱신한다
 
-### 이름 판단기 (웹 하이브리드 모드 준비, #545·#546)
+### 이름 판단기 (웹 하이브리드 모드, #545·#546)
 
 `mode: "hybrid"` 요청에서만 이름 판단기를 쓴다. 기본값은 계속 `rule`이라 OpenAI 키가 없어도
 기존 API와 테스트는 규칙 전용으로 동작한다.
@@ -320,10 +320,10 @@ FastAPI 라우터는 core를 직접 호출하지 않고 `maskingtape_api.service
 
 ### 배포판의 기능 제약
 
-- **core의 로컬 LLM 이름 탐지(`--llm`)는 배포판에서 제외한다.** 로컬 Ollama + 7B 모델이 필요해 서버리스 환경에 올릴 수 없다. 대신 웹 데모 백엔드의 `mode: "hybrid"`에서만 OpenAI 이름 판단기를 선택적으로 쓴다. 키가 없거나 실패하면 규칙 기반 결과로 폴백한다.
+- **core의 로컬 LLM 이름 탐지(`--llm`)는 배포판에서 제외한다.** 로컬 Ollama와 이름 판정 모델(core 기본값 `maskingtape-name-1.5b`)이 필요해 서버리스 환경에 올릴 수 없다. 대신 웹 데모 백엔드의 `mode: "hybrid"`에서만 OpenAI 이름 판단기를 선택적으로 쓴다. 키가 없거나 실패하면 규칙 기반 결과로 폴백한다.
 - 이 제약은 오히려 우리 메시지와 맞다: **"진짜 개인정보는 로컬에서 처리하세요."**
 
-### 미정 (구현 시 실제로 확인할 것)
+### 호스팅
 
-- 호스팅: Vercel 단일 프로젝트 기준 설정을 둔다(정적 프론트 + Python FastAPI 함수). 배포 절차와 검증은 [docs/deployment-vercel.md](../../docs/deployment-vercel.md)를 따른다. **실제 URL 검증 전에는 완료로 보지 않는다.**
-- 대안: Render·Fly.io 등 일반 컨테이너 호스팅(제약이 적음).
+- Vercel 단일 프로젝트(정적 프론트 + Python FastAPI 함수)로 배포돼 있다: https://maskingtape-lilac.vercel.app . 배포 절차와 검증은 [docs/deployment-vercel.md](../../docs/deployment-vercel.md)를 따른다.
+- 대안: Render·Fly.io 등 일반 컨테이너 호스팅(제약이 적음). 지금은 쓰지 않는다.

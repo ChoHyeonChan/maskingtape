@@ -126,7 +126,7 @@
 
 ## ⑥ 설치파일 (#617)
 
-**한 줄**: Inno Setup 설치파일에 임베디드 Python 3.13.2·엔진·pypdf를 함께 묶어, 받는 사람은 Python도 PATH 설정도 없이 쓴다. 최신은 GitHub Releases `desktop-v0.2.4`(10/7, 동작은 0.2.3과 같고 설치 폴더의 고지문이 새 판).
+**한 줄**: Inno Setup 설치파일에 임베디드 Python 3.13.2·엔진·pypdf를 함께 묶어, 받는 사람은 Python도 PATH 설정도 없이 쓴다. 최신은 GitHub Releases `desktop-v0.2.5`(10/31, 엔진이 core 0.4.1이고 앱 코드는 0.2.4와 같다).
 
 **동작** ([`installer/build.py`](../installer/build.py))
 - Flutter 릴리스 빌드 → Python 임베디드 zip(SHA-256 고정)을 풀고 core·pypdf wheel을 `site-packages`에 푼다 → 묶은 CLI와 PDF 추출을 합성 문장으로 실제로 돌려 확인 → 고지문을 `licenses\*.txt`로 모으고 파일별 해시(`BUNDLE_MANIFEST.txt`)를 쓴 뒤 Inno Setup으로 만든다.
