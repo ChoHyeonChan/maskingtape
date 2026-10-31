@@ -176,17 +176,17 @@ python -m pip install -e "packages/core[bench-baselines]"
 python -m bench.evaluators.compare_open_source_tools bench/datasets/synth_v1.jsonl --report bench/reports/open_source_baselines_v1.md
 ```
 
-500건 기준 실측(#406 발표용 대비표, `synth_v1.jsonl`). 2026-10-01에 재고, #650으로 정답 라벨이 2건 늘어
-2026-10-04 main `c526000`에서 maskingtape 행을 다시 쟀다:
+500건 기준 실측(#406 발표용 대비표, `synth_v1.jsonl`). 2026-10-31 main `49b49a0`(maskingtape 0.4.1)에서 위 명령으로
+두 도구를 다시 쟀다([#739](https://github.com/ChoHyeonChan/maskingtape/issues/739)):
 
 | tool | precision | recall | F1 | F2 | tp | fp | fn |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| maskingtape-rules | 0.988 | 0.974 | **0.981** | 0.977 | 971 | 12 | 26 |
+| maskingtape-rules | 0.988 | 0.987 | **0.987** | 0.987 | 984 | 12 | 13 |
 | scrubadub | 0.569 | 0.062 | **0.112** | 0.076 | 62 | 47 | 935 |
 
-scrubadub 행은 다시 돌리지 않았다. #650은 글을 바꾸지 않고 사업자등록번호 정답만 2건 더했고 scrubadub은
-사업자등록번호를 예측하지 않으므로, 예측은 그대로이고 fn만 2 늘어난다(반올림한 비율은 같다). 종류별 표와
-매핑표는 `bench/reports/open_source_baselines_v1.md`에 저장돼 있다(2026-10-01 측정본). ko-pii와 Presidio는
+maskingtape 행은 2026-10-04 `c526000` 값(0.988 / 0.974 / 0.981 / 0.977, tp 971 · fn 26)에서 바뀌었다. 코드 머지 마감
+값인 `2802949`와는 같다. scrubadub 행은 이번에도 같은 값이다. 종류별 표와 매핑표는
+`bench/reports/open_source_baselines_v1.md`에 저장돼 있다(2026-10-31 측정본). ko-pii와 Presidio는
 외부 데이터로 따로 비교한다(아래 「KDPII 타 도구 비교」).
 
 > **⚠️ 한계 고지 (#345) — 구조화 kind의 1.000을 읽을 때 반드시 함께 볼 것**
