@@ -176,17 +176,17 @@ python -m pip install -e "packages/core[bench-baselines]"
 python -m bench.evaluators.compare_open_source_tools bench/datasets/synth_v1.jsonl --report bench/reports/open_source_baselines_v1.md
 ```
 
-500건 기준 실측(#406 발표용 대비표, `synth_v1.jsonl`). 2026-10-01에 재고, #650으로 정답 라벨이 2건 늘어
-2026-10-04 main `c526000`에서 maskingtape 행을 다시 쟀다:
+500건 기준 실측(#406 발표용 대비표, `synth_v1.jsonl`). 2026-10-31 main `49b49a0`(maskingtape 0.4.1)에서 위 명령으로
+두 도구를 다시 쟀다([#739](https://github.com/ChoHyeonChan/maskingtape/issues/739)):
 
 | tool | precision | recall | F1 | F2 | tp | fp | fn |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| maskingtape-rules | 0.988 | 0.974 | **0.981** | 0.977 | 971 | 12 | 26 |
+| maskingtape-rules | 0.988 | 0.987 | **0.987** | 0.987 | 984 | 12 | 13 |
 | scrubadub | 0.569 | 0.062 | **0.112** | 0.076 | 62 | 47 | 935 |
 
-scrubadub 행은 다시 돌리지 않았다. #650은 글을 바꾸지 않고 사업자등록번호 정답만 2건 더했고 scrubadub은
-사업자등록번호를 예측하지 않으므로, 예측은 그대로이고 fn만 2 늘어난다(반올림한 비율은 같다). 종류별 표와
-매핑표는 `bench/reports/open_source_baselines_v1.md`에 저장돼 있다(2026-10-01 측정본). ko-pii와 Presidio는
+maskingtape 행은 2026-10-04 `c526000` 값(0.988 / 0.974 / 0.981 / 0.977, tp 971 · fn 26)에서 바뀌었다. 코드 머지 마감
+값인 `2802949`와는 같다. scrubadub 행은 이번에도 같은 값이다. 종류별 표와 매핑표는
+`bench/reports/open_source_baselines_v1.md`에 저장돼 있다(2026-10-31 측정본). ko-pii와 Presidio는
 외부 데이터로 따로 비교한다(아래 「KDPII 타 도구 비교」).
 
 > **⚠️ 한계 고지 (#345) — 구조화 kind의 1.000을 읽을 때 반드시 함께 볼 것**
@@ -671,24 +671,24 @@ docstring/주석에 명시하고 있다(`email.py`는 상한이 없던 시절 40
 덮였는지는 종류와 무관하게 본다. 주소로 가려졌든 이름으로 가려졌든 글자는 안 보인다.
 미탐은 정답의 종류에, 오탐은 예측의 종류에 센다.
 
-### 결과 (2026-10-01, main `a4db5e2`, 규칙 전용)
+### 결과 (발표 숫자, 2026-10-26 main `2802949`, 규칙 전용, [#739](https://github.com/ChoHyeonChan/maskingtape/issues/739))
 
-이름을 뺀 10종은 미탐·오탐이 없어 이름 행과 전체만 적는다. 2026-10-04 main `c526000`에서 다시 재도
-아래 칸은 같다(#650으로 사업자등록번호 적중만 v1 2건, v2 1건 늘었다).
+이름을 뺀 10종은 미탐·오탐이 없어 이름 행과 전체만 적는다. 2026-10-31 main `49b49a0`에서 다시 재도 아래 칸은 같다.
+처음 잰 2026-10-01 `a4db5e2`에서는 synth_v1 이름 미탐이 26건이었다(완전 일치 0.932, 유출 기준 0.963).
 
 | 데이터셋 | 행 | 미탐 | 가려짐 | 부분 유출 | 완전 유출 | 오탐 | 경계 불일치 | 엉뚱한 곳 | 완전 일치 재현율 | 유출 기준 재현율 |
 |---|---|---|---|---|---|---|---|---|---|---|
-| synth_v1 | name | 26 | 12 | 0 | 14 | 12 | 12 | 0 | 0.932 | 0.963 |
-| synth_v1 | overall | 26 | 12 | 0 | 14 | 12 | 12 | 0 | 0.974 | 0.986 |
-| synth_v2 | name | 22 | 10 | 0 | 12 | 10 | 10 | 0 | 0.940 | 0.967 |
-| synth_v2 | overall | 22 | 10 | 0 | 12 | 10 | 10 | 0 | 0.978 | 0.988 |
+| synth_v1 | name | 13 | 12 | 0 | 1 | 12 | 12 | 0 | 0.966 | 0.997 |
+| synth_v1 | overall | 13 | 12 | 0 | 1 | 12 | 12 | 0 | 0.987 | 0.999 |
+| synth_v2 | name | 11 | 10 | 0 | 1 | 10 | 10 | 0 | 0.970 | 0.997 |
+| synth_v2 | overall | 11 | 10 | 0 | 1 | 10 | 10 | 0 | 0.989 | 0.999 |
 
-- **미탐의 절반 가까이(v1 12/26, v2 10/22)는 유출이 아니다.** 두 글자 이름 뒤 조사
+- **미탐 대부분(v1 12/13, v2 10/11)은 유출이 아니다.** 두 글자 이름 뒤 조사
   (`이`·`의`)를 이름의 셋째 글자로 보고 한 글자 더 가린 경우다.
 - **오탐은 전부 그 반대쪽이다.** 엉뚱한 곳을 가린 오탐은 0건이다.
-- 실제로 원문이 남는 건 v1 14건, v2 12건이고 모양은 둘뿐이다 — 두 글자 이름 + 직함
-  ([#601](https://github.com/ChoHyeonChan/maskingtape/issues/601))과 "A에서 B로 변경"
-  ([#589](https://github.com/ChoHyeonChan/maskingtape/issues/589)).
+- 실제로 원문이 남는 건 v1 1건, v2 1건이고 같은 꼴이다. 일반 낱말과 같은 두 글자 이름이 직함 앞에 온 경우다
+  (`신규 부장님께`). 이전에 남던 두 글자 이름 + 직함([#601](https://github.com/ChoHyeonChan/maskingtape/issues/601))과
+  "A에서 B로 변경"([#589](https://github.com/ChoHyeonChan/maskingtape/issues/589))은 고쳐졌다.
 
 **읽는 법과 한계**
 
@@ -1048,7 +1048,7 @@ kind를 차지한다.** 재현해보니 confidence 1.0짜리 rrn이 confidence 0
 | | `synth_v1.jsonl` | `synth_v2.jsonl` |
 |---|---|---|
 | 만드는 법 | `python -m bench.generate_dataset --count 500 --seed 42 --out bench/datasets/synth_v1.jsonl` | 위에 `--address-extended`를 더하고 `--out bench/datasets/synth_v2.jsonl` |
-| 용도 | README·제출 보고서의 정확도 수치(전체 F1 0.981 등)의 근거 | v1이 못 재는 주소 형태의 경계를 잰다 |
+| 용도 | README·제출 보고서의 정확도 수치(전체 F1 0.987 등)의 근거 | v1이 못 재는 주소 형태의 경계를 잰다 |
 | 기존 수치 | 그대로(#650에서 라벨 2건 추가, 아래) | 해당 없음(별도 측정, #650에서 라벨 1건 추가) |
 
 **왜 v2가 필요한가**([#431](https://github.com/ChoHyeonChan/maskingtape/issues/431)): core가 #423(PR #427)에서

@@ -142,7 +142,7 @@ def _scrubadub_run() -> ToolRun:
     return ToolRun(
         name="scrubadub",
         version=metadata.version("scrubadub"),
-        license="MIT metadata / Apache-2.0 classifier",
+        license="Apache-2.0 (저장소 LICENSE. PyPI license 칸은 MIT)",
         homepage="https://github.com/LeapBeyond/scrubadub",
         kind_map=TOOL_KIND_MAPS["scrubadub"],
         predict=predict,
