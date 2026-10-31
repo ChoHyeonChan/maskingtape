@@ -63,7 +63,7 @@ bench의 채점기(`compare_name_detectors`, `evaluate_attacks`)를 그대로 �
 ## 환경 (학습 전용 venv — 프로젝트 venv와 분리)
 
 ```powershell
-# D:\dev\train\venv — 개발 도구라 SBOM 본문 대상이 아니다(배포물에 들어가지 않음)
+# D:\dev\train\venv — 배포물에는 안 들어가지만 SBOM 본표 27~36에 기반 모델·학습 도구로 적었다(#645)
 py -3.10 -m venv D:\dev\train\venv
 D:\dev\train\venv\Scripts\pip install torch --index-url https://download.pytorch.org/whl/cu124   # BSD-3
 D:\dev\train\venv\Scripts\pip install transformers peft accelerate huggingface_hub gguf          # Apache-2.0 / MIT(gguf)
