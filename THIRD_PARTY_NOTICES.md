@@ -41,17 +41,18 @@ Python이 없는 PC에서도 데스크톱 앱을 쓰도록 만든 설치파일�
 |---|---|---|---|---|
 | CPython 임베디드 배포판 | 3.13.2 | Python-2.0.1 | https://github.com/python/cpython | `python\` |
 | OpenSSL | 3.0.15 | Apache-2.0 | https://github.com/openssl/openssl | `python\libssl-3.dll`, `python\libcrypto-3.dll` (CPython 임베디드에 들어 있음) |
-| SQLite | 3.45.3 | 퍼블릭 도메인 | https://www.sqlite.org/ | `python\sqlite3.dll` (CPython 임베디드에 들어 있음) |
+| SQLite | 3.45.3 | blessing (퍼블릭 도메인) | https://www.sqlite.org/ | `python\sqlite3.dll` (CPython 임베디드에 들어 있음) |
 | Microsoft Visual C++ 런타임 | 14.42.34226.3 (`vcruntime140.dll` 기준) | Microsoft Distributable Code (오픈소스 아님) | CPython 임베디드 배포판에 포함 | `python\vcruntime140.dll`, `python\vcruntime140_1.dll` |
 | pypdf | 6.19.0 | BSD-3-Clause | https://github.com/py-pdf/pypdf | `python\Lib\site-packages\pypdf\` |
-| Flutter 엔진 (Windows) | Flutter 3.44.6 (desktop-v0.2.4) | BSD-3-Clause | https://github.com/flutter/flutter | `flutter_windows.dll`, `data\icudtl.dat` |
+| Flutter 엔진 (Windows) | Flutter 3.44.6 (desktop-v0.2.5, 0.2.4와 같음) | BSD-3-Clause | https://github.com/flutter/flutter | `flutter_windows.dll`, `data\icudtl.dat` |
 | desktop_drop (Windows 플러그인) | 0.7.1 | Apache-2.0 | https://github.com/MixinNetwork/flutter-plugins/tree/main/packages/desktop_drop | `desktop_drop_plugin.dll` |
 | file_selector_windows | 0.9.3+5 | BSD-3-Clause | https://github.com/flutter/packages/tree/main/packages/file_selector/file_selector_windows | `file_selector_windows_plugin.dll` |
-| Inno Setup (설치 실행부) | 6.7.0 (desktop-v0.2.4 기준) | Inno Setup License (오픈소스 아님) | https://github.com/jrsoftware/issrc | `setup.exe` 안. 설치 뒤에는 설치 폴더의 제거 프로그램(`unins*` 파일)으로 남음 |
+| Inno Setup (설치 실행부) | 6.7.0 (desktop-v0.2.5 기준, 0.2.4와 같음) | InnoSetup (Inno Setup License, 오픈소스 아님) | https://github.com/jrsoftware/issrc | `setup.exe` 안. 설치 뒤에는 설치 폴더의 제거 프로그램(`unins*` 파일)으로 남음 |
 
 - CPython 임베디드 배포판은 `python313._pth`에 `Lib\site-packages` 한 줄을 더해(동봉한 패키지를 찾게 하는 경로 설정) 싣고, 그 밖의 파일은 바꾸지 않는다.
-- CPython 임베디드 배포판에 들어 있는 나머지 구성요소(bzip2·libffi·expat·libmpdec·zlib 등)의 고지는 Python 문서
-  「Licenses and Acknowledgements for Incorporated Software」 원문으로 함께 싣는다(`licenses\Python 3.13.2 - incorporated software.txt`).
+- CPython 임베디드 배포판에 들어 있는 나머지 구성요소의 고지도 함께 싣는다. bzip2·libffi는 배포판의 `LICENSE.txt`
+  (`licenses\Python 3.13.2 (CPython).txt`)에, libffi·expat·libmpdec·zlib 등은 Python 문서
+  「Licenses and Acknowledgements for Incorporated Software」 원문(`licenses\Python 3.13.2 - incorporated software.txt`)에 있다.
 - Dart 패키지(SBOM.md 부록 A-4의 런타임 의존성)는 앱 코드(`data\app.so`)에 컴파일돼 들어간다. 이 패키지들과 Flutter 엔진 안의
   제3자 구성요소(ICU·Skia 등)의 고지는 Flutter가 앱에 넣는 `data\flutter_assets\NOTICES.Z`에 있고, 같은 ⓘ 화면이 보여 준다.
 - 우리 코드(core 패키지, 데스크톱 앱)는 Apache-2.0이고, 설치 폴더에 `LICENSE.txt`와 이 파일을 함께 넣는다.
@@ -66,6 +67,7 @@ Python이 없는 PC에서도 데스크톱 앱을 쓰도록 만든 설치파일�
 | 템플릿 | 라이선스 | 저작권 | 원본 | 저장소 안의 위치 |
 |---|---|---|---|---|
 | Flutter 앱 템플릿 (Windows 실행 틀) | BSD-3-Clause | Copyright 2014 The Flutter Authors. All rights reserved. | https://github.com/flutter/flutter/tree/master/packages/flutter_tools/templates/app/windows.tmpl | `apps/desktop/windows/` |
+| Flutter 앱 템플릿 (프로젝트 설정 파일) | BSD-3-Clause | Copyright 2014 The Flutter Authors. All rights reserved. | https://github.com/flutter/flutter/tree/master/packages/flutter_tools/templates/app | `apps/desktop/analysis_options.yaml`, `apps/desktop/.gitignore`, `apps/desktop/.metadata`, `apps/desktop/pubspec.yaml`의 영어 안내 주석 |
 | create-vite `react-ts` 템플릿 | MIT | Copyright (c) 2019-present, VoidZero Inc. and Vite contributors | https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts | `apps/web/tsconfig.json` |
 
 2026-09-24에 두 공식 저장소의 원본과 파일을 대조한 결과다.
@@ -76,6 +78,11 @@ Python이 없는 PC에서도 데스크톱 앱을 쓰도록 만든 설치파일�
   (`CMakeLists.txt`의 컴파일 옵션 따옴표 한 곳)만 다르다. 팀이 바꾼 것은 `main.cpp`의 창 제목(한글) 한 줄과
   `Runner.rc`의 저작권·회사 표기 두 줄이다.
 - `apps/desktop/windows/flutter/generated_plugin*` 3개는 Flutter 도구가 플러그인 목록으로 생성하는 파일이다.
+- `apps/desktop/`의 `analysis_options.yaml`·`.gitignore`·`.metadata`·`pubspec.yaml`도 같은 `flutter create`(커밋 `0682edc`)로 만들었다.
+  2026-11-01에 생성 당시 Flutter 판(`ee80f08`, `.metadata`에 적힘)의 `templates/app/` 원본과 대조했다. `analysis_options.yaml`은
+  템플릿 조건 표시만 빼고 원본과 같다. `.gitignore`는 생성 때 원본과 같았고, 팀이 맨 위에 비식별화 결과물 제외 3줄을 더했다.
+  `pubspec.yaml`은 템플릿 변수(이름·설명·SDK 범위)가 채워진 것에 팀이 의존성 3개와 자산 목록을 더했고, 영어 안내 주석은
+  템플릿 그대로다. `.metadata`는 Flutter 도구가 생성 판을 적어 두는 파일이다.
 - 앱 아이콘(`apps/desktop/windows/runner/resources/app_icon.ico`)은 템플릿 기본 아이콘을 팀이 새로 만든 것으로 바꿨다(2026-08-14).
 - `apps/desktop/windows/runner/Runner.rc`의 `LegalCopyright`·`CompanyName`은 템플릿 기본값(조직 식별자 명의의 저작권 문구)을
   팀 명의("The maskingtape Authors")로 고쳤다([#454](https://github.com/ChoHyeonChan/maskingtape/issues/454)). 빌드한 exe의 속성 창에 이 문구가 보인다.
@@ -215,7 +222,8 @@ The licenses of externally maintained libraries from which parts of the Software
 | PyPI 코어 패키지(`maskingtape`) | 런타임 외부 의존성이 0개라 제3자 코드가 들어가지 않는다 |
 | MCP 서버, 데스크톱 앱 소스 | 소스로 배포한다. 데스크톱 앱 Windows 설치파일은 위 「고지 대상」에 적었다. 의존성은 사용자가 설치·빌드할 때 각 패키지 저장소에서 받는다. 단, 저장소에 들어 있는 Flutter 템플릿은 위 「저장소 소스에 들어 있는 제3자 템플릿」에 적었다 |
 | REST API 공개 데모 | 서버에서만 실행되고 코드가 방문자에게 전달되지 않는다 |
-| AI 모델(기본 maskingtape-name-1.5b, 선택 Qwen2.5-7B-Instruct) | 재배포하지 않는다. 사용자가 Ollama로 허깅페이스·Ollama 라이브러리에서 직접 받는다 |
+| AI 모델(기본 maskingtape-name-1.5b, 선택 Qwen2.5-7B-Instruct, 웹 데모 하이브리드 모드의 GPT-6 Luna) | 재배포하지 않는다. 사용자가 Ollama로 허깅페이스·Ollama 라이브러리에서 직접 받는다. GPT-6 Luna(OpenAI)는 웹 데모 API 서버가 OpenAI API로 부를 뿐이고, 모델 코드와 가중치는 어떤 배포물에도 들어가지 않는다 |
+| Ollama(데스크톱 설치파일의 선택 항목) | 설치파일에 넣지 않는다. 설치 중 「Ollama 설치」를 고를 때만(기본 꺼짐) 공식 설치파일을 ollama.com에서 받아 실행한다(`apps/desktop/installer/maskingtape.iss`의 `OllamaSetupUrl`) |
 | 학습 도구(`training/`의 torch·transformers·peft 등) | 모델을 학습할 때만 쓰고 배포물과 가중치 파일에 들어가지 않는다 |
 
 각 의존성의 버전과 라이선스는 [SBOM.md](SBOM.md)에 있다.
