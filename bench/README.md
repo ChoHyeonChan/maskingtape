@@ -921,7 +921,10 @@ python -m bench.evaluators.compare_modes bench/datasets/synth_v1.jsonl bench/dat
   5번 돌리면 판결문 오탐이 41(4회) ↔ 35(1회), 판결문 이름 미탐이 70(1회) ↔ 69(4회)로 달랐다(재현율 0.001,
   precision 0.005 차이, [#406](https://github.com/ChoHyeonChan/maskingtape/issues/406)). `97ed96f`의 3회는 모두 같았다.
   재현은 `compare_modes`를 같은 데이터로 여러 번 돌리면 된다. Ollama가 CPU로 돌면 1회에 18~23분(문서당 5~7초) 걸린다.
-- 웹 하이브리드(OpenAI)는 연결(#546)과 비용 승인이 먼저라 [#683](https://github.com/ChoHyeonChan/maskingtape/issues/683)으로 옮겼다.
+- 웹 하이브리드(OpenAI)는 연결(#546)과 비용 승인이 먼저라 [#683](https://github.com/ChoHyeonChan/maskingtape/issues/683)으로 옮겼고,
+  2026-10-26에 운영 웹 API로 합성 벤치 1,260건(조정용 3세트와 보고용 `doc_types_holdout_v1`)을 쟀다. 결과는
+  [#683 댓글](https://github.com/ChoHyeonChan/maskingtape/issues/683#issuecomment-6416455197)에 있다. 웹 하이브리드는 규칙으로
+  먼저 가린 글만 OpenAI로 보내므로 입력이 로컬 하이브리드와 달라, 위 표와 나란히 놓지 않는다.
 
 ### 이전 기준 모델(qwen2.5:7b) 측정 — 참고용 기록
 
@@ -1495,8 +1498,9 @@ python -m bench.evaluators.evaluate_attacks bench/datasets/attacks_v1.jsonl --mo
 - rule 열이 7B 표와 다른 것(예: deny_names 0.857 → 0.952)은 모델이 아니라 10/1 이후 규칙 수정 때문이다. hybrid 열에도
   이 차이가 섞여 있다.
 
-**웹 하이브리드(OpenAI) 측정은 아직 없다.** `apps/api`의 OpenAI 경로는 비용이 들어
-팀장 승인을 받은 뒤 같은 세트로 잰다(이슈 본문의 조건). 로컬 모델이 흔들리는 유형은
+**이 공격 세트를 웹 하이브리드(OpenAI)로 잰 값은 아직 없다.** 웹 하이브리드의 정확도는 2026-10-26에 합성 벤치로
+따로 쟀지만([#683](https://github.com/ChoHyeonChan/maskingtape/issues/683)) 공격 판은 보내지 않았다. `apps/api`의 OpenAI 경로는 비용이 들어
+팀장 승인을 받은 뒤 같은 세트로 잰다(#549 본문의 조건). 로컬 모델이 흔들리는 유형은
 상용 모델도 다르게 흔들릴 수 있으므로 그 결과를 이 표에 열로 추가할 계획이다.
 
 ## 데이터셋 포맷 (생성기·평가기가 공유하는 계약)
