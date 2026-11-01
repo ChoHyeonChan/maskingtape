@@ -2,6 +2,7 @@
 
 > **규칙: 라이브러리·프레임워크·AI 모델을 하나라도 추가하면, 추가한 그 PR에서 이 표에 한 줄을 같이 넣는다.**
 > 허용 라이선스: MIT, Apache-2.0, BSD, ISC · 금지: GPL·AGPL·SSPL·비상업 전용 (팀 방침 — Apache-2.0 통일 유지)
+> 이 목록 밖인데 쓰는 것은 부록 B에 판단 근거를 적었다. 데스크톱 설치파일에 직접 싣는 CPython(Python-2.0.1)·Visual C++ 런타임·Inno Setup 실행부는 「CPython 임베디드 배포판」·「Microsoft Visual C++ 런타임」 절, bench 비교용 개발 환경에만 설치되는 LGPL 등은 「python-stdnum」·「setuptools 안의 autocommand」 절, 전이 의존성의 MPL-2.0·PSF-2.0 등은 그 앞 절들이다.
 > 이 표는 대회 결과보고서 **붙임1(SBOM)** 공식 양식과 같은 컬럼이다 — 제출 때 그대로 옮긴다. 심사에 라이선스 검증 단계가 별도로 있다.
 > 전이 의존성(부록 A)은 `python scripts/sbom_transitive.py --write`로 다시 만든다. lock 파일(`apps/web/package-lock.json`, `uv.lock`, `apps/desktop/pubspec.lock`)이 바뀌면 팀장이 갱신한다.
 
@@ -45,14 +46,19 @@
 | 36 | llama.cpp (변환 스크립트·llama-quantize) | b11368 | MIT | https://github.com/ggml-org/llama.cpp | (학습 도구) f16 GGUF 변환·Q4_K_M 양자화. `training/export_ollama.py`가 호출 |
 | 37 | pypdf | 6.19.0 | BSD-3-Clause | https://github.com/py-pdf/pypdf | 데스크톱 설치파일 — 동봉 Python에서 PDF 글자 추출 (wheel SHA-256 고정, 런타임 의존성 없음) |
 | 38 | CPython 임베디드 배포판 | 3.13.2 | Python-2.0.1 | https://github.com/python/cpython | 데스크톱 설치파일 — 앱이 core CLI와 PDF 추출을 부르는 동봉 Python (zip SHA-256 고정). 안에 든 OpenSSL·SQLite·Visual C++ 런타임은 부록 A-7 |
-| 39 | Inno Setup | 6.7.0 | Inno Setup License | https://github.com/jrsoftware/issrc | (빌드 도구) 데스크톱 Windows 설치파일 제작 — 설치 실행부가 setup.exe에 들어간다. 부록 A-7·B |
+| 39 | Inno Setup | 6.7.0 | InnoSetup (Inno Setup License) | https://github.com/jrsoftware/issrc | (빌드 도구) 데스크톱 Windows 설치파일 제작 — 설치 실행부가 setup.exe에 들어간다. 부록 A-7·B |
 | 40 | ko-pii | 1.16.0 | MIT | https://github.com/Marker-Inc-Korea/ko-pii | (개발 도구) KDPII 타 도구 비교의 비교 대상(한국어 개인정보 탐지 라이브러리). 저장소 밖 비교용 가상환경에만 설치한다. 전이 의존성 없음 |
 | 41 | presidio-analyzer | 2.2.364 | MIT (패키지 메타데이터) | https://github.com/data-privacy-stack/presidio | (개발 도구) KDPII 타 도구 비교의 비교 대상(개인정보 탐지 도구). 40번과 같은 가상환경에만 설치한다. 전이 의존성은 부록 A-9 |
 | 42 | spaCy | 3.8.16 | MIT | https://github.com/explosion/spaCy | (개발 도구) 41번이 쓰는 자연어 처리 엔진. 41번과 함께 설치되고, 결과가 같도록 버전만 고정한다 |
 | 43 | en_core_web_lg (spaCy 영어 모델, AI 모델) | 3.8.0 | MIT | https://github.com/explosion/spacy-models | (개발 도구) 41번의 기본 개체명 인식 모델. 비교 상대를 기본 설정으로 돌리려고 받는다. 로컬 실행. 학습 데이터 출처(OntoNotes 5 등)는 모델 패키지의 `LICENSES_SOURCES`에 있다 |
+| 44 | OpenAI API: GPT-6 Luna (AI 모델, 상용 API, 선택) | gpt-6-luna (날짜 고정판 없음, 상세는 부록 C-3) | OpenAI 이용약관 (오픈소스 아님, 가중치 비공개) | https://openai.com/policies/ | 웹 데모(`apps/api`) 하이브리드 모드 전용. 사용자가 하이브리드를 고를 때만(기본은 규칙 전용) 규칙으로 먼저 가린 글을 보내 남은 이름을 판단받는다. 파이썬 표준 라이브러리 `urllib`로 OpenAI Responses API를 부르고 SDK는 쓰지 않는다(`apps/api/maskingtape_api/services/openai_name_judge.py`). 라이브러리·CLI·MCP 서버·데스크톱 앱은 부르지 않는다 |
+| 45 | Flutter SDK (flutter, flutter_test) | 3.44.6 (CI `flutter-version`, 설치파일도 같은 판으로 빌드) | BSD-3-Clause | https://github.com/flutter/flutter | 데스크톱 앱 프레임워크(`apps/desktop/pubspec.yaml`의 SDK 의존성). `flutter_test`는 개발용(위젯 테스트). Windows 엔진이 설치파일에 함께 실린다(부록 A-7) |
+| 46 | Gemma 4 E4B (AI 모델, 평가 전용) | gemma4:e4b (Ollama) | Apache-2.0 | https://ollama.com/library/gemma4 | (개발 도구) 이름 하이브리드 정확도를 qwen2.5:7b와 비교할 때만 로컬 Ollama로 돌렸다(2026-09-30, #548, README 「LLM 모델을 바꿔도 거의 같다」). 제품 코드와 의존성에 없고 배포물에서 쓰지 않는다 |
+| 47 | Starlette | FastAPI가 정하는 판 (uv.lock 1.6.0) | BSD-3-Clause | https://github.com/Kludex/starlette | API 서버. 요청 크기 제한(`body_limit.py`)과 HTTP 예외 처리(`main.py`, `errors.py`)에서 직접 import한다. 따로 선언하지 않고 18번 FastAPI가 함께 설치한다(부록 A-2) |
+| 48 | packaging | 선언 없음 (2번 pytest가 함께 설치) | Apache-2.0 OR BSD-2-Clause | https://github.com/pypa/packaging | (개발 도구) `scripts/sbom_transitive.py`가 의존성 요구사항을 읽을 때 쓴다. 배포물에 들어가지 않는다 |
 
 ※ **AI 모델 주의**: Qwen2.5는 **3B·72B만 비상업 제한(Qwen Research License)**이고 나머지(0.5B/**1.5B**/**7B**/14B/32B)가 Apache-2.0이다. 기본 모델은 1.5B를 학습한 17번, 선택 모델은 7B(26번)다. **3B로 바꾸지 말 것.**
-※ 위 16·17·26번은 결과보고서 **붙임2(AI 모델 활용 및 라이선스 기술 명세서)**에도 반영한다(유형2 '외부 모델 파인튜닝' + 기반 모델명·라이선스·학습 데이터·가중치 공개 주소).
+※ 위 16·17·26·44번은 결과보고서 **붙임2(AI 모델 활용 및 라이선스 기술 명세서)**에도 반영한다(유형2 '외부 모델 파인튜닝' + 기반 모델명·라이선스·학습 데이터·가중치 공개 주소). 44번은 붙임2에 「웹 데모 선택 옵션 (상용 API)」으로 적었다(운영사무국 2026-09-30 서면 회신).
 ※ 27~36번 학습 도구는 `training/`의 학습·변환에만 쓰며 배포물(PyPI·웹·MCP·데스크톱)과 공개한 가중치 파일에 들어가지 않는다. 버전은 학습한 PC의 환경 기준(2026-10-03, #643)이다. 학습 PC의 NVIDIA CUDA 런타임은 부록 B에 적었다.
 ※ 40~43번은 bench의 KDPII 타 도구 비교(`bench/evaluators/compare_kdpii_tools.py`, 2026-10-21, #751)에만 쓴다. `pyproject.toml`과 lock 파일에 없고, 배포물(PyPI·웹·MCP·데스크톱)에 들어가지 않는다. 우리 코드는 `bench/evaluators/pii_tool_adapters.py`의 함수 안에서만 import한다. 설치 명령은 `bench/README.md` 「KDPII 타 도구 비교」에 있다. 43번은 우리 제품에 탑재·적용하는 모델이 아니라 비교 상대 도구의 부품이다.
 
@@ -233,21 +239,21 @@ Python 개발 도구(pytest·ruff·httpx2와 그 전이, Python 3.13.5, Windows)
 
 > 이 절은 생성기 밖이라 손으로 관리한다. `apps/desktop/installer/build.py` 위쪽의 동봉물 상수(버전·주소·해시)나 빌드에 쓰는 Inno Setup 판을 바꾸면 같은 PR에서 고친다.
 
-GitHub Releases `desktop-v*`의 설치파일이다(#617). 위 A-4의 Dart 런타임 의존성은 앱 코드(`data\app.so`)에 컴파일돼 들어가고, 아래는 그 밖에 설치파일에 함께 실리는 것이다. 버전은 `build.py`의 고정값과 desktop-v0.2.4 설치파일(main `97ed96f`, Flutter 3.44.6·Inno Setup 6.7.0으로 빌드) 기준이다.
+GitHub Releases `desktop-v*`의 설치파일이다(#617). 위 A-4의 Dart 런타임 의존성은 앱 코드(`data\app.so`)에 컴파일돼 들어가고, 아래는 그 밖에 설치파일에 함께 실리는 것이다. 버전은 `build.py`의 고정값과 최신 설치파일 desktop-v0.2.5(main `49b49a0`, Flutter 3.44.6·Inno Setup 6.7.0으로 빌드) 기준이다. 함께 실리는 구성요소는 desktop-v0.2.4(main `97ed96f`)와 같다(두 커밋 사이 `apps/desktop`은 문서만 바뀜).
 
 | 구성요소 | 버전 | 라이선스 | 원본 | 비고 |
 |---|---|---|---|---|
 | CPython 임베디드 배포판 | 3.13.2 (`python-3.13.2-embed-amd64.zip`, SHA-256 `1e803610…7b93`) | Python-2.0.1 | https://github.com/python/cpython | 본표 38번. 허용 목록 밖 → 부록 B |
 | OpenSSL | 3.0.15 | Apache-2.0 | https://github.com/openssl/openssl | CPython 임베디드에 포함(`libssl-3.dll`, `libcrypto-3.dll`) |
-| SQLite | 3.45.3 | 퍼블릭 도메인 | https://www.sqlite.org/ | CPython 임베디드에 포함(`sqlite3.dll`). 허용 목록 밖 → 부록 B |
-| Microsoft Visual C++ 런타임 | 14.42.34226.3 (`vcruntime140.dll` 기준. 파일은 `vcruntime140.dll`, `vcruntime140_1.dll`) | Microsoft Distributable Code (오픈소스 아님) | CPython 임베디드 배포판에 포함 | 허용 목록 밖 → 부록 B. 2차 라이선스 검증 때 소스와 같은 zip에 넣어 스캔(OpenUP 10/7) |
-| 그 밖의 CPython 내장 구성요소 | CPython 3.13.2에 든 판 | bzip2·libffi(MIT)·expat(MIT)·libmpdec(BSD-2-Clause)·zlib 등 | https://docs.python.org/3.13/license.html | 고지는 Python 문서 「Licenses and Acknowledgements for Incorporated Software」 원문으로 함께 실음 |
+| SQLite | 3.45.3 | blessing (퍼블릭 도메인) | https://www.sqlite.org/ | CPython 임베디드에 포함(`sqlite3.dll`). 허용 목록 밖 → 부록 B |
+| Microsoft Visual C++ 런타임 | 14.42.34226.3 (`vcruntime140.dll` 기준. 파일은 `vcruntime140.dll`, `vcruntime140_1.dll`) | Microsoft Distributable Code (오픈소스 아님) | CPython 임베디드 배포판에 포함 | 허용 목록 밖 → 부록 B. 2차 라이선스 검증에서 소스와 같은 zip(`maskingtape_20261014_5fd40af.zip`의 `installer-bundled-non-oss/`)에 넣어 2026-10-14에 스캔했다(OpenUP 10/7 안내) |
+| 그 밖의 CPython 내장 구성요소 | CPython 3.13.2에 든 판 | bzip2·libffi(MIT)·expat(MIT)·libmpdec(BSD-2-Clause)·zlib 등 | https://docs.python.org/3.13/license.html | 고지는 두 파일로 함께 실음. bzip2·libffi는 배포판 `LICENSE.txt`(`licenses\Python 3.13.2 (CPython).txt`), libffi·expat·libmpdec·zlib 등은 Python 문서 「Licenses and Acknowledgements for Incorporated Software」 원문(`licenses\Python 3.13.2 - incorporated software.txt`) |
 | pypdf | 6.19.0 | BSD-3-Clause | https://github.com/py-pdf/pypdf | 본표 37번 |
 | maskingtape (core) | 설치파일을 만든 커밋의 판 | Apache-2.0 | https://github.com/ChoHyeonChan/maskingtape | 우리 코드. 런타임 외부 의존성 없음 |
-| Flutter 엔진 (Windows) | Flutter 3.44.6 (엔진 `d3a3293`, desktop-v0.2.4) | BSD-3-Clause | https://github.com/flutter/flutter | `flutter_windows.dll`, `data\icudtl.dat`. 엔진 안의 제3자 구성요소(ICU·Skia 등) 고지는 앱의 `NOTICES.Z` |
+| Flutter 엔진 (Windows) | Flutter 3.44.6 (엔진 `d3a3293`은 desktop-v0.2.4에서 확인. 0.2.5도 같은 Flutter 판) | BSD-3-Clause | https://github.com/flutter/flutter | `flutter_windows.dll`, `data\icudtl.dat`. 엔진 안의 제3자 구성요소(ICU·Skia 등) 고지는 앱의 `NOTICES.Z` |
 | desktop_drop (Windows 플러그인) | 0.7.1 | Apache-2.0 | https://github.com/MixinNetwork/flutter-plugins/tree/main/packages/desktop_drop | `desktop_drop_plugin.dll` |
 | file_selector_windows | 0.9.3+5 | BSD-3-Clause | https://github.com/flutter/packages/tree/main/packages/file_selector/file_selector_windows | `file_selector_windows_plugin.dll` |
-| Inno Setup (설치 실행부) | 6.7.0 | Inno Setup License (오픈소스 아님) | https://github.com/jrsoftware/issrc | 본표 39번. 허용 목록 밖 → 부록 B. 2차 라이선스 검증 때 소스와 같은 zip에 넣어 스캔(팀 결정 10/7) |
+| Inno Setup (설치 실행부) | 6.7.0 | InnoSetup (Inno Setup License, 오픈소스 아님) | https://github.com/jrsoftware/issrc | 본표 39번. 허용 목록 밖 → 부록 B. 2차 라이선스 검증에서 소스와 같은 zip(`installer-bundled-non-oss/`)에 넣어 2026-10-14에 스캔했다(팀 결정 10/7) |
 
 고지문은 설치 폴더의 `licenses\`와 앱의 ⓘ(「오픈소스 고지·라이선스」) 화면, [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)에 있다.
 
@@ -373,8 +379,8 @@ GitHub Releases `desktop-v*`의 설치파일이다(#617). 위 A-4의 Dart 런타
 - **직접 의존이 아니다.** `apps/desktop/pubspec.lock`에 전이 의존성으로 들어 있고, 우리 Dart 코드는 vector_math를 import하지 않는다.
 - `LICENSE` 하나에 두 라이선스 전문이 함께 있다. Google(2015)의 BSD-3-Clause와 Andrew Magill(2013)의 zlib이다. pub.dev 태그는 BSD-3-Clause 하나뿐이라 생성기가 놓쳤다. OpenUP 사전 검증보고서(2026-10-01)가 두 라이선스로 판정해서, pub.dev에서 받은 2.2.0 아카이브를 열어 확인했다(2026-10-03, #634). 생성기는 이 결과를 `PUB_LICENSE_CHECKED`에 버전과 함께 적어 두고, lock의 버전이 바뀌면 「확인 필요」로 표시한다.
 - **zlib은 OSI 승인 퍼미시브 라이선스**다(SPDX 라이선스 목록 3.29). 카피레프트 조항이 없다. 조건은 셋이다. 원작자를 속이지 않는다, 수정한 소스는 수정했다고 밝힌다, 소스를 배포할 때 고지를 지우지 않는다. 제품 문서에 출처를 적는 것은 권장이고 의무가 아니다.
-- 우리는 vector_math를 수정하지 않고 소스를 재배포하지도 않는다. 데스크톱 앱은 소스로 배포되고, 빌드할 때 pub이 받아 온다.
-- 결론: **의무 없음.** 설치 파일로 배포하게 되면 BSD-3-Clause의 바이너리 고지 조건이 생기므로, 앱의 라이선스 화면에 이 고지가 들어가는지 그때 확인한다.
+- 우리는 vector_math를 수정하지 않고 소스를 재배포하지도 않는다. 저장소의 데스크톱 앱 소스를 빌드하면 pub이 받아 온다.
+- 결론: 소스 배포에는 **의무 없음.** 데스크톱 Windows 설치파일을 배포하면서 BSD-3-Clause의 바이너리 고지 조건이 생겼고, 아래 확인대로 앱의 `NOTICES.Z`와 ⓘ 라이선스 화면으로 **충족한다.**
 - 확인(2026-10-07): 데스크톱 Windows 설치파일을 배포하면서 이 조건이 생겼다. `74dac15`로 빌드한 Release 폴더의 `data/flutter_assets/NOTICES.Z`에 vector_math의 LICENSE(BSD-3-Clause와 Andrew Magill의 zlib 전문)가 들어 있고, 앱의 ⓘ 화면(`showLicensePage`)이 이 묶음을 보여 준다.
 
 ### cffi (MIT-0), cryptography (Apache-2.0 OR BSD-3-Clause) — MCP 서버
@@ -415,7 +421,7 @@ GitHub Releases `desktop-v*`의 설치파일이다(#617). 위 A-4의 Dart 런타
 - Visual C++ 런타임(`vcruntime140.dll`, `vcruntime140_1.dll`)은 CPython 임베디드 배포판 안에 들어 있는 그대로다. 재배포 조건은 그 배포판 `LICENSE.txt`의 「Additional Conditions for this Windows binary build」 절에 있다. Microsoft 고지를 바꾸지 않는다, Microsoft 상표를 제품 이름 등에 쓰지 않는다, Microsoft 운영체제 밖에서 돌게 배포하지 않는다, 악성·기만·불법 프로그램에 넣지 않는다. 우리 설치파일은 넷 다 지킨다. 데스크톱 앱(Flutter)이 쓰는 `msvcp140.dll` 등은 싣지 않고, 없으면 설치 프로그램이 Microsoft 배포 주소를 알려 준다(`apps/desktop/installer/maskingtape.iss`).
 - Inno Setup은 설치파일을 만드는 도구다. 만든 `setup.exe` 안에 설치 실행부가 들어가고, 설치 뒤에는 설치 폴더의 제거 프로그램(`unins*` 파일, Inno Setup 도움말 `UninstallFilesDir` 기본값 `{app}`)으로 남는다. Inno Setup License(6.7.0 `license.txt`)는 상업적 사용을 포함해 누구에게나 사용·수정·재배포를 허용하고, 바이너리로 재배포할 때 저작권 고지와 웹사이트 주소를 유지하라고 한다. 우리는 실행부를 고치지 않고, 빌드에 쓴 판의 `license.txt`를 `licenses\Inno Setup (installer).txt`로 함께 싣는다. OSI 승인 목록에는 없다.
 - 둘 다 대회 규정 제8조 ③항이 막는 비상업 조건 라이선스가 아니다.
-- OpenUP 회신: 2026-10-06 요지는 Windows와 호환하려고 같이 들어가는 런타임 등의 라이선스는 신경 쓰지 않아도 되고, 실행 화면·고지 파일·SBOM으로 고지하는 방식이 적절하다는 것이다. 2026-10-07 원문은 「Microsoft VC++ 런타임과 같은 오픈소스가 아닌 호환을 위한 설치파일의 경우에는 결과물의 소스코드와 함께 압축하셔서 스캔하시면 됩니다」다. 2차 라이선스 검증 때 Visual C++ 런타임은 이 답에 따라, Inno Setup 실행부는 같은 원칙으로 팀이 정해(10/7) 소스와 같은 zip에 넣는다.
+- OpenUP 회신: 2026-10-06 요지는 Windows와 호환하려고 같이 들어가는 런타임 등의 라이선스는 신경 쓰지 않아도 되고, 실행 화면·고지 파일·SBOM으로 고지하는 방식이 적절하다는 것이다. 2026-10-07 원문은 「Microsoft VC++ 런타임과 같은 오픈소스가 아닌 호환을 위한 설치파일의 경우에는 결과물의 소스코드와 함께 압축하셔서 스캔하시면 됩니다」다. 2차 라이선스 검증에서 Visual C++ 런타임은 이 답에 따라, Inno Setup 실행부는 같은 원칙으로 팀이 정해(10/7) 소스와 같은 zip(`maskingtape_20261014_5fd40af.zip`의 `installer-bundled-non-oss/`)에 넣었고, 2026-10-14에 스캔했다. OpenUP은 같은 날 스캔이 정상으로 진행됐다고 회신했다.
 - 결론: **수정 없이 싣고 고지를 유지해 재배포 조건 충족.**
 
 ### python-stdnum (LGPL-2.1-or-later), numpy·scipy 휠의 GCC 런타임 (GPL-3.0-or-later WITH GCC-exception-3.1), regex (Apache-2.0 AND CNRI-Python), tqdm (MPL-2.0 AND MIT), numpy (Zlib·CC0-1.0 등 포함), defusedxml·typing-extensions (PSF-2.0) — bench 비교 기준선(개발 도구)
@@ -476,6 +482,20 @@ GitHub Releases `desktop-v*`의 설치파일이다(#617). 위 A-4의 Dart 런타
 | 사용 방식 | 로컬 전용. `--llm`과 함께 `--llm-model qwen2.5:7b`를 줄 때만 `http://127.0.0.1:11434`로 호출한다(`DEFAULT_HOST`). 로컬이 아닌 주소는 코드에서 거부한다 |
 | 재배포 | 하지 않는다. 저장소·PyPI·웹 데모 어디에도 가중치를 싣지 않고, 사용자가 Ollama로 직접 받는다 |
 | 변형 | 수정·미세조정 없음(이 모델 자체는 유형1 '외부 모델 그대로'로 쓴다) |
+
+### C-3. GPT-6 Luna (웹 데모 하이브리드 모드 전용, 상용 API)
+
+| 항목 | 내용 |
+|---|---|
+| 모델 | GPT-6 Luna (OpenAI). 모델 ID `gpt-6-luna`(`apps/api/maskingtape_api/services/openai_name_judge.py`의 `DEFAULT_MODEL`). 날짜 고정판이 없어 정확도를 잴 때 측정 날짜를 같이 적는다 |
+| 라이선스 | OpenAI 이용약관. 오픈소스가 아니고 가중치를 공개하지 않는다 |
+| 원본 | https://openai.com/policies/ |
+| 호출 경로 | OpenAI Responses API(`https://api.openai.com/v1/responses`, 같은 파일의 `OPENAI_RESPONSES_URL`). 파이썬 표준 라이브러리 `urllib.request`로 부르고, OpenAI SDK는 쓰지 않는다. 리다이렉트는 따라가지 않는다 |
+| 사용 방식 | 웹 데모 API 서버(`apps/api`)가 요청의 `mode`가 `hybrid`일 때만 부른다(기본값 `rule`). 규칙으로 먼저 가린 글만 보내고 `store: false`로 OpenAI 쪽 응답 저장을 끈다. 서버 환경변수 `OPENAI_API_KEY`가 없으면 하이브리드 없이 규칙 결과만 준다. 모델은 `MASKINGTAPE_API_OPENAI_MODEL`로 바꿀 수 있다 |
+| 쓰지 않는 곳 | 라이브러리·CLI·MCP 서버·데스크톱 앱. 심사 시연과 발표는 이 옵션을 쓰지 않고 로컬 구성(규칙 + Ollama)으로 한다(README 「원문은 어디로 가나」) |
+| 재배포 | 없다. 모델 코드와 가중치는 어떤 배포물(PyPI·웹 빌드 결과물·MCP·데스크톱 설치파일)에도 들어가지 않는다 |
+| 근거 | 운영사무국 서면 회신(2026-09-30)이 웹 데모의 선택 옵션으로 허용했다. 결과보고서 붙임2에 「웹 데모 선택 옵션 (상용 API)」으로 적었다 |
+| 변형 | 학습·미세조정 없음. API로 결과(이름 목록)만 받는다 |
 
 ## 부록 D: 평가에 쓴 외부 데이터셋
 

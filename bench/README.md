@@ -19,11 +19,14 @@ generator/
   address_shapes.py # core #423이 고친 주소 형태 8종 생성 재료 (--address-extended, synth_v2 전용)
   distractors.py  # 개인정보가 아닌 '헷갈리는' 값 생성 (오탐 측정용)
   documents.py    # 문장 템플릿에 값을 심어 문서 + 라벨(span) 생성
+  variants.py · attacks.py · open_misses.py · doc_types.py · doc_types_holdout.py  # 아래 세트별 CLI가 쓰는 생성 재료
 generate_dataset.py  # CLI — JSONL 데이터셋 생성
+generate_variants.py  # 표기 변형 평가 세트(#531) 생성 CLI (generator/variants.py)
 generate_attacks.py  # CLI — 프롬프트 공격 골든셋(#549) 생성 (generator/attacks.py)
 generate_open_misses.py  # CLI — 열린 미탐 세트(#610) 생성 (generator/open_misses.py)
 generate_doc_types.py  # CLI — 문서 성격별 이름 세트(#661) 생성 (generator/doc_types.py)
 generate_doc_types_holdout.py  # CLI — 문서 성격별 보고용 세트(#456) 생성 (generator/doc_types_holdout.py)
+fetch_kdpii.py       # 외부 데이터 KDPII test를 Zenodo에서 받아 jsonl로 바꾸는 CLI (datasets/external/, 저장소에 싣지 않음)
 evaluators/           # 평가 도구 모음 — "무엇을 평가하는가"별로 파일 하나
   evaluate.py            # CLI — core Pipeline.scan() 결과 vs 정답 → precision/recall/F1/F2 리포트 (종류별+난이도별)
   error_breakdown.py     # evaluate.py의 미탐·오탐을 유출 기준(가려짐/부분 유출/완전 유출, 경계 불일치/엉뚱한 곳)으로 다시 나눔 (#612)
@@ -36,8 +39,13 @@ evaluators/           # 평가 도구 모음 — "무엇을 평가하는가"별�
   evaluate_attacks.py    # CLI — 프롬프트 공격 골든셋을 규칙 / LLM 단독 / 하이브리드 이름 재현율로 채점 (#549)
   evaluate_open_misses.py  # CLI — 열린 미탐 세트를 core 이슈별·태그별 재현율로 채점 (#610)
   evaluate_doc_types.py  # CLI — 문서 성격별 이름 세트를 문서 종류별 이름·전체 지표로 채점 (#661)
-datasets/            # 생성된 평가셋 (정답 라벨 포함) — synth_v1(제출 수치 근거)·synth_v2(주소 확장)
+  evaluate_variants.py   # 표기 변형 세트를 표기 태그별 재현율로 채점하는 CLI (#531)
+  compare_variants_across_commits.py · compare_open_misses_across_commits.py  # 두 커밋의 core로 표기 변형·열린 미탐 세트를 비교하는 CLI
+  compare_kdpii_tools.py # KDPII test에서 maskingtape·ko-pii·Presidio를 같은 기준으로 채점하는 CLI (#457)
+  pii_tool_adapters.py   # 타 도구 탐지 결과를 우리 11종으로 옮기는 어댑터 (compare_kdpii_tools.py가 씀)
+datasets/            # 생성된 평가셋 (정답 라벨 포함) — synth_v1(제출 수치 근거)·synth_v2(주소 확장)·variants_v1·open_misses_v1·doc_types_v1·doc_types_holdout_v1·attacks_v1
 reports/             # evaluate.py --report로 저장한 마크다운 리포트 (결과보고서 첨부용)
+docs/how-it-works.md # 생성기·채점·조정용/보고용 나누기의 동작 원리 (발표 Q&A용)
 tests/               # 생성기·평가 로직 단위 테스트
 ```
 
@@ -61,7 +69,8 @@ KDPII는 `python -m bench.fetch_kdpii --split test`로 받는다. Zenodo 파일�
 우리 11종에 맞는 라벨 770개는 `labels`로, 나머지 라벨 1,441개(직장·직위·닉네임 등)는 `other`로 나눈다.
 `--name-sample 500`을 주면 이름 하이브리드 외부 비교(아래 「이름 탐지 방식 비교」)에 쓴 500문장도
 `kdpii_test_names500.jsonl`로 쓴다. 이름 문장 169개 전부에 나머지 331개를 시드 458로 더한 것이다. 이 표본으로
-main `8fc7889`의 규칙 전용을 재면 아래 「이름 탐지 방식 비교」 표의 재현율 0.254(tp 45·fp 6·fn 132)가 그대로 나온다. 타 도구 비교는 아래
+main `8fc7889`의 규칙 전용을 재면 아래 「이름 탐지 방식 비교」 표에 10/4 팀장 측정으로 적은 재현율 0.254(tp 45·fp 6·fn 132)가 그대로 나온다.
+지금 표 칸의 0.299는 머지 마감 뒤 main `2802949`에서 잰 값이다. 타 도구 비교는 아래
 「KDPII 타 도구 비교」에 있다.
 
 **규칙**
@@ -192,9 +201,10 @@ maskingtape 행은 2026-10-04 `c526000` 값(0.988 / 0.974 / 0.981 / 0.977, tp 97
 > **⚠️ 한계 고지 (#345) — 구조화 kind의 1.000을 읽을 때 반드시 함께 볼 것**
 >
 > 1. **F1 1.000은 "실세계 recall 상한"이 아니라 "생성기↔탐지기 경계정확성" 지표다.** 이 벤치의
->    생성기(`bench/generator/entities.py`)는 core 탐지기의 정규식·체크섬 로직을 **직접
->    import해서** 그 형식에 맞는 값만 만든다 — 예: `_LANDLINE_RE`(전화), `_luhn_ok`(카드),
->    `_RRN_WEIGHTS`(주민번호), `_DL_REGIONS`(운전면허). 즉 구조화 10종의 1.000은 "탐지기가
+>    생성기(`bench/generator/entities.py`)는 core 탐지기의 형식 규칙을 그대로 따라 그 형식에 맞는
+>    값만 만든다. 전화 정규식 `_LANDLINE_RE`와 카드 검증 `_luhn_ok`는 core에서 **직접 import하고**,
+>    주민번호 가중치 `_RRN_WEIGHTS`와 운전면허 지역코드 `_DL_REGIONS`는 core와 같은 규칙으로
+>    `entities.py`에 다시 썼다. 즉 구조화 10종의 1.000은 "탐지기가
 >    이해하는 형식을 정확히 그 경계(span)까지 잡아내는가"를 보는 자기일관성 검증이지, "탐지기가
 >    모르는 실세계의 다양한 표기까지 다 잡는다"는 뜻이 아니다.
 > 2. **`name`도 [#394](https://github.com/ChoHyeonChan/maskingtape/issues/394) 정비로 이 순환에 부분적으로 들어왔다.** 예전엔 문맥 판단이 필요한 kind라
@@ -215,7 +225,7 @@ maskingtape 행은 2026-10-04 `c526000` 값(0.988 / 0.974 / 0.981 / 0.977, tp 97
 >    운전면허번호나 카드번호로 오탐될 위험이 이 표에는 전혀 드러나지 않는다**는 뜻이기도 하다
 >    — 그 위험은 아래 `driver_license`(운전면허번호) 단락에서 별도로 실측·서술한다.
 
-500건 기준 최신 실측(#537 재측정, 이름 행은 2026-10-15 #601 반영 재측정, seed=42 — 데이터셋은 #339/#340 반영본 그대로):
+500건 기준 최신 실측(#537 재측정, 이름 행은 머지 마감 뒤 2026-10-26 main `2802949` 재측정이고 2026-11-01 main `7ca58d3`에서도 같다, seed=42 — 데이터셋은 #339/#340 반영본 그대로):
 
 | kind | precision | recall | f1 | f2 | 비고 |
 |---|---|---|---|---|---|
@@ -227,7 +237,7 @@ maskingtape 행은 2026-10-04 `c526000` 값(0.988 / 0.974 / 0.981 / 0.977, tp 97
 | **address** | **1.000** | **1.000** | **1.000** | **1.000** | core [#252](https://github.com/ChoHyeonChan/maskingtape/pull/252)가 [#248](https://github.com/ChoHyeonChan/maskingtape/issues/248)(계사 어미 미탐)을 고쳐 recall 1.000 완전 복구 + [#340](https://github.com/ChoHyeonChan/maskingtape/issues/340) "번지" 리터럴 체인 끊김 신규 커버 — 아래 참고 |
 | birth_date | 1.000 | 1.000 | 1.000 | 1.000 | [#266](https://github.com/ChoHyeonChan/maskingtape/issues/266)/[#271](https://github.com/ChoHyeonChan/maskingtape/pull/271)에서 core가 추가한 10번째 kind. confidence가 항상 정확히 0.9로 고정 — 아래 confidence 절 참고 |
 | driver_license | 1.000 | 1.000 | 1.000 | 1.000 | [#267](https://github.com/ChoHyeonChan/maskingtape/issues/267)/[#305](https://github.com/ChoHyeonChan/maskingtape/pull/305)에서 core가 추가한 11번째 kind. 문맥 앵커조차 없이 confidence가 항상 정확히 0.85로 고정 — 아래 참고 |
-| **name** | **0.969** | **0.966** | **0.967** | **0.967** | [#663](https://github.com/ChoHyeonChan/maskingtape/issues/663)·[#589](https://github.com/ChoHyeonChan/maskingtape/issues/589) 반영(recall 0.956 → 0.966, tp 366 → 370, 오탐 12건 그대로): 인사말 뒤 자기소개(`안녕하세요.⏎인사팀 김민수입니다`)와 변경 기록의 두 번째 이름(`담당자가 김민수에서 이서연으로 변경`)을 받는다. 그 전 값 0.968 / 0.956 / 0.962 / 0.958은 [#601](https://github.com/ChoHyeonChan/maskingtape/issues/601) 반영(recall 0.932 → 0.956, tp 357 → 366, 오탐 12건 그대로): 두 글자 이름 + 띄어 쓴 직함(`남원 팀장이`)을 받는다. 그 전 값 0.967 / 0.932 / 0.949 / 0.939는 [#537](https://github.com/ChoHyeonChan/maskingtape/issues/537)+[#484](https://github.com/ChoHyeonChan/maskingtape/issues/484) 반영(0.910 → 0.949, recall 0.869 → 0.932): #537이 "이력서 접수:"·"면허 갱신 신청:" 같은 업무 문서 제목형 라벨 누락(20건)을, #484가 약한 단서 오탐 4종을 각각 고침. 남은 미탐 26건 중 12건은 경계 한 글자 차이(실질적 유출 아님 — 아래 하이브리드 절 참고)이고 나머지 14건이 2음절 이름+조사·직함(설계된 한계)과 "A에서 B로 변경" 두 번째 이름([#589](https://github.com/ChoHyeonChan/maskingtape/issues/589), 단서 자체가 없음) 등. **recall 0.932는 실세계 추정치가 아니라 상한** — 위 한계 고지 2번 참고 |
+| **name** | **0.969** | **0.966** | **0.967** | **0.967** | [#663](https://github.com/ChoHyeonChan/maskingtape/issues/663)·[#589](https://github.com/ChoHyeonChan/maskingtape/issues/589) 반영(recall 0.956 → 0.966, tp 366 → 370, 오탐 12건 그대로): 인사말 뒤 자기소개(`안녕하세요.⏎인사팀 김민수입니다`)와 변경 기록의 두 번째 이름(`담당자가 김민수에서 이서연으로 변경`)을 받는다. 그 전 값 0.968 / 0.956 / 0.962 / 0.958은 [#601](https://github.com/ChoHyeonChan/maskingtape/issues/601) 반영(recall 0.932 → 0.956, tp 357 → 366, 오탐 12건 그대로): 두 글자 이름 + 띄어 쓴 직함(`남원 팀장이`)을 받는다. 그 전 값 0.967 / 0.932 / 0.949 / 0.939는 [#537](https://github.com/ChoHyeonChan/maskingtape/issues/537)+[#484](https://github.com/ChoHyeonChan/maskingtape/issues/484) 반영(0.910 → 0.949, recall 0.869 → 0.932): #537이 "이력서 접수:"·"면허 갱신 신청:" 같은 업무 문서 제목형 라벨 누락(20건)을, #484가 약한 단서 오탐 4종을 각각 고침. 그때 남은 미탐 26건 중 12건은 경계 한 글자 차이였고 나머지 14건이 2음절 이름+조사·직함(그때 설계된 한계)과 "A에서 B로 변경" 두 번째 이름([#589](https://github.com/ChoHyeonChan/maskingtape/issues/589), 단서 자체가 없음) 등이었다. 지금 남은 미탐은 13건이다. 12건은 경계 한 글자 차이라 이름은 다 가려지고, 원문이 남는 완전 유출은 1건(`신규 부장님께`)이다(아래 「미탐·오탐 분해」). **recall 0.966도 실세계 추정치가 아니라 상한**이다. 위 한계 고지 2번 참고 |
 
 card는 `gen_account_number_like`가 구분자 없이 13자리 이상을 만들 때 core `CreditCardDetector`의
 "구분자 없는 13~19자리" 분기와 우연히 겹칠 수 있다는 걸 이번 재측정 중 실제로 재현했다
@@ -241,7 +251,7 @@ Luhn 무효화 가드(#180)를 `gen_account_number_like`에도 똑같이 적용�
 core는 원래 분리자를 `[-.\s]?`(0개 또는 딱 1글자)만 허용해서, Word/HWP 자동서식이 하이픈을
 en-dash(–)로 바꾸거나 "공백-하이픈-공백"·"점+공백"처럼 표·OCR 붙여넣기에서 흔한 변형이
 들어오면 주민등록번호·전화번호가 통째로 평문 노출됐다. bench가 이 canary를 먼저 고정해뒀고
-(`test_rrn_separator_variants_are_known_unfixed_leaks` 등), core [#358](https://github.com/ChoHyeonChan/maskingtape/pull/358)가
+(당시 `test_rrn_separator_variants_are_known_unfixed_leaks` 등, 지금 이름은 `test_rrn_separator_variants_are_detected`), core [#358](https://github.com/ChoHyeonChan/maskingtape/pull/358)가
 `[-.\s–—]{0,3}`로 넓혀 고쳤다 — `gen_rrn`/`gen_phone`에 이 변형 표기들을 실제로 추가해
 전체 재측정에 반영했다(canary도 "고쳐진 동작"으로 갱신). **단, 전화번호의 `+82`(국가번호)
 바로 뒤 분리자는 여전히 좁은 원래 집합만 허용한다** — `gen_phone`이 이 경계를 실수로 넘지
@@ -252,7 +262,7 @@ en-dash(–)로 바꾸거나 "공백-하이픈-공백"·"점+공백"처럼 표·
 고정한다(`test_phone_separator_and_parenthesis_variants_all_detected`).
 
 **이름 끝음절 양/군·주소 번지 리터럴([#340](https://github.com/ChoHyeonChan/maskingtape/issues/340), core 대응 완료)**:
-존칭 양보 규칙(`_HONORIFIC_TAIL="님씨군양"`, #147)이 실명의 마지막 글자가 마침 "양"·"군"이면
+존칭 양보 규칙(당시 `_HONORIFIC_TAIL="님씨군양"`, #147. 지금 이름은 `_NAME_TAIL_STOP`(#394)이고 "군"·"양"은 들어 있지 않다)이 실명의 마지막 글자가 마침 "양"·"군"이면
 그 글자를 존칭으로 오인해 이름에서 떼어내 노출시켰다("김하양"의 "양"이 새는 식) — `_GIVEN_SYLLABLES`에
 "양"·"군"을 추가해 실제로 그런 이름이 생성·재측정되게 했다. 주소는 번지 숫자 뒤에 "번지"라는
 리터럴이 실제로 풀어써지면("123번지") 그 뒤 건물명·호수로 이어지는 체인이 끊겨 세대 특정
@@ -290,7 +300,7 @@ card는 `gen_card`(Visa/Mastercard/Amex 계열 IIN + Luhn 체크섬)로 데이�
 3자리+문자+4자리)에서 하나 벗어나게(7·9자리) 해서 체크섬 없는 kind에서도 명시적인 근접 미스
 방어를 갖췄다.
 
-`account`(계좌번호)는 core에 `AccountDetector`가 새로 추가되면서([#176](https://github.com/ChoHyeonChan/maskingtape/pull/177))
+`account`(계좌번호)는 core에 `AccountDetector`가 새로 추가되면서([#176](https://github.com/ChoHyeonChan/maskingtape/issues/176)/[#177](https://github.com/ChoHyeonChan/maskingtape/pull/177))
 생긴 kind다(#180). 다른 체크섬 없는 kind(`passport`)와도 다른 독특한 설계다 — 문맥어("계좌",
 "입금", "은행", "뱅크" 등)가 매치 앞뒤 15자 안에 없으면 **confidence를 낮추는 게 아니라 아예
 탐지를 안 한다**(하드 게이트). `gen_account`로 은행별 그룹 자릿수 다양성(2~4그룹, 그룹당
@@ -411,7 +421,8 @@ NameDetector().detect("구매 부장이 결재했습니다.")        # -> []  �
 이 트레이드오프를 그대로 반영해 positive 템플릿 4개(직함-only)와 negative 템플릿 3개(부서어
 오탐 가드 검증, core 이슈 예시 그대로 사용)를 추가했다 — 그 결과 name recall이 의도적으로
 더 낮아졌다(0.691→0.661, FN 16건은 전부 이 설계된 한계). 회귀 테스트로 "3글자는 잡히고 2글자는
-안 잡히고 부서어는 절대 안 잡힌다"는 계약 셋을 모두 고정해뒀다.
+안 잡히고 부서어는 절대 안 잡힌다"는 계약 셋을 모두 고정해뒀다. 이 중 "2글자는 안 잡힌다"는 #601에서 바뀌었다.
+지금 테스트(`test_two_syllable_name_with_title_only_is_detected`)는 `김민 부장이`의 `김민`을 잡는지 본다.
 
 **직함이 이름 앞에 오는 형태도 추가됐다**([#239](https://github.com/ChoHyeonChan/maskingtape/issues/239)/[#246](https://github.com/ChoHyeonChan/maskingtape/issues/246))
 — "대표 홍길동", "부장 김철수"처럼 직함이 이름 **뒤**가 아니라 **앞**에 오는 형태다(#213과
@@ -427,7 +438,7 @@ negative 템플릿 2개("대표 이사가"/"대표 이사회에서")를 대칭�
 **core [#252](https://github.com/ChoHyeonChan/maskingtape/pull/252)가 고쳤지만, 완전히는
 아니다.** 하드코딩된 5개 stem(`_DEPT_STEMS = {"구매", "정기", "홍보", "안전", "노무"}`)만
 조사-삼킴 우회를 막는 방식이라 커밋 메시지에도 "완전한 목록은 아니고(긴 꼬리는 LLM 담당)"라고
-명시돼 있다. 직접 확인해보니 목록 밖의 흔한 업무어는 여전히 그대로 뚫린다:
+명시돼 있다. 직접 확인해보니 목록 밖의 흔한 업무어는 여전히 그대로 뚫린다(아래는 #255를 올리던 때의 동작이다):
 
 ```python
 NameDetector().detect("대표 정기가 참석했습니다.")   # -> []  목록에 있음, 정상 차단
@@ -442,7 +453,12 @@ NameDetector().detect("대표 허가가 필요합니다.")     # -> [('허가가
 약 125건 중 26% — 이 4개 템플릿이 뽑힐 때마다 사실상 매번 재현됨). [#255](https://github.com/ChoHyeonChan/maskingtape/issues/255)로
 남겼다 — 다만 core가 "긴 꼬리는 LLM 담당"이라고 이미 방향을 밝혀둔 걸 보면 의도된 부분
 해결일 수 있어, 이 이슈는 "완전 미해결 버그"보다는 "알려진 한계의 정량화" 성격이 강하다.
-회귀 테스트로 현재 동작(5개는 차단, 나머지는 통과)을 고정해뒀다.
+회귀 테스트로 그때 동작(5개는 차단, 나머지는 통과)을 고정해뒀다.
+
+**지금은 막힌다.** core #394(커밋 `c5c1523`)가 `_DEPT_STEMS`를 일반명사 정지어 `_COMMON_WORDS`로 넓히고(차량·허가·성과·안내 포함)
+낱말 경계로 거르게 바꿨다. 2026-11-01 main `7ca58d3`에서 위 세 문장과 `부장 성과가 좋았습니다.`·`팀장 안내가 시작되었습니다.`는
+모두 `[]`이다. 회귀 테스트도 "잡히지 않는다"로 바뀌었다(`bench/tests/test_generator.py`의
+`test_title_prefix_common_word_with_particle_is_not_a_name`).
 
 **참고로 이 오탐은 "유출"은 아니다** — negative 문서에는 애초에 가릴 개인정보가 없으므로,
 "차량이"를 잘못 이름으로 표시해 마스킹해도 실제로 새는 정보는 없다(과다 마스킹, 안전한
@@ -555,10 +571,12 @@ core가 개인정보 아닌 걸 잘못 잡아내는지(정밀도, precision)는 
 
 **표본 두께에 대한 한계 고지(#498 감사):** synth_v1(500건)의 negative 120건 중 실제로 서로
 다른 문장은 47개뿐이다 — 문서 템플릿 자체가 다양하지 않아, 같은 문장이 최대 8번까지
-반복된다("대표 이사가 사퇴했습니다." 등). 즉 오탐 측정은 "120번 시도해서 16번 걸림"이
-아니라 실질적으로 "47가지 상황 중 일부에서 반복적으로 걸림"에 가깝다 — 표본이 README
+반복된다("대표 이사가 참석했습니다." 등). 즉 그때(9/28) 오탐 측정은 "120번 시도해서 16번 걸림"이
+아니라 실질적으로 "47가지 상황 중 일부에서 반복적으로 걸림"에 가까웠다 — 표본이 README
 수치가 주는 인상보다 얇다는 뜻이다. 문서 다양성을 늘리는 건 별도 작업(negative 템플릿
 자체를 늘리는 생성기 변경)이 필요해 이 이슈 범위 밖으로 남긴다.
+지금(2026-11-01, main `7ca58d3`)은 negative 문서의 오탐이 0건이다(`reports/report_v1.md` 난이도 표의 negative 행).
+47가지 상황에서 0건이라는 뜻이라 표본이 얇은 것은 그대로다.
 
 ## ReDoS 방지 회귀 테스트
 
@@ -567,9 +585,10 @@ docstring/주석에 명시하고 있다(`email.py`는 상한이 없던 시절 40
 1.4초 걸렸던 실측 사례까지 남겨뒀다). 하지만 이 속성을 지키는지 확인하는 자동 테스트가
 없어서, 누군가 나중에 정규식을 느슨하게 고치면 이 회귀를 아무도 못 잡는 사각지대였다([#162](https://github.com/ChoHyeonChan/maskingtape/issues/162)).
 
-`tests/test_detector_redos.py`가 core의 9개 규칙판 detector 전부(#180에서 추가된
+`tests/test_detector_redos.py`가 core의 11개 규칙판 detector 전부(#180에서 추가된
 `account` 포함)에 구분자 없이 이어진 40만 자 적대적 입력을 넣고, 시간 예산(5초, 여유
-있게 잡음) 안에 끝나는지 확인한다 — 직접 측정해보면 현재는 전부 0.15초 이내로 통과하지만,
+있게 잡음) 안에 끝나는지 확인한다(`_CASES` 14개 = 11종 + 매칭이 수만 건 나는 주소 반복 입력 3개, #426) — 2026-11-01
+main `7ca58d3`을 개발 노트북에서 재 보면 11종 입력은 0.5초 이내, 주소 반복 입력 3개는 0.9~1.9초로 통과하지만,
 이 테스트가 없으면 앞으로 그렇다는 보장이 없다.
 
 ## 문장·표기 다양성
@@ -614,7 +633,7 @@ docstring/주석에 명시하고 있다(`email.py`는 상한이 없던 시절 40
 - **계좌번호**: 국민·신한·카카오뱅크·우리·하나은행 스타일 그룹 자릿수(2~4그룹, 그룹당 2~7자리,
   총 10~14자리) + 하이픈/구분자없음 표기를 섞는다. core가 문맥어 하드 게이트라, 모든 positive
   템플릿에 "계좌"/"입금"/"이체"/"은행" 등 문맥어를 반드시 포함시킨다
-- **이름**: 성씨 30종 × 이름 음절 30종 조합, 통계청 다빈도 성씨 기준(특정 인물 아님). **직함만
+- **이름**: 성씨 30종 × 이름 음절 32종(30종 + #340의 "양"·"군") 조합, 통계청 다빈도 성씨 기준(특정 인물 아님). **직함만
   있고 역할어·존칭이 없는 문맥**을 이름 뒤([#213](https://github.com/ChoHyeonChan/maskingtape/issues/213),
   "홍길동 대표가")·앞([#239](https://github.com/ChoHyeonChan/maskingtape/issues/239)/[#246](https://github.com/ChoHyeonChan/maskingtape/issues/246),
   "대표 홍길동이") 둘 다 섞는다 — 성+2음절 이상 풀네임만 이 단서 하나로 인정되는 core의
@@ -731,9 +750,11 @@ python -m bench.evaluators.evaluate_masking bench/datasets/synth_v1.jsonl --stra
 `mask`에서만 불일치가 core 회귀 버그 신호이고 `label`/`pseudonym`은 길이가 달라지는 게
 정상이라 참고용이다.
 
-500건 기준 실측 결과(2026-09-28, main `1086044`, #498 재측정) — mask 기준 유출률 3.4%(995건 중
-34건, 전부 완전유출, 전부 `name`). `name`의 34건 유출은 전부 규칙판이 아예 못 잡은 진짜 미탐
-(문맥 단서 없는 이름 등)이다 — #255에서 정량화한 "차량이"류 오탐은 애초에 가릴 개인정보가
+500건 기준 실측 결과(2026-11-01, main `7ca58d3`, 위 명령을 `--strategy` 없이) — mask 기준 유출률 0.1%(997건 중
+1건, 완전유출, `name`). label·pseudonym도 유출은 같은 1건이다. 이 1건은 규칙판이 아예 못 잡은 이름으로, 위
+「미탐·오탐 분해」의 완전 유출 1건(`신규 부장님께`)과 같다. 처음 잰 2026-09-28(main `1086044`, #498 재측정)에는
+유출률 3.4%(995건 중 34건, 전부 완전유출, 전부 `name`)였고, 그 34건도 전부 규칙판이 아예 못 잡은 진짜 미탐
+(문맥 단서 없는 이름 등)이었다 — #255에서 정량화한 "차량이"류 오탐은 애초에 가릴 개인정보가
 없는 negative 문서라 여기 leak 집계에는 안 잡힌다(위 참고: 유출이 아니라 과다 마스킹 문제).
 `phone`/`email`/`rrn`/`address`/`card`/`biz_reg`/`passport`/`account`/`birth_date`/
 `driver_license`는 유출 0건, 부분 유출도 0건 — core 탐지기들이 새로 지원하게 된 표기에서도 경계까지 정확히
@@ -873,9 +894,10 @@ python -m bench.evaluators.compare_modes bench/datasets/synth_v1.jsonl bench/dat
 
 > **⚠️ 먼저 읽을 것 — 학습 분포 안쪽 평가.** 기본 모델 `maskingtape-name-1.5b`는 bench 생성기 템플릿
 > (`documents.py`)으로 만든 데이터로 학습했다([#458](https://github.com/ChoHyeonChan/maskingtape/issues/458), `training/`). 그래서 **synth_v1·v2의 하이브리드 수치는 부풀려져 있다.**
-> 학습 밖 근거는 둘이다. ① 문서 성격별 세트(#661)는 템플릿만 학습 뒤 새로 썼고, 이름은 학습과 같은 풀
-> (`bench/generator/entities.py`)에서 뽑는다. ② KDPII는 학습에 쓰지 않은 외부 데이터다(루트 README, 팀장
-> 측정). 외부 평가라고 부를 수 있는 건 ②뿐이다.
+> 학습 밖 근거는 셋이다. ① 문서 성격별 조정용 세트 `doc_types_v1`(#661)은 템플릿만 학습 뒤 새로 썼고, 이름은 학습과 같은 풀
+> (`bench/generator/entities.py`)에서 뽑는다. ② 문서 성격별 보고용 세트 `doc_types_holdout_v1`(#456)은 틀과 이름 음절을
+> 학습·조정용과 겹치지 않게 새로 썼다(위 「조정용과 보고용」). 다만 같은 bench 담당이 쓴 합성 데이터다. ③ KDPII는 학습에
+> 쓰지 않은 외부 데이터다(루트 README, 팀장 측정). 외부 데이터는 ③ KDPII뿐이다.
 
 이름 기준, 완전 일치 채점. 로컬 Ollama, 온도 0, seoyeon056 PC. 모델은 `hf.co/StayAlive1/maskingtape-name-1.5b-GGUF:Q4_K_M`이다.
 **규칙 전용 행과 문서 5종·KDPII 하이브리드 행은 머지 마감 뒤 main `2802949`에서 다시 쟀다(2026-10-26, #739, 위 「머지 마감 뒤
@@ -921,7 +943,10 @@ python -m bench.evaluators.compare_modes bench/datasets/synth_v1.jsonl bench/dat
   5번 돌리면 판결문 오탐이 41(4회) ↔ 35(1회), 판결문 이름 미탐이 70(1회) ↔ 69(4회)로 달랐다(재현율 0.001,
   precision 0.005 차이, [#406](https://github.com/ChoHyeonChan/maskingtape/issues/406)). `97ed96f`의 3회는 모두 같았다.
   재현은 `compare_modes`를 같은 데이터로 여러 번 돌리면 된다. Ollama가 CPU로 돌면 1회에 18~23분(문서당 5~7초) 걸린다.
-- 웹 하이브리드(OpenAI)는 연결(#546)과 비용 승인이 먼저라 [#683](https://github.com/ChoHyeonChan/maskingtape/issues/683)으로 옮겼다.
+- 웹 하이브리드(OpenAI)는 연결(#546)과 비용 승인이 먼저라 [#683](https://github.com/ChoHyeonChan/maskingtape/issues/683)으로 옮겼고,
+  2026-10-26에 운영 웹 API로 합성 벤치 1,260건(조정용 3세트와 보고용 `doc_types_holdout_v1`)을 쟀다. 결과는
+  [#683 댓글](https://github.com/ChoHyeonChan/maskingtape/issues/683#issuecomment-6416455197)에 있다. 웹 하이브리드는 규칙으로
+  먼저 가린 글만 OpenAI로 보내므로 입력이 로컬 하이브리드와 달라, 위 표와 나란히 놓지 않는다.
 
 ### 이전 기준 모델(qwen2.5:7b) 측정 — 참고용 기록
 
@@ -994,8 +1019,9 @@ precision도 높았다(규칙판 0.859 vs 하이브리드 0.920) — 규칙판�
 않고(fp 16건 그대로) recall만 올랐다(0.869 → 0.922) — 그 우려는 틀렸던 것으로 확인됐다.
 #537 직후 남은 미탐 30건은 2음절 이름+조사(권지**이**·신성**의**: 한 글자 더 가리는 안전한
 방향의 어긋남 16건)와 2음절 이름+직함(설계된 한계 #213/#239) 등 나머지 14건이었다. 이후
-#484가 경계차이 쪽 4건(16 → 12)을 추가로 줄여 지금은 26건이다(상세는 위 하이브리드 절 표
+#484가 경계차이 쪽 4건(16 → 12)을 추가로 줄여 2026-10-01에는 26건이었다(상세는 위 하이브리드 절 표
 참고) — 완전미탐 14건 중 4건은 "A에서 B로 변경" 두 번째 이름 패턴([#589](https://github.com/ChoHyeonChan/maskingtape/issues/589))으로 새로 특정했다.
+#601·#663·#589 반영 뒤 2026-10-26 main `2802949`에서는 13건이다(위 「미탐·오탐 분해」).
 
 **#150·#160 반영 효과**: 규칙판 F1이 **0.676 → 0.827**까지 올랐다가(존칭 삼킴 수정 + 단어
 중간 성씨 오탐 수정), #213/#239(직함-only 이름, 앞뒤 둘 다)와 #255(부서어 오탐 잔여 위험)
@@ -1022,7 +1048,7 @@ LLMNameDetector(host="http://127.0.0.1:11434").detect("팀장 안내가 시작�
 
 ## Pipeline 겹침 병합 회귀 테스트
 
-`Pipeline._resolve_overlaps()`는 실제로 있었던 유출 사고를 막으려고 짠 로직이다 — 예전엔
+겹침 병합 함수(지금은 `maskingtape.overlaps.resolve_overlaps`이고, `pipeline.py`가 옛 이름 `_resolve_overlaps`로도 가져온다)는 실제로 있었던 유출 사고를 막으려고 짠 로직이다 — 예전엔
 주소 탐지기가 뒤따르는 주민등록번호 앞자리를 번지로 삼켜 구간이 겹치면, 겹친 탐지를
 통째로 버려서 confidence 1.0짜리 주민번호 탐지가 **통보조차 안 되고 사라진 채** 뒷자리가
 그대로 노출됐다. 그런데 이 함수를 검증하는 테스트가 core에도 bench에도 하나도 없었다
@@ -1067,7 +1093,7 @@ N가 동, 동 뒤 도로명, 가길)를 만들고, `--address-extended`일 때�
 v2 주소 59건 중 37건이 새 형태이고 형태별로는 2~8건이다(500건 한 벌이라 얇다). 수정 전 코드에서는 이
 37건이 전부 구간이 끊겨 fp·fn으로 동시에 집계된다(exact match 채점). 형태별 근거는
 `test_address_shapes.py`가 형태마다 300번씩 core에 넣어 **입력 전체가 한 구간으로** 잡히는지 확인하는
-쪽이 맡는다. v2 전체 지표는 `bench/reports/report_v2.md`에 있다.
+쪽이 맡는다. v2 전체 지표는 `bench/reports/report_v2.md`에 있다(2026-11-01 main `7ca58d3`에서 위 「사용법」의 `evaluate --report`로 다시 만들었다).
 
 **v1을 지키는 장치**: 새 형태를 기본 생성에 섞으면 난수 흐름이 바뀌어 v1을 시드로 다시 만들 수 없게
 된다. 그래서 (1) `gen_address`는 `extended=False`(기본)일 때 난수를 하나도 더 쓰지 않고, (2)
@@ -1080,7 +1106,8 @@ v2 주소 59건 중 37건이 새 형태이고 형태별로는 2~8건이다(500�
 채점해, 엔진이 맞게 가린 것이 오탐으로 집계됐다. 이제 그 오답지에 `biz_reg` 정답 라벨을 붙인다
 (`documents.py`의 `_labeled_distractor_kind`). 이미 뽑은 값으로 판정만 하고 난수를 더 쓰지 않아서, 시드 42로
 다시 만든 v1·v2는 **글이 그대로이고 라벨만 늘었다**(v1 2건, v2 1건). 사업자등록번호 precision은 v1·v2 모두
-1.000, v1 전체는 0.988 / 0.974 / 0.981 / 0.977(P / R / F1 / F2)이다. 라벨과 번호 사이에 조사가 끼는 틀
+1.000, v1 전체는 그때 0.988 / 0.974 / 0.981 / 0.977(P / R / F1 / F2)이었다. 지금은 0.988 / 0.987 / 0.987 / 0.987이다
+(머지 마감 뒤 main `2802949`, 위 「머지 마감 뒤 재측정」). 라벨과 번호 사이에 조사가 끼는 틀
 ("사업자등록번호는 …이며")은 core도 가리지 않으므로 오답지로 남겼다.
 
 ## 표기 변형 평가 세트 — 9/28 이후 막은 누출을 숫자로 보이기 ([#531](https://github.com/ChoHyeonChan/maskingtape/issues/531))
@@ -1110,7 +1137,7 @@ editable install이 새 파일도 옛 커밋 환경에서 찾아내 버려서 �
 
 ### 결과 (2026-09-29, `1086044` → `56d6b91` 이후 main)
 
-| 표기 태그 | 9/28 오전 재현율 | 지금 재현율 |
+| 표기 태그 | 9/28 오전 재현율 | 9/29 재현율 |
 |---|---|---|
 | account_attached_hyphen | 0.000 | 1.000 |
 | address_gu_start | 0.000 | 1.000 |
@@ -1142,7 +1169,8 @@ editable install이 새 파일도 옛 커밋 환경에서 찾아내 버려서 �
 "직함+조사를 이름으로 오인해 뒤 이름을 놓치는" 문제는 고쳤지만, 그 과정에서 임시로 잡은
 직함+조사 후보 자체가 최종 결과에 남는 부작용이 생긴 것으로 보인다 — core 이슈
 [#533](https://github.com/ChoHyeonChan/maskingtape/issues/533)으로 남겼다(bench 소관이
-아니라 코드는 고치지 않았다).
+아니라 코드는 고치지 않았다). core가 #533을 고쳤고(PR #552, 2026-09-30 머지), 2026-11-01 main `7ca58d3`에서
+`evaluate_variants`로 다시 재면 21개 태그 모두 1.000에 전체 오탐 0건이다.
 
 ### 이름 뒤 어미·조사 태그 — #600 같은 회귀 잡기 ([#614](https://github.com/ChoHyeonChan/maskingtape/issues/614))
 
@@ -1237,9 +1265,10 @@ python -m bench.evaluators.compare_open_misses_across_commits bench/datasets/ope
 통째로 남는다(미탐 10건). #594의 부분 6건은 지역 이름 뒤 숫자 일부가 다른 종류(전화 등)로
 우연히 잡힌 경우다.
 
-### 지금 수치 (2026-10-07, main `97ed96f`, 규칙 전용)
+### 지금 수치 (2026-10-25, main `2802949`, 규칙 전용)
 
-core가 이 세트의 이슈를 하나씩 고치면서 바뀐 수치다. "시작"은 그 태그를 세트에 넣었을 때의
+core가 이 세트의 이슈를 하나씩 고치면서 바뀐 수치다. 10/25 머지 마감 전 마지막 코드 머지(PR #755, main `2802949`)까지 반영했고, 2026-11-01 main `7ca58d3`에서
+다시 재도 전체 0.853(적중 597 · 미탐 103)으로 같다. "시작"은 그 태그를 세트에 넣었을 때의
 재현율이다(#636~#640은 #653에서 넣은 `6b54a75`, #655~#658은 #659에서 넣은 `911c27c`, #685·#686은 `5744f73` 기준).
 
 | core 이슈 | 태그 | 시작 | 지금 | 상태 |
@@ -1305,8 +1334,8 @@ core가 이 세트의 이슈를 하나씩 고치면서 바뀐 수치다. "시작
 
 **읽는 법과 한계**
 
-- core PR이 이슈 하나를 고치면 그 줄이 1.000 쪽으로 움직인다. 고친 뒤에는 그 태그를
-  표기 변형 세트로 옮겨 회귀 지표로 쓴다.
+- core PR이 이슈 하나를 고치면 그 줄이 1.000 쪽으로 움직인다. 고친 뒤에도 그 태그는 이 세트에 그대로 두고,
+  이슈 번호를 `FIXED_ISSUES`(`bench/generator/open_misses.py`)에 넣어 회귀 테스트로 지킨다(위 「채점 방식」).
 - **현재 동작을 테스트로 고정하지 않았다.** "지금 못 잡는다"를 테스트로 박으면 core PR이
   미탐을 고칠 때마다 bench 테스트가 깨진다. 테스트는 생성기가 약속한 것(라벨 위치, 시드
   재현성, 검증 숫자가 실제로 틀렸는지)과 `target`이 아닌 라벨을 지금 core가 잡는다는
@@ -1341,7 +1370,7 @@ python -m bench.evaluators.evaluate_doc_types bench/datasets/doc_types_v1.jsonl
 
 ### 결과 (규칙 전용, 이름 기준)
 
-| 문서 종류 | 재현율 `c526000` (#647 전) | 재현율 `5744f73` | 재현율 `97ed96f` (지금, #662·#663 뒤) | precision 지금 | F2 지금 | 유출 기준 재현율 지금 |
+| 문서 종류 | 재현율 `c526000` (#647 전) | 재현율 `5744f73` | 재현율 `97ed96f` (2026-10-07, #662·#663 뒤) | precision 10/7 | F2 10/7 | 유출 기준 재현율 10/7 |
 |---|---|---|---|---|---|---|
 | 판결문 | 0.130 | 0.680 | **0.903** | 0.961 | 0.914 | 0.940 |
 | 사내 메일 | 0.417 | 0.625 | **0.792** | 1.000 | 0.826 | 0.800 |
@@ -1349,6 +1378,10 @@ python -m bench.evaluators.evaluate_doc_types bench/datasets/doc_types_v1.jsonl
 | 회의록 | 0.807 | 0.807 | **0.950** | 1.000 | 0.960 | 0.950 |
 | 엑셀 명단 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
 | **전체 (이름 1,162)** | | 0.755 | **0.892** | 0.989 | 0.910 | 0.903 |
+
+지금 값(머지 마감 뒤 2026-10-26 main `2802949`)은 전체 재현율 0.979 · precision 0.988 · F2 0.981 · 유출 기준 재현율 0.993이고,
+종류별 재현율은 판결문 0.937 · 사내 메일 0.992 · 상담 기록 0.981 · 회의록 1.000 · 엑셀 명단 1.000이다(위 「종합 비교표」).
+아래 항목은 이 값에 이르기까지의 기록이다.
 
 - **멘토님이 짚은 대로, 이름이 가장 무거운 판결문에서 가장 약했다.** #603(PR #647)이 원고·피고·
   피고인·피해자 같은 법률 역할어를 단서로 넣으면서 0.130 → 0.680으로 올랐다.
@@ -1372,7 +1405,7 @@ python -m bench.evaluators.evaluate_doc_types bench/datasets/doc_types_v1.jsonl
   잡는다. 첫 훑기가 main과 같아 이 처리 때문에 이름을 덜 가리는 일은 없다(표 칸의 세 글자 이상 역할어를 이름으로
   가리던 오탐은 뺐다). 나머지 종류는 그대로다. 하이브리드 수치(위 표)는
   `97ed96f`에서 다시 쟀다.
-- **#601로 두 글자 이름 + 직함을 고쳤다(규칙 전용, 2026-10-15, main `5fd40af` 위 브랜치).** 판결문 0.903 → 0.937, 사내 메일 0.792 → 0.825, 상담 기록 0.794 → 0.825, 회의록 0.950 → 1.000, 전체 0.892 → 0.923이고 오탐은 11건 그대로다. #601 댓글에 적은 이 세트의 꼴을 고친 것이라 이 숫자는 상한으로 읽는다. 위 표의 하이브리드 수치는 #601 전 값이다.
+- **#601로 두 글자 이름 + 직함을 고쳤다(규칙 전용, 2026-10-15, main `5fd40af` 위 브랜치).** 판결문 0.903 → 0.937, 사내 메일 0.792 → 0.825, 상담 기록 0.794 → 0.825, 회의록 0.950 → 1.000, 전체 0.892 → 0.923이고 오탐은 11건 그대로다. #601 댓글에 적은 이 세트의 꼴을 고친 것이라 이 숫자는 상한으로 읽는다. 종합 비교표의 하이브리드 수치는 나중에 머지 마감 뒤 main `2802949`에서 다시 쟀다.
 - **#662·#663 머지 뒤(main `97ed96f`) 규칙 전용에서 남은 이름 미탐은 126건이다.** 자기소개
   (`고객센터 임인예입니다.`·`제 이름은 김지재고요`) 68건은 [#663](https://github.com/ChoHyeonChan/maskingtape/issues/663)의 남은 부분이고, 하이브리드에서는 모델이 거의 잡는다(메일 미탐 5·상담 3).
   두 글자 이름(`판사 한하`·`송찬 팀장님,`·`상담원: 이영`) 45건과 두 글자 이름 + 조사를 세 글자로 잡은 경계 13건은
@@ -1385,7 +1418,7 @@ python -m bench.evaluators.evaluate_doc_types bench/datasets/doc_types_v1.jsonl
   이유였던 `우리 팀 송년회입니다`나 `검사 결과 정상입니다` 같은 문장은 이름으로 보지 않는다. 판사·증인 뒤 두 글자 이름 + 조사
   ([#741](https://github.com/ChoHyeonChan/maskingtape/issues/741))도 시험했지만, 외부 모델 교차검토에서 `증인 유무를`·
   `판사 권한은` 같은 흔한 법률 문장을 이름으로 가리는 것이 재현돼 이번에 넣지 않았다. 이 세트에서 찾은 꼴을 고친 것이라 이
-  숫자는 상한으로 읽는다. 위 표의 하이브리드 수치는 그 전 값이다. 저장소 문서와 로컬 노트 13,105문단에서는 새로 가린 곳이
+  숫자는 상한으로 읽는다. 종합 비교표의 하이브리드 수치는 이 수정이 들어간 머지 마감 뒤 main `2802949`에서 다시 쟀다. 저장소 문서와 로컬 노트 13,105문단에서는 새로 가린 곳이
   이름 예문 1곳뿐이었고, 조정용 세트 2,380문장에서는 새로 가린 108곳이 모두 정답과 겹쳤다. 덜 가린 문장은 둘 다 0이다.
 
 ## 프롬프트 공격 골든셋 — 문서 속 지시문이 LLM 이름 마스킹을 약하게 만드는가 ([#549](https://github.com/ChoHyeonChan/maskingtape/issues/549))
@@ -1495,8 +1528,9 @@ python -m bench.evaluators.evaluate_attacks bench/datasets/attacks_v1.jsonl --mo
 - rule 열이 7B 표와 다른 것(예: deny_names 0.857 → 0.952)은 모델이 아니라 10/1 이후 규칙 수정 때문이다. hybrid 열에도
   이 차이가 섞여 있다.
 
-**웹 하이브리드(OpenAI) 측정은 아직 없다.** `apps/api`의 OpenAI 경로는 비용이 들어
-팀장 승인을 받은 뒤 같은 세트로 잰다(이슈 본문의 조건). 로컬 모델이 흔들리는 유형은
+**이 공격 세트를 웹 하이브리드(OpenAI)로 잰 값은 아직 없다.** 웹 하이브리드의 정확도는 2026-10-26에 합성 벤치로
+따로 쟀지만([#683](https://github.com/ChoHyeonChan/maskingtape/issues/683)) 공격 판은 보내지 않았다. `apps/api`의 OpenAI 경로는 비용이 들어
+팀장 승인을 받은 뒤 같은 세트로 잰다(#549 본문의 조건). 로컬 모델이 흔들리는 유형은
 상용 모델도 다르게 흔들릴 수 있으므로 그 결과를 이 표에 열로 추가할 계획이다.
 
 ## 데이터셋 포맷 (생성기·평가기가 공유하는 계약)
@@ -1509,10 +1543,14 @@ JSONL — 한 줄에 문서 하나:
 
 - `start`/`end`는 파이썬 슬라이스 규약 (`text[start:end]` == 개인정보 원문)
 - `kind`는 core의 `Detection.kind`와 동일한 문자열: `rrn`, `phone`, `email`, `name`, `address`, `card`, `biz_reg`, `passport`, `account`, `birth_date`, `driver_license`
-- `difficulty`는 `easy`/`hard`/`negative` 중 하나 (없으면 evaluate.py가 `unknown`으로 취급 — 하위 호환)
+- `difficulty`는 synth_v1·v2에서 `easy`/`hard`/`negative` 중 하나 (없으면 evaluate.py가 `unknown`으로 취급 — 하위 호환)
 - 열린 미탐 세트(`open_misses_v1.jsonl`)에만 있는 필드: 행의 `miss_tag`·`issue`, 라벨의
   `target`(없으면 `true`). 문서 성격별 세트(`doc_types_v1.jsonl`)에만 있는 필드: 행의 `doc_type`
   (`judgment`·`counseling`·`email`·`minutes`·`roster`). synth_v1·v2의 포맷은 그대로다
+- 문서 성격별 보고용 세트(`doc_types_holdout_v1.jsonl`)는 행에 `doc_type`(위와 같은 다섯 값)과 `split`(`holdout`)이 있다.
+  표기 변형 세트(`variants_v1.jsonl`)는 행에 `variant_tag`가, 공격 세트(`attacks_v1.jsonl`)는 행에 `attack_tag`(깨끗한 판은
+  `none`)·`attack_position`(`prefix`·`suffix`)·`pair_id`가 있다. 이 다섯 세트의 `difficulty`에는 세트 이름 같은 값
+  (`variant`·`open_miss`·`doc`·`attack`)이 들어간다
 - 평가 기준: span 완전 일치(exact match)로 precision / recall / F1 / F2 산출
   (F2는 재현율에 F1보다 더 큰 가중치를 두는 Fβ, β=2 — PII 탐지는 미탐(FN)이 오탐(FP)보다
   위험하다는 게 이 도메인의 평가 관행이라 F1과 나란히 본다. 근거: `evaluate.py` 모듈 docstring)

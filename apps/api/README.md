@@ -192,7 +192,7 @@ curl -X POST http://127.0.0.1:8000/anonymize \
 - 두 응답의 `detections`는 `kind`, `start`, `end`, `confidence`, `detector`만 포함한다.
 - 실패 응답은 공유 에러 모양(`code`, `message`, `details`)을 따른다.
 
-## API 계약 (v1 — 프론트·데스크톱은 이 스키마로 목업 개발 시작 가능)
+## API 계약 (v1)
 
 공통 제약:
 
@@ -302,14 +302,14 @@ FastAPI 라우터는 core를 직접 호출하지 않고 `maskingtape_api.service
    ```
 2. **저장하지 않는다(stateless).** 요청 내용을 DB·파일·캐시에 쓰지 않는다. 처리 후 메모리에서 끝난다.
 3. **응답에 원문을 불필요하게 담지 않는다.** `/anonymize`는 비식별화된 텍스트를 돌려주는 게 목적이다. 디버그 필드로 원문을 반환하지 않고, `/scan`·`/anonymize`의 `detections`에도 원문 PII 조각을 넣지 않는다.
-4. **입력 크기 상한**을 둔다(예: 100KB). 초과 시 413으로 거절 — 비용·자원 보호.
+4. **입력 크기 상한**을 둔다. 기본값은 요청 본문 1,000,000바이트(`MASKINGTAPE_API_MAX_BODY_BYTES`)와 `text` 100,000자이고, 어느 쪽이든 넘으면 413으로 거절 — 비용·자원 보호. 하이브리드 모드는 따로 5,000자(`MASKINGTAPE_API_HYBRID_MAX_TEXT_LENGTH`)를 넘으면 규칙 결과로 폴백한다.
 5. **호출 빈도 제한(rate limit)**을 둔다. 공개 URL은 남용된다. 현재 API는 `/scan`·`/anonymize`에 IP별 인메모리 제한을 적용하며 초과 시 429로 거절한다. 하이브리드 모드는 별도 저한도 인메모리 제한을 두고, 초과 시 규칙 결과로 폴백한다. 단, Vercel serverless처럼 여러 인스턴스가 생길 수 있는 환경에서는 카운터가 공유되지 않아 배포 등급의 강한 제한으로 보지 않는다. **결정(2026-08-17, 재확인 2026-09-13): 공모전 데모는 현행 인메모리 제한을 best-effort 보호로 유지하고 배포를 진행한다.** 남용/비용/DoS 위험이 커지면 Vercel 플랫폼 보호 또는 외부 공유 스토어 기반 limiter로 전환한다. OpenAI 비용의 최종 안전장치는 OpenAI 프로젝트 월 사용 한도다(#546).
 6. **CORS를 우리 프론트 도메인으로 제한**한다. `*` 금지.
 7. **HTTPS만 허용**한다.
 
 ### 자기호스팅 하드닝
 
-- API는 `x-forwarded-for`를 클라이언트 키로 신뢰하지 않는다. Vercel 배포에서는 `x-vercel-forwarded-for`, 일반 리버스 프록시에서는 프록시가 덮어쓴 `x-real-ip`만 사용하고, 둘 다 없으면 ASGI `request.client.host`를 쓴다.
+- API는 `x-forwarded-for`를 클라이언트 키로 신뢰하지 않는다. Vercel 배포에서는 기본으로 `x-vercel-forwarded-for`, `x-real-ip`를 이 순서로 보고, 그 밖의 환경에서는 기본값이 비어 있어 헤더를 보지 않는다. 일반 리버스 프록시 뒤에서 `x-real-ip`를 쓰려면 프록시가 그 헤더를 덮어쓰게 한 뒤 `MASKINGTAPE_API_TRUSTED_CLIENT_IP_HEADERS=x-real-ip`로 직접 켠다. 쓸 헤더가 없거나 비어 있으면 ASGI `request.client.host`를 쓴다.
 - nginx 같은 리버스 프록시를 앞에 둘 때는 외부에서 온 `X-Forwarded-For`/`X-Real-IP`를 그대로 전달하지 말고, 프록시가 검증한 값으로 덮어쓴다.
 - 요청 바디는 앱의 `MASKINGTAPE_API_MAX_BODY_BYTES`와 프록시의 `client_max_body_size`를 함께 둔다. 예: `client_max_body_size 1m;`
 
