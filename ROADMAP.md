@@ -96,7 +96,7 @@
 |---|---|---|
 | [@ChoHyeonChan](https://github.com/ChoHyeonChan) (팀장) | `core` · `mcp` · `api` | 탐지·마스킹 엔진, MCP 서버, 아키텍처, 웹 하이브리드의 OpenAI 연결, **팀원 PR 리뷰**, 발표 |
 | [@kitae13](https://github.com/kitae13) | `api` · `repo` | REST API(하이브리드 모드), CI·저장소 설정, 기능테스트 리허설, 개발자 문서 정비 |
-| [@plana1470](https://github.com/plana1470) | `core` | 이름·주민등록번호 탐지율 — 규칙 보강 |
+| [@plana1470](https://github.com/plana1470) | `web` · `core` | 웹 화면, 이름·주민등록번호 탐지율 — 규칙 보강 |
 | [@imsoo0816](https://github.com/imsoo0816) | `web` | 화면·디자인, 웹 데모 모드 선택 |
 | [@stayalive000](https://github.com/stayalive000) | `desktop` · `bench` | Flutter 데스크톱 앱 (Windows), 프롬프트 공격 골든셋 |
 | [@seoyeon056](https://github.com/seoyeon056) | `bench` | 평가 데이터, 정확도 측정·비교, 발표용 수치 |

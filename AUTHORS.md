@@ -10,7 +10,7 @@ maskingtape의 저작권은 아래 기여자들이 공동으로 가지며, 전�
 |---|---|
 | [@ChoHyeonChan](https://github.com/ChoHyeonChan) (팀장) | core, mcp |
 | [@kitae13](https://github.com/kitae13) | api, CI·저장소 설정 |
-| [@plana1470](https://github.com/plana1470) | web |
+| [@plana1470](https://github.com/plana1470) | web, core 규칙 보강 |
 | [@imsoo0816](https://github.com/imsoo0816) | web, 디자인 |
 | [@stayalive000](https://github.com/stayalive000) | desktop |
 | [@seoyeon056](https://github.com/seoyeon056) | bench |
