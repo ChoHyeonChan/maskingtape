@@ -21,7 +21,7 @@
 진행하면 저장소 규칙을 거의 다 지킬 수 있습니다.
 
 1. **쉬운 이슈를 고른다.** GitHub Issues에서 `good first issue` 라벨이 붙은 것부터 봅니다. 없으면
-   `documentation`, `test`, `part: ...` 라벨 중 자기 파트와 맞는 작은 이슈를 고릅니다.
+   `documentation`, `part: ...` 라벨 중 자기 파트와 맞는 작은 이슈를 고릅니다.
 2. **읽을 문서를 정한다.**
    - 공통: 이 문서, [CLAUDE.md](CLAUDE.md), [STRUCTURE.md](STRUCTURE.md)
    - core: [packages/core/README.md](packages/core/README.md)

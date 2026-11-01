@@ -26,6 +26,8 @@ MASKINGTAPE_API_RATE_LIMIT_WINDOW_SECONDS=60
 
 `MASKINGTAPE_API_CORS_ORIGINS` is intentionally empty for the single-origin Vercel deployment. Same-origin browser calls do not need CORS, and this avoids accidentally allowing `*`. If the web and API are ever split across domains, set this to the exact HTTPS web origin, for example `https://maskingtape.example`.
 
+Optional, Production only: `OPENAI_API_KEY` is needed only for the web demo's hybrid mode (the API sends rule-masked text to OpenAI to find more names). Add it as a secret in the Production environment only, not in Preview or Development. Without it the API serves rule-only results and `/api/health` reports `"hybrid_available": false`. The related `MASKINGTAPE_API_OPENAI_*` and `MASKINGTAPE_API_HYBRID_*` defaults are listed in [apps/api/README.md](../apps/api/README.md).
+
 ## Rate limit decision
 
 Decision on 2026-08-17: keep the current `InMemoryRateLimiter` for the public contest demo as best-effort abuse protection.
