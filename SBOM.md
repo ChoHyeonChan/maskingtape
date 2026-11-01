@@ -56,6 +56,7 @@
 | 46 | Gemma 4 E4B (AI 모델, 평가 전용) | gemma4:e4b (Ollama) | Apache-2.0 | https://ollama.com/library/gemma4 | (개발 도구) 이름 하이브리드 정확도를 qwen2.5:7b와 비교할 때만 로컬 Ollama로 돌렸다(2026-09-30, #548, README 「LLM 모델을 바꿔도 거의 같다」). 제품 코드와 의존성에 없고 배포물에서 쓰지 않는다 |
 | 47 | Starlette | FastAPI가 정하는 판 (uv.lock 1.6.0) | BSD-3-Clause | https://github.com/Kludex/starlette | API 서버. 요청 크기 제한(`body_limit.py`)과 HTTP 예외 처리(`main.py`, `errors.py`)에서 직접 import한다. 따로 선언하지 않고 18번 FastAPI가 함께 설치한다(부록 A-2) |
 | 48 | packaging | 선언 없음 (2번 pytest가 함께 설치) | Apache-2.0 OR BSD-2-Clause | https://github.com/pypa/packaging | (개발 도구) `scripts/sbom_transitive.py`가 의존성 요구사항을 읽을 때 쓴다. 배포물에 들어가지 않는다 |
+| 49 | Kanana 1.5-2.1B (AI 모델, 평가 전용) | 2.1B 원본 모델 (변형·판은 측정한 stayalive000이 확인) | Apache-2.0 (kakaocorp 허깅페이스 표기, instruct·base 모두) | https://huggingface.co/kakaocorp | (개발 도구) 2차 발표자료 8·10장에서 AI만으로 이름을 찾게 한 비교(한국어 합성 문서 463건)에 돌렸다. 제품 코드와 의존성에 없고 배포물에서 쓰지 않는다 |
 
 ※ **AI 모델 주의**: Qwen2.5는 **3B·72B만 비상업 제한(Qwen Research License)**이고 나머지(0.5B/**1.5B**/**7B**/14B/32B)가 Apache-2.0이다. 기본 모델은 1.5B를 학습한 17번, 선택 모델은 7B(26번)다. **3B로 바꾸지 말 것.**
 ※ 위 16·17·26·44번은 결과보고서 **붙임2(AI 모델 활용 및 라이선스 기술 명세서)**에도 반영한다(유형2 '외부 모델 파인튜닝' + 기반 모델명·라이선스·학습 데이터·가중치 공개 주소). 44번은 붙임2에 「웹 데모 선택 옵션 (상용 API)」으로 적었다(운영사무국 2026-09-30 서면 회신).
