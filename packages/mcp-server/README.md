@@ -36,6 +36,9 @@ maskingtape-mcp --llm  # 하이브리드 모드 — 이름을 로컬 LLM으로 �
 - **기본(`maskingtape-mcp`)**: 규칙 전용. Ollama 없이 어디서나 동작하는 **안전 바닥**.
 - **`--llm`**: 이름을 로컬 LLM(Ollama + Qwen)으로 문맥 판단하는 하이브리드. 문맥 단서 없는
   이름("이서준 대표"의 서명 등)까지 잡는다. **로컬 Ollama가 실행 중이어야 한다.**
+  모델은 core 기본값인 `maskingtape-name-1.5b`(Qwen2.5-1.5B-Instruct 파인튜닝)이고, 먼저
+  `ollama pull hf.co/StayAlive1/maskingtape-name-1.5b-GGUF:Q4_K_M`로 받아 둔다. MCP 서버에는
+  모델을 고르는 옵션이 없다(`maskingtape-mcp --help`에는 `-h`와 `--llm`만 있다).
 
 LLM 사용 여부를 도구 파라미터가 아닌 **서버 플래그**로 두는 이유: MCP 도구는 "에이전트가
 조작된다"고 가정하므로, 마스킹 강도를 신뢰 주체(서버 세운 사람)가 정하게 한다. `--llm`인데

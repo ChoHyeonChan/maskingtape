@@ -80,7 +80,7 @@ lib/
   models/
     detection.dart             # core Detection과 1:1 (API 계약 v1 스키마) + 한국어 요약
     file_task.dart             # 파일 1개의 처리 상태 (대기/처리 중/완료/실패)
-    sample_texts.dart          # 텍스트 모드 예시 문장 — 웹과 같은 합성 4종
+    sample_texts.dart          # 텍스트 모드 샘플 문서 — 웹 presets.ts와 같은 합성 9종
   services/
     anonymizer.dart            # 비식별화 백엔드 인터페이스 + 예외 타입
     cli_anonymizer.dart        # core CLI 서브프로세스 호출 (stdin UTF-8)
@@ -114,7 +114,7 @@ lib/
     result_preview_dialog.dart # 원문 하이라이트 vs 마스킹 결과 비교 다이얼로그
     detection_panel.dart       # 「탐지 결과 조정」 패널 — 건수·요약·정렬·항목별 가림 토글
     mask_toggle.dart           # 항목별 「가림 / 보임」 알약 토글 (웹 .detect-row__toggle과 같은 모양)
-    sample_tabs.dart           # 스캔 전 샘플 문서 서랍 — 웹 SampleTabs와 같은 구성 (#587)
+    sample_tabs.dart           # 스캔 전 샘플 문서 서랍 (웹은 같은 9종을 SamplePickerModal 팝업으로 보여 줌, #587)
 test/
   batch_processor_test.dart    # 배치 로직 유닛 테스트 (가짜 백엔드, 취소 포함)
   text_screen_test.dart        # 텍스트 입력 모드 — 실행·결과/원문 토글·초기화·옵션 재실행·오류
@@ -142,7 +142,7 @@ test/
 왼쪽이 마스킹 결과로 바뀌고 오른쪽에 탐지 목록(종류·값·확신도)이 뜬다. **결과 ↔ 원문**
 토글로 종류별 색 하이라이트를 볼 수 있고, 결과 복사·다시 입력·초기화가 있다.
 
-- 샘플 버튼 4종은 웹 InputPanel과 **같은 합성 문장**이다 — 두 표면에서 같은 결과가 나오는 걸 보여주는 용도.
+- 샘플 문서 9종은 스캔 전 「탐지 결과 조정」 자리의 샘플 서랍에서 고른다. 웹 `presets.ts`(「샘플 넣기」를 누르면 뜨는 `SamplePickerModal`)와 **같은 합성 문장**이다 — 두 표면에서 같은 결과가 나오는 걸 보여주는 용도.
 - 전략·로컬 LLM 사용 옵션은 파일 모드와 공유한다. 결과가 떠 있는 채로 바꾸면 그 자리에서 다시 돌린다.
 - 처리는 파일 모드와 같은 백엔드(아래 절)를 탄다 — 탐지 로직을 Dart로 다시 쓴 게 아니다.
 
@@ -204,8 +204,8 @@ API 경로에서 지원하지 않는 옵션을 고르면 네트워크를 타기 
 
 ## 로컬 LLM 사용 (선택)
 
-툴바의 **로컬 LLM 사용**를 켜면 CLI에 `--llm`을 붙여 이름을 로컬 LLM으로 판단한다
-(규칙판이 놓치거나 오탐하는 인명을 문맥으로 걸러낸다).
+툴바의 **로컬 LLM 사용**을 켜면 CLI에 `--llm`을 붙여 이름을 로컬 LLM으로 한 번 더 판단한다
+(규칙판이 놓친 이름을 LLM이 더한다. 규칙판 결과는 그대로 두고 합친다).
 
 툴바의 **상태 칩**이 이 PC의 로컬 LLM 준비 상태를 미리 보여준다 — 처리에 실패한 뒤에야
 "Ollama를 켰어야 했구나"를 알게 되는 걸 막기 위해서다. 누르면 다시 확인한다.

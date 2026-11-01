@@ -18,7 +18,7 @@
 
 | 파트 | 구조 | 나눈 기준 |
 |---|---|---|
-| **apps/web** (프론트) | `components/{help, input, layout, results}` | 화면 **역할**별 |
+| **apps/web** (프론트) | `components/{help, input, intro, layout, results}` | 화면 **역할**별 |
 | **apps/desktop** (Flutter) | `lib/{models, services, screens, widgets}` | **레이어**별 |
 | **packages/core** (엔진) | `detectors/{identity, contact, financial, business, personal}` | 개인정보 **도메인**별 |
 
