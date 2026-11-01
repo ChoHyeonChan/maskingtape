@@ -50,8 +50,10 @@ describe("AccuracyPage", () => {
     expect(table).toHaveTextContent("재현율 0.971~0.973 · F1 0.918~0.919");
     expect(table).toHaveTextContent("재현율 0.819 · F1 0.593");
     expect(table).toHaveTextContent("정밀도 0.465");
-    // #683은 비용 계산·팀장 승인 전이라 측정을 시작하지 않았다 — 「재는 중」이라고 쓰지 않는다(#731).
-    expect(screen.getByText(/웹 데모의 하이브리드는 OpenAI 판단기를 씁니다/)).toHaveTextContent("아직 재지 않았습니다(#683)");
+    // #683은 2026-10-26에 합성 데이터로 재고 닫혔다. 「아직 재지 않았다」는 낡은 문장이 돌아오지 않게 지킨다(#774).
+    const hybridNote = screen.getByText(/웹 데모의 하이브리드는 OpenAI 판단기를 씁니다/);
+    expect(hybridNote).toHaveTextContent("2026-10-26에 자체 합성 데이터로 따로 쟀고, 결과는 #683에 있습니다");
+    expect(hybridNote).not.toHaveTextContent("아직 재지 않았습니다");
     expect(screen.queryByText(/재는 중/)).not.toBeInTheDocument();
     expect(screen.queryByText(/0\.923/)).not.toBeInTheDocument();
   });

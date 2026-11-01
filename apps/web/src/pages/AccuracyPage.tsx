@@ -227,8 +227,8 @@ export function AccuracyPage() {
               </div>
 
               <p className="accuracy-name-card__note">
-                웹 데모의 하이브리드는 OpenAI 판단기를 씁니다. 위 LLM 수치는 CLI·데스크톱의 로컬 모델 값이고, 웹
-                하이브리드 정확도는 아직 재지 않았습니다(#683).
+                웹 데모의 하이브리드는 OpenAI 판단기를 씁니다. 위 LLM 수치는 CLI·데스크톱의 로컬 모델 값입니다. 웹
+                하이브리드는 2026-10-26에 자체 합성 데이터로 따로 쟀고, 결과는 #683에 있습니다.
               </p>
             </div>
           </div>
